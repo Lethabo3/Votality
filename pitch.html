@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lethabo Sekoto</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><defs><linearGradient id='g1' x1='20%' y1='20%' x2='80%' y2='80%'><stop offset='0%' stop-color='%23FFFFFF'/><stop offset='50%' stop-color='%23E0E4E5'/><stop offset='100%' stop-color='%23B8BFC2'/></linearGradient><linearGradient id='g2' x1='30%' y1='30%' x2='70%' y2='70%'><stop offset='0%' stop-color='%23B8BFC2'/><stop offset='50%' stop-color='%23969EA1'/><stop offset='100%' stop-color='%23767D80'/></linearGradient></defs><circle cx='12' cy='12' r='10' fill='url(%23g1)'/><circle cx='12' cy='12' r='3' fill='url(%23g2)'/><circle cx='12' cy='12' r='2' fill='%23767D80'/><ellipse cx='8' cy='8' rx='1' ry='0.5' transform='rotate(-45 8 8)' fill='white' opacity='0.7'/><path d='M12 4.5A7.5 7.5 0 0 1 19.5 12' stroke='white' stroke-width='0.3' fill='none' opacity='0.5'/><path d='M4.5 12A7.5 7.5 0 0 1 12 4.5' stroke='%23767D80' stroke-width='0.3' fill='none' opacity='0.3'/></svg>">
+    <style>
+@font-face {
+    font-family: 'GeneralSans-Medium';
+    src: url('GeneralSans-Medium.woff2') format('woff2'),
+         url('GeneralSans-Medium.woff') format('woff'),
+         url('GeneralSans-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'GeneralSans-Regular';
+    src: url('GeneralSans-Regular.woff2') format('woff2'),
+         url('GeneralSans-Regular.woff') format('woff'),
+         url('GeneralSans-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+    font-style: normal;
+}
+
+        :root {
+            --text-color: #000000;
+            --border-color: #000000;
+            --spacing-unit: 120px;
+        }
+
+        body, html {
+            font-family: 'GeneralSans-Regular', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 60px;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-family: 'GeneralSans-Medium', sans-serif;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 56px;
+            margin-bottom: 0;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 72px;
+            margin: 0 0 80px;
+            letter-spacing: -0.02em;
+            padding-top: 120px;
+        }
+
+        /* Sections */
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+            position: relative;
+        }
+        
+        .intro {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .intro a{
+            top: 15rem;
+            display: flex;
+            position: relative;
+            flex-direction: column;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .profile {
+            font-size: 24px;
+            line-height: 1.6;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        .profile a {
+            color: var(--text-color);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .experience-item {
+            padding: 80px 0;
+            margin-bottom: 40px;
+            border-top: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .experience-item:last-child {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .experience-meta {
+            grid-column: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .role-location-group {
+            margin-bottom: auto;
+        }
+
+        .role {
+            font-size: 18px;
+            margin: 0;
+            color: #555;
+        }
+        
+        .duration {
+            font-size: 18px;
+            margin: 0;
+            color: #555;
+            margin-top: auto;
+        }
+
+        .location {
+            font-size: 18px;
+            margin: 8px 0 0;
+            color: #555;
+        }
+
+        .experience-description {
+            grid-column: 2;
+            display: flex;
+            flex-direction: column;
+            padding-top: 48px;
+        }
+        
+        .description {
+            margin-top: auto;
+        }
+
+        .experience-header {
+            margin-bottom: 40px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .experience-item h3 {
+            font-size: 30px;
+            margin: 0 0 20px 0;
+        }
+
+        .description {
+            color: #555;
+            font-size: 18px;
+            width: 100%;
+            max-width: 100%;
+            line-height: 1.8;
+            margin: 0;
+        }
+
+        /* Me section specific styles */
+        #me .experience-item {
+            border: none;
+            padding: 0;
+            margin-bottom: 0;
+            display: block;
+            height: calc(100vh - 200px);
+        }
+
+        #me .description {
+            width: 100%;
+            font-size: 32px;
+            line-height: 1.6;
+            margin: 0;
+            color: #000;
+        }
+
+        .connect {
+            padding: 0;
+            min-height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .connect a {
+            color: var(--text-color);
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            display: block;
+            font-size: 24px;
+            margin-bottom: 24px;
+            transition: opacity 0.3s ease;
+        }
+
+        .connect a:last-child {
+            margin-bottom: 0;
+        }
+
+        .connect a:hover {
+            opacity: 0.7;
+        }
+
+        .description a {
+            color: inherit;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            transition: opacity 0.3s ease;
+        }
+
+        .description a:hover {
+            opacity: 0.7;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                padding: 0 40px;
+            }
+
+            h2 {
+                font-size: 56px;
+                padding-top: 80px;
+            }
+
+            .experience-item {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .experience-description {
+                grid-column: 1;
+            }
+
+            .duration {
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+
+            h1 {
+                font-size: 40px;
+            }
+
+            h2 {
+                font-size: 40px;
+                padding-top: 60px;
+                margin-bottom: 40px;
+            }
+
+            .profile {
+                font-size: 18px;
+            }
+
+            .experience-header {
+                font-size: 18px;
+                margin-bottom: 30px;
+            }
+
+            .experience-item {
+                padding: 40px 0;
+            }
+
+            .experience-item h3 {
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+
+            .role, .location, .duration {
+                font-size: 16px;
+            }
+
+            .description {
+                font-size: 16px;
+            }
+
+            #me .description {
+                font-size: 18px;
+            }
+
+            .connect a {
+                font-size: 18px;
+                margin-bottom: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 16px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            h2 {
+                font-size: 32px;
+                padding-top: 40px;
+                margin-bottom: 30px;
+            }
+
+            .profile {
+                font-size: 16px;
+            }
+
+            .experience-header {
+                font-size: 16px;
+            }
+
+            .experience-item h3 {
+                font-size: 20px;
+            }
+
+            .role, .location, .duration, .description {
+                font-size: 15px;
+            }
+
+            #me .description {
+                font-size: 16px;
+            }
+
+            .connect a {
+                font-size: 16px;
+                margin-bottom: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="intro">
+            <h1>Votality AI</h1>
+            <p class="profile">
+                Market intelligence platform for your<br> investing due diligence<br><br>
+            </p>
+        </header>
+
+        <section id="problem">
+            <h2>Problem</h2>
+            <div class="connect">
+                <a class="#" style="text-decoration: none; pointer-events: none; opacity: 1;">Investors are overwhelmed with scattered data from multiple platforms, causing decision paralysis and missed opportunities. 90% of investment decisions are delayed due to inefficient data processing workflows.</a>
+                <a href="#" style="text-decoration: none; pointer-events: none; opacity: 1;">Manual data analysis can't keep up with fast-changing markets, leading to outdated insights and potential losses.</a>
+                <a href="#" style="text-decoration: none; pointer-events: none; opacity: 1;">Switching between multiple tools and platforms causes critical delays in investment decisions, impacting potential returns.</a>
+            </div>
+        </section>
+
+        <section id="me">
+            <h2>Intelligence</h2>
+            <div class="experience-item">
+                <p class="description">
+                    Votality AI leverages artificial intelligence to sift through large volumes of data—from earnings reports to technical signals and news articles—generating insights that support more informed decision-making.<br><br>
+                    Our platform is designed to reduce the time and effort required to track market changes, serving both individual investors and professionals in a fast-paced financial environment.<br><br>
+                    We combine real-time data, advanced analytics, and AI-driven insights to guide users through the complex world of investing.
+                </p>
+            </div>
+        </section>
+
+        <section id="connect">
+            <h2>Competitors</h2>
+            <div class="connect">
+                <a href="https://votalityai.com" target="_blank">Get Started</a>
+                <a href="https://x.com/votalityai" target="_blank">Twitter</a>
+                <a href="mailto:contact@votalityai.com">Contact Us</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
