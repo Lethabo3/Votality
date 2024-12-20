@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing - Votality</title>
+        <link rel="icon" href="b2.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #333333;
+            line-height: 1.6;
+        }
+
+        .billing-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .section-divider {
+            border-top: 1px solid #e5e7eb;
+            margin: 1.5rem 0;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #111827;
+        }
+
+        .payment-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .invoice-table th,
+        .invoice-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .invoice-table th {
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .button {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .button-update {
+            background-color: #f3f4f6;
+            color: #111827;
+            border: 1px solid #e5e7eb;
+        }
+
+        .button-cancel {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+        }
+
+        .button-view {
+            background-color: #f3f4f6;
+            color: #111827;
+            border: 1px solid #e5e7eb;
+            padding: 0.375rem 0.75rem;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="billing-container">
+        <h2 class="section-title">Payment</h2>
+        <div class="payment-info">
+            <div class="flex items-center gap-2">
+                <i data-lucide="credit-card" class="h-5 w-5"></i>
+                <span>Link by Stripe</span>
+            </div>
+            <button class="button button-update">Update</button>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h2 class="section-title">Invoices</h2>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="invoicesTableBody">
+                <!-- Invoices will be loaded here dynamically -->
+            </tbody>
+        </table>
+
+        <div class="section-divider"></div>
+
+        <div class="flex justify-between items-center">
+            <h2 class="section-title mb-0">Cancellation</h2>
+            <button class="button button-cancel" onclick="confirmCancellation()">Cancel plan</button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        async function loadInvoices() {
+            try {
+                const response = await fetch('get_invoices.php');
+                const data = await response.json();
+                
+                const tableBody = document.getElementById('invoicesTableBody');
+                tableBody.innerHTML = data.invoices.map(invoice => `
+                    <tr>
+                        <td>${new Date(invoice.date).toLocaleDateString()}</td>
+                        <td>US$${invoice.amount.toFixed(2)}</td>
+                        <td><span class="status-badge">${invoice.status}</span></td>
+                        <td><button class="button button-view" onclick="viewInvoice('${invoice.id}')">View</button></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading invoices:', error);
+            }
+        }
+
+        function confirmCancellation() {
+            if (confirm('Are you sure you want to cancel your subscription? This action cannot be undone.')) {
+                cancelSubscription();
+            }
+        }
+
+        async function cancelSubscription() {
+            try {
+                const response = await fetch('cancel_subscription.php', {
+                    method: 'POST',
+                    credentials: 'same-origin'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Your subscription has been cancelled successfully.');
+                    window.location.href = 'index.html';
+                } else {
+                    alert(data.error || 'Failed to cancel subscription. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error cancelling subscription:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        function viewInvoice(invoiceId) {
+            window.open(`invoice.php?id=${invoiceId}`, '_blank');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadInvoices);
+    </script>
+</body>
+</html>

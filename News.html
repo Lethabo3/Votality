@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality - Market News</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                url('../fonts/Satoshi-Bold.woff') format('woff'),
+                url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Switzer-Medium';
+            src: url('../fonts/Switzer-Medium.woff2') format('woff2'),
+                url('../fonts/Switzer-Medium.woff') format('woff'),
+                url('../fonts/Switzer-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Switzer-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #fff);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: 60px;
+        }
+
+        h1, h2 {
+            font-family: 'Satoshi-Bold', sans-serif;
+        }
+
+        .top-icons {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            z-index: 1000;
+            height: 60px;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            width: 100%;
+            padding-top: 1rem;
+        }
+
+        .story-card-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 80px;
+            max-height: calc(100vh - 60px);
+        }
+
+        .story-card {
+        background-color: #fff;
+        border-radius: 0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 0;
+        opacity: 0;
+        transform: scale(1);
+        position: relative;
+        padding: 1rem;
+    }
+
+    .story-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: #e0e0e0;
+    }
+
+    .story-card:last-child::after {
+        display: none;
+    }
+
+    .story-card:hover {
+        transform: translateY(0);
+        background-color: #f8f8f8;
+    }
+
+    .content-wrapper {
+        display: flex;
+        flex-direction: column;
+        max-width: 100%;
+        width: 100%;
+        padding-top: 1rem;
+    }
+
+    .story-card-container {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding-bottom: 80px;
+        max-height: calc(100vh - 60px);
+    }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            justify-content: space-around;
+            align-items: center;
+            height: 60px;
+            z-index: 10;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .votality-heading {
+            font-family: 'GeneralSans-Medium', sans-serif;
+            font-weight: 400;
+            font-size: 1.5rem;
+            color: #333;
+            margin: 0;
+        }
+
+        @keyframes votalityFadeZoom {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .votality-fade-zoom {
+            animation: votalityFadeZoom 0.5s ease-out forwards;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-button svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #888;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #000000;
+        }
+
+        .nav-item:hover {
+            color: #444444;
+        }
+
+        .nav-item i {
+            margin-bottom: 4px;
+            font-size: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body>
+    <div class="top-icons">
+        <button id="nav-toggle" class="icon-button">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h12M4 18h8" />
+            </svg>
+        </button>
+        <h1 class="votality-heading">Market News</h1>
+        <button id="search-button" class="icon-button">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        </button>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="story-card-container">
+            <div id="story-list"></div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="Votality.html" class="nav-item">
+            <i data-feather="message-circle"></i>
+        </a>
+        <a href="#" class="nav-item active">
+            <i data-feather="book-open"></i>
+        </a>
+        <a href="Posts.html" class="nav-item">
+            <i data-feather="users"></i>
+        </a>
+        <a href="market.html" class="nav-item">
+            <i data-feather="trending-up"></i>
+        </a>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            loadTopStories();
+        });
+
+        function loadTopStories() {
+            const placeholderStories = [
+                {
+                    title: "Fed Signals Potential Rate Cuts in Coming Months as Inflation Cools",
+                    summary: "Federal Reserve officials hint at possible monetary policy shift as economic indicators show sustained decline in inflation pressures. Markets respond positively to the announcement as investors adjust their portfolios.",
+                    time_published: "20241214093000",
+                    source: "Reuters"
+                },
+                {
+                    title: "Tech Giants Face New AI Regulation Challenges in European Markets",
+                    summary: "Major technology companies navigate complex regulatory landscape as EU introduces comprehensive artificial intelligence guidelines. Industry leaders prepare for adjustments.",
+                    time_published: "20241214091500",
+                    source: "Bloomberg"
+                },
+                {
+                    title: "Global Supply Chain Disruptions Impact Semiconductor Industry",
+                    summary: "Ongoing logistics challenges and material shortages continue to affect chip manufacturing, leading to extended delivery timelines and increased costs across the sector.",
+                    time_published: "20241214090000",
+                    source: "WSJ"
+                },
+                {
+                    title: "Renewable Energy Sector Sees Record Investment in Q4",
+                    summary: "Solar and wind power projects attract unprecedented funding as governments worldwide accelerate clean energy transitions. Private equity firms show increased interest.",
+                    time_published: "20241214084500",
+                    source: "CNBC"
+                },
+                {
+                    title: "Major Merger Announced in Healthcare Technology Sector",
+                    summary: "Industry leaders combine forces to create innovative digital health solutions platform, promising improved patient care and operational efficiency gains.",
+                    time_published: "20241214083000",
+                    source: "Forbes"
+                }
+            ];
+
+            const storyList = document.getElementById('story-list');
+            storyList.innerHTML = '';
+            
+            placeholderStories.forEach((story, index) => {
+                const storyCard = createStoryCard(story, index);
+                storyList.appendChild(storyCard);
+            });
+        }
+
+        function formatRelativeTime(timestamp) {
+    const now = new Date();
+    const date = new Date(
+        parseInt(timestamp.substr(0, 4)),
+        parseInt(timestamp.substr(4, 2)) - 1,
+        parseInt(timestamp.substr(6, 2)),
+        parseInt(timestamp.substr(9, 2)),
+        parseInt(timestamp.substr(11, 2)),
+        parseInt(timestamp.substr(13, 2))
+    );
+
+    const diffInSeconds = Math.floor((now - date) / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    const diffInMonths = Math.floor(diffInDays / 30);
+    const diffInYears = Math.floor(diffInDays / 365);
+
+    if (diffInSeconds < 60) {
+        return 'just now';
+    } else if (diffInMinutes < 60) {
+        return `${diffInMinutes}m ago`;
+    } else if (diffInHours < 24) {
+        return `${diffInHours}h ago`;
+    } else if (diffInDays < 7) {
+        return `${diffInDays}d ago`;
+    } else if (diffInWeeks < 4) {
+        return `${diffInWeeks}w ago`;
+    } else if (diffInMonths < 12) {
+        return `${diffInMonths}mo ago`;
+    } else {
+        return `${diffInYears}y ago`;
+    }
+}
+
+function createStoryCard(story, index) {
+    const card = document.createElement('div');
+    card.className = 'story-card p-4 votality-fade-zoom cursor-pointer';
+    card.style.animationDelay = `${index * 50}ms`;
+    card.setAttribute('data-id', index);
+    card.setAttribute('data-story', JSON.stringify(story));
+
+    const shortTitle = story.title.length > 60 ? story.title.substring(0, 57) + '...' : story.title;
+
+    card.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+            <h2 class="text-lg font-semibold mr-2 text-gray-900">${shortTitle}</h2>
+        </div>
+        <p class="text-sm text-gray-600 mb-2">${story.summary.substring(0, 100)}...</p>
+        <div class="flex justify-between items-center text-xs">
+            <div class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <span class="font-medium text-gray-800">${story.source}</span>
+            </div>
+            <span class="text-gray-400">${formatRelativeTime(story.time_published)}</span>
+        </div>
+    `;
+    
+    return card;
+}
+  </script>
+</body>
+</html>

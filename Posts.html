@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality - Market Posts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="icon" href="b2.png">
+    <style>
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                 url('../fonts/Satoshi-Bold.woff') format('woff'),
+                 url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Switzer-Medium';
+            src: url('../fonts/Switzer-Medium.woff2') format('woff2'),
+                 url('../fonts/Switzer-Medium.woff') format('woff'),
+                 url('../fonts/Switzer-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Switzer-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #fff);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2 {
+            font-family: 'Satoshi-Bold', sans-serif;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 180px);
+            padding-bottom: -20px;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .post-card-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 0;
+            margin-bottom: -115px;
+            padding-bottom: -30px;
+            max-height: calc(100vh - 20px);
+        }
+
+        .post-card {
+            background-color: #fff;
+            border-radius: 0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 0;
+            opacity: 0;
+            transform: scale(1);
+            position: relative;
+        }
+
+        .post-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+
+        .post-card:last-child::after {
+            display: none;
+        }
+
+        .post-card:hover {
+            transform: translateY(0);
+            background-color: #f8f8f8;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            background-color: transparent;
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            justify-content: space-around;
+            align-items: center;
+            height: 60px;
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #888;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #000000;
+        }
+
+        .nav-item:hover {
+            color: #444444;
+        }
+
+        .nav-item i {
+            margin-bottom: 4px;
+            font-size: 20px;
+        }
+
+        .sentiment-score {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .sentiment-positive { background-color: #E8F5E9; color: #2E7D32; }
+        .sentiment-neutral { background-color: #F5F5F5; color: #616161; }
+        .sentiment-negative { background-color: #FFEBEE; color: #C62828; }
+
+        @keyframes votalityFadeZoom {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .votality-fade-zoom {
+            animation: votalityFadeZoom 0.5s ease-out forwards;
+        }
+
+        .post-card-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .post-card-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .post-card-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .post-card-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .votality-heading {
+            font-family: 'GeneralSans-Medium', sans-serif;
+            font-weight: 400;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .post-button {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            border-radius: 30px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease;
+            z-index: 20;
+        }
+
+        .post-button:hover {
+            background-color: #555;
+        }
+
+        .post-button i {
+            margin-right: 8px;
+        }
+
+        .top-icons {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 1000;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .icon-button svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Styles for logged-out view */
+        .logo-container {
+            background-color: white;
+            border-radius: 50%;
+            padding: 16px;
+            display: inline-block;
+        }
+
+        .login-button {
+            background-color: #000000;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .login-button:hover {
+            background-color: #333333;
+        }
+        .logged-out-content {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 7vh; /* This pushes the content down */
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body>
+    <div id="logged-in-view" style="display: none;">
+        <div class="top-icons">
+            <button id="nav-toggle" class="nav-toggle text-gray-600 hover:text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h12M4 18h8" />
+                </svg>
+            </button>
+            <div id="name-dropdown" class="flex items-center">
+                <h1 class="votality-heading">Market Posts</h1>
+            </div>  
+            <button id="new-post-button" class="icon-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="content-wrapper mx-auto px-0 py-8">
+            <div class="post-card-container mt-16">
+                <div id="posts-container">
+                    <!-- Post 1 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 0ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">Technical Analysis: NVIDIA Breaking New Resistance Levels</h2>
+                            <span class="sentiment-score sentiment-positive">NVDA</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Looking at the daily chart, NVDA has formed a strong support base at $800 and shows potential for continued upward momentum. Volume indicators suggest institutional buying...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>TechTrader</span>
+                            <span>Today</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 2 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 50ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">Fed Minutes Impact on Treasury Yields</h2>
+                            <span class="sentiment-score sentiment-negative">TLT</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Latest Fed minutes suggest a more hawkish stance than expected. This could put pressure on bond prices in the near term. Watch the 10-year yield for confirmation...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>BondAnalyst</span>
+                            <span>Yesterday</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 3 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 100ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">Apple's AI Strategy Gaining Momentum</h2>
+                            <span class="sentiment-score sentiment-positive">AAPL</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Recent patents and acquisitions suggest Apple is making significant progress in AI development. This could be a major catalyst for the stock in the coming quarters...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>TechInvestor</span>
+                            <span>Monday 11th</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 4 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 150ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">Oil Markets: Supply Concerns Rising</h2>
+                            <span class="sentiment-score sentiment-neutral">USO</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Global supply chain disruptions and geopolitical tensions are creating uncertainty in oil markets. Watching key resistance levels at $85/barrel...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>CommodityPro</span>
+                            <span>Monday 11th</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 5 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 200ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">Tesla Q1 Delivery Numbers Analysis</h2>
+                            <span class="sentiment-score sentiment-negative">TSLA</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Q1 deliveries came in below expectations. Market competition and pricing pressures are increasing. Technical support levels to watch at $175...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>EVAnalyst</span>
+                            <span>Sunday 10th</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 6 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 250ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">Microsoft's Cloud Revenue Growth Potential</h2>
+                            <span class="sentiment-score sentiment-positive">MSFT</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Azure's market share continues to expand. Recent enterprise contracts and AI integration suggest strong growth trajectory for cloud segment...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>CloudTech</span>
+                            <span>Sunday 10th</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 7 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 300ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">Gold Breaking Out: Technical Analysis</h2>
+                            <span class="sentiment-score sentiment-positive">GLD</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Gold showing strong momentum above $2,300. Technical indicators suggest potential for continued upside. Watch for consolidation near these levels...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>GoldTrader</span>
+                            <span>Saturday 9th</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 8 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 350ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">Semiconductor Sector: Supply Chain Updates</h2>
+                            <span class="sentiment-score sentiment-neutral">SMH</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Recent industry reports show improving supply chain conditions. Inventory levels normalizing but demand concerns persist in certain segments...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>ChipAnalyst</span>
+                            <span>Saturday 9th</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 9 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 400ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">EUR/USD: Technical Support Levels</h2>
+                            <span class="sentiment-score sentiment-negative">EUR</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Euro showing weakness against USD following economic data. Key support at 1.0750 needs to hold. Watch ECB commentary this week...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>ForexTrader</span>
+                            <span>Friday 8th</span>
+                        </div>
+                    </div>
+                
+                    <!-- Post 10 -->
+                    <div class="post-card p-4 votality-fade-zoom cursor-pointer" style="animation-delay: 450ms">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold mr-2">S&P 500: Weekly Market Outlook</h2>
+                            <span class="sentiment-score sentiment-positive">SPY</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Market breadth improving with healthy rotation among sectors. Technical indicators remain bullish above 5200. Watching earnings season impact...</p>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                            <span>MarketStrategy</span>
+                            <span>Friday 8th</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <a href="Votality.html" class="nav-item">
+                <i data-feather="message-circle"></i>
+            </a>
+            <a href="News.html" class="nav-item">
+                <i data-feather="book-open"></i>
+            </a>
+            <a href="#" class="nav-item active">
+                <i data-feather="users"></i>
+            </a>
+            <a href="market.html" class="nav-item">
+                <i data-feather="trending-up"></i>
+            </a>
+        </nav>
+    </div>
+
+    <div id="logged-out-view" class="flex flex-col justify-between p-6 votality-zoom-in" style="display: none;">
+        <main class="logged-out-content flex-grow flex flex-col items-center justify-center text-center px-4">
+            <div class="logo-container mb-8">
+                <img src="zero.png" alt="Votality Logo" class="w-16 h-16">
+            </div>
+            <h1 class="text-3xl font-bold mb-4">Votality Market Posts</h1>
+            <div id="login-prompt" class="w-full max-w-md mx-auto">
+                <p class="text-xl mb-8">
+                    Log in to view and share market posts with the Votality community.
+                </p>
+                <a href="LoginPageBimo.html" class="login-button w-full py-4 rounded-full text-lg font-bold mb-4 inline-block">
+                    Log In to Access Posts
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+
+            const newPostButton = document.getElementById('new-post-button');
+            if (newPostButton) {
+                newPostButton.addEventListener('click', () => {
+                    window.location.href = 'create_post.html';
+                });
+            }
+        });
+
+        function checkLoginStatus() {
+            fetch('check_login.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.loggedIn) {
+                        document.getElementById('logged-in-view').style.display = 'block';
+                        document.getElementById('logged-out-view').style.display = 'none';
+                        loadRecentPosts();
+                        feather.replace();
+                    } else {
+                        document.getElementById('logged-in-view').style.display = 'none';
+                        document.getElementById('logged-out-view').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking login status:', error);
+                });
+        }
+
+        function loadRecentPosts() {
+            console.log('Attempting to load recent posts...');
+            const postsContainer = document.getElementById('posts-container');
+            
+            if (!postsContainer) {
+                console.error('Error: posts-container not found in the DOM');
+                return;
+            }
+
+            fetch('VotalityChat.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'getRecentPosts'
+                }),
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received data:', data);
+                if (data.error) {
+                    console.error('Error:', data.error);
+                    postsContainer.innerHTML = `<p class="error-message">Error loading posts: ${data.error}</p>`;
+                    return;
+                }
+                if (data.posts && data.posts.length > 0) {
+                    postsContainer.innerHTML = ''; // Clear existing content
+                    data.posts.forEach((post, index) => {
+                        addPostToPage(post, index);
+                    });
+                } else {
+                    postsContainer.innerHTML = '<p>No posts available.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                if (postsContainer) {
+                    postsContainer.innerHTML = `<p class="error-message">Failed to load posts. Please try again later.</p>`;
+                }
+            });
+        }
+
+        function formatTimestamp(timestamp) {
+            const postDate = new Date(timestamp);
+            const now = new Date();
+            const diffDays = Math.floor((now - postDate) / (1000 * 60 * 60 * 24));
+            
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = days[postDate.getDay()];
+            const dayNumber = postDate.getDate();
+            const suffix = getDaySuffix(dayNumber);
+            
+            if (diffDays === 0) {
+                return 'Today';
+            } else if (diffDays === 1) {
+                return 'Yesterday';
+            } else {
+                return `${dayName} ${dayNumber}${suffix}`;
+            }
+        }
+
+        function getDaySuffix(day) {
+            if (day >= 11 && day <= 13) {
+                return 'th';
+            }
+            switch (day % 10) {
+                case 1: return 'st';
+                case 2: return 'nd';
+                case 3: return 'rd';
+                default: return 'th';
+            }
+        }
+
+        function addPostToPage(post, index) {
+            const postsContainer = document.getElementById('posts-container');
+            const postElement = document.createElement('div');
+            postElement.className = 'post-card p-4 votality-fade-zoom cursor-pointer';
+            postElement.style.animationDelay = `${index * 50}ms`;
+
+            let sentimentClass = 'sentiment-neutral';
+            if (post.category === 'Bullish') {
+                sentimentClass = 'sentiment-positive';
+            } else if (post.category === 'Bearish') {
+                sentimentClass = 'sentiment-negative';
+            }
+
+            const shortTitle = post.title.length > 60 ? post.title.substring(0, 57) + '...' : post.title;
+            const shortContent = post.content.length > 100 ? post.content.substring(0, 97) + '...' : post.content;
+
+            postElement.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class="text-lg font-semibold mr-2">${shortTitle}</h2>
+                    <span class="sentiment-score ${sentimentClass}">${post.symbol}</span>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">${shortContent}</p>
+                <div class="flex justify-between items-center text-xs text-gray-500">
+                    <span>${post.author}</span>
+                    <span>${formatTimestamp(post.timestamp)}</span>
+                </div>
+            `;
+
+            postsContainer.appendChild(postElement);
+        }
+
+        function createPostCard(post, index) {
+    const card = document.createElement('div');
+    card.className = 'post-card p-4 votality-fade-zoom cursor-pointer';
+    card.style.animationDelay = `${index * 50}ms`;
+
+    const shortTitle = post.title.length > 60 ? post.title.substring(0, 57) + '...' : post.title;
+    const shortContent = post.content.length > 100 ? post.content.substring(0, 97) + '...' : post.content;
+
+    card.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+            <h2 class="text-lg font-semibold mr-2 text-gray-900">${shortTitle}</h2>
+            <span class="px-2 py-1 bg-gray-100 text-gray-900 rounded-md text-xs font-medium">${post.symbol}</span>
+        </div>
+        <p class="text-sm text-gray-600 mb-3">${shortContent}</p>
+        <div class="flex justify-between items-center text-xs">
+            <div class="flex items-center">
+                <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <span class="font-medium text-gray-800">${post.author}</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-1">
+                    <button class="like-button flex items-center text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                        </svg>
+                        <span class="ml-1">${post.likes || 0}</span>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <button class="dislike-button flex items-center text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path>
+                        </svg>
+                        <span class="ml-1">${post.dislikes || 0}</span>
+                    </button>
+                </div>
+                <span class="text-gray-400">${formatRelativeTime(post.timestamp)}</span>
+            </div>
+        </div>
+    `;
+
+    // Add event listeners for like/dislike buttons
+    const likeButton = card.querySelector('.like-button');
+    const dislikeButton = card.querySelector('.dislike-button');
+
+    likeButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent card click event
+        handleLike(post.id, likeButton);
+    });
+
+    dislikeButton.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent card click event
+        handleDislike(post.id, dislikeButton);
+    });
+
+    return card;
+}
+
+function handleLike(postId, button) {
+    // Toggle active state visually
+    const isActive = button.classList.toggle('text-blue-500');
+    const countSpan = button.querySelector('span');
+    const currentCount = parseInt(countSpan.textContent);
+    
+    // Update count
+    countSpan.textContent = isActive ? currentCount + 1 : currentCount - 1;
+
+    // Send to server
+    fetch('VotalityChat.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'updateLike',
+            postId: postId,
+            value: isActive ? 1 : -1
+        })
+    }).catch(error => console.error('Error updating like:', error));
+}
+
+function handleDislike(postId, button) {
+    // Toggle active state visually
+    const isActive = button.classList.toggle('text-red-500');
+    const countSpan = button.querySelector('span');
+    const currentCount = parseInt(countSpan.textContent);
+    
+    // Update count
+    countSpan.textContent = isActive ? currentCount + 1 : currentCount - 1;
+
+    // Send to server
+    fetch('VotalityChat.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'updateDislike',
+            postId: postId,
+            value: isActive ? 1 : -1
+        })
+    }).catch(error => console.error('Error updating dislike:', error));
+}
+
+// Add necessary styles
+const postCardStyles = document.createElement('style');
+postCardStyles.textContent = `
+    .post-card {
+        background-color: #fff;
+        border-radius: 0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 0;
+        opacity: 0;
+        transform: scale(1);
+        position: relative;
+    }
+
+    .post-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: #e0e0e0;
+    }
+
+    .post-card:last-child::after {
+        display: none;
+    }
+
+    .post-card:hover {
+        transform: translateY(0);
+        background-color: #f8f8f8;
+    }
+
+    .like-button, .dislike-button {
+        transition: all 0.2s ease;
+        padding: 2px;
+        border-radius: 4px;
+    }
+
+    .like-button:hover, .dislike-button:hover {
+        background-color: #f3f4f6;
+    }
+`;
+document.head.appendChild(postCardStyles);
+    </script>
+</body>
+</html>

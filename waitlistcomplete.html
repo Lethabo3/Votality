@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waitlist Confirmation - Votality</title>
+    <link rel="icon" href="favicon5.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, function(error) {
+            console.log('ServiceWorker registration failed: ', error);
+          });
+      }
+    </script>
+    
+    <style>
+        @font-face {
+            font-family: 'Gambetta-Bold';
+            src: url('../fonts/Gambetta-Bold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Bold.woff') format('woff'),
+                 url('../fonts/Gambetta-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @keyframes votalityZoomIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes votalityZoomOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+        }
+        .votality-zoom-in {
+            opacity: 0;
+            animation: votalityZoomIn 0.5s ease-out forwards;
+        }
+        .votality-zoom-out {
+            animation: votalityZoomOut 0.3s ease-in forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+
+        .curvy-button {
+            border-radius: 50px;
+        }
+        body {
+            font-family: 'GeneralSans-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #d0d0d0);
+            min-height: 100vh;
+        }
+        h1 {
+            font-family: 'Gambetta-Bold', serif;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 font-sans">
+    <div class="min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-lg votality-zoom-in">
+            <div class="text-center mb-12">
+                <img src="Votality.jpg" alt="Votality Logo" class="mx-auto mb-6 w-32 h-32 object-cover rounded-full delay-100">
+                <h1 class="text-4xl font-bold mb-6 delay-200">Welcome to the Waitlist!</h1>
+                <p class="text-gray-600 mb-6 delay-300">
+                    Thank you for joining the Votality waitlist. We're excited to have you on board and can't wait to share our AI-powered trading assistant with you.
+                </p>
+            </div>
+            <div class="p-4">
+                <a href="Votality by Stedi.html" class="block w-full bg-gray-800 text-white font-bold py-4 px-6 curvy-button hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300 text-center delay-400">
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            setTimeout(() => {
+                document.querySelectorAll('.votality-zoom-in, .delay-100, .delay-200, .delay-300, .delay-400').forEach(el => {
+                    el.style.opacity = '1';
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Votality</title>
+    <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+        }
+
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
+        }
+
+        .top-nav {
+            position: static;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1.5rem;
+        }
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .top-nav__button--home {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .top-nav__button--contact {
+            color: #fff;
+            background-color: #000;
+            border: 1px solid #e0e0e0;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            background-color: transparent;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #4b5563;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            line-height: 1.75;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem 2rem;
+        }
+
+        .faq-section {
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .faq-question {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .faq-toggle {
+            position: relative;
+            min-width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+        }
+
+        .faq-toggle svg {
+            position: absolute;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .plus-icon {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+
+        .cross-icon {
+            opacity: 0;
+            transform: rotate(-90deg);
+        }
+
+        .faq-toggle.active .plus-icon {
+            opacity: 0;
+            transform: rotate(90deg);
+        }
+
+        .faq-toggle.active .cross-icon {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top;
+            transform: translateY(-10px);
+        }
+
+        .faq-answer p {
+            margin: 0 0 1.5rem;
+            line-height: 1.75;
+            color: #4b5563;
+        }
+
+        .faq-answer.active {
+            max-height: 1000px;
+            opacity: 1;
+            transform: translateY(0);
+            padding: 0 0 1.5rem 0;
+        }
+
+        .footer-container {
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-color);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.125rem;
+            }
+
+            .container {
+                padding: 0 1rem 1rem;
+            }
+
+            .faq-section {
+                padding: 1.5rem;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons">
+            <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
+            <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
+            <a href="about.html" class="top-nav__button top-nav__button--home">About</a>
+            <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
+            <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Frequently Asked Questions</h1>
+        <p>Find answers to common questions about Votality and how it can help you navigate financial markets.</p>
+    </div>
+
+    <div class="container">
+        <div class="faq-section">
+            <div class="faq-item">
+                <button class="faq-question">
+                    What is Votality?
+                    <span class="faq-toggle">
+                        <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </span>
+                </button>
+                <div class="faq-answer">
+                    <p>Votality is a platform designed to help users navigate and understand the intricacies of financial and economic markets. It provides insights, news, and guidance to assist in making informed decisions in the financial world.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    How can Votality help me with my investments?
+                    <span class="faq-toggle">
+                        <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </span>
+                </button>
+                <div class="faq-answer">
+                    <p>Votality offers comprehensive analysis of financial markets, real-time economic data interpretation, and customized insights based on your interests and portfolio. It can help you stay informed about market trends, understand complex financial concepts, and make more informed investment decisions.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Is Votality suitable for beginners?
+                    <span class="faq-toggle">
+                        <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </span>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes, Votality is designed to cater to a wide range of users, from beginners to experienced investors. It provides explanations of complex financial concepts and can be a valuable learning tool for those new to financial markets.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    How often is the information updated?
+                    <span class="faq-toggle">
+                        <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </span>
+                </button>
+                <div class="faq-answer">
+                    <p>Votality provides real-time updates on market data and news. The AI is constantly learning and evolving to ensure you have access to the most relevant and up-to-date information available.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question">
+                    Can Votality replace my financial advisor?
+                    <span class="faq-toggle">
+                        <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </span>
+                </button>
+                <div class="faq-answer">
+                    <p>While Votality is a powerful tool for understanding financial markets and data, it is not a substitute for professional financial advice. We always recommend consulting with a qualified financial advisor before making important investment decisions.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="about.html" class="footer-link">About</a>
+                <a href="pricing.html" class="footer-link">Pricing</a>
+                <a href="terms.html" class="footer-link">Terms</a>
+                <a href="privacy.html" class="footer-link">Privacy</a>
+                <a href="contact.html" class="footer-link">Contact</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const toggle = button.querySelector('.faq-toggle');
+                
+                document.querySelectorAll('.faq-answer').forEach(item => {
+                    if (item !== answer && item.classList.contains('active')) {
+                        const otherToggle = item.previousElementSibling.querySelector('.faq-toggle');
+                        item.style.maxHeight = item.scrollHeight + 'px';
+                        item.classList.remove('active');
+                        otherToggle.classList.remove('active');
+                        setTimeout(() => {
+                            item.style.maxHeight = null;
+                        }, 0);
+                    }
+                });
+                
+                if (!answer.classList.contains('active')) {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    answer.classList.add('active');
+                    toggle.classList.add('active');
+                } else {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    answer.classList.remove('active');
+                    toggle.classList.remove('active');
+                    setTimeout(() => {
+                        answer.style.maxHeight = null;
+                    }, 0);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

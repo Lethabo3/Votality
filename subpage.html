@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Votality Premium</title>
+        <link rel="icon" href="b2.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Gambetta-Bold';
+            src: url('../fonts/Gambetta-Bold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Bold.woff') format('woff'),
+                 url('../fonts/Gambetta-Bold.ttf') format('truetype');
+            font-weight: 600;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'GeneralSans-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #d0d0d0);
+            min-height: 100vh;
+        }
+        .logo-container {
+            background-color: white;
+            border-radius: 50%;
+            padding: 16px;
+            display: inline-block;
+        }
+        .subscribe-button {
+            background-color: #000000;
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        .subscribe-button:hover {
+            background-color: #333333;
+        }
+        .custom-rounded {
+    border-radius: 904px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+#closeButton:hover .custom-rounded {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+        @keyframes votalityZoomIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes votalityZoomOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+        }
+        .votality-zoom-in {
+            opacity: 0;
+            animation: votalityZoomIn 0.5s ease-out forwards;
+        }
+        .votality-zoom-out {
+            animation: votalityZoomOut 0.3s ease-in forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+
+        h1 {
+            font-family: 'Gambetta-Bold', serif;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between p-6 votality-zoom-in">
+    <div class="absolute top-7 right-6">
+        <a href="Votality.html" class="text-gray-600 hover:text-gray-800 block" id="closeButton">
+            <div class="custom-rounded bg-grey p-2 transition-colors duration-200 hover:bg-white/20">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5 text-gray-600">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
+        </a>
+    </div>
+    <main class="flex-grow flex flex-col items-center justify-center text-center px-4">
+        <div class="logo-container mb-8 ">
+            <img src="Votality6.ico" alt="Votality Logo" class="w-16 h-16">
+        </div>
+        <h1 class="text-3xl font-bold mb-4 ">Start your trading journey today with Votality</h1>
+        <p class="text-xl mb-8 ">
+            Unlimited access to Votality, your personal AI trading assistant. Receive daily insights that document every step of your investment journey.
+        </p>
+    </main>
+    <footer class="w-full max-w-md mx-auto">
+        <button class="subscribe-button w-full py-4 rounded-full text-lg font-bold mb-4 ">
+            Subscribe for R249.99/mo
+        </button>
+        <p class="text-center text-sm text-gray-600 mb-4 ">
+            Cancel anytime via the App Store.
+        </p>
+        <div class="text-center text-sm text-gray-500 ">
+            <a href="#" class="hover:text-gray-700 mr-4">Terms</a>
+            <a href="#" class="hover:text-gray-700">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const elements = document.querySelectorAll('.votality-zoom-in');
+            elements.forEach(el => {
+                el.style.opacity = '1';
+            });
+
+            const closeButton = document.getElementById('closeButton');
+            closeButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                const body = document.body;
+                body.classList.remove('votality-zoom-in');
+                body.classList.add('votality-zoom-out');
+                
+                setTimeout(() => {
+                    window.location.href = closeButton.getAttribute('href');
+                }, 300); // Wait for the 0.3-second animation to complete before redirecting
+            });
+        });
+    </script>
+</body>
+</html>

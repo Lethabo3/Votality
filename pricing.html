@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+<!-- Add these to your pricing.html head section -->
+<script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
+<script src="/assets/js/checkout.js" defer></script>
+<script>
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-G7WREYHFF7');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pricing</title>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e5e7eb;
+            --button-color: #333333;
+            --hover-color: #f3f4f6;
+            --grid-color: rgba(229, 231, 235, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: var(--background-color);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            position: relative;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+           .sidebar {
+            width: 3.5rem; /* Reduced width */
+            background-color: #f9f9f9;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+                .sidebar__logo {
+            width: 2.5rem; /* Smaller logo */
+            height: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar__icon {
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+            font-size: 1.25rem;
+        }
+
+        .sidebar__icon:hover {
+            color: var(--hover-color);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 2rem auto;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 3rem;
+            font-size: 1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pricing-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .pricing-plan {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 3rem 2rem;  /* Increased padding */
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+        .plan-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .plan-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 1.5rem 0;  /* Increased margin */
+    color: var(--text-color);
+}
+
+        .plan-price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #4b5563;
+        }
+
+        .plan-description {
+    color: #4b5563;
+    margin-bottom: 1rem;  /* Increased margin */
+}
+        .feature-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 2rem 0;  /* Increased margin */
+    flex-grow: 1;
+}
+
+        .feature-list li {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: var(--text-color);
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .cta-button {
+            background-color: #000;
+            font-family: 'Inter', sans-serif; /* Add this line */
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .cta-button:hover {
+            background-color: #000;
+        }
+
+        .cta-button.outline {
+            background-color: #e0e0e0;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif; /* Add this line */
+        }
+
+        .cta-button.outline:hover {
+            background-color: #e9e9e9;
+            color: #444;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .pricing-plan {
+                width: 100%;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                justify-content: space-around;
+                padding: 0.5rem;
+            }
+
+            .sidebar__icon {
+                margin-bottom: 0;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+        }
+
+        .top-nav {
+    position: static;  /* Changed from fixed */
+    background-color: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    padding: 0 1.5rem;
+    z-index: 20;
+}
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .top-nav__button--signin {
+            color: #000000;
+            background-color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            border: 1px solid #e0e0e0;
+        }
+
+        .top-nav__button--signup {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .footer-container {
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-color);
+        }
+
+        .faq-section {
+    margin-top: 8rem;
+    padding: 0 2rem;
+    width: 85%;  /* Match full width */    margin-left: auto;
+    margin-right: auto;
+}
+
+.faq-section h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-color);
+    letter-spacing: -0.025em;
+}
+
+.faq-section p {
+    text-align: center;
+    color: #4b5563;
+    margin-bottom: 3rem;
+    font-size: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.faq-container {
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1.5rem;
+    text-align: left;  /* Add this */
+    width: 100%;  /* Match full width */
+}
+
+.faq-item {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.faq-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text-color);
+    font-size: 1.10rem;
+    font-weight: 600;
+    transition: color 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.faq-toggle {
+    position: relative;
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 1rem;
+}
+
+.faq-toggle svg {
+    position: absolute;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.plus-icon {
+    opacity: 1;
+    transform: rotate(0deg);
+    display: block;
+}
+
+.cross-icon {
+    opacity: 0;
+    transform: rotate(-90deg);
+    display: block;
+}
+
+.faq-toggle.active .plus-icon {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+.faq-toggle.active .cross-icon {
+    opacity: 1;
+    transform: rotate(0deg);
+}
+
+.faq-answer {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top;
+            margin: 0;  /* Remove default margins */
+            transform: translateY(-10px);
+            text-align: left;  /* Ensure answers are left-aligned */
+
+        }
+        
+        .faq-answer p {
+    text-align: left;  /* Ensure answers are left-aligned */
+    line-height: 1.75;
+    color: #4b5563;
+        margin: 0 0rem 1.5rem;  /* Remove default margins */
+}
+
+        .faq-answer.active {
+            max-height: 1000px;
+            opacity: 1;
+            transform: translateY(0);
+            padding: 0 0 1.5rem 0;
+        }
+
+    </style>
+</head>
+<body>
+        <nav class="top-nav">
+            <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+            <div class="top-nav__buttons">
+                <a href="index.html" class="top-nav__button top-nav__button--signup">Get Started</a>
+            </div>
+        </nav>
+        <main class="main-content">
+            <h1>Plans and Pricing</h1>
+            <p class="subtitle">Choose the plan that fits your financial needs. From young traders to large investors, we have a plan best suited for you.</p>
+            
+            <div class="pricing-container">
+                <div class="pricing-plan">
+                    <h2 class="plan-name">Free</h2>
+                    <p class="plan-description">For individuals starting their financial journey</p>
+
+                    <div class="plan-price">$0<span>/month</span></div>
+                    <ul class="feature-list">
+                        <li>Chat with Votality</li>
+                        <li>Share and publish chats</li>
+                    </ul>
+                    <button class="cta-button outline">Current Plan</button>
+                </div>
+                
+                <div class="pricing-plan">
+                    <h2 class="plan-name">Premium</h2>
+                    <p class="plan-description">For higher message limits and access to more market data</p>
+
+                    <div class="plan-price">$20<span>/month</span></div>
+                    <ul class="feature-list">
+                        <p class="plan-description">Everything in Free, plus:</p>
+                        <li>10-20x higher messaging limits</li>
+                        <li>Access to market news</li>
+                        <li>Access to market data</li>
+                    </ul>
+                    <button class="cta-button" data-plan="premium">Choose Premium</button>
+
+                       </div>
+                
+                <div class="pricing-plan">
+                    <h2 class="plan-name">Teams</h2>
+                    <p class="plan-description">For fast-moving, collaborative teams</p>
+
+                    <div class="plan-price">$30<span>/month</span></div>
+                    <ul class="feature-list">
+                        <p class="plan-description">Everything in Premium, plus:</p>
+                        <li>Even higher messaging limits</li>
+                        <li>Share chats, News and Data with your team</li>
+                        <li>Priority Access</li>
+                    </ul>
+<button class="cta-button" data-plan="teams">Choose Teams</button>
+                </div>
+            </div>
+
+           
+        </main>
+
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <p class="subtitle">Find answers to common questions about our pricing plans and features.</p>
+
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How are the plans billed?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>All paid plans are billed monthly and can be canceled at any time. You'll be billed on the same date each month based on your signup date.</p>
+                    </div>
+                </div>
+        
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Can I switch between plans anytime?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes, you can upgrade or downgrade your plan at any time. Changes will take effect on your next billing cycle and your new rate will be prorated accordingly.</p>
+                    </div>
+                </div>
+        
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What happens to my data if I cancel?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Your data will be securely stored for 30 days after cancellation, during which time you can reactivate your account with all data intact. After 30 days, your data will be permanently deleted.</p>
+                    </div>
+                </div>
+        
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Do you offer team discounts?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes, we offer volume discounts for teams with more than 10 members. Contact our sales team for custom pricing tailored to your team's needs.</p>
+                    </div>
+                </div>
+        
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What payment methods do you accept?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We accept all major credit cards (Visa, Mastercard, American Express), PayPal, and bank transfers for enterprise customers.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+<div class="footer-container">
+                <div class="footer-links">
+                    <a href="about.html" class="footer-link">About</a>
+                    <a href="pricing.html" class="footer-link">Pricing</a>
+                    <a href="terms.html" class="footer-link">Terms</a>
+                    <a href="privacy.html" class="footer-link">Privacy</a>
+                    <a href="contact.html" class="footer-link">Contact</a>
+                </div>
+            </div>
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+        const buttons = document.querySelectorAll('.cta-button');
+        
+        buttons.forEach(button => {
+            button.addEventListener('click', async () => {
+                try {
+                    // Check if user is logged in
+                    const loginCheck = await fetch('/check_login_status.php');
+                    const loginStatus = await loginCheck.json();
+
+                    if (!loginStatus.isLoggedIn) {
+                        // Save intended plan
+                        sessionStorage.setItem('intended_plan', button.dataset.plan);
+                        window.location.href = '/signin.html?redirect=pricing';
+                        return;
+                    }
+
+                    // Get checkout URL from backend
+                    const response = await fetch('create-checkout.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            plan: button.dataset.plan,
+                            userId: loginStatus.userId
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success && data.checkoutUrl) {
+                        window.location.href = data.checkoutUrl;
+                    } else {
+                        throw new Error(data.message || 'Failed to create checkout session');
+                    }
+
+                } catch (error) {
+                    console.error('Checkout error:', error);
+                    alert('There was an error starting the checkout process. Please try again.');
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.faq-question').forEach(button => {
+    button.addEventListener('click', () => {
+        const answer = button.nextElementSibling;
+        const toggle = button.querySelector('.faq-toggle');
+        
+        // Close all other answers with smooth animation
+        document.querySelectorAll('.faq-answer').forEach(item => {
+            if (item !== answer && item.classList.contains('active')) {
+                const otherToggle = item.previousElementSibling.querySelector('.faq-toggle');
+                
+                // Start closing animation
+                item.style.maxHeight = item.scrollHeight + 'px';
+                item.classList.remove('active');
+                otherToggle.classList.remove('active');
+                
+                // Reset after animation
+                setTimeout(() => {
+                    item.style.maxHeight = null;
+                }, 0);
+            }
+        });
+        
+        // Toggle current answer with smooth animation
+        if (!answer.classList.contains('active')) {
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+            answer.classList.add('active');
+            toggle.classList.add('active');
+        } else {
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+            answer.classList.remove('active');
+            toggle.classList.remove('active');
+            
+            setTimeout(() => {
+                answer.style.maxHeight = null;
+            }, 0);
+        }
+    });
+});
+    </script>
+</body>
+</html>

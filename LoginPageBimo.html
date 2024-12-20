@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Votality AI</title>
+    <link rel="icon" href="favicon5.ico">
+    <link href="style.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, function(error) {
+            console.log('ServiceWorker registration failed: ', error);
+          });
+      }
+    </script>
+    
+    <style>
+        @font-face {
+            font-family: 'Gambetta-Bold';
+            src: url('../fonts/Gambetta-Bold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Bold.woff') format('woff'),
+                 url('../fonts/Gambetta-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                 url('../fonts/Satoshi-Bold.woff') format('woff'),
+                 url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInFromTop {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+        @keyframes slideOutToTop {
+            from { transform: translateY(0); }
+            to { transform: translateY(-100%); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .notification {
+            display: none;
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #d1d1d1;
+            padding: 10px;
+            border-radius: 5px;
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transition: transform 0.3s ease-out;
+        }
+        .underline-links a {
+            text-decoration: underline;
+        }
+        .notification.show {
+            display: block;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        input[type="text"], input[type="email"], input[type="password"] {
+            border-radius: 20px;
+            background-color: #ffffff;
+            border: 1px solid #d1d1d1;
+            padding: 12px 20px;
+        }
+
+        button[type="submit"] {
+            border-radius: 20px;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90px;
+        }
+        body {
+            font-family: 'GeneralSans-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #fff);
+            min-height: 100vh;
+        }
+        .form-container {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .text-center {
+            margin-bottom: 20px;
+        }
+
+        .space-y-8 > * + * {
+            margin-top: 16px;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #888;
+            display: none;
+            z-index: 10;
+        }
+
+        .password-toggle.visible {
+            display: block;
+        }
+
+        .logo-container img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
+
+        h2 {
+            font-family: 'Satoshi-Bold',serif;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 font-sans">
+    <div class="notification" id="notification">
+        Incorrect email or password.
+    </div>
+    <div class="container">
+        <div class="logo-container">
+            <img src="Votality.jpg" alt="Votality.jpg AI Logo" class="object-cover">
+        </div>
+        <div class="form-container">
+            <div class="text-center fade-in">
+                <h2 class="text-4xl font-bold text-gray-800 mb-3">Welcome back</h2>
+                <p class="text-gray-600">Please log in to your Votality account.</p>
+            </div>
+            <form class="space-y-8 fade-in" action="login_handlerBimo.php" method="POST">
+                <div>
+                    <input type="email" id="email" name="email" placeholder="Email Address" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800" required>
+                </div>
+                <div class="password-container">
+                    <input type="password" id="password" name="password" placeholder="Password" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800" required>
+                    <span class="password-toggle" id="passwordToggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <line x1="1" y1="1" x2="23" y2="23" class="eye-slash"></line>
+                        </svg>
+                    </span>
+                </div>
+                <button type="submit" class="w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300">
+                    Login
+                </button>
+            </form>
+            <p class="mt-4 text-center text-gray-600 fade-in">
+                Don't have an account? <a href="SignUpBimo.html" class="text-gray-800 font-medium hover:underline">Create</a>
+            </p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            if (new URLSearchParams(window.location.search).get('login') === 'failed') {
+                const notification = document.getElementById('notification');
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3500); 
+            }
+
+            setTimeout(() => {
+                document.querySelectorAll('.fade-in').forEach(el => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                });
+            }, 100);
+
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const eyeIcon = passwordToggle.querySelector('.eye-icon');
+            const eyeSlash = passwordToggle.querySelector('.eye-slash');
+
+            passwordInput.addEventListener('input', function() {
+                if (this.value.length > 0) {
+                    passwordToggle.classList.add('visible');
+                } else {
+                    passwordToggle.classList.remove('visible');
+                }
+            });
+
+            passwordToggle.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                eyeSlash.style.display = type === 'password' ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
+

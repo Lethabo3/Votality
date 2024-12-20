@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company - Votality</title>
+    <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+        }
+
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: transparent;
+            position: relative;
+        }
+
+        .hero .last-updated {
+            position: absolute;
+            width: 100%;
+            top: 6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.25rem;
+            color: #4b5563;
+            line-height: 1.75;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-top: 4rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #4b5563;
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            line-height: 1.75;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem 2rem 2rem;
+        }
+
+        .section {
+            background-color: transparent;
+            padding: 2rem 0;
+        }
+
+        .section:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+            margin-bottom: 0;
+        }
+
+        .section p {
+            font-size: 1.10rem;
+            line-height: 1.75;
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+
+        .arrow-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--text-color);
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease, transform 0.2s ease;
+            margin-top: 1.25rem;
+            margin-right: 1.25rem;
+            position: relative;
+        }
+
+        .arrow-container:hover {
+            background-color: var(--hover-color);
+            cursor: pointer;
+            transform: translateX(5px);
+        }
+
+        .arrow-container svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-color);
+            transform: rotate(180deg);
+        }
+
+        .top-nav {
+            position: static;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1.5rem;
+        }
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .top-nav__button--home {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .top-nav__button--contact {
+            color: #fff;
+            background-color: #000;
+            border: 1px solid #e0e0e0;
+        }
+
+        .footer-container {
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .hero {
+                padding: 4rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.125rem;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons">
+            <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
+            <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
+            <a href="about.html" class="top-nav__button top-nav__button--home">About</a>
+            <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
+            <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <p class="last-updated">Our Company</p>
+        <h1>Empowering Financial Decisions</h1>
+        <p>Revolutionizing the way you interact with financial markets through advanced AI technology.</p>
+    </div>
+
+    <div class="container">
+        <section class="section">
+            <div class="section-header">
+                <h2>Who We Are</h2>
+                <div class="arrow-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                </div>
+            </div>
+            
+            <p>Votality is a cutting-edge AI company dedicated to revolutionizing the financial industry. We combine advanced artificial intelligence with deep financial expertise to provide unparalleled insights and tools for investors, traders, and financial professionals.</p>
+
+            <p>Our mission is to democratize access to sophisticated financial analysis and decision-making tools. We believe that everyone, from individual investors to large institutions, should have the power to make informed financial decisions based on comprehensive data analysis and market insights.</p>
+
+            <p>At Votality, we're not just building another financial tool; we're creating an AI-powered partner that evolves with the markets and grows smarter with every interaction. Our platform offers real-time market analysis, predictive modeling, and personalized insights tailored to each user's unique financial goals and risk profile.</p>
+
+            <p>Founded by a team of finance veterans and AI experts, Votality represents the convergence of decades of financial market experience with the latest advancements in machine learning and natural language processing. We're committed to pushing the boundaries of what's possible in financial technology, always with the goal of empowering our users to navigate the complex world of finance with confidence.</p>
+
+            <p>Join us on our mission to transform the financial landscape. With Votality, the future of finance is here, and it's accessible to everyone.</p>
+        </section>
+
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="about.html" class="footer-link">About</a>
+                <a href="pricing.html" class="footer-link">Pricing</a>
+                <a href="terms.html" class="footer-link">Terms</a>
+                <a href="privacy.html" class="footer-link">Privacy</a>
+                <a href="contact.html" class="footer-link">Contact</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

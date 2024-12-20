@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Votality Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+            --grid-color: rgba(229, 231, 235, 0.3);
+        }
+
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-image: 
+                linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%),
+                linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1rem;
+            z-index: 20;
+        }
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #000000;
+            background-color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            border: 1px solid #e0e0e0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 80px auto 0;
+            padding: 2rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-topic {
+            font-size: 2.5em; /* Increased from 2em */
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1.5rem; /* Increased from 1rem */
+            text-align: left;
+            line-height: 1.2;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+        }
+
+        .user-message {
+            font-size: 1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+            text-align: left;
+            max-width: 100%;
+            align-self: flex-start;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.3;
+        }
+
+        .ai-message {
+            font-size: 1.1em; /* Decreased from inherited size */
+            align-self: flex-start;
+            margin-right: auto;
+            text-align: left;
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.5;
+            margin-top: 0.5rem;
+        }
+
+        .chat-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        .message {
+            padding: 12px 0;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            background-color: transparent;
+            width: 100%;
+        }
+
+
+        .section-heading {
+            font-weight: bold;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .sources-heading, .related-heading {
+            font-size: 1.25em;
+            margin-bottom: 0.25rem;
+        }
+
+        .answer-heading {
+            font-size: 1.25em;
+            margin-top: 1rem;
+            margin-bottom: -1rem;
+        }
+
+        .sources-container {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            margin-left: -1rem;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .sources-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .source-chip {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .source-chip img {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .source-chip .plus-circle {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+                margin-top: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <a href="index.html" class="top-nav__button">Back to Votality</a>
+    </nav>
+
+    <div class="container">
+        <h1 id="chat-topic" class="chat-topic">Loading...</h1>
+        <div id="chat-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedId = urlParams.get('id');
+            if (sharedId) {
+                loadSharedContent(sharedId);
+            } else {
+                showError('No shared content ID provided');
+            }
+        });
+
+        async function loadSharedContent(id) {
+            try {
+                const response = await fetch('VotalityChat2.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'getSharedContent',
+                        id: id
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.error) {
+                    showError('Error loading shared content: ' + data.error);
+                } else {
+                    displaySharedContent(data.content, data.topic);
+                }
+            } catch (error) {
+                showError('An error occurred while fetching the shared content: ' + error.message);
+            }
+        }
+
+        function displaySharedContent(content, topic) {
+            const chatContainer = document.getElementById('chat-container');
+            const chatTopicElement = document.getElementById('chat-topic');
+
+            chatTopicElement.textContent = topic || 'Untitled Chat';
+
+            // Split content into messages and display them
+            const messages = content.split('\n\n');
+            messages.forEach((message, index) => {
+                const chatGroup = document.createElement('div');
+                chatGroup.className = 'chat-group';
+
+                if (index === 0) {
+                    // This is the chat topic
+                    const topicDiv = document.createElement('div');
+                    topicDiv.className = 'chat-topic';
+                    topicDiv.textContent = message;
+                    chatGroup.appendChild(topicDiv);
+                } else if (index % 2 === 1) {
+                    // User message
+                    const userMessageDiv = document.createElement('div');
+                    userMessageDiv.className = 'message user-message';
+                    userMessageDiv.textContent = message;
+                    chatGroup.appendChild(userMessageDiv);
+                } else {
+                    // AI message
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.className = 'message ai-message';
+
+                    // Add Sources section
+                    const sourcesHeading = document.createElement('div');
+                    sourcesHeading.className = 'section-heading sources-heading';
+                    sourcesHeading.textContent = 'Sources';
+                    aiMessageDiv.appendChild(sourcesHeading);
+
+                    const sourcesContainer = document.createElement('div');
+                    sourcesContainer.className = 'sources-container';
+                    const sourceChip = document.createElement('div');
+                    sourceChip.className = 'source-chip';
+                    sourceChip.style.display = 'flex';
+                    sourceChip.style.alignItems = 'center';
+                    sourceChip.style.gap = '0.5rem';
+                    sourceChip.style.padding = '0.5rem';
+                    sourceChip.style.borderRadius = '14px';
+                    sourceChip.style.backgroundColor = 'transparent';
+
+                    const sourceImages = ['bus2.png', 'bus4.png', 'bus3.png'];
+                    sourceImages.forEach((src, index) => {
+                        const sourceImg = document.createElement('img');
+                        sourceImg.src = src;
+                        sourceImg.alt = `Source ${index + 1}`;
+                        sourceImg.style.width = '3rem';
+                        sourceImg.style.height = '3rem';
+                        sourceImg.style.marginRight = '-2rem';
+                        sourceImg.style.objectFit = 'cover';
+                        sourceChip.appendChild(sourceImg);
+                    });
+
+                    const plusCircle = document.createElement('div');
+                    plusCircle.className = 'plus-circle';
+                    plusCircle.textContent = '+2';
+                    sourceChip.appendChild(plusCircle);
+                    
+                    sourcesContainer.appendChild(sourceChip);
+                    aiMessageDiv.appendChild(sourcesContainer);
+
+                    // Add Answer section
+                    const answerHeading = document.createElement('div');
+                    answerHeading.className = 'section-heading answer-heading';
+                    answerHeading.textContent = 'Answer';
+                    aiMessageDiv.appendChild(answerHeading);
+
+                    // AI message content
+                    const answerContent = document.createElement('div');
+                    answerContent.className = 'ai-message-content';
+                    const words = message.split(' ');
+                    words.forEach((word, wordIndex) => {
+                        const span = document.createElement('span');
+                        span.textContent = word + ' ';
+                        span.style.opacity = '1';
+                        span.style.animation = 'none';
+                        answerContent.appendChild(span);
+                    });
+                    aiMessageDiv.appendChild(answerContent);
+
+                    chatGroup.appendChild(aiMessageDiv);
+                }
+
+                chatContainer.appendChild(chatGroup);
+            });
+        }
+
+        function showError(message) {
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.innerHTML = `<p class="text-red-500">${message}</p>`;
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>

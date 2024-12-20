@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-G7WREYHFF7');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality - Market Postsv2</title>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="postv2.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body>
+    <div id="logged-in-view" class="layout">
+        <aside class="sidebar">
+            <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
+            <div class="sidebar-button-container" id="new-post-button">
+                <a href="index.html" class="relative flex items-center justify-center group" data-tooltip="New Chat">
+                    <i data-lucide="plus" class="h-5 w-5 text-black transition-colors group-hover:text-gray-900" style="stroke-width: 1.5"></i>
+                    <span class="absolute left-full ml-4 px-3 py-1.5 bg-[#1a1a1a] text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">New Chat</span>
+                    <span class="absolute left-full ml-1.5 w-0 h-0 border-[5px] border-transparent border-r-[#1a1a1a] translate-y-[-50%] top-[50%] opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                </a>
+            </div>
+            <a href="news.v2.html" data-tooltip="News" class="sidebar__icon">
+                <i data-lucide="book-open"></i>
+            </a>
+            <a href="#" data-tooltip="Posts" class="sidebar__icon active">
+                <i data-lucide="users"></i>
+            </a>
+            <a href="markets.v2.html" data-tooltip="Market" class="sidebar__icon">
+                <i data-lucide="trending-up"></i>
+            </a>
+            <div class="account-container">
+                <i data-lucide="user" class="h-6 w-6 text-gray-400"></i>
+            </div>
+        </aside>
+        <main class="main-content">
+            <nav class="desktop-top-nav">
+                <div class="desktop-top-nav__left">
+                    <h1 class="desktop-top-nav__title">Communities</h1>
+                </div>
+                <div class="desktop-top-nav__right">
+                    <button id="new-post-button" class="icon-button">
+                        <a href="create_post.html" class="sidebar__icon">
+                        <i data-lucide="plus" class="h-7 w-7 text-gray-400"></i>
+                        </a>
+                    </button>
+                </div>
+            </nav>
+            <div class="posts-container">
+                <div class="post-card votality-fade-zoom cursor-pointer">
+                    <div class="post-card__header">
+                        <div class="post-card__author-info">
+                            <div class="post-card__author">
+                                <div class="post-card__author-icon">
+                                    <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                                </div>
+                                <span class="post-card__author-name">MarketAnalyst</span>
+                            </div>
+                            <span class="post-card__timestamp">10 minutes ago</span>
+                        </div>
+                        <div class="post-card__more">
+                            <i data-lucide="more-horizontal" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <h2 class="post-card__title">Fed's Latest Policy Shift Signals New Economic Phase</h2>
+                    <p class="post-card__content">Recent Federal Reserve statements indicate a significant pivot in monetary policy approach. Market participants are closely monitoring these developments for implications on various asset classes.</p>
+                    
+                    <div class="post-card__actions">
+                        <div class="post-card__action">
+                            <i data-lucide="heart" class="h-5 w-5"></i>
+                            <span>24</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="message-circle" class="h-5 w-5"></i>
+                            <span>12</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="share" class="h-5 w-5"></i>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="post-card votality-fade-zoom cursor-pointer">
+                    <div class="post-card__header">
+                        <div class="post-card__author-info">
+                            <div class="post-card__author">
+                                <div class="post-card__author-icon">
+                                    <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                                </div>
+                                <span class="post-card__author-name">TechInvestor</span>
+                            </div>
+                            <span class="post-card__timestamp">25 minutes ago</span>
+                        </div>
+                        <div class="post-card__more">
+                            <i data-lucide="more-horizontal" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <h2 class="post-card__title">AI Sector Shows Unprecedented Growth</h2>
+                    <p class="post-card__content">Leading tech companies are reporting exceptional growth in their AI divisions. Enterprise adoption rates are exceeding previous forecasts, suggesting a sustainable long-term trend.</p>
+                    
+                    <div class="post-card__actions">
+                        <div class="post-card__action">
+                            <i data-lucide="heart" class="h-5 w-5"></i>
+                            <span>30</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="message-circle" class="h-5 w-5"></i>
+                            <span>8</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="share" class="h-5 w-5"></i>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="post-card votality-fade-zoom cursor-pointer">
+                    <div class="post-card__header">
+                        <div class="post-card__author-info">
+                            <div class="post-card__author">
+                                <div class="post-card__author-icon">
+                                    <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                                </div>
+                                <span class="post-card__author-name">CryptoTrader</span>
+                            </div>
+                            <span class="post-card__timestamp">1 hour ago</span>
+                        </div>
+                        <div class="post-card__more">
+                            <i data-lucide="more-horizontal" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <h2 class="post-card__title">Digital Asset Markets Show Strong Institutional Inflows</h2>
+                    <p class="post-card__content">Institutional investment in digital assets continues to grow, with major financial firms announcing new crypto investment products and services. Market structure improvements are supporting this trend.</p>
+                    
+                    <div class="post-card__actions">
+                        <div class="post-card__action">
+                            <i data-lucide="heart" class="h-5 w-5"></i>
+                            <span>15</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="message-circle" class="h-5 w-5"></i>
+                            <span>5</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="share" class="h-5 w-5"></i>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="post-card votality-fade-zoom cursor-pointer">
+                    <div class="post-card__header">
+                        <div class="post-card__author-info">
+                            <div class="post-card__author">
+                                <div class="post-card__author-icon">
+                                    <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                                </div>
+                                <span class="post-card__author-name">GlobalMacro</span>
+                            </div>
+                            <span class="post-card__timestamp">2 hours ago</span>
+                        </div>
+                        <div class="post-card__more">
+                            <i data-lucide="more-horizontal" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <h2 class="post-card__title">Emerging Markets Present New Opportunities</h2>
+                    <p class="post-card__content">Structural reforms and improving economic indicators in key emerging markets are creating attractive investment opportunities. Several countries are showing promising growth trajectories.</p>
+                    
+                    <div class="post-card__actions">
+                        <div class="post-card__action">
+                            <i data-lucide="heart" class="h-5 w-5"></i>
+                            <span>10</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="message-circle" class="h-5 w-5"></i>
+                            <span>3</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="share" class="h-5 w-5"></i>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="post-card votality-fade-zoom cursor-pointer">
+                    <div class="post-card__header">
+                        <div class="post-card__author-info">
+                            <div class="post-card__author">
+                                <div class="post-card__author-icon">
+                                    <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                                </div>
+                                <span class="post-card__author-name">EnergyExpert</span>
+                            </div>
+                            <span class="post-card__timestamp">3 hours ago</span>
+                        </div>
+                        <div class="post-card__more">
+                            <i data-lucide="more-horizontal" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <h2 class="post-card__title">Renewable Energy Sector Reaches Critical Milestone</h2>
+                    <p class="post-card__content">Global renewable energy capacity has exceeded traditional energy sources for the first time. This shift is creating new opportunities across the energy sector value chain.</p>
+                    
+                    <div class="post-card__actions">
+                        <div class="post-card__action">
+                            <i data-lucide="heart" class="h-5 w-5"></i>
+                            <span>20</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="message-circle" class="h-5 w-5"></i>
+                            <span>7</span>
+                        </div>
+                        <div class="post-card__action">
+                            <i data-lucide="share" class="h-5 w-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+<div class="right-sidebar">
+    <div class="trending-topics">
+        <h3 class="section-title">Trending Topics</h3>
+        <div class="topic">
+            <span class="topic-name">BitcoinETF</span>
+            <span class="topic-count">2.4k posts</span>
+        </div>
+        <div class="topic">
+            <span class="topic-name">FedMeeting</span>
+            <span class="topic-count">1.8k posts</span>
+        </div>
+        <div class="topic">
+            <span class="topic-name">EarningsSeason</span>
+            <span class="topic-count">1.5k posts</span>
+        </div>
+        <div class="topic">
+            <span class="topic-name">AIStocks</span>
+            <span class="topic-count">1.2k posts</span>
+        </div>
+        <div class="topic">
+            <span class="topic-name">MarketOutlook</span>
+            <span class="topic-count">956 posts</span>
+        </div>
+    </div>
+
+    <div class="related-communities">
+        <h3 class="section-title">Related Communities</h3>
+        <div class="community">
+            <div class="community-icon">
+                <i data-lucide="trending-up" class="h-5 w-5 text-gray-400"></i>
+            </div>
+            <div class="community-info">
+                <div class="community-name">Stock Trading</div>
+                <div class="community-members">125k members</div>
+            </div>
+        </div>
+        <div class="community">
+            <div class="community-icon">
+                <i data-lucide="bitcoin" class="h-5 w-5 text-gray-400"></i>
+            </div>
+            <div class="community-info">
+                <div class="community-name">Crypto Markets</div>
+                <div class="community-members">98k members</div>
+            </div>
+        </div>
+        <div class="community">
+            <div class="community-icon">
+                <i data-lucide="bar-chart" class="h-5 w-5 text-gray-400"></i>
+            </div>
+            <div class="community-info">
+                <div class="community-name">Technical Analysis</div>
+                <div class="community-members">76k members</div>
+            </div>
+        </div>
+        <div class="community">
+            <div class="community-icon">
+                <i data-lucide="newspaper" class="h-5 w-5 text-gray-400"></i>
+            </div>
+            <div class="community-info">
+                <div class="community-name">Market News</div>
+                <div class="community-members">54k members</div>
+            </div>
+        </div>
+        <div class="community">
+            <div class="community-icon">
+                <i data-lucide="trending-up" class="h-5 w-5 text-gray-400"></i>
+            </div>
+            <div class="community-info">
+                <div class="community-name">Stock Trading</div>
+                <div class="community-members">125k members</div>
+            </div>
+        </div>
+    </div>
+</div>
+            </div> 
+            <div class="right-sidebar">
+                <div class="trending-topics">
+                    <h3 class="section-title">Trending Topics</h3>
+                    <div class="topic">
+                        <span class="topic-name">BitcoinETF</span>
+                        <span class="topic-count">2.4k posts</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">FedMeeting</span>
+                        <span class="topic-count">1.8k posts</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">EarningsSeason</span>
+                        <span class="topic-count">1.5k posts</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">AIStocks</span>
+                        <span class="topic-count">1.2k posts</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">MarketOutlook</span>
+                        <span class="topic-count">956 posts</span>
+                    </div>
+                </div>
+            
+                <div class="related-communities">
+                    <h3 class="section-title">Related Communities</h3>
+                    <div class="community">
+                        <div class="community-icon">
+                            <i data-lucide="trending-up" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                        <div class="community-info">
+                            <div class="community-name">Stock Trading</div>
+                            <div class="community-members">125k members</div>
+                        </div>
+                    </div>
+                    <div class="community">
+                        <div class="community-icon">
+                            <i data-lucide="bitcoin" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                        <div class="community-info">
+                            <div class="community-name">Crypto Markets</div>
+                            <div class="community-members">98k members</div>
+                        </div>
+                    </div>
+                    <div class="community">
+                        <div class="community-icon">
+                            <i data-lucide="bar-chart" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                        <div class="community-info">
+                            <div class="community-name">Technical Analysis</div>
+                            <div class="community-members">76k members</div>
+                        </div>
+                    </div>
+                    <div class="community">
+                        <div class="community-icon">
+                            <i data-lucide="newspaper" class="h-5 w-5 text-gray-400"></i>
+                        </div>
+                        <div class="community-info">
+                            <div class="community-name">Market News</div>
+                            <div class="community-members">54k members</div>
+                        </div>
+                    </div>
+                </div>
+            </div>            
+        </main>
+    </div>
+
+    <div id="logged-out-view" class="flex flex-col justify-between p-6 votality-zoom-in" style="display: none;">
+        <main class="flex-grow flex flex-col items-center justify-center text-center px-4">
+            <aside class="sidebar">
+                <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
+                <div class="sidebar-button-container" id="new-post-button">
+                    <a href="index.html" class="relative flex items-center justify-center group" data-tooltip="New Chat">
+                        <i data-lucide="plus" class="h-5 w-5 text-black transition-colors group-hover:text-gray-900" style="stroke-width: 1.5"></i>
+                        <span class="absolute left-full ml-4 px-3 py-1.5 bg-[#1a1a1a] text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">New Chat</span>
+                        <span class="absolute left-full ml-1.5 w-0 h-0 border-[5px] border-transparent border-r-[#1a1a1a] translate-y-[-50%] top-[50%] opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                    </a>
+                </div>
+                <a href="news.v2.html" data-tooltip="News"  class="sidebar__icon">
+                    <i data-lucide="book-open"></i>
+                </a>
+                <a href="#" data-tooltip="Posts" class="sidebar__icon active">
+                    <i data-lucide="users"></i>
+                </a>
+                <a href="markets.v2.html" data-tooltip="Market" class="sidebar__icon">
+                    <i data-lucide="trending-up"></i>
+                </a>
+                <div class="account-container">
+                    <i data-lucide="user" class="h-6 w-6 text-gray-400"></i>
+                </div>
+            </aside>
+            <main class="main-content2">
+                <nav class="desktop-top-nav">
+                    <div class="desktop-top-nav__left">
+                        <h1 class="desktop-top-nav__title">Market Posts</h1>
+                    </div>
+                    <div class="desktop-top-nav__right">
+                        <button id="new-post-button" class="icon-button">
+                            <i data-lucide="plus" class="h-7 w-7 text-gray-400"></i>
+                        </button>
+                    </div>
+                </nav>
+
+                <div class="attachment-container">
+                    <i data-lucide="users" class="icon-class"></i>
+                </div>
+                
+                 <!-- New heading and text -->
+                 <h2 class="text-xl font-semibold mb-1">Join the Conversation</h2>
+                 <p class="hero__subtitle">Connect and share insights on market trends.</p>
+
+                <button onclick="window.location.href='signin.html'" class="top-nav__button top-nav__button--signin">
+                    Sign In
+                </button>            
+        </main>
+    </div>
+
+     <!-- Add bottom navigation for mobile -->
+     <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active">
+            <i data-lucide="message-circle"></i>
+        </a>
+        <a href="news.v2.html" class="nav-item">
+            <i data-lucide="book-open"></i>
+        </a>
+        <a href="postv2.html" class="nav-item">
+            <i data-lucide="users"></i>
+        </a>
+        <a href="markets.v2.html" class="nav-item">
+            <i data-lucide="trending-up"></i>
+        </a>
+        
+    </nav>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    checkLoginStatus();
+
+    const newPostButton = document.getElementById('new-post-button');
+    if (newPostButton) {
+        newPostButton.addEventListener('click', () => {
+            window.location.href = 'create_post.html';
+        });
+    }
+
+    const backButton = document.getElementById('backButton');
+    if (backButton) {
+        backButton.addEventListener('click', closeExpandedPost);
+    }
+});
+
+function checkLoginStatus() {
+    fetch('check_login.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.loggedIn) {
+                document.getElementById('logged-in-view').style.display = 'flex';
+                document.getElementById('logged-out-view').style.display = 'none';
+                loadRecentPosts();
+            } else {
+                document.getElementById('logged-in-view').style.display = 'none';
+                document.getElementById('logged-out-view').style.display = 'flex';
+            }
+        })
+        .catch(error => {
+            console.error('Error checking login status:', error);
+        });
+}
+
+function loadRecentPosts() {
+    console.log('Attempting to load recent posts...');
+    const postsContainer = document.getElementById('posts-container');
+    
+    if (!postsContainer) {
+        console.error('Error: posts-container not found in the DOM');
+        return;
+    }
+
+    fetch('VotalityChat.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'getRecentPosts'
+        }),
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Received data:', data);
+        if (data.error) {
+            console.error('Error:', data.error);
+            postsContainer.innerHTML = `<p class="error-message">Error loading posts: ${data.error}</p>`;
+            return;
+        }
+        if (data.posts && data.posts.length > 0) {
+            postsContainer.innerHTML = ''; // Clear existing content
+            data.posts.forEach((post, index) => {
+                addPostToPage(post, index);
+            });
+        } else {
+            postsContainer.innerHTML = '<p>No posts available.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        if (postsContainer) {
+            postsContainer.innerHTML = `<p class="error-message">Failed to load posts. Please try again later.</p>`;
+        }
+    });
+}
+
+function formatTimestamp(timestamp) {
+    const postDate = new Date(timestamp);
+    const now = new Date();
+    const diffDays = Math.floor((now - postDate) / (1000 * 60 * 60 * 24));
+    
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = days[postDate.getDay()];
+    const dayNumber = postDate.getDate();
+    const suffix = getDaySuffix(dayNumber);
+    
+    if (diffDays === 0) {
+        return 'Today';
+    } else if (diffDays === 1) {
+        return 'Yesterday';
+    } else {
+        return `${dayName} ${dayNumber}${suffix}`;
+    }
+}
+
+function getDaySuffix(day) {
+    if (day >= 11 && day <= 13) {
+        return 'th';
+    }
+    switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+    }
+}
+
+function addPostToPage(post, index) {
+    const postsContainer = document.getElementById('posts-container');
+    const postElement = document.createElement('div');
+    postElement.className = 'post-card votality-fade-zoom cursor-pointer';
+    postElement.style.animationDelay = `${index * 50}ms`;
+
+    let sentimentClass = getSentimentClass(post.category);
+
+    const shortTitle = post.title.length > 60 ? post.title.substring(0, 57) + '...' : post.title;
+    const shortContent = post.content.length > 100 ? post.content.substring(0, 97) + '...' : post.content;
+
+    postElement.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+            <h2 class="post-card__title">${shortTitle}</h2>
+            <span class="sentiment-score ${sentimentClass}">${post.symbol}</span>
+        </div>
+        <p class="post-card__content">${shortContent}</p>
+        <div class="post-card__meta">
+            <span>${post.author}</span>
+            <span>${formatTimestamp(post.timestamp)}</span>
+        </div>
+    `;
+
+    postElement.addEventListener('click', () => expandPostCard(post, postElement));
+    postsContainer.appendChild(postElement);
+}
+
+function expandPostCard(post, cardElement) {
+    const postsContainer = document.getElementById('posts-container');
+    const allCards = document.querySelectorAll('.post-card');
+    
+    // Hide all other cards
+    allCards.forEach(card => {
+        if (card !== cardElement) {
+            card.style.display = 'none';
+        }
+    });
+
+    // Expand the clicked card
+    cardElement.classList.add('expanded-card');
+    
+    // Add a back button if it doesn't exist
+    if (!document.getElementById('expandedBackButton')) {
+        const backButton = document.createElement('button');
+        backButton.id = 'expandedBackButton';
+        backButton.className = 'top-nav__button top-nav__button--back';
+        backButton.textContent = 'Back';
+        backButton.onclick = closeExpandedPost;
+        cardElement.insertBefore(backButton, cardElement.firstChild);
+    }
+
+    // Update the content to show full text
+    const titleElement = cardElement.querySelector('.post-card__title');
+    const contentElement = cardElement.querySelector('.post-card__content');
+    
+    titleElement.textContent = post.title;
+    contentElement.textContent = post.content;
+}
+
+function closeExpandedPost() {
+    const allCards = document.querySelectorAll('.post-card');
+    const expandedCard = document.querySelector('.expanded-card');
+    
+    if (expandedCard) {
+        // Remove the back button
+        const backButton = document.getElementById('expandedBackButton');
+        if (backButton) {
+            backButton.remove();
+        }
+        
+        // Show all cards
+        allCards.forEach(card => {
+            card.style.display = 'flex';
+        });
+        
+        expandedCard.classList.remove('expanded-card');
+        
+        // Reset truncated content
+        const post = {
+            title: expandedCard.querySelector('.post-card__title').textContent,
+            content: expandedCard.querySelector('.post-card__content').textContent
+        };
+        
+        const titleElement = expandedCard.querySelector('.post-card__title');
+        const contentElement = expandedCard.querySelector('.post-card__content');
+        
+        titleElement.textContent = post.title.length > 60 ? post.title.substring(0, 57) + '...' : post.title;
+        contentElement.textContent = post.content.length > 100 ? post.content.substring(0, 97) + '...' : post.content;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all post cards
+    const postCards = document.querySelectorAll('.post-card');
+    
+    // Add click event listener to each card
+    postCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Get the post data from the card
+            const post = {
+                title: card.querySelector('.post-card__title').textContent,
+                content: card.querySelector('.post-card__content').textContent,
+                author: card.querySelector('.post-card__meta span:first-child').textContent,
+                timestamp: card.querySelector('.post-card__meta span:last-child').textContent,
+                symbol: card.querySelector('.sentiment-score').textContent,
+                category: getSentimentFromClass(card.querySelector('.sentiment-score').className)
+            };
+            expandPostCard(post, card);
+        });
+    });
+});
+
+// Helper function to determine sentiment from class
+function getSentimentFromClass(className) {
+    if (className.includes('positive')) return 'Bullish';
+    if (className.includes('negative')) return 'Bearish';
+    return 'Neutral';
+}
+function createNewsCard(news, index) {
+    const card = document.createElement('div');
+    card.className = 'post-card votality-fade-zoom cursor-pointer';
+    card.style.animationDelay = `${index * 50}ms`;
+    
+    card.innerHTML = `
+        <div class="post-card__header">
+            <div class="post-card__author-info">
+                <div class="post-card__author">
+                    <div class="post-card__author-icon">
+                        <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                    </div>
+                    <span class="post-card__author-name">${news.author}</span>
+                </div>
+                <span class="post-card__timestamp">${getTimeAgo(news.time_published)}</span>
+            </div>
+            <div class="post-card__more">
+                <i data-lucide="more-horizontal" class="h-5 w-5 text-gray-400"></i>
+            </div>
+        </div>
+        
+        <h2 class="post-card__title">${news.title}</h2>
+        <p class="post-card__content">${news.summary}</p>
+        
+        <div class="post-card__actions">
+            <div class="post-card__action">
+                <i data-lucide="heart" class="h-5 w-5"></i>
+                <span>0</span>
+            </div>
+            <div class="post-card__action">
+                <i data-lucide="message-circle" class="h-5 w-5"></i>
+                <span>0</span>
+            </div>
+            <div class="post-card__action">
+                <i data-lucide="share" class="h-5 w-5"></i>
+            </div>
+        </div>
+    `;
+    
+    // Initialize all Lucide icons in the card
+    lucide.createIcons({
+        element: card
+    });
+    
+    card.addEventListener('click', () => expandNewsCard(news, card));
+    return card;
+}
+</script>
+</body>
+</html>

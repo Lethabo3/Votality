@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality Feedback</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9fafb;
+        }
+
+        /* Button to trigger modal */
+        .trigger-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .trigger-button:hover {
+            background-color: #1a1a1a;
+        }
+
+        /* Modal styles */
+        .feedback-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .feedback-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .feedback-modal-content {
+            background-color: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 32rem;
+            width: calc(100% - 2rem);
+            margin: 0 1rem;
+            transform: translateY(20px);
+            transition: transform 0.2s ease;
+        }
+
+        .feedback-modal.active .feedback-modal-content {
+            transform: translateY(0);
+        }
+
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .feedback-header h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            color: #6B7280;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-button:hover {
+            color: #374151;
+        }
+
+        .feedback-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .feedback-option {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid #E5E7EB;
+            background: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #4B5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .feedback-option:hover {
+            background-color: #F3F4F6;
+        }
+
+        .feedback-option.selected {
+            background-color: #000;
+            color: white;
+            border-color: #000;
+        }
+
+        @media (max-width: 640px) {
+            .feedback-modal-content {
+                margin: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Button to trigger the modal -->
+    <button class="trigger-button" onclick="showFeedbackModal()">Show Feedback Form</button>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="feedback-modal">
+        <div class="feedback-modal-content">
+            <div class="feedback-header">
+                <h3>Tell us more:</h3>
+                <button class="close-button" onclick="closeFeedbackModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="feedback-options">
+                <button class="feedback-option">Shouldn't have used Memory</button>
+                <button class="feedback-option">Don't like the style</button>
+                <button class="feedback-option">Not factually correct</button>
+                <button class="feedback-option">Didn't fully follow instructions</button>
+                <button class="feedback-option">Refused when it shouldn't have</button>
+                <button class="feedback-option">More...</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to show the feedback modal
+        function showFeedbackModal() {
+            const modal = document.getElementById('feedback-modal');
+            modal.classList.add('active');
+        }
+
+        // Function to close the feedback modal
+        function closeFeedbackModal() {
+            const modal = document.getElementById('feedback-modal');
+            modal.classList.remove('active');
+        }
+
+        // Add click event listeners to feedback options
+        document.querySelectorAll('.feedback-option').forEach(button => {
+            button.addEventListener('click', function() {
+                // Toggle selected state
+                document.querySelectorAll('.feedback-option').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                
+                // Here you can add code to handle the feedback submission
+                console.log('Selected feedback:', this.textContent);
+            });
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('feedback-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeFeedbackModal();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subscription Status Check</title>
+    <script>
+        async function checkSubscription() {
+            const email = document.getElementById('email').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/subscription-diagnostic.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    resultDiv.innerHTML = `
+                        <div style="color: green;">
+                            ${data.message}<br>
+                            User ID: ${data.user.user_id}<br>
+                            Username: ${data.user.username}<br>
+                            New Status: ${data.user.new_status}
+                        </div>
+                    `;
+                    
+                    // Refresh the page after 3 seconds to show updated status
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="color: red;">
+                            Error: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div style="color: red;">
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Check and Repair Subscription Status</h2>
+    <div>
+        <label for="email">Enter your email:</label>
+        <input type="email" id="email" required>
+        <button onclick="checkSubscription()">Check & Fix Subscription</button>
+    </div>
+    <div id="result"></div>
+</body>
+</html>

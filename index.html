@@ -1,0 +1,2420 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-G7WREYHFF7');
+</script>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Votality</title>
+        <link rel="icon" href="b2.png">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="index.css">
+
+    </head>
+    <body>
+        <nav class="desktop-top-nav">
+            <div class="desktop-top-nav__left">
+                <span id="user-fullname" class="desktop-top-nav__username">Guest</span>
+            </div>
+            <div class="desktop-top-nav__center">
+                <span id="chat-topic" class="desktop-top-nav__topic">Current Chat Topic</span>
+                        </div>
+            <div class="desktop-top-nav__right">
+                <button class="desktop-top-nav__share-button">Share</button>
+            </div>
+        </nav>
+        
+         <!-- Add top navigation for mobile -->
+     <nav class="top-nav" style="display: none;">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons">
+            <a href="signin.html" class="top-nav__button top-nav__button--signin">Sign In</a>
+            <a href="signup.html" class="top-nav__button top-nav__button--signup">Sign Up</a>
+        </div>
+    </nav>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
+            <i data-lucide="chevron-first" class="collapse-arrow h-5 w-5" data-tooltip="Collapse"></i>
+            <span class="logo-text">Votality</span>
+            <div class="sidebar-button-container">
+                <a href="index.html" class="relative flex items-center justify-center group" data-tooltip="New Thread">
+                    <i data-lucide="plus" class="h-5 w-5 text-black transition-colors group-hover:text-gray-900" style="stroke-width: 1.5"></i>
+                    <span class="absolute left-full ml-4 px-3 py-1.5 bg-[#1a1a1a] text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">New Chat</span>
+                    <span class="sidebar-text new-thread-text">New Thread</span>
+                    <span class="absolute left-full ml-1.5 w-0 h-0 border-[5px] border-transparent border-r-[#1a1a1a] translate-y-[-50%] top-[50%] opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                </a>
+            </div>
+    
+            <a href="news.v2.html" data-tooltip="News" class="sidebar__icon">
+                <i data-lucide="book-open" ></i>
+                <span class="sidebar-text">News</span>
+            </a>
+            <a href="postv2.html" data-tooltip="Posts" class="sidebar__icon">
+                <i data-lucide="users"></i>
+                <span class="sidebar-text">Posts</span>
+            </a>
+            <a href="markets.v2.html" data-tooltip="Market" class="sidebar__icon">
+                <i data-lucide="trending-up"></i>
+                <span class="sidebar-text">Markets</span>
+            </a>
+            
+            
+            <div class="toggle-sidebar sidebar-button-container" data-tooltip="Expand">
+                <i data-lucide="sidebar" class="h-5 w-5 text-gray-400"></i>
+                <span class="sidebar-text">Collapse</span>
+            </div>
+    
+            <div class="try-pro-container">
+                <div class="try-pro-title">Try Pro</div>
+                <div class="try-pro-description">Upgrade for image upload, smarter AI, and more Pro Search.</div>
+                <a href="#" class="learn-more-link">
+                    Learn More
+                    <i data-lucide="arrow-up-right" class="h-3 w-3"></i>
+                </a>
+            </div>
+            
+            <div class="account-container sidebar__account">
+                <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                <span class="sidebar-text">Account</span>
+            </div>
+        </aside>
+    
+        <div id="account-panel" class="account-panel">
+            <div class="account-panel-header">
+                <div class="user-icon">
+                    <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                </div>
+                <div class="user-info">
+                    <span id="user-email" class="user-email">user@example.com</span>
+                    <span id="user-plan" class="user-plan">Free Plan</span>
+                </div>
+            </div>
+            <div class="account-panel-content">
+                <button id="billing-btn" class="panel-button">
+                    <div class="panel-button-content">
+                        Billing
+                    </div>
+                    <i data-lucide="chevron-right" class="panel-button-arrow"></i>
+                </button>
+                <button id="appearance-btn" class="panel-button">
+                    <div class="panel-button-content">
+                        Appearance
+                    </div>
+                </button>
+                <button id="learn-more-btn" class="panel-button">
+                    <div class="panel-button-content">
+                        Learn More
+                    </div>
+                    <i data-lucide="chevron-right" class="panel-button-arrow"></i>
+                </button>
+                <button id="help-support-btn" class="panel-button">
+                    <div class="panel-button-content">
+                        Help & Support
+                    </div>
+                    <i data-lucide="chevron-right" class="panel-button-arrow"></i>
+                </button>
+                <button id="logout-btn" class="panel-button">
+                    <div class="panel-button-content">
+                        Logout
+                    </div>
+                </button>
+            </div>
+            <div class="account-panel-footer">
+                <button id="upgrade-plan-btn" class="upgrade-btn">Upgrade Plan</button>
+            </div>
+        </div>
+        
+        <main class="main-content">
+            <section class="hero">
+                <div id="initial-content">
+                    <h1 class="hero__title">Understand the Markets</h1>
+                </div>
+                <div id="textarea-container" class="textarea-container">
+                    <textarea id="query-input" class="textarea-input" placeholder="Ask Votality anything..."></textarea>
+                    <button id="submit-button" class="focus:outline-none" style="position: absolute; right: 10px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;">
+                        <div class="custom-rounded bg-gray-100 p-1.5 hover:bg-gray-200 transition-colors duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-300">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
+                        </div>
+                    </button>
+                    
+                    <button type="button" id="attachment-button" class="focus:outline-none" style="position: absolute; left: 10px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;">
+                        <div class="attachment-container" style="padding: 0.5rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>
+                        </div>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Attach Files </span>
+                            <span class="tooltip-subtext">(Max 3, 3.75MB each)</span>
+                        </div>
+                    </button>
+                    
+                    <button type="button" id="research-button" class="attachment-button focus:outline-none" style="position: absolute; left: 55px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;" data-tooltip="Add Research">
+                        <div class="attachment-container" style="display: flex; align-items: center; gap: 4px; padding: 6px 10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span class="text-gray-500 text-sm">Analyse</span>
+                        </div>
+                    </button>
+                </div>
+                <div id="chat-container" class="chat-container"></div>
+                <button id="scroll-to-bottom" class="scroll-to-bottom-button" aria-label="Scroll to bottom">
+                    <div class="custom-rounded">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                    </div>
+                </button>
+                <div id="suggested-queries" class="suggested-queries">
+                    <button class="query-chip">
+                        Market trends
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </button>
+                    <button class="query-chip">
+                        Investment strategies
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </button>
+                    <button class="query-chip">
+                        Economic indicators
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </button>
+                    <button class="query-chip">
+                        Risk analysis
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </button>
+                </div>
+            </section>
+            <div id="footer-links" class="footer-container">
+                <div class="footer-links">
+                    <a href="about.html" class="footer-link">About</a>
+                    <a href="pricing.html" class="footer-link">Pricing</a>
+                    <a href="terms.html" class="footer-link">Terms</a>
+                    <a href="privacy.html" class="footer-link">Privacy</a>
+                    <a href="contact.html" class="footer-link">Contact</a>
+                </div>
+            </div>
+            <p id="disclaimer" class="disclaimer" style="display: none;">Votality may make mistakes. Please use with discretion.</p>
+        </main>
+    </div>
+    <div id="feedback-popup" class="feedback-popup" style="display: none;">
+        Thanks for your feedback!
+    </div>
+    <div id="feedback-modal" class="feedback-modal">
+        <div class="feedback-modal-content">
+            <div class="feedback-header">
+                <h3>Tell us more:</h3>
+                <button class="close-button" onclick="closeFeedbackModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="feedback-options">
+                <button class="feedback-option">Shouldn't have used Memory</button>
+                <button class="feedback-option">Don't like the style</button>
+                <button class="feedback-option">Not factually correct</button>
+                <button class="feedback-option">Refused when it shouldn't have</button>
+            </div>
+        </div>
+    </div>
+<style>
+.tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 12px);
+    transform: translateX(-50%);
+    background-color: black;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.1s ease;
+    z-index: 50;
+    display: none;
+}
+
+.tooltip:before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: black;
+}
+
+.tooltip-text {
+    color: white;
+}
+
+.tooltip-subtext {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#attachment-button:hover .tooltip {
+    opacity: 1;
+    display: block;
+}
+
+@media (max-width: 640px) {
+    .tooltip {
+        display: none;
+    }
+}
+
+.custom-rounded {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+</style>
+    <script>
+lucide.createIcons();
+const textarea = document.getElementById('query-input');
+const submitButton = document.getElementById('submit-button');
+const initialContent = document.getElementById('initial-content');
+const suggestedQueries = document.getElementById('suggested-queries');
+const footerLinks = document.getElementById('footer-links');
+const disclaimer = document.getElementById('disclaimer');
+const textareaContainer = document.getElementById('textarea-container');
+const chatContainer = document.getElementById('chat-container');
+const attachmentButton = document.getElementById('attachment-button');
+const desktopTopNav = document.querySelector('.desktop-top-nav');
+const desktopTopNavTopic = document.querySelector('.desktop-top-nav__topic');
+const chatTopicElement = document.getElementById('chat-topic');
+
+let currentChatId = null;
+let currentChatTopic = null;
+let isUserLoggedIn = false;
+let messageCount = 0;
+let isInputLocked = false;
+let cooldownEndTime = null;
+
+const topNav = document.querySelector('.top-nav');
+const topNavButtons = topNav.querySelector('.top-nav__buttons');
+
+textarea.addEventListener('input', function() {
+    if (this.value.trim() !== '') {
+        submitButton.querySelector('div').classList.remove('bg-gray-100');
+        submitButton.querySelector('div').classList.add('bg-gray-800');
+        submitButton.querySelector('svg').classList.remove('text-gray-300');
+        submitButton.querySelector('svg').classList.add('text-white');
+    } else {
+        submitButton.querySelector('div').classList.add('bg-gray-100');
+        submitButton.querySelector('div').classList.remove('bg-gray-800');
+        submitButton.querySelector('svg').classList.add('text-gray-300');
+        submitButton.querySelector('svg').classList.remove('text-white');
+    }
+
+    // Update signin/signup buttons visibility
+    updateSignInButtonsVisibility();
+});
+
+// Add keydown event listener for Enter key handling
+textarea.addEventListener('keydown', function(e) {
+    // Check if Enter was pressed without Shift key
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault(); // Prevent new line
+        
+        const message = this.value.trim();
+        if (message && !isInputLocked) {
+            // Trigger the submit button's click event
+            submitButton.click();
+        }
+    }
+});
+
+function checkLoginStatus() {
+    fetch('check_login_status.php')
+        .then(response => response.json())
+        .then(data => {
+            isUserLoggedIn = data.isLoggedIn;
+            if (isUserLoggedIn && data.username) {
+                // Update the username display if needed
+                const userFullnameElement = document.getElementById('user-fullname');
+                if (userFullnameElement) {
+                    userFullnameElement.textContent = data.username;
+                }
+            }
+            updateSignInButtonsVisibility();
+        })
+        .catch(error => console.error('Error checking login status:', error));
+}
+
+function updateSignInButtonsVisibility() {
+    if (window.innerWidth <= 640) {
+        if (isUserLoggedIn || textarea.value.trim() !== '') {
+            topNavButtons.style.display = 'none';
+        } else {
+            topNavButtons.style.display = 'flex';
+        }
+    }
+}
+
+checkLoginStatus();
+
+document.addEventListener('DOMContentLoaded', function() {
+    const accountContainer = document.querySelector('.account-container');
+    const accountPanel = document.getElementById('account-panel');
+    const sidebar = document.querySelector('.sidebar');
+
+    accountContainer.addEventListener('click', function(event) {
+        event.stopPropagation();
+        if (accountPanel.style.display === 'none' || accountPanel.style.display === '') {
+            accountPanel.style.display = 'flex';
+            positionAccountPanel();
+        } else {
+            accountPanel.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!accountPanel.contains(event.target) && event.target !== accountContainer) {
+            accountPanel.style.display = 'none';
+        }
+    });
+
+    function positionAccountPanel() {
+        const rect = accountContainer.getBoundingClientRect();
+        const sidebarWidth = sidebar.offsetWidth;
+        accountPanel.style.bottom = `${window.innerHeight - rect.top}px`;
+        accountPanel.style.left = `${sidebarWidth}px`;
+    }
+
+    // Call positionAccountPanel on window resize
+    window.addEventListener('resize', function() {
+        if (accountPanel.style.display === 'flex') {
+            positionAccountPanel();
+        }
+    });
+
+        // Update user info
+        function updateUserInfo() {
+        fetch('get_user_info.php')
+            .then(response => response.json())
+            .then(data => {
+                if (userEmailElement) {
+                    userEmailElement.textContent = data.email;
+                }
+                if (userPlanElement) {
+                    userPlanElement.textContent = data.plan || 'Free Plan';
+                }
+            })
+            .catch(error => console.error('Error fetching user info:', error));
+    }
+
+    updateUserInfo();
+
+  // Add event listeners for panel buttons
+  document.getElementById('billing-btn').addEventListener('click', function() {
+        console.log('Billing clicked');
+        // Implement billing functionality
+    });
+
+    document.getElementById('appearance-btn').addEventListener('click', function() {
+        console.log('Appearance clicked');
+        // Implement appearance settings functionality
+    });
+
+    document.getElementById('learn-more-btn').addEventListener('click', function() {
+        console.log('Learn More clicked');
+        // Implement learn more functionality
+        });
+
+        // Theme toggle
+        const themeButtons = document.querySelectorAll('.theme-btn');
+        themeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const theme = this.getAttribute('data-theme');
+                console.log('Theme changed to:', theme);
+                // Implement theme change functionality
+            });
+        });
+
+        // Language select
+        document.getElementById('language-select').addEventListener('change', function() {
+            console.log('Language changed to:', this.value);
+            // Implement language change functionality
+        });
+
+        // Upgrade plan
+        document.getElementById('upgrade-plan-btn').addEventListener('click', function() {
+            console.log('Upgrade Plan clicked');
+            // Implement upgrade plan functionality
+        });
+    });
+        
+submitButton.addEventListener('click', async function() {
+    const message = textarea.value.trim();
+    if (message) {
+        // Hide initial content, suggested queries, and footer links
+        initialContent.classList.add('fade-out');
+        suggestedQueries.classList.add('fade-out');
+        footerLinks.classList.add('fade-out');
+        
+        // Start repositioning textarea immediately
+        textareaContainer.classList.add('repositioned');
+        
+        // Change background to white
+        document.body.classList.add('white-background');
+        
+        // After the fade-out animation
+        setTimeout(async () => {
+            initialContent.style.display = 'none';
+            suggestedQueries.style.display = 'none';
+            footerLinks.style.display = 'none';
+            
+            // Show chat container
+            chatContainer.style.display = 'block';
+            chatContainer.classList.add('fade-in');
+            
+            // Show disclaimer
+            if (window.innerWidth > 640) {
+    disclaimer.style.display = 'block';
+    setTimeout(() => {
+        disclaimer.classList.add('fade-in');
+    }, 50);
+}
+
+ // Show desktop top nav for larger screens
+ if (window.innerWidth > 640) {
+                const desktopTopNav = document.querySelector('.desktop-top-nav');
+                desktopTopNav.style.display = 'flex';
+                setTimeout(() => {
+                    desktopTopNav.classList.add('fade-in');
+                }, 50);
+            } else {
+                // Hide top navigation for mobile when chat container appears
+                const topNav = document.querySelector('.top-nav');
+                if (topNav) {
+                    topNav.style.display = 'none';
+                }
+                // Add 'chat-active' class to body for mobile-specific styling
+                document.body.classList.add('chat-active');
+            }
+            
+            // Show desktop top nav for larger screens
+            if (window.innerWidth > 640) {
+                const desktopTopNav = document.querySelector('.desktop-top-nav');
+                desktopTopNav.style.display = 'flex';
+                setTimeout(() => {
+                    desktopTopNav.classList.add('fade-in');
+                }, 50);
+            }
+
+            // Send message to AI and get response
+            await sendMessage(message);
+        }, 500);
+    }
+});
+
+
+function updateUsername() {
+    fetch('get_user_info.php')
+        .then(response => response.json())
+        .then(data => {
+            const userFullnameElement = document.getElementById('user-fullname');
+            if (userFullnameElement) {
+                userFullnameElement.textContent = data.fullname;
+            }
+        })
+        .catch(error => console.error('Error fetching user info:', error));
+}
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', updateUsername);          
+
+// Add click event listener to the share button
+document.querySelector('.desktop-top-nav__share-button').addEventListener('click', shareChatContent);
+
+function updateChatTopicDisplay(topic) {
+    if (desktopTopNavTopic) {
+        // Remove hashtags and trim whitespace
+        topic = topic.replace(/#/g, '').trim();
+        
+        // Remove "Related Topics" and everything after it
+        const relatedTopicsIndex = topic.indexOf('Related Topics');
+        if (relatedTopicsIndex !== -1) {
+            topic = topic.substring(0, relatedTopicsIndex).trim();
+        }
+        
+        // Limit the topic to a reasonable length (e.g., 50 characters)
+        if (topic.length > 20) {
+            topic = topic.substring(0, 47) + '...';
+        }
+        
+        // Clear existing content
+        desktopTopNavTopic.innerHTML = '';
+        
+        // Split the topic into words
+        const words = topic.split(' ');
+        
+        // Create a span for each word and apply the animation
+        words.forEach((word, index) => {
+            const span = document.createElement('span');
+            span.textContent = word + ' ';
+            span.style.opacity = '0';
+            span.style.animation = `fadeIn 0.5s forwards ${index * 100}ms`;
+            desktopTopNavTopic.appendChild(span);
+        });
+        
+        // Make the desktop top nav visible immediately if it's not already
+        const desktopTopNav = document.querySelector('.desktop-top-nav');
+        if (desktopTopNav && window.innerWidth > 640) {
+            desktopTopNav.style.display = 'flex';
+            desktopTopNav.classList.add('fade-in');
+        }
+    }
+    console.log("Chat topic updated:", topic);
+}
+
+async function shareChatContent() {
+    const chatContainer = document.getElementById('chat-container');
+    const chatTopic = document.getElementById('chat-topic').textContent;
+    
+    // Extract text content
+    let chatContent = '';
+    chatContainer.querySelectorAll('.message').forEach(message => {
+        chatContent += message.textContent + '\n\n';
+    });
+    
+    // Generate a unique ID for this shared content
+    const sharedId = generateUniqueId();
+    
+    try {
+        // Save the shared content to the server
+        await saveSharedContent(sharedId, chatContent, chatTopic);
+        
+        // Generate the shareable URL
+        const shareUrl = `${window.location.origin}/shared-message.html?id=${sharedId}`;
+        
+        // Use the Web Share API if available, otherwise fallback to copying to clipboard
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Shared Votality Chat',
+                text: 'Check out this Votality chat',
+                url: shareUrl
+            });
+        } else {
+            await navigator.clipboard.writeText(shareUrl);
+            alert('Shareable link copied to clipboard!');
+        }
+    } catch (error) {
+        console.error('Error sharing content:', error);
+        alert('An error occurred while sharing the content. Please try again.');
+    }
+}
+
+// Function to generate a unique ID
+function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+// Function to save shared content to the server
+async function saveSharedContent(id, content, topic) {
+    const response = await fetch('VotalityChat2.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'saveSharedContent',
+            id: id,
+            content: content,
+            topic: topic
+        }),
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (result.error) {
+        throw new Error(result.error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const collapseArrow = document.querySelector('.collapse-arrow');
+    const sidebar = document.querySelector('.sidebar');
+    
+    collapseArrow.addEventListener('click', function() {
+        sidebar.classList.remove('expanded');
+    });
+});
+
+// Add this to your existing JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const scrollButton = document.getElementById('scroll-to-bottom');
+    const chatContainer = document.querySelector('.chat-container');
+
+    if (chatContainer && scrollButton) {
+        chatContainer.addEventListener('scroll', function() {
+            // Show button if we're more than 100px from bottom
+            const isNearBottom = this.scrollHeight - this.scrollTop - this.clientHeight < 100;
+            
+            if (!isNearBottom) {
+                scrollButton.classList.add('visible');
+            } else {
+                scrollButton.classList.remove('visible');
+            }
+        });
+
+        scrollButton.addEventListener('click', function() {
+            chatContainer.scrollTo({
+                top: chatContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        });
+
+        // Also show/hide button when new messages are added
+        const observer = new MutationObserver(function() {
+            const isNearBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight < 100;
+            if (!isNearBottom) {
+                scrollButton.classList.add('visible');
+            }
+        });
+
+        observer.observe(chatContainer, {
+            childList: true,
+            subtree: true
+        });
+    }
+});
+
+// Update sendMessage function to respect stay logged out choice
+document.addEventListener('DOMContentLoaded', async () => {
+    const stayLoggedOut = sessionStorage.getItem('stayLoggedOut');
+    
+    if (!stayLoggedOut) {
+        try {
+            const response = await fetch('/check_login_status.php');
+            const data = await response.json();
+
+            if (!data.isLoggedIn && !window.location.pathname.includes('signin.html')) {
+                sessionStorage.setItem('returnUrl', window.location.href);
+                window.location.href = '/signin.html';
+                return;
+            }
+
+            if (data.isLoggedIn) {
+                isUserLoggedIn = true;
+                if (data.username) {
+                    const userFullnameElement = document.getElementById('user-fullname');
+                    if (userFullnameElement) {
+                        userFullnameElement.textContent = data.username;
+                    }
+                }
+                loadRecentChats();
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+        }
+    } else {
+        // Set the username display to "Guest" for users who chose to stay logged out
+        const userFullnameElement = document.getElementById('user-fullname');
+        if (userFullnameElement) {
+            userFullnameElement.textContent = 'Guest';
+        }
+    }
+    updateSignInButtonsVisibility();
+});
+// Function to handle staying logged out
+function handleStayLoggedOut() {
+    sessionStorage.setItem('stayLoggedOut', 'true');
+    window.location.href = 'index.html';
+}
+
+    function addRelatedTopics(relatedTopics, chatGroup) {
+    // Remove existing related topics if any
+    const existingRelated = chatGroup.querySelector('.related-container');
+    if (existingRelated) {
+        existingRelated.remove();
+    }
+
+    // Add Related heading
+    const relatedHeading = document.createElement('div');
+    relatedHeading.className = 'section-heading related-heading';
+    relatedHeading.textContent = 'Related';
+    chatGroup.appendChild(relatedHeading);
+
+    // Add related content
+    const relatedContainer = document.createElement('div');
+    relatedContainer.className = 'related-container';
+
+    relatedTopics.forEach(topic => {
+        const relatedItem = document.createElement('div');
+        relatedItem.className = 'related-item';
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'related-item-text';
+        textSpan.textContent = topic;
+
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'related-item-icon';
+        iconSpan.innerHTML = '<i data-lucide="plus"></i>';
+
+        relatedItem.appendChild(textSpan);
+        relatedItem.appendChild(iconSpan);
+        relatedContainer.appendChild(relatedItem);
+    });
+
+    chatGroup.appendChild(relatedContainer);
+
+    // Initialize Lucide icons for the new elements
+    lucide.createIcons();
+
+    console.log("Related topics added:", relatedTopics);
+}
+
+function sendRelatedTopic(topic) {
+    console.log("Sending related topic as message:", topic);
+    
+    // Clear the textarea if it has any existing content
+    textarea.value = '';
+    
+    // Set the textarea value to the clicked topic
+    textarea.value = topic;
+    
+    // Trigger the send button click event
+    submitButton.click();
+}
+
+// Add this check when the page loads
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'checkMessageLimits'
+            }),
+        });
+
+        const data = await response.json();
+        
+        if (data.error === 'cooldown') {
+            textarea.disabled = true;
+            submitButton.disabled = true;
+            startCooldownTimer(data.remainingTime);
+        }
+    } catch (error) {
+        console.error('Error checking message limits:', error);
+    }
+});
+
+// Update the sendMessage function in your JavaScript
+async function sendMessage(message, file = null) {
+    try {
+        // Do the UI transitions first
+        initialContent.classList.add('fade-out');
+        suggestedQueries.classList.add('fade-out');
+        footerLinks.classList.add('fade-out');
+        textareaContainer.classList.add('repositioned');
+        document.body.classList.add('white-background');
+
+        setTimeout(async () => {
+            initialContent.style.display = 'none';
+            suggestedQueries.style.display = 'none';
+            footerLinks.style.display = 'none';
+            chatContainer.style.display = 'block';
+            chatContainer.classList.add('fade-in');
+
+            if (window.innerWidth > 640) {
+                disclaimer.style.display = 'block';
+                setTimeout(() => {
+                    disclaimer.classList.add('fade-in');
+                }, 50);
+            }
+
+            if (window.innerWidth > 640) {
+                desktopTopNav.style.display = 'flex';
+                setTimeout(() => {
+                    desktopTopNav.classList.add('fade-in');
+                }, 50);
+            } else {
+                const topNav = document.querySelector('.top-nav');
+                if (topNav) {
+                    topNav.style.display = 'none';
+                }
+                document.body.classList.add('chat-active');
+            }
+
+            const userMessageElement = await addMessage(message, 'user');
+            textarea.value = '';
+            showAIThinking();
+
+            if (userMessageElement) {
+                userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            try {
+                // Get stayLoggedOut status from sessionStorage
+                const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
+
+                const response = await fetch('VotalityChat2.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'sendMessage',
+                        message: message,
+                        chatId: currentChatId,
+                        stayLoggedOut: stayLoggedOut, // Add this to the request
+                        file: file ? { data: await readFileAsDataURL(file), type: file.type } : null
+                    }),
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    if (data.error === 'auth_required' && !stayLoggedOut) {
+                        hideAIThinking();
+                        sessionStorage.setItem('returnUrl', window.location.href);
+                        window.location.href = '/signin.html';
+                        return;
+                    }
+
+                    if (data.error === 'auth_required' && stayLoggedOut) {
+                        // Ignore auth error if user chose to stay logged out
+                    } else {
+                        throw new Error(data.error);
+                    }
+                }
+
+                if (data.chatTopic) {
+                    updateChatTopicDisplay(data.chatTopic);
+                }
+
+                hideAIThinking();
+                await addMessage(data.response, 'ai', data.relatedTopics);
+                
+                if (!currentChatId) {
+                    currentChatId = data.chatId;
+                }
+
+                if (!stayLoggedOut) {
+                    loadRecentChats();
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                hideAIThinking();
+                await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
+            }
+        }, 500);
+    } catch (error) {
+        console.error('Error in sendMessage:', error);
+        hideAIThinking();
+        await addMessage("Error: " + error.message, 'ai');
+    }
+}
+
+// Update DOM content loaded handler
+document.addEventListener('DOMContentLoaded', async () => {
+    const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
+    
+    if (!stayLoggedOut) {
+        try {
+            const response = await fetch('/check_login_status.php');
+            const data = await response.json();
+
+            if (!data.isLoggedIn && !window.location.pathname.includes('signin.html')) {
+                sessionStorage.setItem('returnUrl', window.location.href);
+                window.location.href = '/signin.html';
+                return;
+            }
+
+            if (data.isLoggedIn) {
+                isUserLoggedIn = true;
+                const userFullnameElement = document.getElementById('user-fullname');
+                if (userFullnameElement && data.username) {
+                    userFullnameElement.textContent = data.username;
+                }
+                loadRecentChats();
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+        }
+    } else {
+        // Set the username display to "Guest" for users who chose to stay logged out
+        const userFullnameElement = document.getElementById('user-fullname');
+        if (userFullnameElement) {
+            userFullnameElement.textContent = 'Guest';
+        }
+    }
+    updateSignInButtonsVisibility();
+});
+
+function updateInputContainer(isDisabled, cooldownTime = null) {
+    const textareaContainer = document.getElementById('textarea-container');
+    const textarea = document.getElementById('query-input');
+    const submitButton = document.getElementById('submit-button');
+
+    if (isDisabled) {
+        textareaContainer.classList.add('disabled');
+        textarea.disabled = true;
+        submitButton.disabled = true;
+
+        // Create message container if it doesn't exist
+        let messageContainer = textareaContainer.querySelector('.disabled-message');
+        if (!messageContainer) {
+            messageContainer = document.createElement('div');
+            messageContainer.className = 'disabled-message';
+            textareaContainer.appendChild(messageContainer);
+        }
+
+        const isPremium = checkIfUserIsPremium(); // You'll need to implement this function
+        if (isPremium) {
+            messageContainer.innerHTML = `
+                <div class="text-center">
+                    <p class="text-gray-700 mb-2">Premium message limit reached.</p>
+                    <p class="text-gray-500 text-sm">Please wait before sending more messages.</p>
+                    <div class="cooldown-timer mt-3">
+                        ${formatCooldownTime(cooldownTime)}
+                    </div>
+                </div>
+            `;
+        } else {
+            messageContainer.innerHTML = `
+                <div class="text-center">
+                    <p class="text-gray-700 mb-2">You've reached the free message limit.</p>
+                    <p class="text-gray-500 text-sm mb-4">Upgrade to Premium to get 20 messages per hour and other benefits.</p>
+                    <a href="pricing.html" class="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors">
+                        Upgrade to Premium
+                    </a>
+                </div>
+            `;
+        }
+
+        textarea.style.display = 'none';
+    } else {
+        textareaContainer.classList.remove('disabled');
+        textarea.disabled = false;
+        submitButton.disabled = false;
+        textarea.style.display = 'block';
+        textarea.placeholder = "Ask Votality anything...";
+        
+        const messageContainer = textareaContainer.querySelector('.disabled-message');
+        if (messageContainer) {
+            messageContainer.remove();
+        }
+    }
+}
+
+function formatCooldownTime(seconds) {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return `
+        <div class="font-semibold text-gray-700">
+            Time remaining: ${hours}h ${minutes}m
+        </div>
+    `;
+}
+
+// Update the cooldown timer function
+function startCooldownTimer() {
+    if (cooldownEndTime) {
+        const timerInterval = setInterval(() => {
+            const remainingTime = cooldownEndTime - Date.now();
+            
+            if (remainingTime <= 0) {
+                clearInterval(timerInterval);
+                updateInputContainer(false);
+            } else {
+                updateInputContainer(true, Math.floor(remainingTime / 1000));
+            }
+        }, 1000);
+    }
+}
+
+// Add this to your main JavaScript file
+function initializeAccountPanel() {
+    const accountPanel = document.getElementById('account-panel');
+    const userEmailElement = document.getElementById('user-email');
+    const userPlanElement = document.getElementById('user-plan');
+    const upgradeButton = accountPanel.querySelector('.account-panel-footer');
+    const logoutButton = accountPanel.querySelector('.panel-button-content:last-child');
+
+    // Load account info
+    fetch('/account_handler.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'action=get_account_info'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error(data.error);
+            return;
+        }
+        userEmailElement.textContent = data.email;
+        userPlanElement.textContent = data.planDisplay;
+    })
+    .catch(error => console.error('Error:', error));
+
+    // Handle logout
+    logoutButton.addEventListener('click', () => {
+        fetch('/account_handler.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'action=logout'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect;
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    // Handle upgrade plan
+    upgradeButton.addEventListener('click', () => {
+        window.location.href = 'pricing.html';
+    });
+}
+
+// Call this when the page loads
+document.addEventListener('DOMContentLoaded', initializeAccountPanel);
+
+// Helper function to create file source element
+function createFileSource(file) {
+    const fileSource = document.createElement('div');
+    fileSource.style.display = 'flex';
+    fileSource.style.alignItems = 'center';
+    fileSource.style.backgroundColor = '#f3f4f6';
+    fileSource.style.borderRadius = '8px';
+    fileSource.style.padding = '8px 12px';
+    fileSource.style.width = '200px';
+    fileSource.style.flexShrink = '0';
+    fileSource.style.cursor = 'pointer';
+    fileSource.style.transition = 'background-color 0.2s ease';
+    fileSource.style.position = 'relative';
+
+    fileSource.addEventListener('mouseover', () => {
+        fileSource.style.backgroundColor = '#e5e7eb';
+    });
+    fileSource.addEventListener('mouseout', () => {
+        fileSource.style.backgroundColor = '#f3f4f6';
+    });
+
+    const fileIcon = document.createElement('div');
+    fileIcon.style.width = '24px';
+    fileIcon.style.height = '24px';
+    fileIcon.style.flexShrink = '0';
+    fileIcon.style.marginRight = '4px';
+    fileIcon.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5 text-gray-600">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>
+    `;
+
+    const fileName = document.createElement('span');
+    fileName.style.fontSize = '0.875rem';
+    fileName.style.color = '#374151';
+    fileName.style.whiteSpace = 'nowrap';
+    fileName.style.overflow = 'hidden';
+    fileName.style.textOverflow = 'ellipsis';
+    fileName.style.flex = '1';
+    fileName.style.marginLeft = '2px';
+    fileName.style.paddingRight = '8px';
+    fileName.style.textAlign = 'left';
+    fileName.textContent = file.name;
+
+    fileSource.appendChild(fileIcon);
+    fileSource.appendChild(fileName);
+    return fileSource;
+}
+
+// Helper function to create source item element
+function createSourceItem(source) {
+    const sourceItem = document.createElement('div');
+    sourceItem.style.display = 'flex';
+    sourceItem.style.alignItems = 'center';
+    sourceItem.style.backgroundColor = '#f3f4f6';
+    sourceItem.style.borderRadius = '8px';
+    sourceItem.style.padding = '8px 12px';
+    sourceItem.style.width = '200px';
+    sourceItem.style.flexShrink = '0';
+    sourceItem.style.cursor = 'pointer';
+    sourceItem.style.transition = 'background-color 0.2s ease';
+    sourceItem.style.position = 'relative';
+
+    sourceItem.addEventListener('mouseover', () => {
+        sourceItem.style.backgroundColor = '#e5e7eb';
+    });
+    sourceItem.addEventListener('mouseout', () => {
+        sourceItem.style.backgroundColor = '#f3f4f6';
+    });
+
+    const imageContainer = document.createElement('div');
+    imageContainer.style.width = '24px';
+    imageContainer.style.height = '24px';
+    imageContainer.style.flexShrink = '0';
+    imageContainer.style.marginLeft = '-8px';
+    imageContainer.style.marginRight = '8px';
+    imageContainer.style.display = 'flex';
+    imageContainer.style.alignItems = 'center';
+    
+    const sourceImg = document.createElement('img');
+    sourceImg.src = source.image;
+    sourceImg.alt = source.name;
+    sourceImg.style.width = '44px';
+    sourceImg.style.height = '44px';
+    sourceImg.style.borderRadius = '4px';
+    sourceImg.style.objectFit = 'cover';
+    
+    const sourceName = document.createElement('span');
+    sourceName.style.fontSize = '0.875rem';
+    sourceName.style.color = '#374151';
+    sourceName.style.whiteSpace = 'nowrap';
+    sourceName.style.overflow = 'hidden';
+    sourceName.style.textOverflow = 'ellipsis';
+    sourceName.style.flex = '1';
+    sourceName.style.marginLeft = source.name === 'Alpha Vantage' ? '-60px' : '-98px';
+    sourceName.textContent = source.name;
+
+    imageContainer.appendChild(sourceImg);
+    sourceItem.appendChild(imageContainer);
+    sourceItem.appendChild(sourceName);
+    return sourceItem;
+}
+
+function initializeAccountFunctionality() {
+    const accountPanel = document.getElementById('account-panel');
+    
+    // Learn More button
+    document.getElementById('learn-more-btn').addEventListener('click', () => {
+        window.location.href = 'about.html';
+    });
+
+    // Help & Support button
+    document.getElementById('help-support-btn').addEventListener('click', () => {
+        window.location.href = 'contact.html';
+    });
+
+    // Logout button
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('account_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=logout'
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = 'signin.html';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    });
+
+    // Upgrade Plan button
+    const upgradeButton = document.querySelector('#upgrade-plan-btn');
+    if (upgradeButton) {
+        upgradeButton.addEventListener('click', () => {
+            window.location.href = 'pricing.html';
+        });
+    }
+}
+
+// Initialize account functionality when the document loads
+document.addEventListener('DOMContentLoaded', initializeAccountFunctionality);
+
+function generateHeading(paragraph) {
+    // Try to extract explicit heading from [Heading]: format
+    const headingMatch = paragraph.match(/^\[([^\]]+)\]:/);
+    if (headingMatch) {
+        return headingMatch[1].trim();
+    }
+
+    // Define content analysis patterns and their corresponding headings
+    const contentPatterns = [
+        {
+            patterns: ['market cap', 'valuation', 'worth', 'valued at', 'billion', 'million'],
+            heading: 'Market Valuation'
+        },
+        {
+            patterns: ['stock price', 'shares', 'trading at', 'stock market', 'equity'],
+            heading: 'Stock Performance'
+        },
+        {
+            patterns: ['revenue', 'earnings', 'profit', 'income', 'financial results'],
+            heading: 'Financial Results'
+        },
+        {
+            patterns: ['forecast', 'predict', 'expect', 'outlook', 'future'],
+            heading: 'Future Outlook'
+        },
+        {
+            patterns: ['risk', 'challenge', 'concern', 'warning', 'caution'],
+            heading: 'Risk Assessment'
+        },
+        {
+            patterns: ['opportunity', 'potential', 'growth', 'expand', 'development'],
+            heading: 'Growth Opportunities'
+        },
+        {
+            patterns: ['industry', 'sector', 'market segment', 'competition'],
+            heading: 'Industry Analysis'
+        },
+        {
+            patterns: ['technolog', 'innovation', 'develop', 'research'],
+            heading: 'Technology & Innovation'
+        },
+        {
+            patterns: ['management', 'executive', 'leadership', 'strategy'],
+            heading: 'Management Strategy'
+        },
+        {
+            patterns: ['acquisition', 'merger', 'partnership', 'deal'],
+            heading: 'Corporate Development'
+        },
+        {
+            patterns: ['regulation', 'law', 'compliance', 'legal'],
+            heading: 'Regulatory Impact'
+        },
+        {
+            patterns: ['global', 'international', 'worldwide', 'region'],
+            heading: 'Global Perspective'
+        },
+        {
+            patterns: ['trend', 'pattern', 'movement', 'direction'],
+            heading: 'Market Trends'
+        },
+        {
+            patterns: ['compare', 'versus', 'competition', 'competitor'],
+            heading: 'Competitive Analysis'
+        },
+        {
+            patterns: ['economic', 'economy', 'gdp', 'inflation'],
+            heading: 'Economic Context'
+        },
+        {
+            patterns: ['invest', 'portfolio', 'asset', 'allocation'],
+            heading: 'Investment Analysis'
+        },
+        {
+            patterns: ['dividend', 'yield', 'payout', 'distribution'],
+            heading: 'Dividend Analysis'
+        },
+        {
+            patterns: ['trade', 'volume', 'liquidity', 'exchange'],
+            heading: 'Trading Activity'
+        },
+        {
+            patterns: ['policy', 'government', 'fed', 'central bank'],
+            heading: 'Policy Impact'
+        },
+        {
+            patterns: ['summary', 'conclude', 'overall', 'takeaway'],
+            heading: 'Key Takeaways'
+        }
+    ];
+
+    // Convert paragraph to lowercase for pattern matching
+    const lowerParagraph = paragraph.toLowerCase();
+
+    // Check for pattern matches
+    for (const {patterns, heading} of contentPatterns) {
+        if (patterns.some(pattern => lowerParagraph.includes(pattern))) {
+            return heading;
+        }
+    }
+
+    // Analyze paragraph structure for special cases
+    if (paragraph.includes('%') && /\d+(\.\d+)?%/.test(paragraph)) {
+        return 'Statistical Analysis';
+    }
+    if (/\$\d+|\d+ dollars/i.test(paragraph)) {
+        return 'Financial Metrics';
+    }
+    if (paragraph.split('.').length > 3) {
+        return 'Detailed Analysis';
+    }
+    if (paragraph.length < 100) {
+        return 'Quick Overview';
+    }
+
+    // Contextual analysis for time references
+    if (/yesterday|today|tomorrow|week|month|year|quarter/i.test(paragraph)) {
+        return 'Temporal Analysis';
+    }
+
+    // Default headings for opening and closing paragraphs
+    if (paragraph === firstParagraphInMessage) {
+        return 'Market Overview';
+    }
+    if (paragraph === lastParagraphInMessage) {
+        return 'Concluding Analysis';
+    }
+
+    // Fallback heading
+    return 'Market Analysis';
+}
+
+
+function showAIThinking() {
+    const chatContainer = document.querySelector('.chat-container');
+    const lastChatGroup = chatContainer.lastElementChild;
+    
+    // Sources heading (visible)
+    const sourcesHeading = document.createElement('div');
+    sourcesHeading.className = 'section-heading sources-heading';
+    sourcesHeading.textContent = 'Sources';
+    lastChatGroup.appendChild(sourcesHeading);
+    
+    // Single sources container skeleton
+    const sourcesContainerSkeleton = document.createElement('div');
+    sourcesContainerSkeleton.className = 'sources-container skeleton-sources-container';
+    sourcesContainerSkeleton.style.cssText = `
+        display: flex;
+        margin-bottom: 16px;
+        padding: 0 16px;
+        margin-right: 0px;
+    `;
+    
+    // Create single source chip skeleton with overlapping circles
+    const sourceChipSkeleton = document.createElement('div');
+    sourceChipSkeleton.className = 'flex items-center bg-gray-100 rounded-xl p-2 animate-pulse';
+    sourceChipSkeleton.style.width = '192px';
+    
+    const circlesContainer = document.createElement('div');
+    circlesContainer.className = 'flex space-x-1';
+    
+    // Create five overlapping circles
+    for (let i = 0; i < 5; i++) {
+        const circle = document.createElement('div');
+        circle.className = 'w-8 h-8 bg-gray-200 rounded-full';
+        circle.style.marginRight = i < 4 ? '-16px' : '0'; // Apply margin to all except last circle
+        circlesContainer.appendChild(circle);
+    }
+    
+    sourceChipSkeleton.appendChild(circlesContainer);
+    sourcesContainerSkeleton.appendChild(sourceChipSkeleton);
+    lastChatGroup.appendChild(sourcesContainerSkeleton);
+    
+    // Answer heading (visible)
+    const answerHeading = document.createElement('div');
+    answerHeading.className = 'section-heading answer-heading';
+    answerHeading.textContent = 'Answer';
+    lastChatGroup.appendChild(answerHeading);
+    
+    // AI message skeleton
+    const skeletonLoader = document.createElement('div');
+    skeletonLoader.className = 'skeleton-loader';
+    
+    for (let i = 0; i < 4; i++) {
+        const skeletonLine = document.createElement('div');
+        skeletonLine.className = 'skeleton-line';
+        skeletonLine.style.width = `${100 - i * 5}%`;
+        skeletonLine.style.height = '16px';
+        skeletonLine.style.marginBottom = '8px';
+        skeletonLoader.appendChild(skeletonLine);
+    }
+    
+    lastChatGroup.appendChild(skeletonLoader);
+
+    // Related heading (visible)
+    const relatedHeading = document.createElement('div');
+    relatedHeading.className = 'section-heading related-heading';
+    relatedHeading.textContent = 'Related';
+    lastChatGroup.appendChild(relatedHeading);
+
+    // Related skeleton
+    const relatedSkeleton = document.createElement('div');
+    relatedSkeleton.className = 'skeleton-loader related-skeleton';
+
+    for (let i = 0; i < 5; i++) {
+        const relatedLine = document.createElement('div');
+        relatedLine.className = 'skeleton-line';
+        relatedLine.style.width = '100%';
+        relatedLine.style.height = '16px';
+        relatedLine.style.marginBottom = '8px';
+        relatedSkeleton.appendChild(relatedLine);
+    }
+
+    lastChatGroup.appendChild(relatedSkeleton);
+    
+    // Scroll to the last chat group (user's message)
+    lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function hideAIThinking() {
+    const chatContainer = document.querySelector('.chat-container');
+    const lastChatGroup = chatContainer.lastElementChild;
+
+    // Remove sources heading
+    const sourcesHeading = lastChatGroup.querySelector('.sources-heading');
+    if (sourcesHeading) {
+        sourcesHeading.remove();
+    }
+
+    // Remove sources container skeleton
+    const sourcesContainerSkeleton = lastChatGroup.querySelector('.skeleton-sources-container');
+    if (sourcesContainerSkeleton) {
+        sourcesContainerSkeleton.remove();
+    }
+
+    // Remove answer heading
+    const answerHeading = lastChatGroup.querySelector('.answer-heading');
+    if (answerHeading) {
+        answerHeading.remove();
+    }
+
+    // Remove skeleton loader
+    const skeletonLoader = lastChatGroup.querySelector('.skeleton-loader');
+    if (skeletonLoader) {
+        skeletonLoader.remove();
+    }
+
+    // Remove related heading
+    const relatedHeading = lastChatGroup.querySelector('.related-heading');
+    if (relatedHeading) {
+        relatedHeading.remove();
+    }
+
+    // Remove related skeleton
+    const relatedSkeleton = lastChatGroup.querySelector('.related-skeleton');
+    if (relatedSkeleton) {
+        relatedSkeleton.remove();
+    }
+}
+
+
+function toggleMobileNav() {
+    const bottomNav = document.querySelector('.bottom-nav');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+   
+    if (window.innerWidth <= 640) {
+        topNav.style.display = 'flex';
+        bottomNav.style.display = 'flex';
+        sidebar.style.display = 'none';
+        desktopTopNav.style.display = 'none';
+        mainContent.style.paddingTop = '60px';
+        mainContent.style.paddingBottom = '60px';
+
+        // Update signin/signup buttons visibility
+        updateSignInButtonsVisibility();
+    } else {
+        topNav.style.display = 'none';
+        bottomNav.style.display = 'flex';
+        sidebar.style.display = 'flex';
+        // Only show desktop top nav if it's already visible (after submit)
+        if (desktopTopNav.classList.contains('fade-in')) {
+            desktopTopNav.style.display = 'flex';
+        }
+        mainContent.style.paddingTop = '0';
+        mainContent.style.paddingBottom = '0';
+    }
+}
+
+// Add event listener for window resize
+window.addEventListener('resize', toggleMobileNav);
+
+
+// New functions for AI integration
+
+async function loadRecentChats() {
+    try {
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'getRecentChats'
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('Error fetching chats:', data.error);
+            return;
+        }
+
+        // Update UI with recent chats (you'll need to implement this part)
+        updateRecentChatsUI(data.chats);
+    } catch (error) {
+        console.error('Error loading recent chats:', error);
+    }
+}
+
+function updateRecentChatsUI(chats) {
+    // Implement this function to update your UI with recent chats
+    // This will depend on how you want to display recent chats in your design
+    console.log('Recent chats:', chats);
+}
+
+async function createNewChat() {
+    try {
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'createNewChat'
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        currentChatId = data.chatId;
+        chatContainer.innerHTML = '';
+        resetUI();
+        loadRecentChats();
+
+        return currentChatId;
+    } catch (error) {
+        console.error('Error creating new chat:', error);
+        throw error;
+    }
+}
+
+function resetUI() {
+    // Reset UI elements to initial state
+    initialContent.style.display = 'block';
+    suggestedQueries.style.display = 'flex';
+    footerLinks.style.display = 'block';
+    chatContainer.style.display = 'none';
+    if (window.innerWidth > 640) {
+    disclaimer.style.display = 'none';
+} else {
+    disclaimer.style.display = 'none !important';
+}    
+    initialContent.classList.remove('fade-out');
+    suggestedQueries.classList.remove('fade-out');
+    footerLinks.classList.remove('fade-out');
+    chatContainer.classList.remove('fade-in');
+    disclaimer.classList.remove('fade-in');
+    
+    textareaContainer.classList.remove('repositioned');
+    document.body.classList.remove('white-background');
+    
+    textarea.value = '';
+    
+    if (desktopTopNav) {
+        desktopTopNav.style.display = 'none';
+        desktopTopNav.classList.remove('fade-in');
+    }
+    
+    // Reset chat topic
+    currentChatTopic = null;
+    updateChatTopicDisplay('Current Chat Topic');
+}
+
+function handleAttachment() {
+    // Implement file attachment logic here
+    console.log('Attachment button clicked');
+    // You can add file input and handling logic here
+}
+
+async function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// Event listener for attachment button
+attachmentButton.addEventListener('click', handleAttachment);
+
+// Event listener for suggested queries
+suggestedQueries.querySelectorAll('.query-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+        const query = this.textContent.trim();
+        textarea.value = query;
+        submitButton.click();
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadRecentChats();
+    // Add any other initialization code here
+});   
+
+// Global variable to store attached files
+let attachedFiles = [];
+
+// Create hidden file input
+const fileInput = document.createElement('input');
+fileInput.type = 'file';
+fileInput.multiple = true;
+fileInput.accept = 'image/*,.pdf,.doc,.docx';
+fileInput.style.display = 'none';
+document.body.appendChild(fileInput);
+
+// Handle attachment button click
+attachmentButton.addEventListener('click', function() {
+    if (attachedFiles.length > 0) {
+        // Show file panel if files are attached
+        toggleFilePanel();
+    } else {
+        // Trigger file selection if no files attached
+        fileInput.click();
+    }
+});
+
+// Handle file selection
+fileInput.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    
+    // Check if adding new files would exceed the limit
+    const totalFiles = attachedFiles.length + files.length;
+    if (totalFiles > 3) {
+        alert('Maximum 3 files allowed');
+        return;
+    }
+    
+    // Check file size limits
+    const validFiles = files.filter(file => {
+        const maxSize = 3.75 * 1024 * 1024; // 3.75MB in bytes
+        return file.size <= maxSize;
+    });
+
+    if (validFiles.length > 0) {
+        // Add new files to existing ones
+        attachedFiles = [...attachedFiles, ...validFiles];
+        updateAttachmentButtonUI();
+        createFilePanel();
+        
+        // Show the panel after creating it
+        const panel = document.querySelector('.file-panel');
+        if (panel) {
+            panel.style.display = 'block';
+        }
+    }
+    
+    // Reset file input
+    fileInput.value = '';
+});
+
+// Update attachment button UI
+function updateAttachmentButtonUI() {
+    const attachmentContainer = attachmentButton.querySelector('.attachment-container');
+    
+    attachmentContainer.innerHTML = attachedFiles.length > 0 
+        ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+           </svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+           </svg>`;
+}
+
+function createFilePanel() {
+    const existingPanel = document.querySelector('.file-panel');
+    if (existingPanel) {
+        existingPanel.remove();
+    }
+
+    const panel = document.createElement('div');
+    panel.className = 'file-panel';
+    panel.style.display = 'none';
+
+    const header = document.createElement('div');
+    header.className = 'file-panel-header';
+    
+    const title = document.createElement('div');
+    title.className = 'header-title';
+    title.textContent = 'Attached Files';
+
+    const actions = document.createElement('div');
+    actions.className = 'header-actions';
+
+    const addButton = document.createElement('button');
+    addButton.className = 'header-button';
+    addButton.disabled = attachedFiles.length >= 3;
+    addButton.style.opacity = attachedFiles.length >= 3 ? '0.5' : '1';
+    addButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Add</span>
+    `;
+    addButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (attachedFiles.length < 3) {
+            fileInput.click();
+        }
+    });
+
+    const clearButton = document.createElement('button');
+    clearButton.className = 'header-button';
+    clearButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        <span>Clear</span>
+    `;
+    clearButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        attachedFiles = [];
+        panel.remove();
+        updateAttachmentButtonUI();
+    });
+
+    actions.appendChild(addButton);
+    actions.appendChild(clearButton);
+    header.appendChild(title);
+    header.appendChild(actions);
+    panel.appendChild(header);
+
+    const filesContainer = document.createElement('div');
+    filesContainer.className = 'files-container';
+
+    attachedFiles.forEach((file) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        
+        fileItem.innerHTML = `
+            <div class="file-info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                <span>${file.name}</span>
+            </div>`;
+            
+        filesContainer.appendChild(fileItem);
+    });
+
+    panel.appendChild(filesContainer);
+    document.body.appendChild(panel);
+    positionFilePanel();
+}
+
+function positionFilePanel() {
+    const panel = document.querySelector('.file-panel');
+    if (panel) {
+        const buttonRect = attachmentButton.getBoundingClientRect();
+        panel.style.position = 'absolute';
+        panel.style.left = `${buttonRect.left}px`;
+        panel.style.bottom = `${window.innerHeight - buttonRect.top + 10}px`;
+    }
+}
+
+function toggleFilePanel() {
+    const panel = document.querySelector('.file-panel');
+    if (panel) {
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButton = document.querySelector('.toggle-sidebar');
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+    const desktopTopNav = document.querySelector('.desktop-top-nav');
+    const desktopTopNavLeft = document.querySelector('.desktop-top-nav__left');
+    
+    toggleButton.addEventListener('click', function() {
+        sidebar.classList.toggle('expanded');
+        
+        // Update tooltip text based on sidebar state
+        const isExpanded = sidebar.classList.contains('expanded');
+        toggleButton.setAttribute('data-tooltip', isExpanded ? 'Collapse' : 'Expand');
+        
+        // Update the desktop top nav left margin
+        if (desktopTopNavLeft) {
+            if (isExpanded) {
+                desktopTopNavLeft.style.marginLeft = '14rem'; // Width for expanded sidebar
+            } else {
+                desktopTopNavLeft.style.marginLeft = '0';
+            }
+            // Add transition for smooth movement
+            desktopTopNavLeft.style.transition = 'margin-left 0.3s ease';
+        }
+        
+        // Rotate the sidebar icon when expanded
+        const sidebarIcon = toggleButton.querySelector('[data-lucide="sidebar"]');
+        if (sidebarIcon) {
+            sidebarIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+            sidebarIcon.style.transition = 'transform 0.3s ease';
+        }
+    });
+    
+    // Close sidebar on clicking outside
+    document.addEventListener('click', function(e) {
+        if (!sidebar.contains(e.target) && 
+            !toggleButton.contains(e.target) && 
+            sidebar.classList.contains('expanded')) {
+            sidebar.classList.remove('expanded');
+            desktopTopNavLeft.style.marginLeft = '0';
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768 && sidebar.classList.contains('expanded')) {
+            sidebar.classList.remove('expanded');
+            if (desktopTopNavLeft) {
+                desktopTopNavLeft.style.marginLeft = '0';
+            }
+        }
+    });
+});
+
+function addEditControls(messageElement) {
+    // Create edit controls container
+    const editControls = document.createElement('div');
+    editControls.className = 'message-edit-controls';
+    
+// Create edit button
+const editButton = document.createElement('button');
+editButton.className = 'edit-button';
+editButton.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    </svg>
+    Edit
+`;
+    
+    // Create submit and cancel buttons (initially hidden)
+    const submitButton = document.createElement('button');
+    submitButton.className = 'submit-edit-button';
+    submitButton.style.display = 'none';
+    submitButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Save
+    `;
+    
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'cancel-edit-button';
+    cancelButton.style.display = 'none';
+    cancelButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        Cancel
+    `;
+    
+    // Add event listeners
+    editButton.addEventListener('click', () => startEditing(messageElement));
+    submitButton.addEventListener('click', () => submitEdit(messageElement));
+    cancelButton.addEventListener('click', () => cancelEdit(messageElement));
+    
+    // Add buttons to controls in the new order: Save first, then Cancel
+    editControls.appendChild(editButton);
+    editControls.appendChild(cancelButton);  // Move Cancel before Submit
+    editControls.appendChild(submitButton);  // Move Submit after Cancel
+    
+    // Add controls to message
+    messageElement.appendChild(editControls);
+}
+
+function startEditing(messageElement) {
+    const originalText = messageElement.childNodes[0].textContent;
+    messageElement.classList.add('editing');
+    
+    // Create textarea
+    const textarea = document.createElement('textarea');
+    textarea.className = 'message-edit-input';
+    textarea.value = originalText;
+    
+    // Store original text for cancellation
+    textarea.dataset.originalText = originalText;
+    
+    // Replace text with textarea
+    messageElement.replaceChild(textarea, messageElement.childNodes[0]);
+    textarea.focus();
+    
+    // Show/hide appropriate buttons
+    const controls = messageElement.querySelector('.message-edit-controls');
+    controls.querySelector('.edit-button').style.display = 'none';
+    controls.querySelector('.submit-edit-button').style.display = 'flex';
+    controls.querySelector('.cancel-edit-button').style.display = 'flex';
+}
+
+function submitEdit(messageElement) {
+    const textarea = messageElement.querySelector('.message-edit-input');
+    const newText = textarea.value;
+    
+    // Create new text node
+    const textNode = document.createTextNode(newText);
+    messageElement.replaceChild(textNode, textarea);
+    
+    // Reset UI
+    finishEditing(messageElement);
+    
+    // Resend the edited message to get new AI response
+    sendMessage(newText);
+}
+
+function cancelEdit(messageElement) {
+    const textarea = messageElement.querySelector('.message-edit-input');
+    const originalText = textarea.dataset.originalText;
+    
+    // Restore original text
+    const textNode = document.createTextNode(originalText);
+    messageElement.replaceChild(textNode, textarea);
+    
+    // Reset UI
+    finishEditing(messageElement);
+}
+
+function finishEditing(messageElement) {
+    messageElement.classList.remove('editing');
+    
+    // Reset buttons
+    const controls = messageElement.querySelector('.message-edit-controls');
+    controls.querySelector('.edit-button').style.display = 'flex';
+    controls.querySelector('.submit-edit-button').style.display = 'none';
+    controls.querySelector('.cancel-edit-button').style.display = 'none';
+}
+
+function addMessage(text, sender, relatedTopics = []) {
+    return new Promise((resolve) => {
+        const chatContainer = document.querySelector('.chat-container');
+        let messageElement;
+        
+        if (sender === 'user') {
+            const chatGroup = document.createElement('div');
+            chatGroup.className = 'chat-group';
+            
+            messageElement = document.createElement('div');
+            messageElement.className = 'message user-message';
+            messageElement.textContent = text;
+            
+            chatGroup.appendChild(messageElement);
+            chatContainer.appendChild(chatGroup);
+            
+            // Add edit controls for user messages
+            addEditControls(messageElement);
+            
+            resolve(messageElement);
+        } else {
+            const lastChatGroup = chatContainer.lastElementChild;
+            
+            // Add Sources heading
+            const sourcesHeading = document.createElement('div');
+            sourcesHeading.className = 'section-heading sources-heading';
+            sourcesHeading.textContent = 'Sources';
+            lastChatGroup.appendChild(sourcesHeading);
+
+            // Add sources container
+            const sourcesContainer = document.createElement('div');
+            sourcesContainer.className = 'sources-container';
+            sourcesContainer.style.display = 'flex';
+            sourcesContainer.style.flexWrap = 'wrap';
+            sourcesContainer.style.gap = '12px';
+            sourcesContainer.style.padding = '8px 16px';
+            
+            if (attachedFiles && attachedFiles.length > 0) {
+                // Display attached files as sources
+                attachedFiles.forEach(file => {
+                    const fileSource = createFileSource(file);
+                    sourcesContainer.appendChild(fileSource);
+                });
+            } else {
+                // Default source display with images
+                const sourceData = [
+                    { image: 'bus2.png', name: 'Nasdaq' },
+                    { image: 'bus1.png', name: 'Alpha Vantage' },
+                    { image: 'bus3.png', name: 'Bezinga' }
+                ];
+
+                sourceData.forEach(source => {
+                    const sourceItem = createSourceItem(source);
+                    sourcesContainer.appendChild(sourceItem);
+                });
+            }
+            
+            lastChatGroup.appendChild(sourcesContainer);
+            
+            // Add Answer heading
+            const answerHeading = document.createElement('div');
+            answerHeading.className = 'section-heading answer-heading';
+            answerHeading.textContent = 'Answer';
+            lastChatGroup.appendChild(answerHeading);
+
+            messageElement = document.createElement('div');
+            messageElement.className = 'message ai-message';
+            
+            // Add message content with animation
+            const messageContent = document.createElement('div');
+            messageContent.className = 'ai-message-content';
+            
+            const paragraphs = text.split('\n\n');
+            let delay = 0;
+
+            paragraphs.forEach((paragraph, index) => {
+                if (paragraph.trim() !== '') {
+                    const paragraphContainer = document.createElement('div');
+                    paragraphContainer.className = 'ai-message-paragraph-container';
+
+                    const pElement = document.createElement('p');
+                    pElement.className = 'ai-message-paragraph';
+                    
+                    const words = paragraph.split(' ');
+                    words.forEach((word, wordIndex) => {
+                        const span = document.createElement('span');
+                        span.textContent = word + ' ';
+                        span.style.opacity = '0';
+                        span.style.animation = `fadeIn 0.2s forwards ${delay}ms`;
+                        pElement.appendChild(span);
+                        delay += 10;
+                    });
+                    
+                    paragraphContainer.appendChild(pElement);
+                    messageContent.appendChild(paragraphContainer);
+                    delay += 100;
+                }
+            });
+            
+            messageElement.appendChild(messageContent);
+
+            // Add interaction buttons
+            const interactions = document.createElement('div');
+            interactions.className = 'message-interactions';
+            interactions.innerHTML = `
+                <div class="message-feedback">
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Like message">
+                            <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Like</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Dislike message">
+                            <i data-lucide="thumbs-down" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Dislike</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-actions">
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Copy message">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Copy</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Retry message">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Retry</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add interaction handlers
+            const likeButton = interactions.querySelector('[aria-label="Like message"]');
+            const dislikeButton = interactions.querySelector('[aria-label="Dislike message"]');
+
+            likeButton.addEventListener('click', () => {
+                likeButton.style.color = '#059669';
+                dislikeButton.style.color = '';
+                handleLike(messageElement);
+            });
+
+            dislikeButton.addEventListener('click', () => {
+                dislikeButton.style.color = '#DC2626';
+                likeButton.style.color = '';
+                handleDislike(messageElement);
+            });
+
+            const copyButton = interactions.querySelector('[aria-label="Copy message"]');
+            copyButton.addEventListener('click', () => {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        copyButton.style.color = '#059669';
+                        setTimeout(() => {
+                            copyButton.style.color = '';
+                        }, 1000);
+                    })
+                    .catch(console.error);
+            });
+
+            const retryButton = interactions.querySelector('[aria-label="Retry message"]');
+            retryButton.addEventListener('click', () => {
+                const lastUserMessage = chatContainer.querySelector('.user-message:last-of-type');
+                if (lastUserMessage) {
+                    const messageText = lastUserMessage.textContent;
+                    sendMessage(messageText);
+                }
+            });
+
+            messageElement.appendChild(interactions);
+            lastChatGroup.appendChild(messageElement);
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            setTimeout(() => {
+                if (relatedTopics.length > 0) {
+                    const relatedHeading = document.createElement('div');
+                    relatedHeading.className = 'section-heading related-heading';
+                    relatedHeading.textContent = 'Related';
+                    lastChatGroup.appendChild(relatedHeading);
+
+                    const relatedContainer = document.createElement('div');
+                    relatedContainer.className = 'related-container';
+
+                    relatedTopics.forEach(topic => {
+                        const relatedItem = document.createElement('div');
+                        relatedItem.className = 'related-item';
+
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'related-item-text';
+                        textSpan.textContent = topic;
+
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = 'related-item-icon';
+                        iconSpan.innerHTML = '<i data-lucide="plus"></i>';
+
+                        relatedItem.appendChild(textSpan);
+                        relatedItem.appendChild(iconSpan);
+                        relatedContainer.appendChild(relatedItem);
+
+                        relatedItem.addEventListener('click', () => sendRelatedTopic(topic));
+                    });
+
+                    lastChatGroup.appendChild(relatedContainer);
+                    lucide.createIcons();
+                }
+                resolve(messageElement);
+            }, delay + 100);
+        }
+    });
+}
+
+function addMessageInteractions(messageElement, sender) {
+    if (sender === 'ai') {
+        const interactions = document.createElement('div');
+        interactions.className = 'message-interactions';
+        interactions.innerHTML = `
+            <div class="message-feedback">
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Like message">
+                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Like</span>
+                    </div>
+                </div>
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Dislike message">
+                        <i data-lucide="thumbs-down" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Dislike</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-actions">
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Copy message">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Copy</span>
+                    </div>
+                </div>
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Retry message">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Retry</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add event listeners
+        const likeButton = interactions.querySelector('[aria-label="Like message"]');
+        const dislikeButton = interactions.querySelector('[aria-label="Dislike message"]');
+        const copyButton = interactions.querySelector('[aria-label="Copy message"]');
+        const retryButton = interactions.querySelector('[aria-label="Retry message"]');
+
+        likeButton.addEventListener('click', () => {
+            const icon = likeButton.querySelector('i');
+            icon.style.fill = 'currentColor';
+            icon.style.color = '#000000';
+            dislikeButton.querySelector('i').removeAttribute('style');
+            handleLike(messageElement);
+        });
+
+        dislikeButton.addEventListener('click', () => {
+            createFeedbackForm();
+            showFeedbackForm();
+            handleDislike(messageElement);
+        });
+
+        copyButton.addEventListener('click', () => handleCopy(messageElement));
+        retryButton.addEventListener('click', () => handleRetry(messageElement));
+
+        messageElement.appendChild(interactions);
+        
+        // Initialize Lucide icons for the new elements
+        lucide.createIcons(interactions);
+    }
+}
+
+
+function handleLike(messageElement) {
+    console.log('Message liked');
+    showFeedbackPopup(); // Call the function to show the feedback popup
+    // Implement any additional like functionality here, if needed
+}
+
+function handleDislike(messageElement) {
+    console.log('Message disliked');
+    showFeedbackModal()
+    // Implement dislike functionality
+}
+
+function handleCopy(messageElement) {
+    const messageText = messageElement.querySelector('.ai-message-paragraph').textContent;
+    navigator.clipboard.writeText(messageText).then(() => {
+        console.log('Message copied to clipboard');
+        // You can add a visual feedback here, like a temporary tooltip
+    });
+}
+
+function handleRetry(messageElement) {
+    const lastUserMessage = document.querySelector('.user-message:last-of-type');
+    if (lastUserMessage) {
+        const messageText = lastUserMessage.textContent;
+        sendMessage(messageText);
+    }
+}
+
+// Function to show feedback popup
+function showFeedbackPopup() {
+    const popup = document.getElementById('feedback-popup');
+    popup.style.display = 'block';
+    popup.style.opacity = '1';
+    popup.style.top = '20px'; // Show the popup
+
+    // Hide the popup after 3 seconds
+    setTimeout(() => {
+        popup.style.opacity = '0';
+        popup.style.top = '-50px'; // Move it out of view
+        setTimeout(() => {
+            popup.style.display = 'none'; // Hide it completely
+        }, 500); // Wait for the fade-out transition
+    }, 3000); // Show for 3 seconds
+}
+
+// Add event listener to the like button
+const likeButton = document.querySelector('[aria-label="Like message"]');
+if (likeButton) {
+    likeButton.addEventListener('click', showFeedbackPopup);
+}
+
+dislikeButton.addEventListener('click', () => {
+    const icon = dislikeButton.querySelector('i');
+    icon.style.fill = 'currentColor';
+    icon.style.color = '#000000';
+    likeButton.querySelector('i').removeAttribute('style');
+    handleDislike(messageElement);
+    showFeedbackModal(); // Show the feedback form when dislike is clicked
+});
+
+// Add these functions to handle the feedback modal
+function showFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    modal.classList.add('active');
+}
+
+function closeFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    modal.classList.remove('active');
+}
+
+// Add event listeners for the feedback options
+document.querySelectorAll('.feedback-option').forEach(button => {
+    button.addEventListener('click', function() {
+        // Toggle selected state
+        document.querySelectorAll('.feedback-option').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        this.classList.add('selected');
+        
+        // Here you can add code to handle the feedback submission
+        console.log('Selected feedback:', this.textContent);
+        
+        // Close the modal after a short delay
+        setTimeout(() => {
+            closeFeedbackModal();
+        }, 500);
+    });
+});
+
+// Close modal when clicking outside
+document.getElementById('feedback-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeFeedbackModal();
+    }
+});
+</script>
+</body>
+</html>

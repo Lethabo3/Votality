@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-G7WREYHFF7');
+</script>       
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Votality</title>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+        }
+
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
+        }
+
+        .top-nav {
+            position: static;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1.5rem;
+        }
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .top-nav__button--home {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .top-nav__button--contact {
+            color: #fff;
+            background-color: #000;
+            border: 1px solid #e0e0e0;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 1rem 2rem;
+            background-color: transparent;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+        }
+
+        .hero p {
+            text-align: center;
+            color: #4b5563;
+            margin-top: -0.8rem;
+            margin-bottom: 4rem;
+            font-size: 1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: -5rem auto 0;
+            padding: 0 2rem 2rem 2rem;
+        }
+
+        .signup-form {
+            background-color: var(--background-color);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .google-button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .google-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .google-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .separator:not(:empty)::before {
+            margin-right: 1rem;
+        }
+
+        .separator:not(:empty)::after {
+            margin-left: 1rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--text-color);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-family: 'Inter', sans-serif;
+            margin-top: 0.5rem;
+        }
+
+        .submit-button:hover {
+            opacity: 0.9;
+        }
+
+        .terms {
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .terms a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .terms a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-container {
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-color);
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.125rem;
+            }
+
+            .container {
+                padding: 0 1rem 1rem;
+            }
+
+            .signup-form {
+                padding: 1.5rem;
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 3rem;
+            font-size: 1rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons">
+            <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
+            <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
+            <a href="about.html" class="top-nav__button top-nav__button--home">About</a>
+            <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
+            <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Join Votality</h1>
+        <p class="subtitle">Create your account and take control of the markets</p>
+    </div>
+
+    <div class="container">
+        <div class="signup-form">
+            <div id="g_id_onload" style="display: none;"
+            data-client_id="583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com"
+            data-context="signin"
+            data-ux_mode="popup"
+            data-callback="handleCredentialResponse"
+            data-auto_prompt="false">
+       </div>
+       <div class="g_id_signin" style="display: none;"
+            data-type="standard"
+            data-shape="rectangular"
+            data-theme="outline"
+            data-text="signin_with"
+            data-size="large"
+            data-logo_alignment="left">
+       </div>
+            <button class="google-button" onclick="triggerGoogleSignIn()">
+                <img src="https://raw.githubusercontent.com/gilbarbara/logos/main/logos/google-icon.svg" alt="Google logo">
+                Continue with Google
+            </button>
+            
+            <div class="separator">or</div>
+            
+            <form id="signup-form" action="signup_handlerBimo.php" method="POST">
+                <input type="text" name="fullname" placeholder="Full Name" class="input-field" required>
+                <input type="email" name="email" placeholder="Email" class="input-field" required>
+                <input type="password" name="password" id="password" placeholder="Password" class="input-field" required>
+                <button type="submit" class="submit-button">Create Account</button>
+            </form>
+            
+            <p class="terms">
+                By continuing, you agree to Votality's <a href="terms.html">Terms of Service</a>, and 
+                <a href="privacy.html">Privacy Policy</a>.
+            </p>
+        </div>
+
+       
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const signupForm = document.getElementById('signup-form');
+
+        signupForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (this.checkValidity()) {
+                this.submit();
+            } else {
+                alert('Please fill in all required fields');
+            }
+        });
+
+        function triggerGoogleSignIn() {
+            const googleSignInButton = document.querySelector('.g_id_signin div[role=button]');
+            if (googleSignInButton) {
+                googleSignInButton.click();
+            } else {
+                console.error('Google Sign-In button not found');
+            }
+        }
+
+        function handleCredentialResponse(response) {
+            const responsePayload = decodeJwtResponse(response.credential);
+            console.log("ID: " + responsePayload.sub);
+            console.log('Full Name: ' + responsePayload.name);
+            console.log('Given Name: ' + responsePayload.given_name);
+            console.log('Family Name: ' + responsePayload.family_name);
+            console.log("Image URL: " + responsePayload.picture);
+            console.log("Email: " + responsePayload.email);
+        }
+
+        function decodeJwtResponse(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: "583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com",
+                callback: handleCredentialResponse
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("custom-google-button"),
+                { theme: "outline", size: "large" }
+            );
+        };
+    </script>
+</body>
+</html>

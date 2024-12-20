@@ -1,0 +1,1207 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+        <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-G7WREYHFF7');
+        </script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Votality - Market Data Prototype</title>
+            <link rel="icon" href="b2.png">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+        <style>
+            :root {
+                --background-color: #ffffff;
+                --text-color: #333333;
+                --border-color: #e5e7eb;
+                --hover-color: #f3f4f6;
+                --grid-color: rgba(229, 231, 235, 0.3);
+            }
+            
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body, html {
+                font-family: 'Inter', sans-serif;
+                background-color: var(--background-color);
+                color: var(--text-color);
+                line-height: 1.6;
+                height: 100%;
+            }
+            
+            .layout {
+                display: flex;
+                min-height: 100vh;
+            }
+            
+            .sidebar {
+                width: 4rem;
+                background-color: #f9f9f9;
+                border-right: 1px solid #e0e0e0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 0.2rem 0;
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+            }
+            
+            .sidebar__logo {
+                width: 3.5rem;
+                height: 3.5rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .sidebar-button-container {
+                background-color: var(--background-color);
+                border: 1px solid var(--border-color);
+                border-radius: 10px;
+                padding: 0.35rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                margin-bottom: 1.5rem;
+            }
+            
+            .sidebar__icon {
+                margin-bottom: 1.5rem;
+                color: var(--text-color);
+                transition: color 0.3s ease;
+                font-size: 1.25rem;
+            }
+            
+            .account-container {
+                background-color: var(--background-color);
+                border: 1px solid var(--border-color);
+                border-radius: 999px;
+                padding: 0.35rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                margin-top: auto;
+                margin-bottom: 0.5rem;
+            }
+            
+            .account-container:hover {
+                background-color: var(--hover-color);
+            }
+            
+            .main-content {
+                flex: 1;
+                margin-left: 4rem;
+                padding: 1rem;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .desktop-top-nav {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 4rem;
+                right: 0;
+                background-color: #ffffff;
+                height: 60px;
+                padding: 0 1rem;
+                z-index: 20;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid var(--border-color);
+            }   
+            
+            .desktop-top-nav__left {
+                flex: 1;
+                display: flex;
+                align-items: center;
+            }
+            
+            .desktop-top-nav__right {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .desktop-top-nav__title {
+                font-weight: 600;
+                color: var(--text-color);
+                font-size: 1.2rem;
+            }
+            
+            .forex-data-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                gap: 1rem;
+                width: 100%;
+                max-width: none;
+                margin: 60px -15px 0;
+                padding: 0 1rem;
+            }
+            
+            .market-card {
+                background-color: #fff;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 1rem;
+                transition: all 0.3s ease;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                position: relative;
+            }
+            
+            .market-card:hover {
+                box-shadow: 0 1px rgba(0, 0, 0, 0.1);
+            }
+            
+            .market-card__title {
+                font-size: 1rem;
+                font-weight: 600;
+            }
+            
+            .market-card__rate {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #333;
+                margin-bottom: 0.5rem;
+            }
+            
+            .market-card__content {
+                font-size: 0.9rem;
+                color: #666;
+                margin-bottom: 0.5rem;
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .market-card__header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 0.5rem;
+            }
+            
+            .market-card__subtitle {
+                font-size: 0.8rem;
+                color: #666;
+            }
+            
+            .market-card__title-group {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .market-card__meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.8rem;
+                color: #888;
+                margin-top: auto;
+            }
+            
+            .market-card__meta span {
+                display: flex;
+                align-items: center;
+            }
+            
+            .market-card__meta span:first-child {
+                font-weight: bold;
+            }
+            
+            .market-closed-indicator {
+                background-color: #FF4136;
+                color: white;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 0.7rem;
+                font-weight: bold;
+                margin-left: 8px;
+            }
+            
+            .trend-indicator {
+                padding: 2px 6px;
+                border-radius: 10px;
+                font-size: 0.8rem;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+            }
+            
+            .trend-up { background-color: #E8F5E9; color: #2E7D32; }
+            .trend-neutral { background-color: #F5F5F5; color: #616161; }
+            .trend-down { background-color: #FFEBEE; color: #C62828; }
+            
+            .status-active, 
+            .status-less-active,
+            .status-closed {
+                font-weight: 600;
+            }
+            
+            .status-active { 
+                color: #888;
+            }
+            
+            .status-less-active { 
+                color: #888;
+            }
+            
+            .status-closed {
+                color: #888;
+            }   
+            
+            .event-notification {
+                color: #666;
+                display: flex;
+                align-items: center;
+                font-size: 0.8rem;
+            }
+            
+            .event-notification i {
+                margin-right: 0.25rem;
+            }
+            
+            .placeholder-card {
+                background-color: #fff;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 1rem;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                position: relative;
+                overflow: hidden;
+            }
+            
+            .placeholder-card::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                transform: translateX(-100%);
+                background-image: linear-gradient(
+                    90deg,
+                    rgba(255, 255, 255, 0) 0,
+                    rgba(255, 255, 255, 0.2) 20%,
+                    rgba(255, 255, 255, 0.5) 60%,
+                    rgba(255, 255, 255, 0)
+                );
+                animation: shimmer 2s infinite;
+            }
+            
+            @keyframes shimmer {
+                100% {
+                    transform: translateX(100%);
+                }
+            }
+            
+            .placeholder-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 0.5rem;
+            }
+            
+            .placeholder-title {
+                width: 100px;
+                height: 20px;
+                background-color: #e0e0e0;
+                border-radius: 4px;
+            }
+            
+            .placeholder-subtitle {
+                width: 150px;
+                height: 16px;
+                background-color: #e0e0e0;
+                border-radius: 4px;
+                margin-top: 0.25rem;
+            }
+            
+            .placeholder-trend {
+                width: 60px;
+                height: 24px;
+                background-color: #e0e0e0;
+                border-radius: 10px;
+            }
+            
+            .placeholder-rate {
+                width: 100px;
+                height: 32px;
+                background-color: #e0e0e0;
+                border-radius: 4px;
+                margin: 1rem 0;
+            }
+            
+            .placeholder-meta {
+                display: flex;
+                justify-content: space-between;
+                margin-top: auto;
+            }
+            
+            .placeholder-status,
+            .placeholder-event {
+                width: 80px;
+                height: 16px;
+                background-color: #e0e0e0;
+                border-radius: 4px;
+            }
+            
+            .market-card-detail-nav {
+                position: fixed;
+                top: 0;
+                left: 4rem;
+                right: 0;
+                background-color: #ffffff;
+                height: 60px;
+                padding: 0 1rem;
+                z-index: 20;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .market-card-detail-nav__content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                height: 100%;
+            }
+            
+            .market-card-detail-nav__left {
+                display: flex;
+                align-items: baseline;
+            }
+            
+            .market-card-detail-nav__symbol {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: var(--text-color);
+            }
+            
+            .market-card-detail-nav__company {
+                font-size: 1rem;
+                color: #888;
+                margin-left: 0.75rem;
+                font-weight: normal;
+            }
+            
+            .current-price {
+                display: flex;
+                align-items: center;
+            }
+            
+            .current-price .change {
+                display: flex;
+                align-items: center;
+                padding: 0.20rem 0.3rem;
+                border-radius: 10px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-right: 0.2rem;
+                margin-top: 0.4rem;
+                background-color: transparent;
+            }
+            
+            .current-price .price {
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+            
+            .current-price .trend-up {
+                background-color: transparent;
+                color: #2E7D32;
+            }
+            
+            .current-price .trend-down {
+                background-color: #FFEBEE;
+                color: #C62828;
+            }
+            
+            .stock-detail-view {
+                padding-top: 80px;
+                padding-left: 1rem;
+                padding-right: 1rem;
+                background-color: var(--background-color);
+                color: var(--text-color);
+            }
+            
+            .detail-content {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 1rem;
+            }
+            
+            .chart-container {
+                background-color: #fff;
+                border: 1px solid var(--border-color);
+                border-radius: 8px;
+                padding: 1rem;
+            }
+            
+            .chart-controls {
+                display: flex;
+                gap: 0.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .time-frame {
+                background-color: #f0f0f0;
+                border: none;
+                color: var(--text-color);
+                padding: 0.25rem 0.5rem;
+                border-radius: 4px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+            
+            .time-frame.active,
+            .time-frame:hover {
+                background-color: #e0e0e0;
+            }
+            
+            #stockChart {
+                width: 100%;
+                height: 400px;
+            }
+            
+
+    .key-facts-container {
+        background-color: #f0f0f0;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .key-facts-container h4 {
+        color: #2c3e50;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .key-facts-container h4 i {
+        margin-right: 0.5rem;
+        color: #888;
+    }
+
+    .key-facts-container p {
+        color: #34495e;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+            .stock-data-combined {
+        background-color: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+
+
+    .data-card h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .data-grid {
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .key-statistics,
+    .company-info {
+        width: 100%;
+    }
+
+    .data-grid h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: #555;
+            padding-bottom: 0.5rem;
+    }
+
+    .data-grid ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .data-grid li {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+            
+            @media (max-width: 1024px) {
+                .detail-content {
+                    grid-template-columns: 1fr;
+                }
+            
+                .data-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+            
+            @media (max-width: 768px) {
+                .sidebar {
+                    display: none;
+                }
+            
+                .main-content,
+                .desktop-top-nav,
+                .market-card-detail-nav {
+                    margin-left: 0;
+                    left: 0;
+                }
+            
+                .forex-data-container {
+                    grid-template-columns: 1fr;
+                }
+            }
+            
+            @media (max-width: 640px) {
+                .bottom-nav {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    border-top: 1px solid #e0e0e0;
+                    background-color: #ffffff;
+                    display: flex;
+                    justify-content: space-around;
+                    align-items: center;
+                    height: 60px;
+                    z-index: 10;
+                }
+            }
+
+            .detail-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+}
+
+.chart-stats-container {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.chart-header h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.time-interval-select {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: #fff;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.chart-wrapper {
+    height: 300px; /* Adjust this value to make the chart smaller */
+    margin-bottom: 1rem;
+}
+
+.stats-section {
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+}
+
+.stats-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.stats-summary {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.stat-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+}
+            </style>
+    </head>
+    <body>
+        <div class="layout">
+            <aside class="sidebar">
+                <img src="zero.png" alt="Votality AI Logo" class="sidebar__logo">
+                <div class="sidebar-button-container" id="new-post-button">
+                    <a href="index.html">
+                    <i data-lucide="plus" class="h-7 w-7 text-gray-400"></i>
+                    </a>
+                </div>
+                <a href="news.v2.html" class="sidebar__icon">
+                    <i data-lucide="book-open"></i>
+                </a>
+                <a href="postv2.html" class="sidebar__icon">
+                    <i data-lucide="users"></i>
+                </a>
+                <a href="#" class="sidebar__icon active">
+                    <i data-lucide="trending-up"></i>
+                </a>
+                <div class="account-container">
+                    <a href="signup.html" >
+                    <i data-lucide="user" class="h-6 w-6 text-gray-400"></i>
+                </a>
+                </div>
+            </aside>
+            <main class="main-content">
+                <nav class="desktop-top-nav">
+                    <div class="desktop-top-nav__left">
+                        <h1 class="desktop-top-nav__title">Market Data</h1>
+                    </div>
+                </nav>
+                <div class="forex-data-container" id="forex-data-container">
+                    <div class="placeholder-card">
+                        <div class="placeholder-header">
+                            <div>
+                                <div class="placeholder-title"></div>
+                                <div class="placeholder-subtitle"></div>
+                            </div>
+                            <div class="placeholder-trend"></div>
+                        </div>
+                        <div class="placeholder-rate"></div>
+                        <div class="placeholder-meta">
+                            <div class="placeholder-status"></div>
+                            <div class="placeholder-event"></div>
+                        </div>
+                    </div>
+                                </div>
+            </main>
+        </div>
+
+        <!-- Add bottom navigation for mobile -->
+        <nav class="bottom-nav">
+            <a href="index.html" class="nav-item">
+                <i data-lucide="message-circle"></i>
+            </a>
+            <a href="news.v2.html" class="nav-item">
+                <i data-lucide="book-open"></i>
+            </a>
+            <a href="postv2.html" class="nav-item">
+                <i data-lucide="users"></i>
+            </a>
+            <a href="#" class="nav-item active">
+                <i data-lucide="trending-up"></i>
+            </a>
+        </nav>
+
+        <script>
+    // Create Lucide icons
+    lucide.createIcons();
+
+    // Define currency pairs
+    const currencyPairs = [
+        { base: 'USD', target: 'EUR', baseName: 'U.S. Dollar', targetName: 'Euro' },
+        { base: 'USD', target: 'GBP', baseName: 'U.S. Dollar', targetName: 'British Pound' },
+        { base: 'USD', target: 'JPY', baseName: 'U.S. Dollar', targetName: 'Japanese Yen' },
+        { base: 'EUR', target: 'GBP', baseName: 'Euro', targetName: 'British Pound' },
+        { base: 'GBP', target: 'JPY', baseName: 'British Pound', targetName: 'Japanese Yen' },
+        { base: 'EUR', target: 'JPY', baseName: 'Euro', targetName: 'Japanese Yen' },
+        { base: 'USD', target: 'CAD', baseName: 'U.S. Dollar', targetName: 'Canadian Dollar' },
+        { base: 'USD', target: 'AUD', baseName: 'U.S. Dollar', targetName: 'Australian Dollar' },
+        { base: 'USD', target: 'CHF', baseName: 'U.S. Dollar', targetName: 'Swiss Franc' },
+        { base: 'USD', target: 'CNY', baseName: 'U.S. Dollar', targetName: 'Chinese Yuan' },
+        { base: 'EUR', target: 'CAD', baseName: 'Euro', targetName: 'Canadian Dollar' },
+        { base: 'EUR', target: 'AUD', baseName: 'Euro', targetName: 'Australian Dollar' },
+        { base: 'EUR', target: 'CHF', baseName: 'Euro', targetName: 'Swiss Franc' },
+        { base: 'GBP', target: 'CAD', baseName: 'British Pound', targetName: 'Canadian Dollar' },
+        { base: 'GBP', target: 'AUD', baseName: 'British Pound', targetName: 'Australian Dollar' },
+        { base: 'GBP', target: 'CHF', baseName: 'British Pound', targetName: 'Swiss Franc' },
+        { base: 'AUD', target: 'JPY', baseName: 'Australian Dollar', targetName: 'Japanese Yen' },
+        { base: 'CAD', target: 'JPY', baseName: 'Canadian Dollar', targetName: 'Japanese Yen' },
+        { base: 'CHF', target: 'JPY', baseName: 'Swiss Franc', targetName: 'Japanese Yen' },
+        { base: 'NZD', target: 'USD', baseName: 'New Zealand Dollar', targetName: 'U.S. Dollar' },
+        { base: 'USD', target: 'MXN', baseName: 'U.S. Dollar', targetName: 'Mexican Peso' },
+        { base: 'USD', target: 'SGD', baseName: 'U.S. Dollar', targetName: 'Singapore Dollar' },
+        { base: 'EUR', target: 'NOK', baseName: 'Euro', targetName: 'Norwegian Krone' },
+        { base: 'EUR', target: 'SEK', baseName: 'Euro', targetName: 'Swedish Krona' },
+        { base: 'EUR', target: 'DKK', baseName: 'Euro', targetName: 'Danish Krone' },
+        { base: 'USD', target: 'HKD', baseName: 'U.S. Dollar', targetName: 'Hong Kong Dollar' },
+        { base: 'USD', target: 'ZAR', baseName: 'U.S. Dollar', targetName: 'South African Rand' },
+        { base: 'USD', target: 'THB', baseName: 'U.S. Dollar', targetName: 'Thai Baht' },
+        { base: 'USD', target: 'ILS', baseName: 'U.S. Dollar', targetName: 'Israeli New Shekel' },
+        { base: 'USD', target: 'PLN', baseName: 'U.S. Dollar', targetName: 'Polish Złoty' },
+        { base: 'GBP', target: 'NZD', baseName: 'British Pound', targetName: 'New Zealand Dollar' },
+        { base: 'AUD', target: 'NZD', baseName: 'Australian Dollar', targetName: 'New Zealand Dollar' },
+        { base: 'EUR', target: 'TRY', baseName: 'Euro', targetName: 'Turkish Lira' },
+        { base: 'USD', target: 'TRY', baseName: 'U.S. Dollar', targetName: 'Turkish Lira' },
+        { base: 'USD', target: 'INR', baseName: 'U.S. Dollar', targetName: 'Indian Rupee' },
+        { base: 'USD', target: 'KRW', baseName: 'U.S. Dollar', targetName: 'South Korean Won' },
+        { base: 'EUR', target: 'ZAR', baseName: 'Euro', targetName: 'South African Rand' },
+        { base: 'GBP', target: 'ZAR', baseName: 'British Pound', targetName: 'South African Rand' },
+        { base: 'CHF', target: 'EUR', baseName: 'Swiss Franc', targetName: 'Euro' },
+    ];
+
+    function getPeakLiquidityTime(pair) {
+        const now = new Date();
+        const utcDay = now.getUTCDay();
+        const utcHour = now.getUTCHours();
+        const utcMinutes = now.getUTCMinutes();
+        const currentTimeInMinutes = utcHour * 60 + utcMinutes;
+
+        // Check if it's weekend (Saturday or Sunday)
+        if (utcDay === 0 || utcDay === 6) {
+            return { status: "Closed" };
+        }
+
+        // Define peak liquidity times for different currency pairs (in UTC)
+        const peakTimes = {
+            USD: [{ start: 12, end: 21 }], // 8:00 AM - 5:00 PM New York
+            EUR: [{ start: 7, end: 16 }],  // 8:00 AM - 5:00 PM London
+            GBP: [{ start: 7, end: 16 }],  // 8:00 AM - 5:00 PM London
+            JPY: [{ start: 0, end: 9 }],   // 9:00 AM - 6:00 PM Tokyo
+            AUD: [{ start: 22, end: 7 }],  // 8:00 AM - 5:00 PM Sydney (crosses midnight UTC)
+            NZD: [{ start: 20, end: 5 }],  // 8:00 AM - 5:00 PM Wellington (crosses midnight UTC)
+        };
+
+        function isWithinTimeRange(currentTime, start, end) {
+            if (start < end) {
+                return currentTime >= start && currentTime < end;
+            } else {
+                return currentTime >= start || currentTime < end;
+            }
+        }
+
+        const basePeakTimes = peakTimes[pair.base] || peakTimes.USD;
+        const targetPeakTimes = peakTimes[pair.target] || peakTimes.USD;
+
+        for (let time of basePeakTimes.concat(targetPeakTimes)) {
+            if (isWithinTimeRange(currentTimeInMinutes, time.start * 60, time.end * 60)) {
+                return { status: "Active" };
+            }
+        }
+
+        return { status: "Less Active" };
+    }
+
+    function showForexPairDetails(pair, data) {
+        const detailView = document.createElement('div');
+        detailView.className = 'forex-pair-detail-view';
+        detailView.innerHTML = `
+            <div class="detail-header">
+                <button class="back-button">&larr; Back</button>
+                <h2>${pair.base}/${pair.target}</h2>
+                <p>${pair.baseName} / ${pair.targetName}</p>
+            </div>
+            <div class="detail-content">
+                <div class="current-rate">
+                    <h3>Current Rate</h3>
+                    <p class="rate">${data.exchangeRate.toFixed(4)}</p>
+                    <p class="change ${data.trendClass}">${data.changePercentage}%</p>
+                </div>
+                <div class="market-status">
+                    <h3>Market Status</h3>
+                    <p>${data.liquidityInfo.status}</p>
+                </div>
+                <div class="trading-hours">
+                    <h3>Trading Hours (UTC)</h3>
+                    <p>24 hours, 5 days a week</p>
+                    <p>Opens: Sunday 5:00 PM</p>
+                    <p>Closes: Friday 5:00 PM</p>
+                </div>
+                <div class="volatility">
+                    <h3>Volatility</h3>
+                    <p>Average Daily Range: ${(Math.random() * 100 + 50).toFixed(2)} pips</p>
+                </div>
+            </div>
+        `;
+
+        const backButton = detailView.querySelector('.back-button');
+        backButton.addEventListener('click', () => {
+            document.body.removeChild(detailView);
+        });
+
+        document.body.appendChild(detailView);
+    }
+
+    
+    function fetchRates() {
+        fetch('get_rates.php')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('forex-data-container');
+                container.innerHTML = '';
+                currencyPairs.forEach(pair => {
+                    const baseRate = data.rates[pair.base];
+                    const targetRate = data.rates[pair.target];
+                    const exchangeRate = targetRate / baseRate;
+                    
+                    const mockChange = (Math.random() - 0.5) * 0.02;
+                    const changePercentage = (mockChange * 100).toFixed(2);
+                    
+                    let trendClass = 'trend-neutral';
+                    let trendIcon = 'minus';
+                    if (mockChange > 0) {
+                        trendClass = 'trend-up';
+                        trendIcon = 'trending-up';
+                    } else if (mockChange < 0) {
+                        trendClass = 'trend-down';
+                        trendIcon = 'trending-down';
+                    }
+
+                    const liquidityInfo = getPeakLiquidityTime(pair);
+                    
+                    const baseEvents = data.upcoming_events[pair.base] || [];
+                    const targetEvents = data.upcoming_events[pair.target] || [];
+                    const hasUpcomingEvent = baseEvents.length > 0 || targetEvents.length > 0;
+                    const eventInfo = hasUpcomingEvent ? (baseEvents[0] || targetEvents[0]) : null;
+
+                    const pairElement = document.createElement('div');
+                    pairElement.className = 'market-card';
+                    pairElement.innerHTML = `
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">${pair.base}${pair.target}</h2>
+                                <div class="market-card__subtitle">${pair.baseName} / ${pair.targetName}</div>
+                            </div>
+                            <span class="trend-indicator ${trendClass}">
+                                <i data-lucide="${trendIcon}" class="h-4 w-4 inline-block mr-1"></i>
+                                ${Math.abs(changePercentage)}%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">${exchangeRate.toFixed(4)}</div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-${liquidityInfo.status.toLowerCase().replace(' ', '-')}">
+                                <i data-lucide="${liquidityInfo.status === 'Closed' ? 'lock' : 'clock'}" class="h-4 w-4 inline-block mr-1"></i>
+                                ${liquidityInfo.status}
+                            </span>
+                            ${eventInfo ? `
+                                <span class="event-notification">
+                                    <i data-lucide="calendar" class="h-4 w-4"></i>
+                                    Event: ${eventInfo.name}
+                                </span>
+                            ` : ''}
+                        </div>
+                    `;
+
+                    pairElement.addEventListener('click', () => {
+                        const pairData = {
+                            exchangeRate,
+                            changePercentage,
+                            trendClass,
+                            liquidityInfo
+                        };
+                        showForexPairDetails(pair, pairData);
+                    });
+
+                    container.appendChild(pairElement);
+                });
+                lucide.createIcons();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Fetch rates immediately and then every 5 minutes
+    fetchRates();
+    setInterval(fetchRates, 5 * 60 * 1000);
+
+    function showTeslaStockDetails() {
+    const mainContent = document.querySelector('.main-content');
+    mainContent.innerHTML = `
+        <nav class="market-card-detail-nav">
+            <div class="market-card-detail-nav__content">
+                <div class="market-card-detail-nav__left">
+                    <span class="market-card-detail-nav__symbol">TSLA</span>
+                    <span class="market-card-detail-nav__company">Tesla, Inc.</span>
+                </div>
+                <div class="current-price">
+                    <span class="change trend-up">
+                        +5.41 -2.5%
+                    </span>
+                    <span class="price">$220.70</span>
+                </div>
+            </div>
+        </nav>
+        <div class="stock-detail-view">
+            <div class="detail-content">
+                <div class="chart-stats-container">
+                    <div class="chart-header">
+                        <h3>Stock Price Chart</h3>
+                        <select id="timeIntervalSelect" class="time-interval-select">
+                            <option value="1D">1D</option>
+                            <option value="5D">5D</option>
+                            <option value="1M">1M</option>
+                            <option value="6M">6M</option>
+                            <option value="1Y">1Y</option>
+                            <option value="5Y">5Y</option>
+                        </select>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                    <div class="stats-section">
+                        <h3>Key Statistics</h3>
+                        <div class="stats-summary">
+                            Tesla (TSLA) stock is currently trading at $220.70, up 2.5% today. The stock has seen a 52-week range of $101.81 to $384.29. With a market cap of $699.8B, Tesla remains a leader in the electric vehicle market.
+                        </div>
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <span class="stat-label">Open</span>
+                                <span class="stat-value">$218.25</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">High</span>
+                                <span class="stat-value">$223.40</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Low</span>
+                                <span class="stat-value">$217.80</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Volume</span>
+                                <span class="stat-value">12.5M</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">P/E Ratio</span>
+                                <span class="stat-value">67.82</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Market Cap</span>
+                                <span class="stat-value">$699.8B</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stock-data-combined">
+                    <div class="data-card">
+                        <div class="key-facts-container">
+                            <h4>
+                                <i data-lucide="lightbulb" class="h-4 w-4"></i>
+                                Key facts today
+                            </h4>
+                            <p>Tesla Inc. shares are down 0.5% to 0.6% in premarket trading following the announcement of the NHTSA's investigation into Full Self-Driving collisions involving approximately 2.4 million vehicles.</p>
+                        </div>
+                        <div class="data-grid">
+                            <div>
+                                <h4>Upcoming Events</h4>
+                                <ul>
+                                    <li><span>Tesla's Q4 Earnings Call</span><span>Jan 24, 2025</span></li>
+                                    <li><span>Tesla's Annual Shareholder Meeting</span><span>Jun 13, 2025</span></li>
+                                    <li><span>Cybertruck Production Update</span><span>Dec 1, 2024</span></li>
+                                                                        <li><span>Tesla's Q4 Earnings Call</span><span>Jan 24, 2025</span></li>
+                                    <li><span>Tesla's Annual Shareholder Meeting</span><span>Jun 13, 2025</span></li>
+                                    <li><span>Cybertruck Production Update</span><span>Dec 1, 2024</span></li>
+                                                                        <li><span>Tesla's Q4 Earnings Call</span><span>Jan 24, 2025</span></li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4>Related News</h4>
+                                <ul>
+                                    <li><span>Tesla Unveils Next-Gen Supercharger with 350kW+ Capacity</span></li>
+                                    <li><span>Elon Musk Hints at New Tesla Gigafactory Location</span></li>
+                                    <li><span>Tesla's FSD Beta Expands to More Countries in Europe</span></li>
+                                    
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Create placeholder chart
+    createPlaceholderChart();
+
+    // Add event listener for time interval select
+    const timeIntervalSelect = document.getElementById('timeIntervalSelect');
+    timeIntervalSelect.addEventListener('change', (event) => {
+        console.log('Selected time interval:', event.target.value);
+        // Here you would typically update the chart data based on the selected time interval
+    });
+}
+
+function createPlaceholderChart() {
+    const ctx = document.getElementById('stockChart').getContext('2d');
+    
+    // Generate placeholder data
+    const labels = Array.from({length: 30}, (_, i) => `Day ${i + 1}`);
+    const data = Array.from({length: 30}, () => Math.floor(Math.random() * (250 - 200 + 1) + 200));
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'TSLA Stock Price',
+                data: data,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: true,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxTicksLimit: 5 // Limit the number of x-axis labels
+                    }
+                },
+                y: {
+                    display: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        maxTicksLimit: 5 // Limit the number of y-axis labels
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+}
+
+    function generateStockPriceData(currentPrice, days) {
+        const data = [];
+        let price = currentPrice;
+        for (let i = 0; i < days; i++) {
+            price *= (1 + (Math.random() - 0.5) * 0.02);
+            data.push(price);
+        }
+        return data;
+    }
+
+
+    // Update the createTeslaPlaceholder function to use the new detail view
+    function createTeslaPlaceholder() {
+        const container = document.getElementById('forex-data-container');
+        
+        // Clear existing content
+        container.innerHTML = '';
+
+        const teslaCard = document.createElement('div');
+        teslaCard.className = 'market-card';
+        teslaCard.innerHTML = `
+            <div class="market-card__header">
+                <div class="market-card__title-group">
+                    <h2 class="market-card__title">TSLA</h2>
+                    <div class="market-card__subtitle">Tesla, Inc.</div>
+                </div>
+                <span class="trend-indicator trend-up">
+                    <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                    2.5%
+                </span>
+            </div>
+            <div class="market-card__content">
+                <div class="market-card__rate">220.70</div>
+            </div>
+            <div class="market-card__meta">
+                <span class="status-active">
+                    <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                    Market Open
+                </span>
+                <span class="event-notification">
+                    <i data-lucide="calendar" class="h-4 w-4"></i>
+                    Earnings: In 4 days
+                </span>
+            </div>
+        `;
+
+        teslaCard.addEventListener('click', showTeslaStockDetails);
+
+        container.appendChild(teslaCard);
+        lucide.createIcons();
+    }
+
+    // Create the Tesla placeholder card
+    createTeslaPlaceholder();
+        </script>
+    </body>
+    </html>

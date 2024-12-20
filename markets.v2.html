@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-G7WREYHFF7');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality - Market Data</title>
+        <link rel="icon" href="b2.png">
+    <link rel="stylesheet" href="markets.v2.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
+            <div class="sidebar-button-container" id="new-post-button">
+                <a href="index.html" class="relative flex items-center justify-center group" data-tooltip="New Chat">
+                    <i data-lucide="plus" class="h-5 w-5 text-black transition-colors group-hover:text-gray-900" style="stroke-width: 1.5"></i>
+                    <span class="absolute left-full ml-4 px-3 py-1.5 bg-[#1a1a1a] text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">New Chat</span>
+                    <span class="absolute left-full ml-1.5 w-0 h-0 border-[5px] border-transparent border-r-[#1a1a1a] translate-y-[-50%] top-[50%] opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                </a>
+            </div>
+            <a href="news.v2.html" data-tooltip="News" class="sidebar__icon">
+                <i data-lucide="book-open"></i>
+            </a>
+            <a href="postv2.html" data-tooltip="Posts" class="sidebar__icon">
+                <i data-lucide="users"></i>
+            </a>
+            <a href="#" data-tooltip="Market" class="sidebar__icon active">
+                <i data-lucide="trending-up"></i>
+            </a>
+            <div class="account-container">
+                <a href="signup.html" >
+                <i data-lucide="user" class="h-6 w-6 text-gray-400"></i>
+               </a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <nav class="desktop-top-nav">
+                <div class="desktop-top-nav__left">
+                    <h1 class="desktop-top-nav__title">Market Data</h1>
+                </div>
+                <div class="desktop-top-nav__right">
+                </div>
+            </nav>
+            
+            <div class="forex-data-container" id="forex-data-container">
+                <!-- Two-column layout for market cards -->
+                <div class="market-cards-grid">
+                    <!-- Column 1 -->
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">EURUSD</h2>
+                                <div class="market-card__subtitle">Euro vs U.S. Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                                0.25%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">1.0876</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">USDJPY</h2>
+                                <div class="market-card__subtitle">U.S. Dollar vs Japanese Yen</div>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                                0.32%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">147.82</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">AUDUSD</h2>
+                                <div class="market-card__subtitle">Australian Dollar vs U.S. Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-down">
+                                <i data-lucide="trending-down" class="h-4 w-4 inline-block mr-1"></i>
+                                0.18%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">0.6584</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-less-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Less Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">USDCAD</h2>
+                                <div class="market-card__subtitle">U.S. Dollar vs Canadian Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                                0.15%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">1.3475</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">EURCHF</h2>
+                                <div class="market-card__subtitle">Euro vs Swiss Franc</div>
+                            </div>
+                            <span class="trend-indicator trend-neutral">
+                                <i data-lucide="minus" class="h-4 w-4 inline-block mr-1"></i>
+                                0.03%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">0.9465</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">NZDUSD</h2>
+                                <div class="market-card__subtitle">New Zealand Dollar vs U.S. Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-down">
+                                <i data-lucide="trending-down" class="h-4 w-4 inline-block mr-1"></i>
+                                0.22%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">0.6142</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-less-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Less Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">EURJPY</h2>
+                                <div class="market-card__subtitle">Euro vs Japanese Yen</div>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                                0.45%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">160.82</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">GBPJPY</h2>
+                                <div class="market-card__subtitle">British Pound vs Japanese Yen</div>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                                0.28%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">186.75</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">USDCHF</h2>
+                                <div class="market-card__subtitle">U.S. Dollar vs Swiss Franc</div>
+                            </div>
+                            <span class="trend-indicator trend-down">
+                                <i data-lucide="trending-down" class="h-4 w-4 inline-block mr-1"></i>
+                                0.12%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">0.8724</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">EURGBP</h2>
+                                <div class="market-card__subtitle">Euro vs British Pound</div>
+                            </div>
+                            <span class="trend-indicator trend-neutral">
+                                <i data-lucide="minus" class="h-4 w-4 inline-block mr-1"></i>
+                                0.05%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">0.8584</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">USDSGD</h2>
+                                <div class="market-card__subtitle">U.S. Dollar vs Singapore Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                                0.16%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">1.3385</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-less-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Less Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">USDHKD</h2>
+                                <div class="market-card__subtitle">U.S. Dollar vs Hong Kong Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-neutral">
+                                <i data-lucide="minus" class="h-4 w-4 inline-block mr-1"></i>
+                                0.02%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">7.8234</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">USDZAR</h2>
+                                <div class="market-card__subtitle">U.S. Dollar vs South African Rand</div>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                                0.35%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">18.6524</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-less-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Less Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">EURCAD</h2>
+                                <div class="market-card__subtitle">Euro vs Canadian Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-down">
+                                <i data-lucide="trending-down" class="h-4 w-4 inline-block mr-1"></i>
+                                0.20%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">1.4652</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">GBPAUD</h2>
+                                <div class="market-card__subtitle">British Pound vs Australian Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i data-lucide="trending-up" class="h-4 w-4 inline-block mr-1"></i>
+                                0.28%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">1.9245</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-less-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Less Active
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="market-card">
+                        <div class="market-card__header">
+                            <div class="market-card__title-group">
+                                <h2 class="market-card__title">GBPUSD</h2>
+                                <div class="market-card__subtitle">British Pound vs U.S. Dollar</div>
+                            </div>
+                            <span class="trend-indicator trend-down">
+                                <i data-lucide="trending-down" class="h-4 w-4 inline-block mr-1"></i>
+                                0.15%
+                            </span>
+                        </div>
+                        <div class="market-card__content">
+                            <div class="market-card__rate">1.2634</div>
+                            <div class="market-card__chart">
+                                <canvas height="40"></canvas>
+                            </div>
+                        </div>
+                        <div class="market-card__meta">
+                            <span class="status-active">
+                                <i data-lucide="clock" class="h-4 w-4 inline-block mr-1"></i>
+                                Active
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div class="watchlist-sidebar">
+            <div class="watchlist-search">
+                <i data-lucide="search" class="search-icon"></i>
+                <input type="text" placeholder="Search symbols..." class="search-input">
+            </div>
+            
+            <h2 class="section-title">Watchlist</h2>
+            
+            <div class="watchlist-items">
+                <div class="watchlist-item">
+                    <div class="watchlist-info">
+                        <span class="watchlist-symbol">AAPL</span>
+                        <span class="watchlist-name">Apple Inc.</span>
+                    </div>
+                    <div class="watchlist-data">
+                        <span class="watchlist-price">175.04</span>
+                        <span class="watchlist-change positive">+1.24%</span>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item">
+                    <div class="watchlist-info">
+                        <span class="watchlist-symbol">MSFT</span>
+                        <span class="watchlist-name">Microsoft Corporation</span>
+                    </div>
+                    <div class="watchlist-data">
+                        <span class="watchlist-price">368.80</span>
+                        <span class="watchlist-change positive">+0.85%</span>
+                    </div>
+                </div>
+                
+                <div class="watchlist-item">
+                    <div class="watchlist-info">
+                        <span class="watchlist-symbol">GOOGL</span>
+                        <span class="watchlist-name">Alphabet Inc.</span>
+                    </div>
+                    <div class="watchlist-data">
+                        <span class="watchlist-price">133.32</span>
+                        <span class="watchlist-change negative">-0.45%</span>
+                    </div>
+                </div>
+        
+                <div class="watchlist-item">
+                    <div class="watchlist-info">
+                        <span class="watchlist-symbol">NVDA</span>
+                        <span class="watchlist-name">NVIDIA Corporation</span>
+                    </div>
+                    <div class="watchlist-data">
+                        <span class="watchlist-price">486.20</span>
+                        <span class="watchlist-change positive">+2.18%</span>
+                    </div>
+                </div>
+        
+                <div class="watchlist-item">
+                    <div class="watchlist-info">
+                        <span class="watchlist-symbol">AMZN</span>
+                        <span class="watchlist-name">Amazon.com Inc.</span>
+                    </div>
+                    <div class="watchlist-data">
+                        <span class="watchlist-price">145.68</span>
+                        <span class="watchlist-change positive">+0.92%</span>
+                    </div>
+                </div>
+        
+                <div class="watchlist-item">
+                    <div class="watchlist-info">
+                        <span class="watchlist-symbol">META</span>
+                        <span class="watchlist-name">Meta Platforms Inc.</span>
+                    </div>
+                    <div class="watchlist-data">
+                        <span class="watchlist-price">325.28</span>
+                        <span class="watchlist-change negative">-0.32%</span>
+                    </div>
+                </div>
+        
+                <div class="watchlist-item">
+                    <div class="watchlist-info">
+                        <span class="watchlist-symbol">TSLA</span>
+                        <span class="watchlist-name">Tesla Inc.</span>
+                    </div>
+                    <div class="watchlist-data">
+                        <span class="watchlist-price">238.45</span>
+                        <span class="watchlist-change positive">+1.75%</span>
+                    </div>
+                </div>
+        
+                <div class="watchlist-item">
+                    <div class="watchlist-info">
+                        <span class="watchlist-symbol">AMD</span>
+                        <span class="watchlist-name">Advanced Micro Devices Inc.</span>
+                    </div>
+                    <div class="watchlist-data">
+                        <span class="watchlist-price">125.32</span>
+                        <span class="watchlist-change negative">-0.88%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <script>
+// Create Lucide icons
+lucide.createIcons();
+
+// Define currency pairs
+const currencyPairs = [
+    { base: 'USD', target: 'EUR', baseName: 'U.S. Dollar', targetName: 'Euro' },
+    { base: 'USD', target: 'GBP', baseName: 'U.S. Dollar', targetName: 'British Pound' },
+    { base: 'USD', target: 'JPY', baseName: 'U.S. Dollar', targetName: 'Japanese Yen' },
+    { base: 'EUR', target: 'GBP', baseName: 'Euro', targetName: 'British Pound' },
+    { base: 'GBP', target: 'JPY', baseName: 'British Pound', targetName: 'Japanese Yen' },
+    { base: 'EUR', target: 'JPY', baseName: 'Euro', targetName: 'Japanese Yen' },
+    { base: 'USD', target: 'CAD', baseName: 'U.S. Dollar', targetName: 'Canadian Dollar' },
+    { base: 'USD', target: 'AUD', baseName: 'U.S. Dollar', targetName: 'Australian Dollar' },
+    { base: 'USD', target: 'CHF', baseName: 'U.S. Dollar', targetName: 'Swiss Franc' },
+    { base: 'USD', target: 'CNY', baseName: 'U.S. Dollar', targetName: 'Chinese Yuan' },
+    { base: 'EUR', target: 'CAD', baseName: 'Euro', targetName: 'Canadian Dollar' },
+    { base: 'EUR', target: 'AUD', baseName: 'Euro', targetName: 'Australian Dollar' },
+    { base: 'EUR', target: 'CHF', baseName: 'Euro', targetName: 'Swiss Franc' },
+    { base: 'GBP', target: 'CAD', baseName: 'British Pound', targetName: 'Canadian Dollar' },
+    { base: 'GBP', target: 'AUD', baseName: 'British Pound', targetName: 'Australian Dollar' },
+    { base: 'GBP', target: 'CHF', baseName: 'British Pound', targetName: 'Swiss Franc' },
+    { base: 'AUD', target: 'JPY', baseName: 'Australian Dollar', targetName: 'Japanese Yen' },
+    { base: 'CAD', target: 'JPY', baseName: 'Canadian Dollar', targetName: 'Japanese Yen' },
+    { base: 'CHF', target: 'JPY', baseName: 'Swiss Franc', targetName: 'Japanese Yen' },
+    { base: 'NZD', target: 'USD', baseName: 'New Zealand Dollar', targetName: 'U.S. Dollar' },
+    { base: 'USD', target: 'MXN', baseName: 'U.S. Dollar', targetName: 'Mexican Peso' },
+    { base: 'USD', target: 'SGD', baseName: 'U.S. Dollar', targetName: 'Singapore Dollar' },
+    { base: 'EUR', target: 'NOK', baseName: 'Euro', targetName: 'Norwegian Krone' },
+    { base: 'EUR', target: 'SEK', baseName: 'Euro', targetName: 'Swedish Krona' },
+    { base: 'EUR', target: 'DKK', baseName: 'Euro', targetName: 'Danish Krone' },
+    { base: 'USD', target: 'HKD', baseName: 'U.S. Dollar', targetName: 'Hong Kong Dollar' },
+    { base: 'USD', target: 'ZAR', baseName: 'U.S. Dollar', targetName: 'South African Rand' },
+    { base: 'USD', target: 'THB', baseName: 'U.S. Dollar', targetName: 'Thai Baht' },
+    { base: 'USD', target: 'ILS', baseName: 'U.S. Dollar', targetName: 'Israeli New Shekel' },
+    { base: 'USD', target: 'PLN', baseName: 'U.S. Dollar', targetName: 'Polish Złoty' },
+    { base: 'GBP', target: 'NZD', baseName: 'British Pound', targetName: 'New Zealand Dollar' },
+    { base: 'AUD', target: 'NZD', baseName: 'Australian Dollar', targetName: 'New Zealand Dollar' },
+    { base: 'EUR', target: 'TRY', baseName: 'Euro', targetName: 'Turkish Lira' },
+    { base: 'USD', target: 'TRY', baseName: 'U.S. Dollar', targetName: 'Turkish Lira' },
+    { base: 'USD', target: 'INR', baseName: 'U.S. Dollar', targetName: 'Indian Rupee' },
+    { base: 'USD', target: 'KRW', baseName: 'U.S. Dollar', targetName: 'South Korean Won' },
+    { base: 'EUR', target: 'ZAR', baseName: 'Euro', targetName: 'South African Rand' },
+    { base: 'GBP', target: 'ZAR', baseName: 'British Pound', targetName: 'South African Rand' },
+    { base: 'CHF', target: 'EUR', baseName: 'Swiss Franc', targetName: 'Euro' },
+];
+
+function getPeakLiquidityTime(pair) {
+    const now = new Date();
+    const utcDay = now.getUTCDay();
+    const utcHour = now.getUTCHours();
+    const utcMinutes = now.getUTCMinutes();
+    const currentTimeInMinutes = utcHour * 60 + utcMinutes;
+
+    // Check if it's weekend (Saturday or Sunday)
+    if (utcDay === 0 || utcDay === 6) {
+        return { status: "Closed" };
+    }
+
+    // Define peak liquidity times for different currency pairs (in UTC)
+    const peakTimes = {
+        USD: [{ start: 12, end: 21 }], // 8:00 AM - 5:00 PM New York
+        EUR: [{ start: 7, end: 16 }],  // 8:00 AM - 5:00 PM London
+        GBP: [{ start: 7, end: 16 }],  // 8:00 AM - 5:00 PM London
+        JPY: [{ start: 0, end: 9 }],   // 9:00 AM - 6:00 PM Tokyo
+        AUD: [{ start: 22, end: 7 }],  // 8:00 AM - 5:00 PM Sydney (crosses midnight UTC)
+        NZD: [{ start: 20, end: 5 }],  // 8:00 AM - 5:00 PM Wellington (crosses midnight UTC)
+    };
+
+    function isWithinTimeRange(currentTime, start, end) {
+        if (start < end) {
+            return currentTime >= start && currentTime < end;
+        } else {
+            return currentTime >= start || currentTime < end;
+        }
+    }
+
+    const basePeakTimes = peakTimes[pair.base] || peakTimes.USD;
+    const targetPeakTimes = peakTimes[pair.target] || peakTimes.USD;
+
+    for (let time of basePeakTimes.concat(targetPeakTimes)) {
+        if (isWithinTimeRange(currentTimeInMinutes, time.start * 60, time.end * 60)) {
+            return { status: "Active" };
+        }
+    }
+
+    return { status: "Less Active" };
+}
+
+function showForexPairDetails(pair, data) {
+    const mainContent = document.querySelector('.main-content');
+    mainContent.innerHTML = `
+        <nav class="market-card-detail-nav">
+            <div class="market-card-detail-nav__content">
+                <div class="market-card-detail-nav__left">
+                    <span class="market-card-detail-nav__symbol">${pair.base}/${pair.target}</span>
+                    <span class="market-card-detail-nav__company">${pair.baseName} / ${pair.targetName}</span>
+                </div>
+                <div class="current-price">
+                    <span class="change ${data.trendClass}">
+                        ${data.changePercentage > 0 ? '+' : ''}${data.changePercentage}%
+                    </span>
+                    <span class="price">${data.exchangeRate.toFixed(4)}</span>
+                </div>
+            </div>
+        </nav>
+            <div class="stock-detail-view">
+                <div class="detail-content">
+                    <div class="chart-stats-container">
+                        <div class="chart-header">
+                            <h3>Exchange Rate Chart</h3>
+                            <select id="timeIntervalSelect" class="time-interval-select">
+                                <option value="1D">1D</option>
+                                <option value="5D">5D</option>
+                                <option value="1M">1M</option>
+                                <option value="6M">6M</option>
+                                <option value="1Y">1Y</option>
+                                <option value="5Y">5Y</option>
+                            </select>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="forexChart"></canvas>
+                        </div>
+                        <div class="stats-section">
+                            <h3>Key Statistics</h3>
+                            <div class="stats-summary">
+                                The ${pair.base}/${pair.target} pair is currently trading at ${data.exchangeRate.toFixed(4)}, ${data.trendClass === 'trend-up' ? 'up' : 'down'} ${Math.abs(data.changePercentage)}% today. This pair represents the exchange rate between ${pair.baseName} and ${pair.targetName}.
+                            </div>
+                            <div class="stats-container">
+                                <div class="stat-item">
+                                    <span class="stat-label">Open</span>
+                                    <span class="stat-value">${(data.exchangeRate * (1 + (Math.random() - 0.5) * 0.01)).toFixed(4)}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">High</span>
+                                    <span class="stat-value">${(data.exchangeRate * (1 + Math.random() * 0.02)).toFixed(4)}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Low</span>
+                                    <span class="stat-value">${(data.exchangeRate * (1 - Math.random() * 0.02)).toFixed(4)}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Volume</span>
+                                    <span class="stat-value">${(Math.random() * 1000000 + 500000).toFixed(0)}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">52 Week High</span>
+                                    <span class="stat-value">${(data.exchangeRate * (1 + Math.random() * 0.1)).toFixed(4)}</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">52 Week Low</span>
+                                    <span class="stat-value">${(data.exchangeRate * (1 - Math.random() * 0.1)).toFixed(4)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stock-data-combined">
+                        <div class="data-card">
+                            <div class="key-facts-container">
+                                <h4>
+                                    <i data-lucide="lightbulb" class="h-4 w-4"></i>
+                                    Key facts today
+                                </h4>
+                                <p>The ${pair.base}/${pair.target} pair is showing ${data.trendClass === 'trend-up' ? 'strength' : 'weakness'} today, influenced by recent economic data and market sentiment.</p>
+                            </div>
+                            <div class="data-grid">
+                                <div>
+                                    <h4>Upcoming Events</h4>
+                                    <ul id="upcoming-events">
+                                        <li>Loading events...</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4>Related News</h4>
+                                    <ul id="related-news">
+                                        <li>Loading news...</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Create forex chart
+        createForexChart(pair, data);
+
+        // Add event listener for time interval select
+        const timeIntervalSelect = document.getElementById('timeIntervalSelect');
+        timeIntervalSelect.addEventListener('change', (event) => {
+            updateForexChart(pair, event.target.value);
+        });
+
+        // Fetch and display news
+        fetchNews(pair.base).then(baseNews => {
+            fetchNews(pair.target).then(targetNews => {
+                const allNews = [...baseNews, ...targetNews]
+                    .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+                    .slice(0, 5);
+
+                const newsListElement = document.getElementById('related-news');
+                newsListElement.innerHTML = allNews.length > 0
+                    ? allNews.map(news => `
+                        <li>
+                            <a href="${news.url}" target="_blank">${news.title}</a>
+                            <small>(${news.source})</small>
+                        </li>
+                    `).join('')
+                    : '<li>No recent news available</li>';
+            });
+        });
+
+        // Simulate fetching upcoming events
+        const upcomingEvents = [
+            { name: `${pair.base} Interest Rate Decision`, date: '2023-11-15' },
+            { name: `${pair.target} GDP Release`, date: '2023-11-22' },
+            { name: `${pair.base}/${pair.target} Volatility Report`, date: '2023-11-30' }
+        ];
+        const eventsListElement = document.getElementById('upcoming-events');
+        eventsListElement.innerHTML = upcomingEvents.map(event => 
+            `<li><span>${event.name}</span><span>${event.date}</span></li>`
+        ).join('');
+    }
+
+async function fetchNews(symbol) {
+    try {
+        const response = await fetch(`get_news.php?symbol=${symbol}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+            return data.data;
+        } else {
+            throw new Error(data.message || 'Failed to fetch news');
+        }
+    } catch (error) {
+        console.error('Error fetching news:', error);
+        return [];
+    }
+}
+
+
+
+function createForexChart(pair, initialData) {
+    const ctx = document.getElementById('forexChart').getContext('2d');
+    
+    // Generate timestamps from 10:00 to 20:00 in 2-hour intervals
+    const timestamps = ['10:00', '12:00', '14:00', '16:00', '18:00', '20:00'];
+    
+    // Generate data points for smooth line
+    const timePoints = 48;
+    const data = [];
+    const labels = [];
+    
+    for (let i = 0; i < timePoints; i++) {
+        const baseValue = initialData.exchangeRate;
+        const trend = (i / timePoints) * 0.01;
+        const noise = Math.sin(i * 0.5) * 0.002 + (Math.random() - 0.5) * 0.001;
+        const value = baseValue * (1 + trend + noise);
+        
+        data.push(value);
+        // For internal data points, we'll use more granular labels
+        const hour = 10 + Math.floor((i * 10) / timePoints);
+        const minute = (Math.floor((i * 10) / timePoints) % 1) * 60;
+        labels.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+    }
+
+    const customTooltip = {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#333',
+        bodyColor: '#666',
+        borderColor: '#e5e7eb',
+        borderWidth: 1,
+        padding: 10,
+        displayColors: false,
+        callbacks: {
+            title: function(tooltipItems) {
+                return tooltipItems[0].label;
+            },
+            label: function(context) {
+                return `Rate: ${context.parsed.y.toFixed(4)}`;
+            },
+            afterLabel: function(context) {
+                const change = ((context.parsed.y - data[0]) / data[0] * 100).toFixed(2);
+                return `Change: ${change}%`;
+            }
+        }
+    };
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: `${pair.base}/${pair.target} Exchange Rate`,
+                data: data,
+                borderColor: '#7F56D9',
+                backgroundColor: 'rgba(127, 86, 217, 0.1)',
+                borderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                pointHoverBackgroundColor: '#7F56D9',
+                pointHoverBorderColor: '#fff',
+                pointHoverBorderWidth: 2,
+                fill: true,
+                tension: 0.3,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: customTooltip
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    border: {
+                        display: true,
+                        color: '#e5e7eb'
+                    },
+                    ticks: {
+                        callback: function(val, index) {
+                            // Show the predefined timestamps
+                            const tickIndex = Math.round((index / (this.ticks.length - 1)) * (timestamps.length - 1));
+                            return timestamps[tickIndex];
+                        },
+                        count: 6,
+                        maxTicksLimit: 6,
+                        color: '#666',
+                        font: {
+                            size: 11
+                        },
+                        padding: 8,
+                        align: 'start', // Align with tick start
+                        maxRotation: 0,
+                        minRotation: 0,
+                    },
+                    offset: false,
+                    position: 'bottom',
+                    min: 0,
+                    max: timePoints - 1,
+                    grid: {
+                        drawTicks: false // Don't draw tick marks
+                    },
+                    afterBoundingBoxUpdate: function(scale) {
+                        // Ensure scale alignment matches content area
+                        scale.left = scale.right - scale.width;
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    border: {
+                        display: true,
+                        color: '#e5e7eb'
+                    },
+                    ticks: {
+                        maxTicksLimit: 6,
+                        color: '#666',
+                        font: {
+                            size: 11
+                        },
+                        callback: function(value) {
+                            return value.toFixed(4);
+                        },
+                        padding: 8
+                    }
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            hover: {
+                mode: 'index',
+                intersect: false
+            },
+            layout: {
+                padding: {
+                    left: 10,
+                    right: 10,
+                    top: 10,
+                    bottom: 0
+                }
+            }
+        }
+    });
+}
+
+function updateForexChart(pair, timeFrame) {
+    const chart = Chart.getChart('forexChart');
+    if (!chart) return;
+
+    const timePoints = 48;
+    const newData = [];
+    const newLabels = [];
+    const baseValue = parseFloat(chart.data.datasets[0].data[0]);
+
+    for (let i = 0; i < timePoints; i++) {
+        const trend = (i / timePoints) * 0.02;
+        const noise = Math.sin(i * 0.5) * 0.003 + (Math.random() - 0.5) * 0.002;
+        const value = baseValue * (1 + trend + noise);
+        
+        const hour = 10 + Math.floor((i * 10) / timePoints);
+        const minute = (Math.floor((i * 10) / timePoints) % 1) * 60;
+        newLabels.push(`${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`);
+        newData.push(value);
+    }
+    
+    chart.data.datasets[0].data = newData;
+    chart.data.labels = newLabels;
+    chart.update('none');
+}
+// First, modify the fetchRates function to add hover-based news loading
+function fetchRates() {
+    fetch('get_rates.php')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('forex-data-container');
+            container.innerHTML = '';
+            currencyPairs.forEach(pair => {
+                const baseRate = data.rates[pair.base];
+                const targetRate = data.rates[pair.target];
+                const exchangeRate = targetRate / baseRate;
+                
+                const mockChange = (Math.random() - 0.5) * 0.02;
+                const changePercentage = (mockChange * 100).toFixed(2);
+                
+                let trendClass = 'trend-neutral';
+                let trendIcon = 'minus';
+                if (mockChange > 0) {
+                    trendClass = 'trend-up';
+                    trendIcon = 'trending-up';
+                } else if (mockChange < 0) {
+                    trendClass = 'trend-down';
+                    trendIcon = 'trending-down';
+                }
+
+                const liquidityInfo = getPeakLiquidityTime(pair);
+                
+                const baseEvents = data.upcoming_events[pair.base] || [];
+                const targetEvents = data.upcoming_events[pair.target] || [];
+                const hasUpcomingEvent = baseEvents.length > 0 || targetEvents.length > 0;
+                const eventInfo = hasUpcomingEvent ? (baseEvents[0] || targetEvents[0]) : null;
+
+                const pairElement = document.createElement('div');
+                pairElement.className = 'market-card';
+                pairElement.innerHTML = `
+                    <div class="market-card__header">
+                        <div class="market-card__title-group">
+                            <h2 class="market-card__title">${pair.base}${pair.target}</h2>
+                            <div class="market-card__subtitle">${pair.baseName} vs ${pair.targetName}</div>
+                        </div>
+                        <span class="trend-indicator ${trendClass}">
+                            <i data-lucide="${trendIcon}" class="h-4 w-4 inline-block mr-1"></i>
+                            ${Math.abs(changePercentage)}%
+                        </span>
+                    </div>
+                    <div class="market-card__content">
+                        <div class="market-card__rate">${exchangeRate.toFixed(4)}</div>
+                    </div>
+                    <div class="market-card__meta">
+                        <span class="status-${liquidityInfo.status.toLowerCase().replace(' ', '-')}">
+                            <i data-lucide="${liquidityInfo.status === 'Closed' ? 'lock' : 'clock'}" class="h-4 w-4 inline-block mr-1"></i>
+                            ${liquidityInfo.status}
+                        </span>
+                        ${eventInfo ? `
+                            <span class="event-notification">
+                                <i data-lucide="calendar" class="h-4 w-4"></i>
+                                Event: ${eventInfo.name}
+                            </span>
+                        ` : ''}
+                    </div>
+                `;
+
+                // Add hover event to load news
+                let newsLoaded = false;
+                pairElement.addEventListener('mouseenter', async () => {
+                    if (!newsLoaded) {
+                        try {
+                            // Check if news is already in cache
+                            if (!newsCache.has(pair.base)) {
+                                const baseNews = await fetchNews(pair.base);
+                                newsCache.set(pair.base, baseNews);
+                            }
+                            if (!newsCache.has(pair.target)) {
+                                const targetNews = await fetchNews(pair.target);
+                                newsCache.set(pair.target, targetNews);
+                            }
+                            newsLoaded = true;
+                        } catch (error) {
+                            console.error('Error loading news:', error);
+                        }
+                    }
+                });
+
+                pairElement.addEventListener('click', () => {
+                    const pairData = {
+                        exchangeRate,
+                        changePercentage,
+                        trendClass,
+                        liquidityInfo
+                    };
+                    showForexPairDetails(pair, pairData);
+                });
+
+                container.appendChild(pairElement);
+            });
+            lucide.createIcons();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Remove the preloadAllNews initialization
+document.addEventListener('DOMContentLoaded', () => {
+    fetchRates();
+    setInterval(fetchRates, 5 * 60 * 1000);
+});
+
+    </script>
+</body>
+</html>

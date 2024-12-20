@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lethabo Sekoto - Full Stack & AI Developer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+       @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        .chat-container {
+            height: calc(100vh - 240px);
+            overflow-y: auto;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .user-message {
+            background-color: #e6e6e6;
+            align-self: flex-end;
+        }
+        .input-container {
+            position: relative;
+            top:-2.1vh;
+        }
+        #user-input {
+            border-radius: 20px;
+            background-color: #ffffff;
+            border: 1px solid #d1d1d1;
+            padding: 12px 20px 12px 40px;
+            width: 100%;
+            color: #333;
+        }
+        #user-input::placeholder {
+            color: #999;
+            transition: all 0.3s ease;
+            padding-left: 5px;
+        }
+        #user-input:focus::placeholder {
+            opacity: 0;
+        }
+        #attachment-button,
+        #submit-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+        #attachment-button {
+            left: 10px;
+        }
+        #file-input {
+            display: none;
+        }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            padding: 5px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+
+        .file-preview img {
+            max-width: 50px;
+            max-height: 50px;
+            margin-right: 10px;
+        }
+
+        .file-preview .file-name {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-preview .remove-file {
+            cursor: pointer;
+            color: #888;
+            margin-left: 10px;
+        }
+        #submit-button {
+            position: absolute;
+            right: 10px;
+            margin-top: -2px;
+            transform: translateY(-50%);
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #submit-button.visible {
+            opacity: 1;
+        }
+        #submit-button:hover div {
+            transform: scale(1.1);
+        }
+        .logo-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 5;
+        }
+        .bento-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .bento-box {
+            background-color: #f0f0f0;
+            border-radius: 20px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: calc(50% - 5px);
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .bento-box:hover {
+            background-color: #e6e6e6;
+            transform: translateY(-2px);
+        }
+        .nav-toggle {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .nav-toggle:hover {
+            transform: scale(1.1);
+        }
+        .nav-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background-color: #ffffff;
+            border-right: 1px solid #d1d1d1;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-menu.open {
+            left: 0;
+        }
+        .nav-hover-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50px;
+            height: 100vh;
+            z-index: 999;
+        }
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+        .nav-overlay.open {
+            display: block;
+        }
+        .nav-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .recent-chat {
+            background-color: #f0f0f0;
+            border-radius: 13px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            word-break: break-all;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .recent-chats-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        .recent-chat:hover {
+            background-color: #e6e6e6;
+        }
+        .menu-icon {
+            position: absolute;
+            right: 10px;
+            display: none; 
+            cursor: pointer;
+            color: #666;
+        }
+        .recent-chat:hover .menu-icon {
+            display: inline-block;
+        }
+        #recent-chats {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        .user-email-container {
+            background-color: #e9e9e9;
+            border-radius: 15px;
+            padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+            font-size: 0.9rem;
+            text-align: left;
+            word-break: break-all;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute;
+            bottom: 25px;
+            left: 10px;
+            right: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-email-container:hover {
+            background-color: #d9d9d9;
+        }
+
+        .user-profile-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #FFF;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .user-email {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .email-dropdown {
+            position: absolute;
+            bottom: 70px;
+            left: 10px;
+            right: 10px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1rem;
+            display: none;
+            z-index: 1001;
+        }
+        .email-dropdown.show {
+            display: block;
+        }
+        .email-dropdown-item {
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border-radius: 10px;
+        }
+        .email-dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+        .email-dropdown-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 0.5rem 0;
+        }
+        .top-icons {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 1000;
+        }
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .icon-button svg {
+            width: 24px;
+            height: 24px;
+        }
+        .nav-header h2 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-left: 2vh;
+            color: #333;
+            margin-top: 5vh;
+        }
+        :root {
+            --container-radius: 14px;
+        }
+        .custom-rounded {
+            border-radius: var(--container-radius);
+        }
+        .bento-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .bento-box {
+            background-color: #f0f0f0;
+            border-radius: 20px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: calc(50% - 5px);
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .bento-box:hover {
+            background-color: #e6e6e6;
+            transform: translateY(-2px);
+        }
+        .project-image {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-right: 0.75rem;
+        }
+        .bento-box-content {
+            display: flex;
+            align-items: center;
+        }
+        .project-info {
+            flex: 1;
+        }
+        .project-title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        .project-link {
+            display: flex;
+            align-items: center;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 0.75rem;
+        }
+        .project-link svg {
+            width: 16px;
+            height: 16px;
+            margin-left: 0.25rem;
+        }
+        .message {
+    animation: slideIn 0.3s ease-out;
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+}
+
+.ai-message {
+    background-color: #fff;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.ai-message-text {
+    margin-bottom: 0.5rem;
+}
+
+.ai-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+}
+
+.ai-bento-box {
+    background-color: #f0f0f0;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.ai-bento-box:hover {
+    background-color: #e6e6e6;
+    transform: translateY(-2px);
+}
+
+.ai-bento-box svg {
+    margin-left: 0.5rem;
+}
+
+.linkedin-button {
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    color: #4a5568;
+    flex-shrink: 0;
+}
+
+.linkedin-button:hover {
+    background-color: #e6e6e6;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+    .ai-actions {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .ai-bento-box {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .linkedin-button {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+}
+#name-dropdown {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+}
+.close-nav {
+    position: absolute;
+    top: 1rem;
+    right: 16rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.certificate-box {
+        transition: all 0.3s ease;
+    }
+    .certificate-box:hover {
+        background-color: #e6e6e6;
+        transform: translateY(-2px);
+    }
+    .skill-box .project-bento-content {
+        justify-content: center;
+        height: 100%;
+    }
+    .skill-box .project-info {
+        text-align: center;
+    }
+    .skill-box .project-title {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+    .video-modal {
+        display: flex;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .video-modal-content {
+        background-color: #fefefe;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 800px;
+        position: relative;
+    }
+
+    .close-modal {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        position: absolute;
+        right: 10px;
+        top: 5px;
+    }
+
+    .close-modal:hover,
+    .close-modal:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    .skills-bento-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+    }
+    .skill-bento-box {
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    .skill-bento-box:hover {
+        background-color: #e0e0e0;
+        transform: translateY(-2px);
+    }
+    .profile-image-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .user-email-container {
+            background-color: #e9e9e9;
+            border-radius: 15px;
+            padding: 0.5rem 0.75rem 0.5rem 0.5rem;
+            font-size: 0.9rem;
+            text-align: left;
+            word-break: break-all;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute;
+            bottom: 25px;
+            left: 10px;
+            right: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-email-container:hover {
+            background-color: #d9d9d9;
+        }
+
+        .user-profile-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .user-email {
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 font-sans">
+    <div class="top-icons">
+        <button id="nav-toggle" class="nav-toggle text-gray-600 hover:text-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h12M4 18h8" />
+            </svg>
+        </button>
+        <div id="name-dropdown" class="flex items-center cursor-pointer">
+            <span class="mr-1">Lethabo</span>
+            
+        </div>
+        <button id="new-chat-button" class="icon-button">
+            <div class="profile-image-container">
+                <img src="WhatsApp Image 2024-08-28 at 11.55.34_02355bdb.jpg" alt="Profile" class="profile-image">
+            </div>
+        </button>
+    </div>
+
+    <div id="nav-hover-area" class="nav-hover-area"></div>
+
+    <nav id="nav-menu" class="nav-menu">
+        <div class="nav-content">
+            <button id="close-nav" class="close-nav">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h12M4 18h8" />
+                </svg>
+            </button>
+            <div class="recent-chats-container" id="recent-chats">
+                <br/>
+                <br/>
+                <br/>
+                <div class="recent-chat">Skills Overview</div>
+                <div class="recent-chat">Certificates Earned</div>
+                <div class="recent-chat">Connect with Lethabo</div>
+                <div class="recent-chat">Intresting Projects</div>
+                <div class="recent-chat">New chat</div>
+                <div class="recent-chat">Best club in Premier League</div>
+            </div>
+        </div>
+        <div id="userEmailContainer" class="user-email-container">
+            <img id="userProfileImage" src="WhatsApp Image 2024-08-28 at 11.55.34_02355bdb.jpg" alt="User Profile" class="user-profile-image">
+            <div id="userEmail" class="user-email">Lethabo Sekoto</div>
+        </div>
+        <div id="emailDropdown" class="email-dropdown">
+            <div id="dropdownEmail" class="email-dropdown-item font-bold">lethabosekoto@drivestedi.com</div>
+            <div class="email-dropdown-divider"></div>
+            <div class="email-dropdown-item" onclick="openHelp()">Help & FAQ</div>
+            <div class="email-dropdown-item" onclick="openSettings()">Settings</div>
+            <div class="email-dropdown-item" onclick="openLearnMore()">Learn More</div>
+            <div class="email-dropdown-divider"></div>
+            <div class="email-dropdown-item text-red-600" onclick="logout()">Log out</div>
+        </div>
+    </nav>
+
+    <div id="nav-overlay" class="nav-overlay"></div>
+
+    <div class="container mx-auto px-4 min-h-screen flex flex-col relative pt-16">
+        <div id="logo-container" class="logo-container fade-in">
+            <img src="Votality.jpg" alt="Votality.jpg Campus Logo" class="w-32 h-32 object-cover mb-4">
+        </div>
+
+        <main class="flex-grow flex flex-col">
+            <div id="chat-container" class="chat-container flex flex-col p-4" style="display: none;"></div>
+        </main>
+
+        <footer class="py-4 fixed bottom-0 left-0 right-0 bg-white">
+            <div id="bento-grid" class="bento-grid max-w-3xl mx-auto px-4">
+                <div class="bento-box" onclick="window.open('https://drivestedi.com', '_blank')">
+                    <div class="bento-box-content">
+                        <img src="512x512.png" alt="Stedi" class="project-image">
+                        <div class="project-info">
+                            <h3 class="project-title">Stedi</h3>
+                            <a href="https://drivestedi.com" class="project-link" target="_blank">
+                                Visit website
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="bento-box" onclick="window.open('https://bimo.drivestedi.com/WelcomeToBimo.html', '_blank')">
+                    <div class="bento-box-content">
+                        <img src="Votality.jpg" alt="Votality AI" class="project-image">
+                        <div class="project-info">
+                            <h3 class="project-title">Votality AI</h3>
+                            <a href="https://bimo.drivestedi.com/WelcomeToBimo.html" class="project-link" target="_blank">
+                                Visit website
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form id="chat-form" class="flex flex-col items-center max-w-3xl mx-auto px-4 mt-4">
+            <div id="file-preview" class="w-full mb-2" style="display: none;"></div>
+            <div class="input-container w-full relative">
+                <textarea id="user-input" placeholder="Chat with AI..." class="w-full p-3 pl-12 pr-12 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 custom-rounded resize-none overflow-hidden" rows="1" style="height: 50px;"></textarea>
+                <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt">
+                <button type="button" id="attachment-button" class="absolute left-2 top-1/2 transform -translate-y-1/2 focus:outline-none">
+                    <div class="custom-rounded bg-transparent p-2 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                    </div>
+                </button>
+                <button type="submit" id="submit-button" class="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none">
+                    <div class="custom-rounded bg-gray-200 p-2 hover:bg-gray-300 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5 text-gray-600">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </div>
+                </button>
+            </div>
+        </form>
+    </footer>
+    </div>
+    <script>
+        // DOM Elements
+const userInput = document.getElementById('user-input');
+const submitButton = document.getElementById('submit-button');
+const logoContainer = document.getElementById('logo-container');
+const chatContainer = document.getElementById('chat-container');
+const navToggle = document.getElementById('nav-toggle');
+const navMenu = document.getElementById('nav-menu');
+const newChatButton = document.getElementById('new-chat-button');
+const navOverlay = document.getElementById('nav-overlay');
+const bentoGrid = document.getElementById('bento-grid');
+const recentChats = document.getElementById('recent-chats');
+
+// Portfolio data
+const portfolioData = {
+    intro: "Hello I'm Lethabo Sekoto I excel at developing Artificial Intelligence web applications, with proficiency in various programming languages and technologies. Feel free to use the AI to know more about me.",
+    cvLink: "Lethabo_Sekoto_CV.pdf",
+    projects: [
+        {
+            name: "AI-Powered Chat Application",
+            description: "A real-time chat app with sentiment analysis and language translation.",
+            technologies: ["React", "Node.js", "TensorFlow"]
+        },
+        {
+            name: "E-commerce Platform",
+            description: "A full-featured online store with product recommendations and inventory management.",
+            technologies: ["Vue.js", "Django", "PostgreSQL"]
+        },
+        {
+            name: "Mobile Fitness Tracker",
+            description: "A cross-platform app for tracking workouts and providing AI-powered fitness recommendations.",
+            technologies: ["React Native", "Firebase", "TensorFlow Lite"]
+        }
+    ],
+    skills: [
+        "JavaScript (React, Vue.js, Node.js)",
+        "Python (Django, TensorFlow)",
+        "Mobile Development (React Native)",
+        "Database Management (SQL, NoSQL)",
+        "DevOps & Cloud Services (AWS, Docker)"
+    ],
+    experience: [
+        {
+            title: "Senior Full Stack Developer",
+            company: "TechCorp Inc.",
+            period: "2020 - Present",
+            description: "Leading development of high-traffic web applications and mentoring junior developers."
+        },
+        {
+            title: "AI Engineer",
+            company: "InnovateAI",
+            period: "2018 - 2020",
+            description: "Developed machine learning models for NLP and computer vision applications."
+        }
+    ]
+};
+
+document.getElementById('chat-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const message = userInput.value.trim();
+    if (message) {
+        sendMessage(message);
+    }
+});
+
+navToggle.addEventListener('click', toggleNav);
+navOverlay.addEventListener('click', closeNav);
+newChatButton.addEventListener('click', startNewConversation);
+
+userInput.addEventListener('input', function() {
+    submitButton.classList.toggle('visible', this.value.trim() !== '');
+});
+
+recentChats.addEventListener('click', function(e) {
+    if (e.target.classList.contains('recent-chat')) {
+        handleRecentChatClick(e.target.textContent);
+    }
+});
+
+// Certificate gallery variables
+let currentPage = 1;
+const totalPages = 2;
+const imageSets = [
+    [
+        'IMG-20240821-WA0002.jpg',
+        'IMG-20240821-WA0003.jpg',
+        'IMG-20240821-WA0006.jpg',
+        'IMG-20240821-WA0005.jpg'
+    ],
+    [
+        'IMG-20240821-WA0001.jpg',
+        'IMG-20240821-WA0004.jpg',
+        'IMG-20240821-WA0007.jpg'
+    ]
+];
+
+// Functions
+function toggleNav() {
+    navMenu.classList.toggle('open');
+    navOverlay.style.display = navMenu.classList.contains('open') ? 'block' : 'none';
+}
+
+function closeNav() {
+    navMenu.classList.remove('open');
+    navOverlay.style.display = 'none';
+}
+
+function startNewConversation() {
+    chatContainer.innerHTML = '';
+    showLogoAndStartConversation();
+}
+
+function showLogoAndStartConversation() {
+    logoContainer.style.display = 'flex';
+    chatContainer.style.display = 'none';
+    setTimeout(() => {
+        logoContainer.style.display = 'none';
+        chatContainer.style.display = 'flex';
+        startInitialConversation();
+    }, 1500);
+}
+
+function startInitialConversation() {
+    const userMessage = "Hi Lethabo, please tell me about yourself";
+    addMessage(userMessage, 'user');
+    
+    setTimeout(() => {
+        const aiResponse = portfolioData.intro;
+        addMessage(aiResponse, 'ai', true);
+    }, 1000);
+}
+
+// Update the sendMessage function
+async function sendMessage(message) {
+    addMessage(message, 'user');
+    userInput.value = '';
+    submitButton.classList.remove('visible');
+
+    const response = await generateResponse(message);
+    setTimeout(() => addMessage(response, 'ai'), 1000);
+} 
+
+// ... (previous code remains the same)
+
+function addMessage(text, sender, isIntro = false) {
+    if (logoContainer.style.display !== 'none') {
+        logoContainer.style.display = 'none';
+        chatContainer.style.display = 'flex';
+        bentoGrid.style.display = 'none';
+    }
+
+    // Check if this message already exists
+    const existingMessages = chatContainer.querySelectorAll('.message');
+    for (let msg of existingMessages) {
+        if (msg.textContent.trim() === text.trim()) {
+            return; // If the message already exists, don't add it again
+        }
+    }
+
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message');
+
+    messageDiv.style.animation = 'none';
+    messageDiv.offsetHeight; // trigger reflow
+    messageDiv.style.animation = null;
+
+    if (sender === 'ai') {
+        const textDiv = document.createElement('div');
+        textDiv.classList.add('ai-message-text');
+        textDiv.textContent = text;
+        messageDiv.appendChild(textDiv);
+
+        if (isIntro) {
+            const actionsDiv = document.createElement('div');
+            actionsDiv.classList.add('ai-actions');
+
+            const bentoBox = document.createElement('div');
+            bentoBox.classList.add('ai-bento-box');
+            bentoBox.innerHTML = `
+                Download Resume
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+            `;
+            bentoBox.onclick = function() {
+                downloadCV();
+            };
+
+            const linkedInButton = document.createElement('div');
+            linkedInButton.classList.add('linkedin-button');
+            linkedInButton.textContent = 'in';
+            linkedInButton.onclick = function() {
+                window.open('https://za.linkedin.com/in/lethabo-sekoto-0549081b2', '_blank');
+            };
+
+            actionsDiv.appendChild(bentoBox);
+            actionsDiv.appendChild(linkedInButton);
+            messageDiv.appendChild(actionsDiv);
+        }
+    } else {
+        messageDiv.textContent = text;
+    }
+
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function downloadCV() {
+    const link = document.createElement('a');
+    link.href = 'Lethabo_Sekoto_-_AI_Developer_&_Engineer__Full-Stack_Developer__Software_Engineer.pdf'; // Note the space is removed here
+    link.download = 'Lethabo_Sekoto_-_AI_Developer_&_Engineer__Full-Stack_Developer__Software_Engineer.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// ... (rest of the code remains the same)
+const skills = [
+    "Web Developing",
+    "Deep Learning",
+    "Large Language Models (LLM)",
+    "Network Security",
+    "Cloud Computing",
+    "Software Architecture",
+    "Artificial Intelligence",
+    "MySQL",
+    "Angular",
+    "Machine Learning"
+];
+
+function displaySkills() {
+    const skillsList = document.createElement('ul');
+    skillsList.className = 'skills-list';
+
+    skills.forEach(skill => {
+        const listItem = document.createElement('li');
+        listItem.textContent = skill;
+        skillsList.appendChild(listItem);
+    });
+
+    return skillsList;
+}
+
+async function generateResponse(message) {
+    let response = '';
+    const lowercaseMessage = message.toLowerCase();
+    
+    if (lowercaseMessage.includes('project')) {
+        response = "Great! I'd love to tell you about my projects. Here are a few highlights:\n\n" + 
+            portfolioData.projects.map(project => 
+                `${project.name}: ${project.description} (Technologies: ${project.technologies.join(', ')})`
+            ).join('\n\n');
+    } else if (lowercaseMessage.includes('skill')) {
+        response = "Please check the skills section to see all my skills ;)";
+        const skillsList = displaySkills();
+        setTimeout(() => {
+            const aiMessageBox = chatContainer.querySelector('.ai-message:last-child');
+            if (aiMessageBox) {
+                aiMessageBox.appendChild(skillsList);
+            }
+        }, 100);
+    } else if (lowercaseMessage.includes('experience')) {
+        response = "Here's a summary of my work experience:\n\n" + 
+            portfolioData.experience.map(job => 
+                `${job.title} at ${job.company} (${job.period}): ${job.description}`
+            ).join('\n\n');
+    } else {
+        // For non-portfolio queries, use the AI to generate a response
+        try {
+            const aiResponse = await fetch('PortfolioAIChat.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'getAIResponse',
+                    message: message
+                }),
+            });
+
+            const responseText = await aiResponse.text();
+            console.log("Raw PHP response:", responseText);
+
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error("Failed to parse JSON:", parseError);
+                throw new Error("Invalid JSON response from server");
+            }
+
+            if (data.debug_output) {
+                console.log("Debug output:", data.debug_output);
+            }
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            response = data.response;
+        } catch (error) {
+            console.error('Error getting AI response:', error);
+            response = "I'm sorry, I encountered an error while processing your request. Could you please try again?";
+        }
+    }
+
+    return response;
+}
+function resetChatInput() {
+    userInput.type = "text";
+    userInput.placeholder = "Chat with AI...";
+    submitButton.onclick = null; // Reset to default behavior
+    document.getElementById('chat-form').onsubmit = function(e) {
+        e.preventDefault();
+        const message = userInput.value.trim();
+        if (message) {
+            sendMessage(message);
+        }
+    };
+}
+
+function addSkillsBentoBoxes() {
+    const skills = [
+        "Web Development",
+        "Deep Learning",
+        "Large Language Models (LLM)",
+        "Network Security",
+        "Cloud Computing",
+        "Software Architecture",
+        "Artificial Intelligence",
+        "MySQL",
+        "Angular",
+        "Machine Learning"
+    ];
+
+    const container = document.createElement('div');
+    container.className = 'skills-bento-grid';
+
+    skills.forEach(skill => {
+        const skillBox = document.createElement('div');
+        skillBox.className = 'skill-bento-box';
+        skillBox.textContent = skill;
+        container.appendChild(skillBox);
+    });
+
+    const lastAiMessage = chatContainer.querySelector('.ai-message:last-child');
+    if (lastAiMessage) {
+        lastAiMessage.appendChild(container);
+    }
+}
+
+function handleRecentChatClick(chatType) {
+    chatContainer.innerHTML = ''; // Clear existing chat
+    logoContainer.style.display = 'none';
+    chatContainer.style.display = 'flex';
+    bentoGrid.style.display = 'none';
+
+    let userMessage, aiResponse;
+
+    switch(chatType) {
+        case 'Connect with Lethabo':
+            addMessage("I'd like to connect with Lethabo", 'user');
+            setTimeout(() => {
+                addMessage("Sure! I'd be happy to help you connect with Lethabo. Could you please provide your email address?", 'ai', false);
+                userInput.placeholder = "Enter your email address";
+                userInput.type = "email";
+                submitButton.onclick = handleEmailSubmission;
+            }, 1000);
+            break;
+            case 'Skills Overview':
+    userMessage = "What are your skills?";
+    aiResponse = "";
+    
+    // Clear existing chat and add new messages
+    chatContainer.innerHTML = '';
+    addMessage(userMessage, 'user');
+    setTimeout(() => {
+        addMessage(aiResponse, 'ai', false);
+        addSkillsBentoBoxes();
+    }, 1000);
+    break;
+        case 'Certificates Earned':
+            userMessage = "Show me your certificates";
+            aiResponse = "Here are my certificates. Click on each to view the full image.";
+            resetChatInput();
+            
+            addMessage(userMessage, 'user');
+            setTimeout(() => {
+                addMessage(aiResponse, 'ai', false);
+                addCertificateImages();
+            }, 1000);
+            break;
+        case 'Intresting Projects':
+            userMessage = "Please show me your projects";
+            aiResponse = "Certainly! Here are two of my main projects:";
+            resetChatInput();
+            
+            addMessage(userMessage, 'user');
+            setTimeout(() => {
+                addMessage(aiResponse, 'ai', false);
+                addProjectBentoBoxes();
+            }, 1000);
+
+            setTimeout(() => {
+                addMessage("That's cool, can I please have more information on Votality?", 'user');
+            }, 2000);
+
+            setTimeout(() => {
+                const votalityInfo = "Of course! Votality is an innovative AI-powered platform designed to revolutionize the way we interact with and understand data. Here's a brief overview:";
+                addMessage(votalityInfo, 'ai', false);
+                addVotalityVideoBox();
+            }, 3000);
+
+            break;
+        case 'New chat':
+            userMessage = "Start a new conversation";
+            aiResponse = portfolioData.intro;
+            resetChatInput();
+            break;
+        case 'Best club in Premier League':
+            userMessage = "Which is the best club in the Premier League?";
+            aiResponse = "Chelsea is the best club in the Premier League. ";
+            resetChatInput();
+            break;
+        default:
+            userMessage = "Tell me about yourself";
+            aiResponse = portfolioData.intro;
+            resetChatInput();
+    }
+
+    if (chatType !== 'Connect with Lethabo' && chatType !== 'Intresting Projects' && chatType !== 'Certificates Earned') {
+        addMessage(userMessage, 'user');
+        setTimeout(() => addMessage(aiResponse, 'ai', false), 1000);
+    }
+
+    closeNav();
+}
+
+function handleEmailSubmission() {
+    const email = userInput.value.trim();
+    if (email && isValidEmail(email)) {
+        addMessage(email, 'user');
+        userInput.value = '';
+        userInput.type = "text";
+        setTimeout(() => {
+            addMessage("Great! Now, what message would you like to send to Lethabo? Please share what you'd like Lethabo to know.", 'ai', false);
+            userInput.placeholder = "Enter your message for Lethabo";
+            submitButton.onclick = () => handleMessageSubmission(email);
+        }, 1000);
+    } else {
+        addMessage("Please enter a valid email address.", 'ai', false);
+    }
+}
+
+function handleMessageSubmission(email) {
+    const message = userInput.value.trim();
+    if (message) {
+        addMessage(message, 'user');
+        userInput.value = '';
+        userInput.placeholder = "Chat with AI...";
+        resetChatInput();
+
+        // Send the email and message to the server
+        fetch('handle_contact_form.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, message }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                addMessage(`Thank you for your message. I've forwarded your contact information and message to Lethabo.`, 'ai', false);
+            } else {
+                throw new Error(data.error || 'An error occurred while sending your message.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            addMessage("I'm sorry, there was an error sending your message. Please try again later.", 'ai', false);
+        });
+    }
+}
+
+function isValidEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+// Update the addCertificateImages function
+function addCertificateImages() {
+    const container = document.createElement('div');
+    container.className = 'project-bento-grid';
+
+    // Add first 3 certificates
+    for (let i = 0; i < 3; i++) {
+        const bentoBox = createCertificateBentoBox(certificates[i]);
+        container.appendChild(bentoBox);
+    }
+
+    // Add to chat container
+    if (chatContainer && chatContainer.lastElementChild) {
+        chatContainer.lastElementChild.appendChild(container);
+    } else {
+        console.error('Chat container or its last child not found');
+        document.body.appendChild(container);
+    }
+
+    // Add user message after a delay
+    setTimeout(() => {
+        addMessage("Wow! These certificates are impressive. Can I see more?", 'user');
+    }, 1500);
+
+    // Add AI response and remaining certificates after another delay
+    setTimeout(() => {
+        addMessage("Certainly! I'm glad you find them interesting. Here are the rest of my certificates:", 'ai', false);
+
+        const remainingContainer = document.createElement('div');
+        remainingContainer.className = 'project-bento-grid';
+
+        // Add remaining certificates
+        for (let i = 3; i < certificates.length; i++) {
+            const bentoBox = createCertificateBentoBox(certificates[i]);
+            remainingContainer.appendChild(bentoBox);
+        }
+
+        chatContainer.lastElementChild.appendChild(remainingContainer);
+    }, 3000);
+}
+
+
+function createImageGrid(images) {
+    const imageGrid = document.createElement('div');
+    imageGrid.style.display = 'grid';
+    imageGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+    imageGrid.style.gap = '10px';
+    imageGrid.style.marginTop = '10px';
+
+    images.forEach((file, index) => {
+        const img = document.createElement('img');
+        img.src = file;
+        img.alt = `Certificate ${index + 1}`;
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        img.style.borderRadius = '8px';
+        imageGrid.appendChild(img);
+    });
+
+    return imageGrid;
+}
+
+function createNavigationContainer() {
+    const navigationContainer = document.createElement('div');
+    navigationContainer.style.display = 'flex';
+    navigationContainer.style.justifyContent = 'center';
+    navigationContainer.style.alignItems = 'center';
+    navigationContainer.style.marginTop = '10px';
+    navigationContainer.style.transform = 'scale(0.9)';
+
+    const leftArrow = createArrow('left');
+    const rightArrow = createArrow('right');
+    const pageIndicator = document.createElement('span');
+    pageIndicator.style.margin = '0 8px';
+pageIndicator.style.color = '#666';
+    pageIndicator.style.fontSize = '14px';
+
+    navigationContainer.appendChild(leftArrow);
+    navigationContainer.appendChild(pageIndicator);
+    navigationContainer.appendChild(rightArrow);
+
+    return navigationContainer;
+}
+
+function createArrow(direction) {
+    const arrow = document.createElement('button');
+    arrow.style.background = 'none';
+    arrow.style.border = 'none';
+    arrow.style.cursor = 'pointer';
+    arrow.style.padding = '3px';
+    arrow.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="${direction === 'left' ? '19' : '5'}" y1="12" x2="${direction === 'left' ? '5' : '19'}" y2="12"></line>
+            <polyline points="${direction === 'left' ? '12 19 5 12 12 5' : '12 5 19 12 12 19'}"></polyline>
+        </svg>
+    `;
+    arrow.onclick = () => navigateGallery(direction);
+    return arrow;
+}
+
+function navigateGallery(direction) {
+    if (direction === 'right' && currentPage < totalPages) {
+        currentPage++;
+    } else if (direction === 'left' && currentPage > 1) {
+        currentPage--;
+    }
+    updateGallery();
+}
+
+function updateGallery() {
+    const gallery = document.querySelector('.certificate-gallery');
+    if (gallery) {
+        const imageGrid = createImageGrid(imageSets[currentPage - 1]);
+        gallery.replaceChild(imageGrid, gallery.firstChild);
+        updateNavigation();
+    } else {
+        console.error('Unable to update gallery: Gallery not found');
+    }
+}
+
+function updateNavigation() {
+    const gallery = document.querySelector('.certificate-gallery');
+    if (gallery) {
+        const navigationContainer = gallery.lastElementChild;
+        const [leftArrow, pageIndicator, rightArrow] = navigationContainer.children;
+
+        leftArrow.style.opacity = currentPage === 1 ? '0.5' : '1';
+        rightArrow.style.opacity = currentPage === totalPages ? '0.5' : '1';
+        pageIndicator.textContent = `${currentPage}/${totalPages}`;
+    } else {
+        console.error('Unable to update navigation: Gallery not found');
+    }
+}
+// Certificate data
+const certificates = [
+    { name: 'AI Engineering', file: 'IMG-20240821-WA0002.jpg' },
+    { name: 'AI Developer', file: 'IMG-20240821-WA0003.jpg' },
+    { name: 'Project Management', file: 'IMG-20240821-WA0006.jpg' },
+    { name: 'Software Engineering', file: 'IMG-20240821-WA0005.jpg' },
+    { name: 'Python', file: 'IMG-20240821-WA0001.jpg' },
+    { name: 'Web Development', file: 'IMG-20240821-WA0004.jpg' },
+    { name: 'Cybersecurity', file: 'IMG-20240821-WA0007.jpg' },
+    { name: 'Back-End Development', file: 'CERTIFICATE_LANDING_PAGE.jpg' },
+    { name: 'Machine Learning', file: 'CERTIFICATE_LANDING_PAGE2.jpg' },
+    { name: 'Python for Data Science', file: 'CERTIFICATE_LANDING_PAGE3.jpg' }
+];
+
+// Function to create a certificate bento box
+// Function to create a certificate bento box
+function createCertificateBentoBox(certificate) {
+    const bentoBox = document.createElement('div');
+    bentoBox.className = 'project-bento-box certificate-box';
+    bentoBox.onclick = () => openCertificateImage(certificate.file);
+
+    bentoBox.innerHTML = `
+        <div class="project-bento-content">
+            <img src="${certificate.file}" alt="${certificate.name}" class="project-image">
+            <div class="project-info">
+                <h3 class="project-title">${certificate.name}</h3>
+                <p class="certificate-description">View Certificate</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+        </div>
+    `;
+
+    return bentoBox;
+}
+
+// Function to open certificate image
+function openCertificateImage(file) {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '1000';
+
+    const img = document.createElement('img');
+    img.src = file;
+    img.style.maxWidth = '90%';
+    img.style.maxHeight = '90%';
+    img.style.objectFit = 'contain';
+
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+
+    overlay.onclick = () => document.body.removeChild(overlay);
+}
+
+function createProjectBentoBox(project) {
+    const bentoBox = document.createElement('div');
+    bentoBox.className = 'project-bento-box';
+    bentoBox.onclick = () => window.open(project.link, '_blank');
+
+    bentoBox.innerHTML = `
+        <div class="project-bento-content">
+            <img src="${project.image}" alt="${project.name}" class="project-image">
+            <div class="project-info">
+                <h3 class="project-title">${project.name}</h3>
+                <a href="${project.link}" class="project-link" target="_blank">
+                    Visit website
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    `;
+
+    return bentoBox;
+}
+
+function addProjectBentoBoxes() {
+    const bentoContainer = document.createElement('div');
+    bentoContainer.className = 'project-bento-grid';
+
+    const projects = [
+        {
+            name: "Stedi",
+            link: "https://drivestedi.com",
+            image: "512x512.png"
+        },
+        {
+            name: "Votality AI",
+            link: "https://bimo.drivestedi.com/WelcomeToBimo.html",
+            image: "Votality.jpg"
+        }
+    ];
+
+    projects.forEach(project => {
+        const bentoBox = createProjectBentoBox(project);
+        bentoContainer.appendChild(bentoBox);
+    });
+
+    chatContainer.lastElementChild.appendChild(bentoContainer);
+}
+
+// Update the style
+const style = document.createElement('style');
+style.textContent += `
+    .project-bento-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 30px;
+        width: 100%;
+    }
+    .project-bento-box {
+        background-color: #f0f0f0;
+        border-radius: 20px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+        flex: 1 1 calc(50% - 5px);
+        min-width: 200px;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+    .project-bento-box:hover {
+        background-color: #e6e6e6;
+        transform: translateY(-2px);
+    }
+    .project-bento-content {
+        display: flex;
+        align-items: center;
+    }
+    .project-image {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-right: 0.75rem;
+    }
+    .project-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .project-title {
+        font-weight: bold;
+        margin-bottom: 0.25rem;
+    }
+    .project-link {
+        display: flex;
+        align-items: center;
+        color: #4a5568;
+        text-decoration: none;
+        font-size: 0.75rem;
+    }
+    .project-link svg {
+        width: 16px;
+        height: 16px;
+        margin-left: 0.25rem;
+    }
+    @media (max-width: 480px) {
+        .project-bento-box {
+            flex: 1 1 100%;
+        }
+        .project-image {
+            width: 30px;
+            height: 30px;
+        }
+        .project-title {
+            font-size: 0.9rem;
+        }
+        .project-link {
+            font-size: 0.7rem;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// ... (previous code remains the same)
+
+function addVotalityVideoBox() {
+    const container = document.createElement('div');
+    container.className = 'project-bento-grid';
+
+    // Votality Video Box
+    const votalityVideoBox = createVideoBox("Votality", "Votality.jpg", "WhatsApp Video 2024-08-21 at 03.45.19_fe2273bf.mp4");
+    container.appendChild(votalityVideoBox);
+
+    // Stedi Video Box
+    const stediVideoBox = createVideoBox("Stedi", "512x512.png", "Recording 2024-08-23 193321.mp4");
+    container.appendChild(stediVideoBox);
+
+    chatContainer.lastElementChild.appendChild(container);
+}
+
+function createVideoBox(title, thumbnailSrc, videoSrc) {
+    const videoBox = document.createElement('div');
+    videoBox.className = 'project-bento-box video-box';
+    videoBox.style.cursor = 'pointer';
+
+    videoBox.innerHTML = `
+        <div class="project-bento-content">
+            <img src="${thumbnailSrc}" alt="${title} Thumbnail" class="project-image">
+            <div class="project-info">
+                <h3 class="project-title">Watch ${title} Video</h3>
+                <p class="video-description">Overview</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+        </div>
+    `;
+
+    videoBox.onclick = () => {
+        openVideoModal(videoSrc);
+    };
+
+    return videoBox;
+}
+
+function openVideoModal(videoSrc) {
+    const modal = document.createElement('div');
+    modal.className = 'video-modal';
+    modal.innerHTML = `
+        <div class="video-modal-content">
+            <span class="close-modal">&times;</span>
+            <video width="100%" controls>
+                <source src="${videoSrc}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const closeBtn = modal.querySelector('.close-modal');
+    closeBtn.onclick = () => {
+        document.body.removeChild(modal);
+    };
+
+    modal.onclick = (event) => {
+        if (event.target === modal) {
+            document.body.removeChild(modal);
+        }
+    };
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    feather.replace();
+    showLogoAndStartConversation();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const closeNavButton = document.getElementById('close-nav');
+    const navMenu = document.getElementById('nav-menu');
+    const navOverlay = document.getElementById('nav-overlay');
+
+    closeNavButton.addEventListener('click', function() {
+        closeNav();
+    });
+});
+
+
+    </script>
+</body>
+</html>

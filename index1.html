@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());   
+
+  gtag('config', 'G-G7WREYHFF7');
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality by Stedi</title>
+        <link rel="icon" href="b2.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Gambetta-Bold';
+            src: url('../fonts/Gambetta-Bold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Bold.woff') format('woff'),
+                 url('../fonts/Gambetta-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                 url('../fonts/Satoshi-Bold.woff') format('woff'),
+                 url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Gambetta-Semibold';
+            src: url('../fonts/Gambetta-Semibold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Semibold.woff') format('woff'),
+                 url('../fonts/Gambetta-Semibold.ttf') format('truetype');
+            font-weight: 600;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'GeneralSans-Medium', sans-serif;
+            min-height: 100vh;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1fr min(1280px, 100%) 1fr;
+            grid-template-rows: auto 1fr auto;
+        }
+
+        body > * {
+            grid-column: 2;
+        }
+
+        .full-bleed {
+            grid-column: 1 / -1;
+        }
+
+        .custom-h1 {
+            font-family: 'Satoshi-Bold',serif !important;
+            font-size: 2.0rem !important;
+            font-weight: 600 !important;
+            line-height: 1.2 !important;
+            margin-bottom: 1rem !important;
+        }
+
+        .main-paragraph {
+            font-size: 1rem !important;
+            margin-bottom: 1.5rem !important;
+            width: 100%;
+        }
+
+        .iphone-mockup {
+            width: 274px;
+            height: 570px;
+            transform: rotate(2deg);
+            overflow: hidden;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .download-button {
+            background-color: rgba(0, 0, 0, 0.9);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .download-button:hover {
+            background-color: rgba(51, 51, 51, 0.9);
+        }
+
+        .content-wrapper {
+            padding-left: 0;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .footer-content {
+            width: calc(50% + 394px);
+        }
+
+        .footer-legal {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            margin-top: 120px;
+            width: 100%;
+        }
+
+        .stedi-text {
+            text-align: left;
+            color: #4b5563;
+            position: absolute;
+            font-size: 0.875rem;
+            margin-top: -65px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stedi-text .highlight {
+            color: #1f2937;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .stedi-text .arrow {
+            margin-left: 4px;
+            width: 14px;
+            height: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .stedi-text:hover .arrow {
+            transform: translateX(4px);
+        }
+
+        .journey-link {
+            transition: color 0.3s ease;
+        }
+
+        .journey-link:hover {
+            color: #1f2937;
+        }
+
+        .journey-link:hover svg {
+            transform: translateX(4px);
+            transition: transform 0.3s ease;
+        }
+
+        @media (max-width: 767px) {
+            .custom-h1 {
+                font-size: 1.5rem !important;
+            }
+            .main-paragraph {
+                font-size: 0.9rem !important;
+            }
+            .iphone-mockup {
+                width: 220px;
+                height: 455px;
+            }
+            .fixed-button {
+                position: fixed;
+                bottom: 20px;
+                left: 24px;
+                right: 24px;
+                z-index: 1000;
+            }
+            .button-spacer {
+                height: 120px;
+            }
+            .footer-content {
+                width: 100%;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .tablet-screenshot-adjust {
+                padding-right: 0 !important;
+                justify-content: flex-end;
+            }
+        }
+
+        /* New styles for animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        .zoom-in {
+            animation: zoomIn 0.5s ease-out;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="flex flex-col">
+    <header>
+        <div class="header-container">
+            <div class="w-12 h-12 invisible"></div> <!-- Placeholder for alignment -->
+        </div>
+    </header>
+    <main class="flex-grow flex flex-col justify-center px-4 py-8 md:py-16 max-w-5xl mx-auto">
+        <div class="flex flex-col md:flex-row items-start justify-between md:space-x-2">
+            <div class="w-full md:w-1/2 mb-8 md:mb-0 md:pt-9 content-wrapper fade-in">
+                <a href="https://bimo.drivestedi.com/" class="stedi-text">
+                    Owned by <span class="highlight">Stedi</span>
+                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+                <img src="Votality.jpg" alt="Votality Logo" class="w-12 h-12 mb-8">
+                <h1 class="custom-h1 md:text-left">Meet Votality, the AI that grows with your trades</h1>
+                <p class="main-paragraph md:text-left">
+                    Votality is an AI designed to help you navigate and understand the complexities of financial and economic markets. Whether you’re an investor seeking the data to grow your portfolio or a trader looking to stay ahead in volatile markets, Votality provides the insights, News and guidance you need.                </p>
+                <div class="md:text-left hidden md:block">
+                    <a href="Votality.html" class="download-button px-8 py-3 rounded-full text-lg font-semibold transition duration-300 inline-block" onclick="zoomIntoProduct(event)">
+                        Try Out Votality
+                    </a>
+                </div>
+            </div>
+            <div class="w-full md:w-1/2 flex justify-center items-center md:items-start md:pr-20 md:pt-12 tablet-screenshot-adjust fade-in">
+                <div class="iphone-mockup zoom-in">
+                    <video autoplay loop muted playsinline class="w-full h-full object-cover">
+                        <!-- Primary video -->
+                        <source src="Votality5.mp4" type="video/mp4">
+                        <!-- Fallback video -->
+                        <source src="Votality4.mp4" type="video/mp4">
+                        <!-- Fallback text if none of the videos work -->
+                        Your browser does not support the video tag.
+                    </video>
+                </div>                
+            </div>
+        </div>
+        <div class="button-spacer md:hidden"></div>
+    </main>
+
+    <footer class="py-8 md:py-16 fade-in">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="border-t border-gray-800 mb-8"></div>
+                <div class="mb-8">
+                    <p class="text-base md:text-lg mb-4">
+                        Votality is an app created to simplify access to market and economic data, making it easier for users to stay informed. It serves as a platform to enhance financial understanding, enabling people to make better, more informed decisions.                    </p>
+                    <a href="understand-votality.html" class="text-base md:text-lg text-gray-600 hover:text-gray-800 inline-flex items-center journey-link">
+                        <span class="highlight"> Understand Votality</span>
+                        <svg class="ml-1 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                </div>
+                <div class="border-t border-gray-800 mb-8"></div>
+                
+                <div class="footer-nav flex justify-between items-center mb-8">
+                    <img src="Votality.jpg" alt="Votality Logo" class="w-6 h-6">
+                    <div class="flex space-x-4 md:space-x-6 text-xs md:text-sm text-gray-500">
+                        <a href="#" class="hover:text-gray-700">X.com</a>
+                        <a href="#" class="hover:text-gray-700">Discord</a>
+                        <a href="#" class="hover:text-gray-700">Contact</a>
+                        <a href="#" class="hover:text-gray-700">Careers</a>
+                    </div>
+                </div>
+                
+                <div class="footer-legal">
+                    <span class="text-xs md:text-sm text-gray-400">© 2024 Stedi</span>
+                    <div class="flex space-x-2 text-xs md:text-sm text-gray-400">
+                        <a href="#" class="hover:text-gray-600">Terms</a>
+                        <span>|</span>
+                        <a href="#" class="hover:text-gray-600">Privacy</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="fixed-button md:hidden">
+        <a href="Votality.html" class="download-button w-full px-8 py-3 rounded-full text-lg font-semibold transition duration-300 inline-block text-center" onclick="zoomIntoProduct(event)">
+            Try Out Votality
+        </a>
+    </div>
+
+    <script>
+        function zoomIntoProduct(event) {
+            event.preventDefault();
+            const mainContent = document.querySelector('main');
+            const footer = document.querySelector('footer');
+            const fixedButton = document.querySelector('.fixed-button');
+
+            mainContent.classList.add('fade-out');
+            footer.classList.add('fade-out');
+            if (fixedButton) fixedButton.classList.add('fade-out');
+
+            setTimeout(() => {
+                mainContent.classList.add('hidden');
+                footer.classList.add('hidden');
+                if (fixedButton) fixedButton.classList.add('hidden');
+
+                const zoomElement = document.createElement('div');
+                zoomElement.className = 'fixed inset-0 bg-white flex items-center justify-center';
+                zoomElement.innerHTML = `
+                    <div class="text-black text-2xl">Loading Votality...</div>
+                `;
+                document.body.appendChild(zoomElement);
+
+                setTimeout(() => {
+                    window.location.href = 'Votality.html';
+                }, 1000);
+            }, 500);
+        }
+
+        // Add fade-in effect on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = document.querySelectorAll('.fade-in, .zoom-in');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

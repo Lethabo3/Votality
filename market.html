@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality - Market Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="icon" href="b2.png">
+    <style>
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                 url('../fonts/Satoshi-Bold.woff') format('woff'),
+                 url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Switzer-Medium';
+            src: url('../fonts/Switzer-Medium.woff2') format('woff2'),
+                 url('../fonts/Switzer-Medium.woff') format('woff'),
+                 url('../fonts/Switzer-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Switzer-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #fff);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2 {
+            font-family: 'Satoshi-Bold', sans-serif;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 180px);
+            padding-bottom: -20px;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .market-data-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 0;
+            margin-bottom: -115px;
+            padding-bottom: -30px;
+            max-height: calc(100vh - 20px);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            background-color: transparent;
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            justify-content: space-around;
+            align-items: center;
+            height: 60px;
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #888;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #000000;
+        }
+
+        .nav-item:hover {
+            color: #444444;
+        }
+
+        .nav-item i {
+            margin-bottom: 4px;
+            font-size: 20px;
+        }
+
+        .votality-heading {
+            font-family: 'GeneralSans-Medium', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #333;
+            margin-top: -1.3rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .market-item {
+            background-color: #fff;
+            border-radius: 0;
+            padding: 15px;
+            margin-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        .market-item:hover {
+            background-color: #f8f8f8;
+        }
+
+        .market-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+
+        .market-item:last-child::after {
+            display: none;
+        }
+
+        .market-item-name {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .market-item-change {
+            font-size: 0.9em;
+            text-align: right;
+        }
+
+        .positive-change { color: #4CAF50; }
+        .negative-change { color: #F44336; }
+
+        .market-data-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .market-data-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .market-data-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .market-data-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .category-heading {
+            font-family: 'Satoshi-Bold', sans-serif;
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            padding-left: 15px;
+        }
+
+        /* Skeleton loading animation */
+        @keyframes shimmer {
+            0% { background-position: -468px 0; }
+            100% { background-position: 468px 0; }
+        }
+
+        .skeleton {
+            background: #f6f7f8;
+            background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+            background-repeat: no-repeat;
+            background-size: 800px 104px;
+            display: inline-block;
+            position: relative;
+            animation-duration: 1s;
+            animation-fill-mode: forwards;
+            animation-iteration-count: infinite;
+            animation-name: shimmer;
+            animation-timing-function: linear;
+        }
+
+        .skeleton-category {
+            height: 24px;
+            width: 120px;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .skeleton-item {
+            height: 70px;
+            margin-bottom: 0;
+            border-radius: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            background-color: white;
+            position: relative;
+        }
+
+        .skeleton-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+
+        .skeleton-text {
+            height: 15px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+
+        .skeleton-name { width: 100px; }
+        .skeleton-symbol { width: 60px; }
+        .skeleton-price { width: 80px; }
+        .skeleton-change { width: 70px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .market-item {
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .market-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .votality-heading {
+            font-family: 'GeneralSans-Medium', sans-serif;
+            font-weight: 400;
+            font-size: 1.5rem;
+            color: #333;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .word-fade-in {
+            display: inline-block;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .word-container {
+            display: inline;
+        }
+
+        .top-icons {
+            position: fixed;
+            top: 0;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .icon-button svg {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-icons">
+        <button id="nav-toggle" class="nav-toggle text-gray-600 hover:text-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h12M4 18h8" />
+            </svg>
+        </button>
+        <div id="name-dropdown" class="flex items-center">
+            <h1 class="votality-heading">Market Data</h1>
+        </div>  
+        <button id="search-button" class="icon-button">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        </button>
+    </div>
+    
+    <div class="content-wrapper mx-auto px-0 py-8">
+        <div class="market-data-container">
+            <div id="market-data-list">
+                <!-- Market data or skeleton loader will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="Votality.html" class="nav-item">
+            <i data-feather="message-circle"></i>
+        </a>
+        <a href="News.html" class="nav-item">
+            <i data-feather="book-open"></i>
+        </a>
+        <a href="Posts.html" class="nav-item">
+            <i data-feather="users"></i>
+        </a>
+        <a href="#" class="nav-item active">
+            <i data-feather="trending-up"></i>
+        </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            showSkeletonLoader();
+            loadAllMarketData();
+        });
+
+        const categories = ['indices', 'stocks', 'forex', 'crypto'];
+
+        function showSkeletonLoader() {
+            const marketDataList = document.getElementById('market-data-list');
+            marketDataList.innerHTML = ''; // Clear existing content
+
+            categories.forEach(category => {
+                const categorySection = document.createElement('div');
+                categorySection.setAttribute('data-category', category);
+                
+                const categoryHeading = document.createElement('div');
+                categoryHeading.className = 'skeleton skeleton-category';
+                categorySection.appendChild(categoryHeading);
+
+                // Add 5 skeleton items for each category
+                for (let i = 0; i < 5; i++) {
+                    const skeletonItem = document.createElement('div');
+                    skeletonItem.className = 'skeleton-item';
+                    skeletonItem.innerHTML = `
+                        <div class="flex items-center">
+                            <div>
+                                <div class="skeleton skeleton-text skeleton-name"></div>
+                                <div class="skeleton skeleton-text skeleton-symbol"></div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="skeleton skeleton-text skeleton-price"></div>
+                            <div class="skeleton skeleton-text skeleton-change"></div>
+                        </div>
+                    `;
+                    categorySection.appendChild(skeletonItem);
+                }
+
+                marketDataList.appendChild(categorySection);
+            });
+        }
+
+        async function loadAllMarketData() {
+            for (const category of categories) {
+                try {
+                    const data = await fetchMarketDataByCategory(category);
+                    displayMarketData(data.marketData, category);
+                } catch (error) {
+                    console.error(`Error loading ${category} data:`, error);
+                    const categoryContainer = document.querySelector(`[data-category="${category}"]`);
+                    if (categoryContainer) {
+                        categoryContainer.innerHTML = `<p class="error-message">Failed to load ${category} data. Please try again later.</p>`;
+                    }
+                }
+            }
+        }
+
+        async function fetchMarketDataByCategory(category) {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const response = await fetch('VotalityChat.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'getMarketDataByCategory',
+                    category: category
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            return data;
+        }
+        
+        function displayMarketData(data, category) {
+            const categoryContainer = document.querySelector(`[data-category="${category}"]`);
+            
+            if (!categoryContainer) {
+                console.error(`Category container for ${category} not found`);
+                return;
+            }
+
+            categoryContainer.innerHTML = ''; // Clear skeleton loader
+            
+            const categoryHeading = document.createElement('h2');
+            categoryHeading.className = 'category-heading fade-in';
+            categoryHeading.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            categoryContainer.appendChild(categoryHeading);
+            
+            if (data.length === 0) {
+                const noDataText = document.createElement('p');
+                noDataText.className = 'text-gray-500 fade-in';
+                noDataText.textContent = 'No data available for this category.';
+                categoryContainer.appendChild(noDataText);
+                return;
+            }
+
+            data.forEach((item, index) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'market-item';
+                
+                let changeClass, changeSign;
+                
+                if (item.change > 0) {
+                    changeClass = 'positive-change';
+                    changeSign = '+';
+                } else if (item.change < 0) {
+                    changeClass = 'negative-change';
+                    changeSign = '';
+                } else {
+                    changeClass = 'no-change';
+                    changeSign = '';
+                }
+
+                const changeText = `${changeSign}${item.change.toFixed(2)} (${changeSign}${item.changePercent.toFixed(2)}%)`;
+                
+                itemElement.innerHTML = `
+                    <div class="market-item-name">
+                        <div class="font-bold">${item.name}</div>
+                        <div class="text-sm text-gray-500">${item.symbol}</div>
+                    </div>
+                    <div class="market-item-price">
+                        <div class="font-bold text-right">${item.price.toFixed(2)}</div>
+                        <div class="market-item-change ${changeClass}">${changeText}</div>
+                    </div>
+                `;
+                
+                categoryContainer.appendChild(itemElement);
+
+                // Trigger reflow to ensure the transition works
+                void itemElement.offsetWidth;
+
+                // Add visible class with a slight delay for each item
+                setTimeout(() => {
+                    itemElement.classList.add('visible');
+                }, index * 50);
+            });
+        }
+    </script>
+</body>
+</html>

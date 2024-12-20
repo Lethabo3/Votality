@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-G7WREYHFF7');
+    </script>
+    <link rel="stylesheet" href="news.v2.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality - Market News</title>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
+            <div class="sidebar-button-container" id="new-post-button">
+                <a href="index.html" class="relative flex items-center justify-center group" data-tooltip="New Chat">
+                    <i data-lucide="plus" class="h-5 w-5 text-black transition-colors group-hover:text-gray-900" style="stroke-width: 1.5"></i>
+                    <span class="absolute left-full ml-4 px-3 py-1.5 bg-[#1a1a1a] text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">New Chat</span>
+                    <span class="absolute left-full ml-1.5 w-0 h-0 border-[5px] border-transparent border-r-[#1a1a1a] translate-y-[-50%] top-[50%] opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
+                </a>
+            </div>
+            <a href="#" data-tooltip="News" class="sidebar__icon active">
+                <i data-lucide="book-open"></i>
+            </a>
+            <a href="postv2.html" data-tooltip="Posts" class="sidebar__icon">
+                <i data-lucide="users"></i>
+            </a>
+            <a href="markets.v2.html"  data-tooltip="Market" class="sidebar__icon">
+                <i data-lucide="trending-up"></i>
+            </a>
+            <div class="account-container">
+                <a href="signup.html">
+                    <i data-lucide="user" class="h-6 w-6 text-gray-400"></i>
+                </a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <nav class="desktop-top-nav">
+                <div class="desktop-top-nav__left">
+                    <h1 class="desktop-top-nav__title">Market News</h1>
+                </div>
+                <div class="desktop-top-nav__right">
+                    <!-- Add search functionality if needed -->
+                </div>
+            </nav>
+            <div class="news-container">
+                <!-- Row 1: 8-columns + 4-columns -->
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="" alt="Fed meeting" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        
+                        <h2 class="news-card__title">Federal Reserve Signals Potential Rate Cuts in Coming Months</h2>
+                        <p class="news-card__summary">The Federal Reserve indicated it may begin reducing interest rates in 2024 as inflation shows signs of cooling, leading to positive market reactions across major indices.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">10 minutes ago</span>
+                            <span class="source">Financial Times</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/y2.jpg" alt="Tech sector" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        
+                        <h2 class="news-card__title">Tech Sector Faces Headwinds Amid Global Chip Shortage</h2>
+                        <p class="news-card__summary">Major technology companies report continued supply chain disruptions as semiconductor shortages persist.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">45 minutes ago</span>
+                            <span class="source">Reuters</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Row 2: Two 6-column cards -->
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/api/placeholder/600/300" alt="European markets" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        
+                        <h2 class="news-card__title">European Markets Rally on Strong Economic Data</h2>
+                        <p class="news-card__summary">European stocks reached new highs following better-than-expected GDP growth figures.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">2 hours ago</span>
+                            <span class="source">Bloomberg</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/api/placeholder/600/300" alt="Oil markets" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        
+                        <h2 class="news-card__title">Oil Prices Stabilize Following OPEC+ Meeting</h2>
+                        <p class="news-card__summary">Crude oil markets show signs of stabilization after OPEC+ members agree on production quotas.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">3 hours ago</span>
+                            <span class="source">Wall Street Journal</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Row 3: 8-columns + 4-columns -->
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/api/placeholder/800/400" alt="Retail sales" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                       
+                        <h2 class="news-card__title">Global Retail Sales Surge in Q4 2024</h2>
+                        <p class="news-card__summary">Worldwide retail sales show unexpected strength as consumer confidence rebounds, defying earlier predictions of market slowdown.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">5 hours ago</span>
+                            <span class="source">CNBC</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/api/placeholder/400/300" alt="Green energy" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        
+                        <h2 class="news-card__title">Green Energy Sector Sees Record Investment</h2>
+                        <p class="news-card__summary">Renewable energy companies attract unprecedented levels of investment.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">6 hours ago</span>
+                            <span class="source">Forbes</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Row 4: Two 6-column cards -->
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/api/placeholder/600/300" alt="Healthcare stocks" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        <h2 class="news-card__title">Healthcare Stocks React to New Policy Proposals</h2>
+                        <p class="news-card__summary">Healthcare sector experiences mixed trading as lawmakers debate new reforms.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">8 hours ago</span>
+                            <span class="source">MarketWatch</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/api/placeholder/600/300" alt="Crypto market" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        <h2 class="news-card__title">Cryptocurrency Market Sees Institutional Adoption</h2>
+                        <p class="news-card__summary">Major financial institutions announce new cryptocurrency investment products.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">12 hours ago</span>
+                            <span class="source">CoinDesk</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Row 5: 8-columns + 4-columns -->
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/api/placeholder/800/400" alt="Manufacturing data" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        
+                        <h2 class="news-card__title">Global Manufacturing Index Hits New Record</h2>
+                        <p class="news-card__summary">Manufacturing activity worldwide reaches unprecedented levels as supply chain issues resolve and demand increases.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">1 day ago</span>
+                            <span class="source">Reuters</span>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="news-card">
+                    <div class="news-card__image-container">
+                        <img src="/api/placeholder/400/300" alt="Trade volumes" class="news-card__image">
+                    </div>
+                    <div class="news-card__content">
+                        
+                        <h2 class="news-card__title">Global Trade Volumes Show Recovery</h2>
+                        <p class="news-card__summary">International trade metrics indicate improvement in global commerce.</p>
+                        <div class="news-card__meta">
+                            <span class="time-ago">1 day ago</span>
+                            <span class="source">Bloomberg</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            </div>
+            <aside class="right-sidebar">
+                <div class="trending-topics">
+                    <h3 class="section-title">Trending Topics</h3>
+                    <div class="topic">
+                        <span class="topic-name">Federal Reserve</span>
+                        <span class="topic-count">2.4K articles</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">Crypto Markets</span>
+                        <span class="topic-count">1.8K articles</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">Tech Stocks</span>
+                        <span class="topic-count">1.2K articles</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">Oil & Gas</span>
+                        <span class="topic-count">956 articles</span>
+                    </div>
+                </div>
+                
+                <div class="trending-topics">
+                    <h3 class="section-title">Popular Markets</h3>
+                    <div class="topic">
+                        <span class="topic-name">S&P 500</span>
+                        <span class="topic-count">4,927.21</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">NASDAQ</span>
+                        <span class="topic-count">15,982.01</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">BTC/USD</span>
+                        <span class="topic-count">44,235.80</span>
+                    </div>
+                    <div class="topic">
+                        <span class="topic-name">EUR/USD</span>
+                        <span class="topic-count">1.0891</span>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Add bottom navigation for mobile -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i data-lucide="message-circle"></i>
+        </a>
+        <a href="#" class="nav-item active">
+            <i data-lucide="book-open"></i>
+        </a>
+        <a href="postv2.html" class="nav-item">
+            <i data-lucide="users"></i>
+        </a>
+        <a href="markets.v2.html" class="nav-item">
+            <i data-lucide="trending-up"></i>
+        </a>
+    </nav>
+
+    <div id="expandedPostContainer" class="expanded-post-container">
+        <div class="expanded-post-header">
+            <div class="top-nav__buttons">
+                <button id="backButton" class="top-nav__button top-nav__button--back">Back</button>
+            </div>
+        </div>
+        <div class="expanded-post-content">
+            <h1 id="expandedPostTitle" class="expanded-post-title"></h1>
+            <div id="expandedPostMeta" class="expanded-post-meta"></div>
+            <div id="expandedPostBody" class="expanded-post-body"></div>
+        </div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    loadNews();
+    
+    const backButton = document.getElementById('backButton');
+    if (backButton) {
+        backButton.addEventListener('click', closeExpandedNews);
+    } else {
+        console.error('Back button not found');
+    }
+});
+
+function getTimeAgo(timestamp) {
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - past) / 1000);
+
+    if (diffInSeconds < 60) {
+        return 'just now';
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diffInSeconds < 604800) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    } else if (diffInSeconds < 2592000) {
+        const weeks = Math.floor(diffInSeconds / 604800);
+        return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+    } else {
+        const months = Math.floor(diffInSeconds / 2592000);
+        return `${months} ${months === 1 ? 'month' : 'months'} ago`;
+    }
+}
+
+function createNewsCard(news, index) {
+    const card = document.createElement('div');
+    card.className = 'news-card';
+    card.style.animationDelay = `${index * 50}ms`;
+    
+    card.innerHTML = `
+        <div class="news-card__image-container">
+            <img src="/api/placeholder/800/400" alt="${news.title}" class="news-card__image">
+        </div>
+        <div class="news-card__content">
+            <h2 class="news-card__title">${news.title}</h2>
+            <p class="news-card__summary">${news.summary}</p>
+            <div class="news-card__meta">
+                <span class="time-ago">${getTimeAgo(news.time_published)}</span>
+                <span class="source">${news.source}</span>
+            </div>
+        </div>
+    `;
+    
+    card.addEventListener('click', () => expandNewsCard(news, card));
+    return card;
+}
+
+function expandPostCard(post, cardElement) {
+            const expandedContainer = document.getElementById('expandedPostContainer');
+            const expandedTitle = document.getElementById('expandedPostTitle');
+            const expandedMeta = document.getElementById('expandedPostMeta');
+            const expandedBody = document.getElementById('expandedPostBody');
+
+            // Get the position of the clicked card
+            const rect = cardElement.getBoundingClientRect();
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            // Set the initial position and scale of the expanded container
+            expandedContainer.style.transition = 'none';
+            expandedContainer.style.transform = `scale(0.95) translate(${rect.left}px, ${rect.top + scrollTop}px)`;
+            expandedContainer.style.width = `${rect.width}px`;
+            expandedContainer.style.height = `${rect.height}px`;
+            expandedContainer.style.display = 'block';
+            expandedContainer.style.opacity = '0';
+
+            // Force a reflow
+            expandedContainer.offsetHeight;
+
+            // Animate to full screen
+            expandedContainer.style.transition = 'all 0.3s ease-out';
+            expandedContainer.style.transform = 'scale(1) translate(0, 0)';
+            expandedContainer.style.width = '100%';
+            expandedContainer.style.height = '100%';
+            expandedContainer.style.opacity = '1';
+
+            // Add content
+            expandedTitle.textContent = post.title;
+            expandedMeta.innerHTML = `
+                <span>${post.author}</span>
+                <span>${formatTimestamp(post.timestamp)}</span>
+                <span class="sentiment-score ${getSentimentClass(post.category)}">${post.symbol}</span>
+            `;
+            expandedBody.textContent = post.content;
+
+            // Add 'show' class for additional animations if needed
+            expandedContainer.classList.add('show');
+
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeExpandedPost() {
+            const expandedContainer = document.getElementById('expandedPostContainer');
+            expandedContainer.style.transition = 'all 0.3s ease-in';
+            expandedContainer.style.opacity = '0';
+            expandedContainer.style.transform = 'scale(0.95)';
+
+            setTimeout(() => {
+                expandedContainer.style.display = 'none';
+                expandedContainer.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }, 300);
+        }
+
+
+
+function loadNews() {
+    fetch('VotalityChat.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'getTopStories'
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error('Error:', data.error);
+            return;
+        }
+        const newsContainer = document.getElementById('news-container');
+        newsContainer.innerHTML = '';
+        if (data.stories && data.stories.length > 0) {
+            data.stories.forEach((story, index) => {
+                const newsCard = createNewsCard(story, index);
+                newsContainer.appendChild(newsCard);
+            });
+        } else {
+            newsContainer.innerHTML = '<p>No financial news stories available at the moment.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        document.getElementById('news-container').innerHTML = '<p>Failed to load financial news. Please try again later.</p>';
+    });
+}
+    </script>
+</body>
+</html>

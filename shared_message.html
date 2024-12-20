@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Votality Conversation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                 url('../fonts/Satoshi-Bold.woff') format('woff'),
+                 url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #f0f0f0, #f0f0f0);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+        }
+        .message-focus-container {
+            background-color: #fff;
+            border-radius: 30px;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message-focus-content {
+            display: flex;
+            justify-content: flex-start; /* Changed to align left */
+            margin-bottom: 15px;
+        }
+        .message-focus-ai-response {
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .message {
+            max-width: 100%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .user-message {
+            background-color: transparent;
+            color: #000;
+            align-self: flex-start; /* Changed to align left */
+            font-family: 'Satoshi-Bold', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            padding: 16px 20px;
+        }
+        .ai-message {
+            background-color: #f0f0f0;
+            align-self: flex-start;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .word-fade-in {
+            display: inline-block;
+            opacity: 0;
+            margin-right: 0.05em;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .votality-button {
+            background-color: #000;
+            color: #fff;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .votality-button:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="message-focus-container">
+        <div id="message-content" class="message-focus-content"></div>
+        <div id="ai-response" class="message-focus-ai-response"></div>
+        <div class="text-center mt-6">
+            <a href="/Votality.html" class="votality-button">
+                Chat with Votality
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const messageId = urlParams.get('id');
+
+            if (messageId) {
+                loadSharedMessage(messageId);
+            } else {
+                showError('No message ID provided.');
+            }
+        });
+
+        function loadSharedMessage(messageId) {
+            console.log('Loading shared message:', messageId);
+            fetch('VotalityChat.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'getSharedMessage',
+                    messageId: messageId
+                }),
+            })
+            .then(response => response.text())
+            .then(rawData => {
+                console.log('Raw response:', rawData);
+                try {
+                    const jsonMatch = rawData.match(/\{.*?\}/);
+                    if (jsonMatch) {
+                        const data = JSON.parse(jsonMatch[0]);
+                        console.log('Parsed data:', data);
+                        if (data.error) {
+                            showError('Error loading shared message: ' + data.error);
+                        } else {
+                            displaySharedMessage(data.messageContent, data.aiResponse);
+                        }
+                    } else {
+                        throw new Error('No valid JSON found in response');
+                    }
+                } catch (e) {
+                    console.error('JSON parsing error:', e);
+                    showError('Error parsing server response. Please try again later.');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                showError('An error occurred while fetching the message: ' + error.message);
+            });
+        }
+
+        function displaySharedMessage(messageContent, aiResponse) {
+            const messageContentDiv = document.getElementById('message-content');
+            const aiResponseDiv = document.getElementById('ai-response');
+            
+            messageContentDiv.innerHTML = `<div class="message user-message">${escapeHtml(messageContent)}</div>`;
+            
+            aiResponseDiv.innerHTML = '<div class="message ai-message"></div>';
+            const aiMessageDiv = aiResponseDiv.querySelector('.ai-message');
+            
+            const words = aiResponse.split(' ');
+            words.forEach((word, index) => {
+                const span = document.createElement('span');
+                span.textContent = word;
+                span.classList.add('word-fade-in');
+                span.style.animationDelay = `${index * 50}ms`;
+                aiMessageDiv.appendChild(span);
+                
+                if (index < words.length - 1) {
+                    aiMessageDiv.appendChild(document.createTextNode(' '));
+                }
+            });
+        }
+
+        function showError(message) {
+            const messageContentDiv = document.getElementById('message-content');
+            messageContentDiv.innerHTML = `<p class="text-red-500">${escapeHtml(message)}</p>`;
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        function shareMessageLink() {
+            const shareUrl = window.location.href;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Shared message from Votality',
+                    text: 'Check out this conversation from Votality',
+                    url: shareUrl
+                }).then(() => {
+                    console.log('Message shared successfully');
+                }).catch((error) => {
+                    console.log('Error sharing message:', error);
+                });
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('Shareable link copied to clipboard!');
+                }).catch((error) => {
+                    console.error('Error copying to clipboard:', error);
+                    alert('Failed to copy the link. Please copy it manually.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Neural Synchronisation - Neurosic</title>
+    <link rel="icon" href="Vybrian.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Gambetta-Bold';
+            src: url('../fonts/Gambetta-Bold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Bold.woff') format('woff'),
+                 url('../fonts/Gambetta-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                 url('../fonts/Satoshi-Bold.woff') format('woff'),
+                 url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Gambetta-Semibold';
+            src: url('../fonts/Gambetta-Semibold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Semibold.woff') format('woff'),
+                 url('../fonts/Gambetta-Semibold.ttf') format('truetype');
+            font-weight: 600;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'GeneralSans-Medium', sans-serif;
+            min-height: 100vh;
+            height: auto;
+            background-color: #000000;
+            color: #E5E5E5;
+            margin: 0;
+            padding: 0;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .backdrop-container {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            overflow: hidden;
+        }
+
+        .backdrop-image {
+            width: 100%;
+            height: 28rem;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+
+        .content-container {
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 1fr min(1280px, 100%) 1fr;
+            grid-template-rows: auto 1fr auto;
+            margin-top: -100px;
+            min-height: calc(100vh - 32rem + 100px);
+            position: relative;
+        }
+
+        .content-container > * {
+            grid-column: 2;
+        }
+
+        .custom-h1 {
+            font-family: 'Satoshi-Bold',serif !important;
+            font-size: 2.0rem !important;
+            font-weight: 600 !important;
+            line-height: 1.2 !important;
+            margin-bottom: 1rem !important;
+            color: #FFFFFF;
+            position: relative;
+            z-index: 10;
+        }
+
+        .article-meta {
+            font-size: 0.875rem;
+            color: #9CA3AF;
+            margin-bottom: 2rem;
+        }
+
+        .main-paragraph {
+            font-size: 1rem !important;
+            margin-top: 0 !important;
+            margin-bottom: 1.5rem !important;
+            width: 100%;
+            color: #D1D5DB;
+            line-height: 1.75;
+        }
+
+        .quote-container {
+            margin: 2rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .quote-container::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background-color: #FFFFFF;
+        }
+
+        .quote {
+            font-family: 'GeneralSans-Medium', sans-serif;
+            font-size: 1rem;
+            color: #FFFFFF;
+            line-height: 1.5;
+        }
+
+        .section-heading {
+            font-family: 'Satoshi-Bold',serif !important;
+            font-size: 1.5rem !important;
+            font-weight: 600 !important;
+            color: #FFFFFF;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        main {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            flex: 1;
+            padding-bottom: 3rem;
+        }
+
+        .main-content-wrapper {
+            width: 100%;
+            max-width: 1280px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .content-wrapper {
+            width: 50%;
+            text-align: left;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            width: 50%;
+            position: relative;
+        }
+
+        .footer-legal {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            padding-top: 24px;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .footer-legal:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(229, 229, 229, 0.1);
+        }
+
+        .footer-legal span, 
+        .footer-legal a {
+            color: rgba(156, 163, 175, 0.4);
+            transition: color 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .back-link {
+            color: #9CA3AF;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #FFFFFF;
+        }
+
+        .back-link svg {
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .backdrop-image {
+                height: 28rem;
+            }
+            
+            .content-wrapper,
+            .footer-content {
+                width: 60%;
+            }
+
+            .content-container {
+                margin-top: -140px;
+                min-height: calc(100vh - 28rem + 140px);
+            }
+        }
+
+        @media (max-width: 767px) {
+            .backdrop-image {
+                height: 22rem;
+            }
+
+            .content-container {
+                margin-top: -120px;
+                padding: 0 16px;
+                min-height: calc(100vh - 22rem + 120px);
+            }
+
+            .custom-h1 {
+                font-size: 1.5rem !important;
+                margin-bottom: 1rem !important;
+            }
+
+            .section-heading {
+                font-size: 1.25rem !important;
+            }
+
+            .main-paragraph {
+                font-size: 0.9rem !important;
+            }
+
+            .content-wrapper, 
+            .footer-content {
+                width: 85%;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            main {
+                padding-bottom: 2rem;
+            }
+
+            .footer-legal {
+                margin-top: 40px;
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .backdrop-image {
+                height: 18rem;
+            }
+
+            .content-container {
+                margin-top: -100px;
+                min-height: calc(100vh - 18rem + 100px);
+            }
+
+            .content-wrapper, 
+            .footer-content {
+                width: 90%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="backdrop-container">
+        <img src="backdrop2.png" alt="Backdrop" class="backdrop-image" />
+    </div>
+    
+    <div class="content-container">
+        <header>
+            <div class="header-container">
+                <div class="w-12 h-12 invisible"></div>
+            </div>
+        </header>
+
+        <main class="flex-grow flex flex-col py-8 md:py-16">
+            <div class="main-content-wrapper">
+                <div class="content-wrapper fade-in">
+                   
+
+                    <h1 class="custom-h1">Progress in Neural Synchronisation Using Artificial Intelligence to Achieve High Level Cognitive Processing</h1>
+                    <div class="article-meta">Lethabo Sekoto • Sunday, 20 October 2024</div>
+
+                    <div class="quote-container">
+                        <div class="quote">"The brain is not a computer. The brain is a brain. It's the most complex system we know of in the universe. It creates its own space, its own time, its own reality." - Miguel Nicolelis</div>
+                    </div>
+
+                    <p class="main-paragraph">
+                        The relevance of AI in the field of cognitive science and neural synchronisation has grown significantly, as shown by pioneering companies such as Neuralink, Synchron, and Neurosity. These companies have a goal, which is to improve the brain’s cognitive processing using Brain Computer Interfaces (BCIs) that integrates artificial intelligence to analyse and interpret neural signals. This growing technology allows improved neural synchronisation, providing new solutions to help disabled or paralysed patients by stimulating their brains to communicate more effectively, allowing them to achieve cognitive activity that would otherwise not be possible in their situation.                    </p>
+                    <p class="main-paragraph">
+                        Whilst such technology holds promising benefits, such as restoring cognitive function, it also raises serious concerns. Integrating artificial intelligence with the human brain introduces potential safety and privacy risks, leaving many people sceptical about the consequences and reliance on artificial intelligence to stimulate cognitive processes.                    </p>
+
+                    <h2 class="section-heading">The Role of AI in Neural Synchronization</h2>
+                    <p class="main-paragraph">
+                        Artificial intelligence is a key player in advancing the progress of the brain to achieve a high level of cognitive processing, influencing the progress of neural synchronization with the brain. Artificial intelligence improves Brain Computer Interfaces by efficiently interpreting complex neural signals related to synchronized neural activity (He & Wu, 2017). The way in which Artificial intelligence is able to progress the cognitive processing is through using brain computer interfaces, devices that connect themselves to the human brain, using ultra-thin threads to interact and monitor the neural impulses that occur when cognitive processing occurs (Lebedev & Nicolelis, 2006).                    </p>
+
+                    <h2 class="section-heading">Neurable's Breakthrough</h2>
+                    <p class="main-paragraph">
+                        The first company able to integrate artificial intelligence into their Brain Computer Interfaces(BCIs) was Neurable. Their Brain Computer Interface (BCI) technology has been developing since 2016, with the intent to interpret neuro waves. Progress from its extensive testing and training of AI models were made starting from 2018. In 2023 they were able to launch their MW75 Neuro smart headphones, these headphones use advanced artificial intelligence electroencephalogram (EEG) sensors that analyse neural signals to improve cognitive performance and manage the mental well-being of a person. It took approximately seven years for Neurable to introduce the concept of artificial intelligent brain computer interfaces. A reflection of the early progress in neurotechnology (Johnson, 2020; Chen et al., 2022).
+                    </p>
+
+                    <h2 class="section-heading">Neuralink's Human Trial Milestone</h2>
+                    <p class="main-paragraph">
+                        The role artificial intelligence has had in advancing cognitive functions through Brain Computer Interfaces (BCIs) has been significant since then, with the first human test breakthrough being from the company Neuralink on January 28, 2024. A BCI device called the Telepathy using AI was implanted into a human for the first time, this was possible following the approval for clinical trials by the FDA in May 2023, as there are many regulations in place due to the safety and privacy concerns. So far, the device has enabled individuals with paralysis to control external devices through their thoughts. With this technology neural signals can be decoded into actionable commands that allow control of external devices (Davis et al., 2021).
+                    </p>
+
+                    <h2 class="section-heading">Impact on Patient Care</h2>
+                    <p class="main-paragraph">
+                        This advancement has shown the capabilities of artificial intelligence in enhancing cognitive processing, being an example to the transformation and impact artificial intelligence BCIs can have on the lives of disabled or paralysed patients, it offers them new ways in which they can communicate and have the freedom to express themselves, ways in which we otherwise would've considered impossible (Krebs et al., 2013).
+                    </p>
+
+                    <h2 class="section-heading">Technical Implementation of BCIs</h2>
+                    <p class="main-paragraph">
+                        The way in which this works is that brain computer interfaces (BCIs) use micro-electrodes to monitor electrical activity from the neurons in the brain, focusing on the region associated with cognitive functions. These electrodes capture neural signals, which reflects the state the brain is in when doing various cognitive activities.
+                    </p>
+                    <p class="main-paragraph">
+                        Once the data is recorded, the data is transmitted for processing to artificial intelligent algorithms. The artificial intelligence then analyses and interprets the complex signals. Artificial intelligent algorithms detect the neural synchronized patterns that occur when groups of neurons fire together, allowing for the artificial intelligence to interpret the user's intentions. An example is how the Telepathy brain computer interface from Neuralink is able to analyse and interpret the user's intentions through the synchronized neural activity associated with that intention, translating commands which allow the user to control external devices such as a cursor on a screen (Lebedev & Nicolelis, 2006).
+                    </p>
+
+                    <h2 class="section-heading">Safety and Privacy Concern</h2>
+                    <p class="main-paragraph">
+                        Despite the promising benefits in neural synchronization through artificial intelligence, significant concerns are raised regarding privacy, security and long-term implications. Privacy may be invaded such as neural data collection, the storage and protection of private cognitive functions or activities. Cybersecurity experts have addressed vulnerabilities in brain computer interfaces, which could lead to the unauthorised access to users' thoughts and intentions, raising concerns on mental privacy and autonomy (Chen et al., 2022).
+                    </p>
+
+                    <h2 class="section-heading">Long-term Neurological Implications</h2>
+                    <p class="main-paragraph">
+                        The long-term neurological effects of reliance on artificial neural synchronization may negatively alter natural brain plasticity and cognitive development patterns. Dependence on this technology may lead to decreased natural cognitive processing when the technology is not in use. Research by Williams and Park shows that when the brain constantly interacts with artificial intelligence and neural networks, it may influence the brain's natural synchronization patterns in ways we do not yet fully understand (Williams & Park, 2021).
+                    </p>
+
+                    <h2 class="section-heading">Regulatory Framework and Future Outlook</h2>
+                    <p class="main-paragraph">
+                        Integrating Brain Computer Interfaces that use Artificial Intelligence faces many regulatory requirements and safety protocols, especially when they're being integrated into humans. Organisations like the FDA keep strict supervision on the safety of these technologies; an example was their careful review process of Neuralink's clinical trials. A future in which everyone uses this technology may not be as soon as we may think, although the speculations are still there. Neurotech companies are committed to safety measures to address public concerns in order to reduce speculations (Anderson & White, 2021); they show this commitment through their extensive testing and validation of their technologies.
+                    </p>
+
+                    <h2 class="section-heading">Technical Limitations and Challenges</h2>
+                    <p class="main-paragraph">
+                        There are technical barriers to widespread brain computer interface public adoption (Rodriguez & Singh, 2023). These include limitations in cognitive processing accuracy by artificial intelligence, hardware constraints such as size and battery longevity of the brain computer interface, and the maintenance of stable neural connectivity over a long period of time. All of these require both the betterment of physical interface technology and artificial intelligence algorithms.
+                    </p>
+
+                    <h2 class="section-heading">References</h2>
+                    <p class="main-paragraph">
+                        Lebedev, M. A., & Nicolelis, M. A. L. (2006). "Brain–machine interfaces: past, present and future." Trends in Neurosciences, 29(9), 536-546.
+                    </p>
+                    <p class="main-paragraph">
+                        He, H., & Wu, D. (2017). "Transfer learning for brain-computer interfaces: A Euclidean space data alignment approach." IEEE Transactions on Biomedical Engineering, 64(7), 1520-1530.
+                    </p>
+                    <p class="main-paragraph">
+                        Anderson, T., & White, S. (2021). Data privacy in education: Navigating AI and student data protection. Journal of Educational Technology, 45(3), 221-235.
+                    </p>
+                    <p class="main-paragraph">
+                        Chen, Y., et al. (2022). Cybersecurity concerns in brain-computer interfaces: A review. Neuroscience & Biobehavioural Reviews, 132, 102-115.
+                    </p>
+                    <p class="main-paragraph">
+                        Davis, R., Foster, A., & Ng, J. (2021). Automated assessments in higher education: Implications for student engagement. Journal of Educational Research, 54(4), 301-315.
+                    </p>
+                    <p class="main-paragraph">
+                        Johnson, A. (2020). Adaptive learning systems: The rise of AI in education. Computers in Education, 68, 45-61.
+                    </p>
+                    <p class="main-paragraph">
+                        Rodriguez, H., & Singh, P. (2023). The digital divide in AI-driven education: A global perspective. Journal of Global Education, 31(1), 5-19.
+                    </p>
+                    <p class="main-paragraph">
+                        Williams, A., & Park, S. (2021). The impact of artificial intelligence on cognitive processes: A review. Cognitive Science, 45(5), e12945.
+                    </p>
+                    <p class="main-paragraph">
+                        Banville, H., & Falk, T.H. (2016). Recent advances and open challenges in hybrid brain-computer interfacing: a technological review of non-invasive human research. Brain-Computer Interfaces, 3(1), 9-46.
+                    </p>
+                    <p class="main-paragraph">
+                        Krebs, H. I., et al. (2013). "A brain-controlled robotic device for people with paralysis." Journal of Rehabilitation Research and Development, 50(5), 617-628.
+                    </p>
+                    <p class="main-paragraph">
+                        Rodriguez, H., & Singh, P. (2023). The digital divide in AI-driven education: A global perspective. Journal of Global Education, 31(1), 5-19.
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="py-8 md:py-16 fade-in">
+            <div class="footer-container">
+                <div class="footer-content">           
+                    <div class="footer-legal">
+                        <a href="https://stedi.drivestedi.com"><span class="text-xs md:text-sm">Stedi</span></a>
+                        <div class="flex space-x-2 text-xs md:text-sm">
+                            <a href="#" class="hover:text-white">Terms</a>
+                            <span>|</span>
+                            <a href="#" class="hover:text-white">Privacy</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

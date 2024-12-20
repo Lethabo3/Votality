@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Votality Waitlist</title>
+    <link rel="icon" href="favicon5.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(function(registration) {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, function(error) {
+            console.log('ServiceWorker registration failed: ', error);
+          });
+      }
+    </script>
+    
+    <style>
+        @font-face {
+            font-family: 'Gambetta-Bold';
+            src: url('../fonts/Gambetta-Bold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Bold.woff') format('woff'),
+                 url('../fonts/Gambetta-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @keyframes votalityZoomIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes votalityZoomOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+        }
+        .votality-zoom-in {
+            opacity: 0;
+            animation: votalityZoomIn 0.5s ease-out forwards;
+        }
+        .votality-zoom-out {
+            animation: votalityZoomOut 0.3s ease-in forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+
+        body {
+            font-family: 'GeneralSans-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #d0d0d0);
+            min-height: 100vh;
+        }
+
+        input[type="text"], input[type="email"] {
+            border-radius: 20px;
+            background-color: #ffffff;
+            border: 1px solid #d1d1d1;
+            padding: 12px 20px;
+        }
+
+        button[type="submit"] {
+            border-radius: 20px;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90px;
+        }
+
+        .form-container {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h2 {
+            font-family: 'Gambetta-Bold', serif;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 font-sans">
+    <div class="container votality-zoom-in">
+        <div class="logo-container delay-100">
+            <img src="Votality.jpg" alt="Votality AI Logo" class="w-20 h-20 object-cover">
+        </div>
+        <div class="form-container">
+            <div class="text-center delay-200">
+                <h2 class="text-4xl font-bold text-gray-800 mb-3">Join the Waitlist</h2>
+                <p class="text-gray-600">Be the first to experience Votality, the AI that grows with your trades.</p>
+            </div>
+            <form class="space-y-8 mt-8" id="waitlistForm" action="process_waitlist.php" method="POST">
+                <div class="delay-300">
+                    <input type="text" id="name" name="name" placeholder="Your Name" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800" required>
+                </div>
+                <div class="delay-300">
+                    <input type="email" id="email" name="email" placeholder="Email Address" class="w-full px-4 py-3 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 text-gray-800" required>
+                </div>
+                <button type="submit" class="w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300 delay-400">
+                    Join Waitlist
+                </button>
+            </form>
+            <p class="mt-4 text-center text-gray-600 delay-400">
+                By joining, you agree to receive updates about Votality.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            setTimeout(() => {
+                document.querySelectorAll('.votality-zoom-in, .delay-100, .delay-200, .delay-300, .delay-400').forEach(el => {
+                    el.style.opacity = '1';
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

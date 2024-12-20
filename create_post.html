@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-G7WREYHFF7');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post - Votality</title>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e5e7eb;
+            --button-color: #333333;
+            --input-background: #ffffff;
+            --form-background: #f9f9f9;
+            --hover-color: #f3f4f6;
+            --grid-color: rgba(229, 231, 235, 0.3);
+        }
+
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            background-color: var(--background-color);
+            background-image: 
+                linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%),
+                linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 60px; /* Space for top nav */
+        }
+
+        .content-wrapper {
+            max-width: 400px;
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .main-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .post-form {
+            background-color: var(--form-background);
+            border-radius: 29px;
+            padding: 1.5rem;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        .post-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea,
+        .submit-button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            border: 1px solid var(--border-color);
+            background-color: var(--input-background);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--button-color);
+        }
+
+        .submit-button {
+            background-color: var(--button-color);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        .submit-button:hover {
+            opacity: 0.9;
+        }
+
+        .terms {
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+            margin-top: 0.75rem;
+        }
+
+        .terms a {
+            color: var(--button-color);
+            text-decoration: none;
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1rem;
+            z-index: 20;
+        }
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .top-nav__button--secondary {
+            color: #000000;
+            background-color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            border: 1px solid #e0e0e0;
+        }
+
+        .top-nav__button--primary {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .form-input,
+            .form-select,
+            .form-textarea,
+            .submit-button {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .top-nav__button {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .main-title {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .post-form {
+                padding: 1rem;
+            }
+
+            .post-title {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .form-input,
+            .form-select,
+            .form-textarea,
+            .submit-button {
+                padding: 0.5rem;
+                margin-bottom: 0.5rem;
+                font-size: 0.85rem;
+            }
+
+            .terms {
+                font-size: 0.7rem;
+                margin-top: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons">
+            <a href="postv2.html" class="top-nav__button top-nav__button--secondary">Back</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="content-wrapper">
+            <h2 class="main-title">Create Post</h2>
+            <form id="create-post-form" action="create_post.php" method="POST" class="post-form">
+                <h3 class="post-title">Share your analysis with the Votality community</h3>
+                <input type="text" id="title" name="title" placeholder="Post Title" class="form-input" required>
+                <input type="text" id="symbol" name="symbol" placeholder="Symbol (e.g., EURUSD, AAPL)" class="form-input" required>
+                <select id="category" name="category" class="form-select" required>
+                    <option value="">Select Category</option>
+                    <option value="Bullish">Bullish</option>
+                    <option value="Bearish">Bearish</option>
+                    <option value="Neutral">Neutral</option>
+                </select>
+                <textarea id="content" name="content" rows="4" placeholder="Your analysis or thoughts" class="form-textarea" required></textarea>
+                <button type="submit" class="submit-button">Post</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('create-post-form');
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch('create_post.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        // If the response is a redirect
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            const result = await response.text();
+                            console.log(result);
+                            // Redirect to posts page on success
+                            window.location.href = 'postv2.html';
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        throw new Error(errorText);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred while submitting your post. Please try again.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

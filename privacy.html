@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>privacy</title>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+        }
+        
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        body {
+            background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: transparent;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            margin-top: 1rem; /* Add space for the date */
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: #4b5563;
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            line-height: 1.75;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 3rem;
+            padding-bottom: 8rem;
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem 2rem 2rem;
+        }
+        
+        .section {
+            background-color: transparent;
+            padding: 2rem 0;
+        }
+        
+        .section:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+            margin-bottom: 0;
+        }
+        
+        .section p {
+            font-size: 1.10rem;
+            line-height: 1.75;
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+        
+        .arrow-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--text-color);
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease, transform 0.3s ease;
+            margin-top: 1.25rem;
+            margin-right: 1.25rem;
+            position: relative;
+        }
+        
+        .arrow-container:hover {
+            background-color: var(--hover-color);
+            cursor: pointer;
+            transform: translateX(5px);
+        }
+        
+        .arrow-container svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-color);
+            transform: rotate(180deg);
+        }
+        
+        .top-nav {
+            position: static;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1.5rem;
+        }
+        
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+        
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .top-nav__button--home {
+            background-color: #fff;
+            color: #000;
+        }
+        
+        .top-nav__button--contact {
+            color: #fff;
+            background-color: #000;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .faq-section {
+            margin-top: 4rem;
+        }
+        
+        .faq-section h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+        }
+        
+        .faq-container {
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .faq-question {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+            color: var(--text-color);
+            font-size: 1.10rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .faq-toggle {
+            position: relative;
+            min-width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+        }
+        
+        .faq-toggle svg {
+            position: absolute;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        
+        .plus-icon {
+            opacity: 1;
+            transform: rotate(0deg);
+            display: block;
+        }
+        
+        .cross-icon {
+            opacity: 0;
+            transform: rotate(-90deg);
+            display: block;
+        }
+        
+        .faq-toggle.active .plus-icon {
+            opacity: 0;
+            transform: rotate(90deg);
+        }
+        
+        .faq-toggle.active .cross-icon {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: top;
+            transform: translateY(-10px);
+        }
+        
+        .faq-answer.active {
+            max-height: 1000px;
+            opacity: 1;
+            transform: translateY(0);
+            padding: 0 0 1.5rem 0;
+        }
+        
+        .footer-container {
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        
+        .footer-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--text-color);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+        
+            .hero {
+                padding: 4rem 1rem;
+            }
+        
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        
+            .hero p {
+                font-size: 1.125rem;
+            }
+        
+            .stats-container {
+                flex-wrap: wrap;
+                gap: 2rem;
+            }
+        
+            .footer-links {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+
+        .hero .last-updated {
+        font-size: 1rem;
+        color: #4b5563;
+        line-height: 1.75;
+        /* Override any hero text-align if needed */
+        text-align: center;
+        /* Override hero p styles */
+        max-width: 800px;
+        }
+
+    .hero p.last-updated {
+        margin: 2rem auto 1.5rem auto; /* Ensure this specific styling is applied */
+    }
+        </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons"> 
+           <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
+            <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
+            <a href="about.html" class="top-nav__button top-nav__button--home">About</a>
+            <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
+            <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <p class="last-updated">December 09, 2024</p>
+        <h1>Your Data, Your Trust</h1>
+        <p>Transparent data practices and robust privacy protection for AI-powered solutions.</p>
+        
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number">256-bit</div>
+                <div class="stat-label">Encryption</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Monitoring</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">ISO 27001</div>
+                <div class="stat-label">Certified</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">GDPR</div>
+                <div class="stat-label">Compliant</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <section class="section">
+            <div class="section-header">
+                <h2>Protecting Your Privacy</h2>
+                <div class="arrow-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                </div>
+            </div>
+            
+            <p>This Privacy Policy describes how Votality AI, Inc. ("we," "us," "our") collects, uses, and discloses information about individuals who use our websites, applications, services, tools, and features to access our products or otherwise interact with us (collectively, the "Services"). For the purposes of this Privacy Policy, we are the data controller, and "you" and "your" means you as the user of the Services, whether you are a customer, website visitor, job applicant, representative of a company with whom we do business, or another individual whose information we have collected pursuant to this Privacy Policy. This Privacy Policy does not cover the use of any Votality API or enterprise-level services, where we act solely as a processor, and which are governed by the applicable Terms and Conditions, including any Data Processing Addendums incorporated therein, that you agree to when signing up for a subscription to those services.</p>
+    
+            <p>Please read this Privacy Policy carefully. By using any of the Services, you agree to the collection, use, and disclosure of your information as described in this Privacy Policy. If you do not agree to this Privacy Policy, please do not use or access the Services.</p>
+    
+            <p>We may modify this Privacy Policy from time to time, in which case we will update the “Last Updated” date at the top of this Privacy Policy. If we make material changes to the way in which we use or disclose information we collect, we will use reasonable efforts to notify you (such as by emailing you at the last email address you provided us, by posting notice of such changes on the Services, or by other means consistent with applicable law) and will take additional steps as required by applicable law. If you do not agree to any updates to this Privacy Policy, please do not continue using or accessing the Services.</p>
+    
+            <p>When you use or access the Services, we collect certain categories of information about you from a variety of sources.</p>
+
+            <p>Some features of the Services may require you to directly provide us with certain information about yourself. You may elect not to provide this information, but doing so may prevent you from using or accessing these features. Information that you directly submit through our Services includes basic contact details, such as your name, address, phone number, and email ("Contact Information"). This information is used to perform our contract with you to provide the Services and to communicate with you, including informing you about promotions, products, or services of interest, with your consent where required. We also collect account information such as your name, username, email, and password ("Account Information"), which we use to maintain and secure your account. If you register an account, you are responsible for keeping your credentials safe. If your account is compromised, please contact us immediately at support@votalityai.com.</p>
+            
+            <p>We may collect payment information, including credit or debit card details and billing addresses, through secure third-party processors ("Payment Information"), to facilitate payments for the Services. Applicant details such as resumes, references, and job history ("Applicant Information") may also be collected to process job applications and evaluate candidacies as part of our legitimate interests.</p>
+            
+            <p>Your interaction with the Services, such as inputs, prompts, and any outputs generated, may include personal information ("Service Interaction Information"). These inputs and outputs may be used to perform our contract with you. Please note that if you share content publicly or with third parties, it may be stored, displayed, reproduced, or disclosed without your permission and may or may not be attributed to you. Additionally, any other information you include in communications with us will be processed to fulfill our contract with you, such as when you submit messages or specific details during transactions.</p>
+            
+            <p>We, and certain third parties, automatically collect certain information about your interaction with the Services ("Usage Data") through tracking technologies such as cookies and pixels. This includes device information, such as the type of device, operating system, unique identifiers, and IP address, as well as approximate location and interaction data like browser type, clickstream data, and ad impressions. This Usage Data is used to tailor content, analyze user interactions, and improve the Services. For further details about our use of tracking technologies, refer to the "Cookies and Other Tracking Technologies" section.</p>
+            
+            <p>We may obtain additional information about you from third-party sources, such as analytics providers (e.g., Google Analytics) to enhance the Services. We may also receive details from career platforms like LinkedIn or job boards, as well as marketing databases to customize advertising ("Advertising Information"). Partner organizations may share data with us to facilitate offers, promotions, or discounted access to the Services ("Partner Information"). If you link third-party accounts (e.g., Google or Apple) to your Votality account, we collect and use this information to maintain and manage your account.</p>
+            
+            <p>Publicly accessible sources, such as articles or journals, may also provide information relevant to the Services. All collected data is used to provide and improve the Services, enhance safety, troubleshoot issues, and comply with applicable laws and obligations. Where applicable, we may anonymize your data to ensure it cannot be linked back to you ("Deidentified Information") and use such information for legitimate purposes, ensuring compliance with legal requirements.</p>
+            
+            <p>Any information received from third parties will be treated in accordance with this Privacy Policy. We are not responsible for the accuracy of information provided by third parties or their respective policies or practices.</p>    
+            
+            <p>Most browsers accept cookies automatically, but you may have the ability to control how your devices handle the use of tracking technologies. If you choose, you may block or delete our cookies from your browser or limit cross-site tracking. However, doing so may affect the functionality of some Services, including certain features and general usability. If you have questions about the specific information we process or retain about you, as well as your choices regarding our data collection and use practices, please contact us using the information provided below.</p>    
+            <p>We may disclose your information to third parties in accordance with this Privacy Policy. This includes sharing information with our affiliates or others within our corporate group for internal administration or support purposes, which is in our legitimate interest to operate a successful business and provide our Services. We may also disclose your information to service providers and vendors that assist in delivering the Services, such as those providing system administration, cloud storage, AI content creation, security, customer transaction facilitation, marketing communications, web analytics, payment networks, and payment processing. In addition, we may share information with business partners that facilitate your access to our Services, such as through promotion codes or other partnership arrangements, to provide free or discounted access to the Services.</p>
+
+            <p>If you direct us to disclose your information, for example, through the use of social media widgets, login integrations, or when purchasing third-party goods via the Services, we may share your information with other third parties, including other users. Outputs or shared content that you make publicly available may also be visible to others. Advertising partners may receive your information to assist with delivering advertisements or displaying advertising information on our Services. When necessary, we may share your personal data with professional advisors such as auditors, legal counsel, and accountants to protect our business interests or comply with legal obligations.</p>
+            
+            <p>In the event of a corporate control change, such as a merger, restructuring, asset sale, bankruptcy, or similar transaction, we may share personal information with a prospective buyer, seller, or new owner to ensure business continuity. Additionally, we may disclose your information as required to comply with applicable law, regulatory obligations, judicial orders, or law enforcement inquiries. Such disclosures also help enforce our terms of service, protect the safety of our business and users, and meet legal and security requirements.</p>
+
+            <p>Certain features of the Services may allow you to initiate interactions between the Services and third-party platforms or services, such as Discord, X (formerly Twitter), and other social networks ("Social Features"). These Social Features may allow you to access our pages on third-party platforms and engage with our content, such as liking or sharing it. When you use these features, a third party may collect and/or use your information. Any content you post or make accessible through these Social Features may be publicly displayed by the third-party service. Both we and the third party may have access to information about you and your use of both the Services and the third-party platform. For further information, please refer to the section below on Third-Party Websites and Links.</p>
+
+            <p>We may provide links to third-party websites or platforms, such as Discord and X (formerly Twitter). If you follow links to sites or platforms that we do not control and are not affiliated with us, you should review their privacy policies, terms of service, and other applicable notices. We are not responsible for the privacy or security of, or any information found on, these third-party sites or platforms. Information you provide on public or semi-public venues, such as third-party social networking platforms, may also be visible to other users of both the Services and those third-party platforms without restriction on its use. Our inclusion of such links does not imply any endorsement of the content on those platforms or of their owners or operators.</p>
+        
+            <p>Children under the age of 13 are not permitted to use the Services, and we do not knowingly collect or seek to collect any personal information from children, particularly those under 13 years of age, or in regions where the minimum age for processing personal data differs. For users above the age of 13 but below the age at which they can legally consent to the processing of their personal information, we require parental or guardian consent before using the Services.</p>
+
+            <p>If we become aware that we have unknowingly collected information from a child under the relevant minimum age, we will make commercially reasonable efforts to delete such information. If you are the parent or guardian of a child under the applicable age who has provided us with their personal information, please contact us using the information below to request its deletion.</p>
+
+            <p>Despite our reasonable efforts to protect your information, no security measures are completely impenetrable, and we cannot guarantee "perfect security." Any information you send to us electronically, whether through the Services or by other means, may not be secure while in transit. We recommend that you avoid using unsecured channels to send sensitive or confidential information.</p>
+
+            <p>We retain your information for as long as reasonably necessary to fulfill the purposes outlined in this Privacy Policy. When determining how long to retain your information, we consider factors such as whether we need the data to continue providing the Services, resolve disputes, enforce our contractual agreements, prevent harm, promote safety, ensure security and integrity, or protect our rights, property, or products.</p>
+
+            <p>Depending on where you live, you may have certain rights regarding the personal information we have collected about you. These rights are not absolute, and in some instances, we may decline your request as permitted by law. You may have the right to access or request information about the personal data we hold about you, including details about its collection, use, and disclosure. You may also have the right to request that we delete the personal information we maintain about you or correct any inaccuracies. Additionally, you may have the right to receive a copy of your personal information and request that we transfer it to a third party. In certain cases, you may request that we stop, suspend, or restrict our processing of your personal data, or object to our processing altogether.</p>
+
+            <p>If we rely on your consent to process your personal information, you have the right to withdraw this consent at any time by contacting us at support@votalityai.com. Please note that withdrawing your consent will not affect the lawfulness of any processing conducted before your withdrawal, but it may prevent us from delivering the Services to you as expected.</p>
+            
+            <p>You may also opt out of receiving personalized advertising or marketing promotions by contacting us at the provided email address. To exercise any of these rights, please contact us using the information below. We may require additional information, such as your email address or government-issued ID, to verify your identity before responding to your request. You can also designate an authorized agent to act on your behalf by providing a written document or power of attorney. If your request is denied, you may appeal our decision by contacting us again.</p>
+            
+            <p>To stop the collection of your information for AI purposes, such as improving our models, you can adjust your settings on the Services. You may also request to delete your account through the settings page or by contacting us at support@votalityai.com. Upon deletion, we aim to remove your personal data from our servers within 30 days.</p>
+
+            <p>If you have any complaints about how we process your personal information, please contact us at support@votalityai.com, and we will respond to your request as soon as possible.</p>
+
+<p>If you believe we have violated data protection laws, you can file a complaint with the data protection supervisory authority in your country of residence or work, or where you believe the infringement occurred. This may include filing a complaint with the relevant authority, such as the UK Information Commissioner's Office or another applicable data protection authority.</p>
+
+<p>Should you have any questions about our privacy practices or this Privacy Policy, please email us at support@votalityai.com and/or your local representative's contact details as set out above.</p>
+
+<p>Except as otherwise prescribed by applicable law, in the event of any inconsistency between the English language version and local language version of this Privacy Policy, the English language version will prevail.</p>
+        </section>
+            <section class="section faq-section">
+            <h2>FAQ</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Will Votality use my content to improve models and services?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Data submitted through our API is not used to train our AI models or improve service offerings without explicit consent. Data submitted through our consumer services may be used to improve our models, subject to our privacy settings and opt-out options.</p>
+                    </div>
+                </div>
+        
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How is my data protected and stored?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We use industry-standard encryption and security measures to protect your data. All information is stored in secure, encrypted databases with regular security audits and updates. We maintain strict access controls and monitor all data access patterns.</p>
+                    </div>
+                </div>
+        
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What rights do I have regarding my data?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>You have the right to access, modify, or delete your personal data at any time. You can also request a complete export of your data, opt out of data processing for specific purposes, and withdraw consent for data usage. These rights can be exercised through your account settings or by contacting our privacy team.</p>
+                    </div>
+                </div>
+        
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How long is my data retained?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We retain your data only for as long as necessary to provide our services and comply with legal obligations. Active account data is kept while your account is active, and you can request deletion at any time. After account closure, we may retain certain data for a limited period as required by law or for legitimate business purposes.</p>
+                    </div>
+                </div>
+        
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What happens to my data if Votality is acquired?
+                        <span class="faq-toggle">
+                            <svg class="plus-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>If Votality is involved in a merger, acquisition, or sale of assets, your personal data would continue to be protected under our privacy commitments. We would notify you before your information becomes subject to a different privacy policy and provide you with choices regarding your data.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="about.html" class="footer-link">About</a>
+                <a href="pricing.html" class="footer-link">Pricing</a>
+                <a href="terms.html" class="footer-link">Terms</a>
+                <a href="privacy.html" class="footer-link">Privacy</a>
+                <a href="contact.html" class="footer-link">Contact</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        document.querySelectorAll('.faq-question').forEach(button => {
+        button.addEventListener('click', () => {
+            const answer = button.nextElementSibling;
+            const toggle = button.querySelector('.faq-toggle');
+            
+            // Close all other answers with smooth animation
+            document.querySelectorAll('.faq-answer').forEach(item => {
+                if (item !== answer && item.classList.contains('active')) {
+                    const otherToggle = item.previousElementSibling.querySelector('.faq-toggle');
+                    
+                    // Start closing animation
+                    item.style.maxHeight = item.scrollHeight + 'px';
+                    item.classList.remove('active');
+                    otherToggle.classList.remove('active');
+                    
+                    // Reset after animation
+                    setTimeout(() => {
+                        item.style.maxHeight = null;
+                    }, 0);
+                }
+            });
+            
+            // Toggle current answer with smooth animation
+            if (!answer.classList.contains('active')) {
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                answer.classList.add('active');
+                toggle.classList.add('active');
+            } else {
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                answer.classList.remove('active');
+                toggle.classList.remove('active');
+                
+                setTimeout(() => {
+                    answer.style.maxHeight = null;
+                }, 0);
+            }
+        });
+    });
+    </script>
+</body>
+</html>

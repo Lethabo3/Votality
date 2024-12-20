@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality - No News Available</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="icon" href="b2.png">
+    <style>
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                 url('../fonts/Satoshi-Bold.woff') format('woff'),
+                 url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Switzer-Medium';
+            src: url('../fonts/Switzer-Medium.woff2') format('woff2'),
+                 url('../fonts/Switzer-Medium.woff') format('woff'),
+                 url('../fonts/Switzer-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Switzer-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #fff);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2 {
+            font-family: 'Satoshi-Bold', sans-serif;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 180px);
+            padding-bottom: -20px;
+        }
+
+        .no-news-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            background-color: transparent;
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            justify-content: space-around;
+            align-items: center;
+            height: 60px;
+            z-index: 10;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #888888;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: #000000;
+        }
+
+        .nav-item:hover {
+            color: #444444;
+        }
+
+        .nav-item i {
+            margin-bottom: 4px;
+            font-size: 20px;
+        }
+
+        @keyframes votalityFadeZoom {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .votality-fade-zoom {
+            animation: votalityFadeZoom 0.5s ease-out forwards;
+        }
+
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body>
+     <main class="flex-grow flex flex-col items-center justify-center text-center px-4">
+        <div class="logo-container mb-8 ">
+            <img src="zero.png" alt="Votality Logo" class="w-16 h-16">
+        </div>
+        <h1 class="text-3xl font-bold mb-4 ">No News Available</h1>
+        <p class="text-xl mb-8 ">
+            We're currently unable to fetch the latest news. This could be due to a temporary issue with our news service or network connectivity.        </p>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="Votality.html" class="nav-item">
+            <i data-feather="message-circle"></i>
+        </a>
+        <a href="#" class="nav-item active">
+            <i data-feather="book-open"></i>
+        </a>
+        <a href="Posts.html" class="nav-item">
+            <i data-feather="users"></i>
+        </a>
+        <a href="market.html" class="nav-item">
+            <i data-feather="trending-up"></i>
+        </a>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+        });
+    </script>
+</body>
+</html>

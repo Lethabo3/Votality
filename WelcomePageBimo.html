@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Votality AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="icon" href="b2.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <script>
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, function(error) {
+              console.log('ServiceWorker registration failed: ', error);
+            });
+        }
+    </script>
+    <style>
+        @font-face {
+            font-family: 'Gambetta-Bold';
+            src: url('../fonts/Gambetta-Bold.woff2') format('woff2'),
+                 url('../fonts/Gambetta-Bold.woff') format('woff'),
+                 url('../fonts/Gambetta-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Satoshi-Bold';
+            src: url('../fonts/Satoshi-Bold.woff2') format('woff2'),
+                 url('../fonts/Satoshi-Bold.woff') format('woff'),
+                 url('../fonts/Satoshi-Bold.ttf') format('truetype');
+            font-weight: 700;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        body {
+            font-family: 'GeneralSans-Medium', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(to bottom, #fff, #fff, #d0d0d0);
+            min-height: 100vh;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        .curvy-button {
+            border-radius: 9999px;
+            padding: 16px 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .absolute-button {
+            position: absolute;
+            top: calc(env(safe-area-inset-top) + 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: transparent;
+            color: #333333;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d1d1;
+            border-radius: 9999px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .absolute-button:hover {
+            background-color: #f0f0f0;
+            color: #000000;
+        }
+        h1 {
+            font-family: 'Satoshi-Bold',serif;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 font-sans">
+    <div class="min-h-screen flex flex-col items-center justify-between p-6">
+        <div class="w-full max-w-md text-center mt-20 fade-in">
+            <img src="Votality.jpg" alt="Votality AI Logo" class="mx-auto mb-6 w-32 h-32 object-cover">
+            <h1 class="text-4xl font-bold text-gray-800 mb-3">Welcome to Votality</h1>
+            <p class="text-gray-600 mb-6">Earn more with Votality.</p>
+        </div>
+        
+        <div class="button-container fade-in">
+            <button onclick="window.location.href='SignUpBimo.html'" class="curvy-button w-full bg-gray-800 text-white mb-4 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                Get started
+            </button>
+            <button onclick="window.location.href='LoginPageBimo.html'" class="curvy-button w-full text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50" style="background-color: #f0f0f0;">
+                Login
+            </button>
+            
+            <p class="mt-4 text-center text-gray-600 underline-links">
+                By continuing, you agree to Votality AI's <a href="Terms and Conditions.html" class="text-gray-600 hover:text-gray-800 hover:underline">Terms & Conditions</a> and <a href="Votality AI Privacy Notice.html" class="text-gray-600 hover:text-gray-800 hover:underline">Privacy Policy</a>.
+            </p>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>terms</title>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+        }
+
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: transparent;
+            position: relative;
+        }
+
+        .hero .last-updated {
+            position: absolute;
+            width: 100%;
+            top: 6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.25rem;
+            color: #4b5563;
+            line-height: 1.75;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-top: 4rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #4b5563;
+            max-width: 800px;
+            margin: 0 auto 2rem auto;
+            line-height: 1.75;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 3rem;
+            padding-bottom: 8rem;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem 2rem 2rem;
+        }
+
+        .section {
+            background-color: transparent;
+            padding: 2rem 0;
+        }
+
+        .section:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+            margin-bottom: 0;
+        }
+
+        .section p {
+            font-size: 1.10rem;
+            line-height: 1.75;
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+            margin-bottom: 0;
+        }
+
+        .arrow-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid var(--text-color);
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease, transform 0.2s ease;
+            margin-top: 1.25rem;
+            margin-right: 1.25rem;
+            position: relative;
+        }
+
+        .arrow-container:hover {
+            background-color: var(--hover-color);
+            cursor: pointer;
+            transform: translateX(5px);
+        }
+
+        .arrow-container svg {
+            width: 18px;
+            height: 18px;
+            color: var(--text-color);
+            transform: rotate(180deg);
+        }
+
+        .top-nav {
+            position: static;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1.5rem;
+        }
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .top-nav__button--home {
+            background-color: #fff;
+            color: #000;
+        }
+
+        .top-nav__button--contact {
+            color: #fff;
+            background-color: #000;
+            border: 1px solid #e0e0e0;
+        }
+
+        .footer-container {
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .hero {
+                padding: 4rem 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.125rem;
+            }
+
+            .stats-container {
+                flex-wrap: wrap;
+                gap: 2rem;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons">
+            <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
+            <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
+            <a href="about.html" class="top-nav__button top-nav__button--home">About</a>
+            <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
+            <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <p class="last-updated">December 09, 2024</p>
+        <h1>Our Terms & Conditions</h1>
+        <p>Clear guidelines and agreements for using our AI-powered platform responsibly.</p>
+        
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Support</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Transparency</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">Fair Use</div>
+                <div class="stat-label">Policy</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">Global</div>
+                <div class="stat-label">Compliance</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <section class="section">
+            <div class="section-header">
+                <h2>Service Terms</h2>
+                <div class="arrow-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                </div>
+            </div>
+            
+            <p>Welcome to Votality! Before you access our services, please read these Terms of Service.</p>
+
+            <p>These Terms of Service ("Terms") govern your use of Claude.ai, Claude Pro, and other products and services that we may offer for individuals, along with any associated apps, software, and websites (together, our "Services"). These Terms are a contract between you and Votality, PBC ("Votality") (and not our Providers), and they include our Acceptable Use Policy. By accessing our Services, you agree to these Terms.</p>
+            
+            <p>Please read our Privacy Policy, which describes how we collect and use personal information.</p>
+            
+            <p>Please note: Our Commercial Terms of Service govern your use of any Votality API key, the Votality Console, or any other Votality offerings that reference the Commercial Terms of Service. For clarity, this does not include Claude.ai or Claude Pro use for individuals or entities.</p>
+            
+            <h3>1. Who we are</h3>
+            
+            <p>Votality is an AI safety and research company working to build reliable, interpretable, and steerable AI systems. We conduct frontier research, develop and apply a variety of safety techniques, and deploy the resulting systems via a set of partnerships and products.</p>
+            
+            <h3>2. Account creation and access</h3>
+            
+            <p>Minimum age. You must be at least 18 years old or the minimum age required to consent to use the Services in your location, whichever is higher.</p>
+            
+            <p>Your Votality Account. To access our Services, we may ask you to create an Account. You agree to provide correct, current, and complete Account information and allow us to use it to communicate with you about our Services. Our communications to you using your Account information will satisfy any requirements for legal notices.</p>
+            
+            <p>You may not share your Account login information, Votality API key, or Account credentials with anyone else. You also may not make your Account available to anyone else. You are responsible for all activity occurring under your Account, and you agree to notify us immediately if you become aware of any unauthorized access to your Account by sending an email to support@votalityai.com.</p>
+            
+            <p>You may close your Account at any time by contacting us at support@votalityai.com.</p>
+            
+            <p>Business Domains. If you use an email address owned by your employer or another organization, your Account may be linked to the organization's Votality enterprise account, and the organization's administrator may be able to monitor and control the Account, including having access to Materials (defined below). We will provide notice to you before linking your Account to an organization's enterprise account. However, if the organization is responsible for notifying you or has already informed you that it may monitor and control your Account, we may not provide additional notice.</p>
+            
+            <p>Evaluation and Additional Services. In some cases, we may permit you to evaluate our Services for a limited time or with limited functionality. Use of our Services for evaluation purposes are for your personal, non-commercial use only.</p>
+            
+            <p>You may need to accept additional terms to use certain Services. These additional terms will supplement our Terms for those Services and may change your rights or obligations for those Services, including your obligations to pay fees.</p>
+            
+            <h3>3. Use of our Services</h3>
+            
+            <p>You may access and use our Services only in compliance with our Terms, our Acceptable Use Policy, and any guidelines or supplemental terms we may post on the Services (the "Permitted Use").</p>
+            
+            <p>You may not access or use, or help another person to access or use, our Services in the following ways:</p>
+            
+            <p>In any manner that violates any applicable law or regulation—including, without limitation, any laws about exporting data or software to and from the United States or other countries.</p>
+            
+            <p>To develop any products or services that compete with our Services, including to develop or train any artificial intelligence or machine learning algorithms or models.</p>
+            
+            <p>To decompile, reverse engineer, disassemble, or otherwise reduce our Services to human-readable form, except when these restrictions are prohibited by applicable law.</p>
+            
+            <p>To crawl, scrape, or otherwise harvest data or information from our Services other than as permitted under these Terms.</p>
+            
+            <p>To use our Services or Materials to obtain unauthorized access to any system or information, or to deceive any person.</p>
+            
+            <p>To infringe, misappropriate, or violate intellectual property or other legal rights (including the rights of publicity or privacy).</p>
+            
+            <p>Except when you are accessing our Services via a Votality API Key or where we otherwise explicitly permit it, to access the Services through automated or non-human means, whether through a bot, script, or otherwise.</p>
+            
+            <p>To engage in any other conduct that restricts or inhibits any person from using or enjoying our Services, or that we reasonably believe exposes us—or any of our users, affiliates, or any other third party—to any liability, damages, or detriment of any type, including reputational harms.</p>
+            
+            <p>You also must not abuse, harm, interfere with, or disrupt our Services, including, for example, introducing viruses or malware, spamming or DDoSing Services, or bypassing any of our systems or protective measures.</p>
+            
+            <h3>4. Prompts, Outputs, and Materials</h3>
+            
+            <p>You may be allowed to submit text, documents, or other materials to our Services for processing (we call these "Prompts"). Our Services may generate responses based on your Prompts (we call these "Outputs"). Prompts and Outputs collectively are "Materials."</p>
+            
+            <p>Rights to Materials. You are responsible for all Prompts you submit to our Services. By submitting Prompts to our Services, you represent and warrant that you have all rights, licenses, and permissions that are necessary for us to process the Prompts under our Terms. You also represent and warrant that your submitting Prompts to us will not violate our Terms, our Acceptable Use Policy, or any laws or regulations applicable to those Prompts. As between you and Votality, and to the extent permitted by applicable law, you retain any right, title, and interest that you have in the Prompts you submit. Subject to your compliance with our Terms, we assign to you all of our right, title, and interest—if any—in Outputs.</p>
+            
+            <p>Reliance on Outputs. Artificial intelligence and large language models are frontier technologies that are still improving in accuracy, reliability and safety. When you use our Services, you acknowledge and agree:</p>
+            
+            <p>Outputs may not always be accurate and may contain material inaccuracies even if they appear accurate because of their level of detail or specificity.</p>
+            
+            <p>You should not rely on any Outputs without independently confirming their accuracy.</p>
+            
+            <p>The Services and any Outputs may not reflect correct, current, or complete information.</p>
+            
+            <p>Outputs may contain content that is inconsistent with Votality's views.</p>
+            
+            <p>Our use of Materials. We may use Materials to provide, maintain, and improve the Services and to develop other products and services. We will not train our models on any Materials that are not publicly available, except in two circumstances:</p>
+            
+            <p>If you provide Feedback to us (through the Services or otherwise) regarding any Materials, we may use that Feedback in accordance with Section 5 (Feedback).</p>
+            
+            <p>If your Materials are flagged for trust and safety review, we may use or analyze those Materials to improve our ability to detect and enforce Acceptable Use Policy violations, including training models for use by our trust and safety team, consistent with Votality's safety mission.</p>
+            
+            <h3>5. Feedback</h3>
+            
+            <p>We appreciate feedback, including ideas and suggestions for improvement or rating an Output in response to a Prompt ("Feedback"). If you rate an Output in response to a Prompt—for example, by using the thumbs up/thumbs down icon—we will store the related conversation as part of your Feedback. You have no obligation to give us Feedback, but if you do, you agree that we may use the Feedback however we choose without any obligation or other payment to you.</p>
+            
+            <h3>6. Subscriptions, fees and payment</h3>
+            
+            <p>Fees and billing. You may be required to pay us fees to access or use our Services or certain features of our Services. You are responsible for paying any applicable fees listed for the Services.</p>
+            
+            <p>If you purchase access to our Services or features of our Services, you must provide complete and accurate billing information ("Payment Method"). You agree that we may charge the Payment Method for any applicable fees listed on our Services and any applicable tax. If the fees for these Services or features are specified to be recurring or based on usage, you agree that we may charge these fees and applicable taxes to the Payment Method on a periodic basis.</p>
+            
+            <p>If you purchase access to our Services through a distributor (e.g. an app store) ("App Distributor"), then you will make payment to the App Distributor, and the App Distributor's terms in relation to payment methods, billing, and refunds will apply instead of these Terms.</p>
+            
+            <p>Except as expressly provided in these Terms or where required by law, all payments are non-refundable. Please check your order carefully before confirming it, and see below for additional information about recurring charges for our subscriptions.</p>
+            
+            <p>Additional fees. We may increase fees for our Services. If we charge additional fees in connection with our Services, we will give you an opportunity to review and accept the additional fees before you are charged. Also, additional fees may apply for additional Services or features of the Services that we may make available. If you do not accept any such additional fees, we may discontinue your access to the Services or features.</p>
+            
+            <p>You agree that we will not be held liable for any errors caused by third-party payment processors used to process fees paid by you to us.</p>
+            
+            <p>Subscriptions. To access Claude Pro and other subscription services we may make available to individuals, you must sign up for a subscription with us (a "Subscription"), first by creating an Account, and then following the subscription procedure on our Services. When you sign up for a Subscription, you agree to these Terms.</p>
+            
+            <p>Subscription content, features, and services. The content, features, and other services provided as part of your Subscription, and the duration of your Subscription, will be described in the order process. We may change the content, features, and other services from time to time, and we do not guarantee that any particular piece of content, feature, or other service will always be available through the Services.</p>
+            
+            <p>Subscription term and automatic renewal. If you sign up for a paid Subscription, we or the App Distributor will automatically charge your Payment Method on each agreed-upon periodic renewal date until you cancel. If your Subscription has a minimum term (the "Initial Term"), we will let you know during the order process. Your Subscription will last for the Initial Term and will automatically renew, and your Payment Method will be charged, at the end of the Initial Term for an additional term equal in duration to the Initial Term and will continue to renew and incur charges for additional terms equal in duration to the Initial Term (each such additional term, a "Renewal Term") until you cancel.</p>
+            
+            <p>Subscription cancellation. If you subscribed via our website, you may cancel your Subscription for any reason by using a method we may provide to you through our products—for example, for Claude Pro, in your customer portal—or by notifying us at support@votalityai.com. If you subscribed via an app, you'll need to cancel via the App Distributor according to the App Distributor's terms. Learn more here. To avoid renewal and charges for the next Renewal Term, cancel your subscription at least 24 hours before the last day of the Initial Term or any Renewal Term. For example, if you subscribe on January 25th for a Subscription with a one-month Initial Term, you must cancel the Subscription per the instructions by February 23rd (24 hours before February 24th) to avoid renewal and charges for the next Renewal Term. In the event of a cancellation, your fees will not be refunded, but your access to the Services will continue through the end of the Initial Term or any Renewal Term for which you previously paid fees.</p>
+            
+            <p>Subscription fees. You will pay the fees, either to us or to the App Distributor, for the Initial Term and each subsequent Renewal Term up front, at the start of that Initial Term or Renewal Term, as applicable. We have the right to make changes to the fees applicable to your Subscription from time to time, although we will not make any change to the fees applicable to your Subscription during the current Initial Term or Renewal Term, as applicable. If these changes result in an increase in the fees payable by you, we will inform you at least 30 days in advance of the change. You agree to the increase in fees payable by you unless you cancel the Subscription, as described in the paragraph (Subscription cancellation) immediately above, before the Renewal Term to which the increase in fees will apply.</p>
+            
+            <h3>7. Third-party services and links</h3>
+            
+            <p>Our Services may use or be used in connection with third-party content, services, or integrations. We do not control or accept responsibility for any loss or damage that may arise from your use of any third-party content, services, and integrations, for which we make no representations or warranties. Your use of any third-party content, services, and integrations is at your own risk and subject to any terms, conditions, or policies (including privacy policies) applicable to such third-party content, services, and integrations.</p>
+            
+            <h3>8. Software</h3>
+            
+            <p>We may offer manual or automatic updates to our software including our apps ("Votality Software"), without advance notice to you. Votality Software may include open source software. In the event of any conflict between these Terms and any other Votality or third-party terms applicable to any portion of Votality Software, such as open-source license terms, such other terms will control as to that portion of the Votality Software and to the extent of the conflict.</p>
+            
+            <h3>9. Ownership of the Services</h3>
+            
+            <p>The Services are owned, operated, and provided by us and our affiliates, licensors, distributors, and service providers (collectively "Providers"). We and our Providers retain all of our respective rights, title, and interest, including intellectual property rights, in and to the Services. Other than the rights of access and use expressly granted in our Terms, our Terms do not grant you any right, title, or interest in or to our Services.</p>
+            
+            <p>10. Disclaimer of warranties, limitations of liability, and indemnity</p>
+            
+            <p>Our team works hard to provide great services, and we're continuously working on improvements. However, there are certain aspects we can't guarantee. We are using ALL CAPS to explain this, to make sure that you see it.</p>
+            
+            <p>YOUR USE OF THE SERVICES AND MATERIALS IS SOLELY AT YOUR OWN RISK. THE SERVICES AND OUTPUTS ARE PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS AND, TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, ARE PROVIDED WITHOUT WARRANTIES OF ANY KIND, WHETHER EXPRESS, IMPLIED, OR STATUTORY. WE AND OUR PROVIDERS EXPRESSLY DISCLAIM ANY AND ALL WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, TITLE, MERCHANTABILITY, ACCURACY, AVAILABILITY, RELIABILITY, SECURITY, PRIVACY, COMPATIBILITY, NON-INFRINGEMENT, AND ANY WARRANTY IMPLIED BY COURSE OF DEALING, COURSE OF PERFORMANCE, OR TRADE USAGE.</p>
+            
+            <p>TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, IN NO EVENT WILL WE, OUR PROVIDERS, OR OUR OR THEIR RESPECTIVE AFFILIATES, INVESTORS, DIRECTORS, OFFICERS, EMPLOYEES, AGENTS, SUCCESSORS OR ASSIGNS (COLLECTIVELY, THE "VOTALITY PARTIES"), BE LIABLE FOR ANY DIRECT, INDIRECT, PUNITIVE, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR OTHER DAMAGES ARISING OUT OF OR IN ANY WAY RELATED TO THE SERVICES, THE MATERIALS, OR THESE TERMS, WHETHER BASED IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY, OR OTHER THEORY, EVEN IF ANY VOTALITY PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF DAMAGES, AND EVEN IF THE DAMAGES ARE FORESEEABLE.</p>
+            
+            <p>TO THE FULLEST EXTENT PERMISSIBLE UNDER APPLICABLE LAW, THE VOTALITY PARTIES' TOTAL AGGREGATE LIABILITY TO YOU FOR ALL DAMAGES, LOSSES AND CAUSES OF ACTION ARISING OUT OF OR IN ANY WAY RELATED TO THE SERVICES, THE MATERIALS, OR THESE TERMS, WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE, WILL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID TO US FOR ACCESS TO OR USE OF THE SERVICES (IF ANY) IN THE SIX MONTHS PRECEDING THE DATE SUCH DAMAGES, LOSSES, AND CAUSES OF ACTION FIRST AROSE, AND $100. THE FOREGOING LIMITATIONS ARE ESSENTIAL TO THESE TERMS, AND WE WOULD NOT OFFER THE SERVICES TO YOU UNDER THESE TERMS WITHOUT THESE LIMITATIONS.</p>
+            
+            <p>LIABILITIES, CLAIMS, DAMAGES, EXPENSES (INCLUDING REASONABLE ATTORNEYS' FEES AND COSTS), AND OTHER LOSSES ARISING OUT OF OR RELATED TO YOUR BREACH OR ALLEGED BREACH OF THESE TERMS; YOUR ACCESS TO, USE OF, OR ALLEGED USE OF THE SERVICES OR THE MATERIALS; YOUR FEEDBACK; ANY PRODUCTS OR SERVICES THAT YOU DEVELOP, OFFER, OR OTHERWISE MAKE AVAILABLE USING OR OTHERWISE IN CONNECTION WITH THE SERVICES; YOUR VIOLATION OF APPLICABLE LAW OR ANY THIRD-PARTY RIGHT; AND ANY ACTUAL OR ALLEGED FRAUD, INTENTIONAL MISCONDUCT, GROSS NEGLIGENCE, OR CRIMINAL ACTS COMMITTED BY YOU OR YOUR EMPLOYEES OR AGENTS. WE RESERVE THE RIGHT TO ENGAGE SEPARATE COUNSEL AND PARTICIPATE IN OR ASSUME THE EXCLUSIVE DEFENSE AND CONTROL OF ANY MATTER OTHERWISE SUBJECT TO INDEMNIFICATION BY YOU HEREUNDER, IN WHICH CASE YOU AGREE TO COOPERATE WITH US AND SUCH SEPARATE COUNSEL AS WE REASONABLY REQUEST.</p>
+
+            <p>THE LAWS OF SOME JURISDICTIONS DO NOT ALLOW THE DISCLAIMER OF IMPLIED WARRANTIES OR CERTAIN TYPES OF DAMAGES, SO SOME OR ALL OF THE DISCLAIMERS AND LIMITATIONS OF LIABILITY IN THESE TERMS MAY NOT APPLY TO YOU.</p>
+            
+            <p>OUR PROVIDERS ARE INTENDED THIRD PARTY BENEFICIARIES OF THE WARRANTY DISCLAIMERS AND LIMITATIONS OF LIABILITY CONTAINED IN THIS SECTION 10.</p>
+            
+            <h3>11. General terms</h3>
+            
+            <p>Changes to the Services. Our Services are novel and will change. We may sometimes add or remove features, increase or decrease capacity limits, offer new Services, or stop offering certain Services.</p>
+            
+            <p>Unless we specifically agree otherwise in a separate agreement with you, we reserve the right to modify, suspend, or discontinue the Services or your access to the Services, in whole or in part, at any time without notice to you. Although we will strive to provide you with reasonable advance notice if we stop offering a Service, there may be urgent situations—such as preventing abuse, responding to legal requirements, or addressing security and operability issues—where providing advance notice is not feasible. We will not be liable for any change to or any suspension or discontinuation of the Services or your access to them.</p>
+            
+            <p>Changes to these terms. We may revise and update these Terms at our discretion. Some examples of times, we may update these Terms include (1) to reflect changes in our Services, like when we add or remove features or services, or update our pricing, (2) for security or legal reasons, or (3) to promote safety or prevent abuse. If you continue to access the Services after we post the updated Terms on Votality's website or otherwise give you notice of Terms changes, then you agree to the updated Terms. If you do not accept the updated Terms, you must stop using our Services.</p>
+            
+            <p>Supplemental terms. We may offer Services or features that we believe require service-specific terms or guidelines. When using our Services, you agree to comply with any applicable guidelines, rules, or supplemental terms that may be posted on the Services from time to time ("Supplemental Terms"). If these Terms conflict with Supplemental Terms, the Supplemental Terms will govern for the applicable Service.</p>
+            
+            <p>Entire agreement. These Terms and any other terms expressly incorporated by reference form the entire agreement between you and us regarding the subject matter of our Terms.</p>
+            
+            <p>Termination. You may stop accessing the Services at any time. We may suspend or terminate your access to the Services (including any Subscriptions) at any time without notice to you if we believe that you have breached these Terms, or if we must do so in order to comply with law. If we terminate your access to the Services due to a violation of these Terms and you have a Subscription, you will not be entitled to any refund. In addition, if you have a Subscription, we may terminate the Subscription at any time for any other reason. If we exercise this right and you purchased the subscription via our website, we will refund you, on a pro rata basis, the fees you paid for the remaining portion of your Subscription after termination. Any refunds for Subscriptions purchased via an App Distributor are subject to the App Distributor's terms and not these terms.</p>
+            
+            <p>We may also terminate your Account if you have been inactive for over a year and you do not have a paid Account. If we terminate your Account due to inactivity, we will provide you with notice before doing so.</p>
+            
+            <p>Upon termination of these Terms, a Subscription, or your access to the Services, we may at our option delete any Materials or other data associated with your Account. Sections 6 (with respect to fees outstanding as of such expiration or termination) and 9 – 12 will survive any expiration or termination of our Terms or a Subscription.</p>
+            
+            <p>Severability. If a particular Term or portion of these Terms is not valid or enforceable, this will have no effect on any other Terms.</p>
+            
+            <p>No waiver. Any delay or failure on our part to enforce a provision of these Terms is not a waiver of our right to enforce them later.</p>
+            
+            <p>No assignment. These Terms may not be transferred or assigned by you without our prior written consent, but may be assigned by us without restriction.</p>
+            
+            <p>Use of our brand. You may not, without our prior written permission, use our name, logos, or other trademarks in connection with products or services other than the Services, or in any other way that implies our affiliation, endorsement, or sponsorship. To seek permission, please email us at marketing@votalityai.com.</p>
+            
+            <p>Export Controls. You may not export or provide access to the Services into any U.S. embargoed countries or to anyone on (i) the U.S. Treasury Department's list of Specially Designated Nationals, (ii) any other restricted party lists identified by the Office of Foreign Asset Control, (iii) the U.S. Department of Commerce Denied Persons List or Entity List, or (iv) any other restricted party lists. You represent and warrant that you and anyone accessing or using the Services on your behalf, or using your Account credentials, are not such persons or entities and are not located in any such country.</p>
+            
+            <p>Legal Compliance. We may comply with governmental, court, and law enforcement requests or requirements relating to provision or use of the Services, or to information provided to or collected under our Terms. We reserve the right, at our sole discretion, to report information from or about you, including but not limited to Prompts or Outputs, to law enforcement.</p>
+            
+            <p>U.S. Government Use. The Services were developed solely at private expense and are commercial computer software and commercial computer software documentation within the meaning of the applicable Federal Acquisition Regulations and their agency supplements. Accordingly, U.S. Government users of the Services will have only those rights that are granted to all other end users of the Services pursuant to these Terms.</p>
+            
+            <h3>12. In case of disputes</h3>
+            
+            <p>Equitable relief. You agree that (a) no adequate remedy exists at law if you breach Section 3 (Use of Our Services); (b) it would be difficult to determine the damages resulting from such breach, and any such breach would cause irreparable harm; and (c) a grant of injunctive relief provides the best remedy for any such breach. You waive any opposition to such injunctive relief, as well as any demand that we prove actual damage or post a bond or other security in connection with such injunctive relief.</p>
+            
+            <p>Governing law and exclusive jurisdiction. Our Terms will be governed by, and construed and interpreted in accordance with, the laws of the State of California without giving effect to conflict of law principles. You and Votality agree that any disputes arising out of or relating to these Terms will be resolved exclusively in the state or federal courts located in San Francisco, California, and you and Votality submit to the personal and exclusive jurisdiction of those courts. By accessing our Services, you waive any claims that may arise under the laws of other jurisdictions.</p>        </section>
+
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="about.html" class="footer-link">About</a>
+                <a href="pricing.html" class="footer-link">Pricing</a>
+                <a href="terms.html" class="footer-link">Terms</a>
+                <a href="privacy.html" class="footer-link">Privacy</a>
+                <a href="contact.html" class="footer-link">Contact</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality - Market Data</title>
+        <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+            --grid-color: rgba(229, 231, 235, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100%;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+           .sidebar {
+            width: 3.5rem; /* Reduced width */
+            background-color: #f9f9f9;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.2rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+        }
+
+                .sidebar__logo {
+            width: 2.5rem; /* Smaller logo */
+            height: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-button-container {
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar__icon {
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+            font-size: 1.25rem;
+        }
+
+        .account-container {
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 0.35rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin-top: auto;
+            margin-bottom: 0.5rem;
+        }
+
+        .account-container:hover {
+            background-color: var(--hover-color);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 4rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .desktop-top-nav {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 4rem;
+            right: 0;
+            background-color: #ffffff;
+            height: 60px;
+            padding: 0 1rem;
+            z-index: 20;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }   
+
+        .desktop-top-nav__left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .desktop-top-nav__right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .desktop-top-nav__title {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 1.2rem;
+        }
+
+        .market-data-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1rem;
+            width: 100%;
+            max-width: none;
+            margin: 60px -15px 0;
+            padding: 0 1rem;
+        }
+
+        .market-card {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .market-card:hover {
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .market-card__title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .market-card__content {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .market-card__meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: auto;
+        }
+
+        .trend-indicator {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .trend-up { background-color: #E8F5E9; color: #2E7D32; }
+        .trend-neutral { background-color: #F5F5F5; color: #616161; }
+        .trend-down { background-color: #FFEBEE; color: #C62828; }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content,
+            .desktop-top-nav {
+                margin-left: 0;
+                left: 0;
+            }
+
+            .market-data-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                border-top: 1px solid #e0e0e0;
+                background-color: #ffffff;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                height: 60px;
+                z-index: 10;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <img src="zero.png" alt="Votality AI Logo" class="sidebar__logo">
+            <div class="sidebar-button-container" id="new-post-button">
+                <a href="votality2.html">
+                <i data-lucide="plus" class="h-7 w-7 text-gray-400"></i>
+                </a>
+            </div>
+            <a href="news.v2.html" class="sidebar__icon">
+                <i data-lucide="book-open"></i>
+            </a>
+            <a href="postv2.html" class="sidebar__icon">
+                <i data-lucide="users"></i>
+            </a>
+            <a href="#" class="sidebar__icon active">
+                <i data-lucide="trending-up"></i>
+            </a>
+            <div class="account-container">
+                <a href="signup.html" class="sidebar__icon active">
+                <i data-lucide="user" class="h-6 w-6 text-gray-400"></i>
+               </a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <nav class="desktop-top-nav">
+                <div class="desktop-top-nav__left">
+                    <h1 class="desktop-top-nav__title">Market Data</h1>
+                </div>
+                <div class="desktop-top-nav__right">
+                    
+                </div>
+            </nav>
+            <div class="market-data-container" id="market-data-container">
+                <!-- Market data cards will be dynamically added here -->
+            </div>
+        </main>
+    </div>
+
+     <!-- Add bottom navigation for mobile -->
+     <nav class="bottom-nav">
+        <a href="votality2.html" class="nav-item active">
+            <i data-lucide="message-circle"></i>
+        </a>
+        <a href="news.v2.html" class="nav-item">
+            <i data-lucide="book-open"></i>
+        </a>
+        <a href="postv2.html" class="nav-item">
+            <i data-lucide="users"></i>
+        </a>
+        <a href="markets.v2.html" class="nav-item">
+            <i data-lucide="trending-up"></i>
+        </a>
+        
+    </nav>
+
+    <script>
+        lucide.createIcons();
+
+        // Simulated market data (replace with your actual data fetching logic)
+const marketData = [
+    // Stocks
+    {
+        symbol: "AAPL",
+        name: "Apple Inc.",
+        price: 145.85,
+        change: 2.31,
+        changePercent: 1.61,
+        volume: 83245678,
+        type: "Stock"
+    },
+    {
+        symbol: "GOOGL",
+        name: "Alphabet Inc.",
+        price: 2245.13,
+        change: -12.87,
+        changePercent: -0.57,
+        volume: 1564789,
+        type: "Stock"
+    },
+    {
+        symbol: "MSFT",
+        name: "Microsoft Corporation",
+        price: 280.74,
+        change: 0.02,
+        changePercent: 0.01,
+        volume: 23456789,
+        type: "Stock"
+    },
+    {
+        symbol: "AMZN",
+        name: "Amazon.com, Inc.",
+        price: 3116.46,
+        change: 45.89,
+        changePercent: 1.49,
+        volume: 3678901,
+        type: "Stock"
+    },
+    {
+        symbol: "TSLA",
+        name: "Tesla, Inc.",
+        price: 689.99,
+        change: 12.75,
+        changePercent: 1.88,
+        volume: 28901234,
+        type: "Stock"
+    },
+    {
+        symbol: "JPM",
+        name: "JPMorgan Chase & Co.",
+        price: 155.48,
+        change: -0.98,
+        changePercent: -0.63,
+        volume: 7654321,
+        type: "Stock"
+    },
+    {
+        symbol: "JNJ",
+        name: "Johnson & Johnson",
+        price: 168.23,
+        change: 1.05,
+        changePercent: 0.63,
+        volume: 5432109,
+        type: "Stock"
+    },
+    {
+        symbol: "V",
+        name: "Visa Inc.",
+        price: 231.82,
+        change: 2.54,
+        changePercent: 1.11,
+        volume: 4321098,
+        type: "Stock"
+    },
+    {
+        symbol: "WMT",
+        name: "Walmart Inc.",
+        price: 139.52,
+        change: -0.78,
+        changePercent: -0.56,
+        volume: 6789012,
+        type: "Stock"
+    },
+    {
+        symbol: "PG",
+        name: "Procter & Gamble Co.",
+        price: 137.99,
+        change: 0.45,
+        changePercent: 0.33,
+        volume: 7890123,
+        type: "Stock"
+    },
+
+    // Forex
+    {
+        symbol: "EUR/USD",
+        name: "Euro / US Dollar",
+        price: 1.1845,
+        change: 0.0025,
+        changePercent: 0.21,
+        volume: 125678901,
+        type: "Forex"
+    },
+    {
+        symbol: "USD/JPY",
+        name: "US Dollar / Japanese Yen",
+        price: 110.32,
+        change: -0.15,
+        changePercent: -0.14,
+        volume: 98765432,
+        type: "Forex"
+    },
+    {
+        symbol: "GBP/USD",
+        name: "British Pound / US Dollar",
+        price: 1.3789,
+        change: 0.0056,
+        changePercent: 0.41,
+        volume: 87654321,
+        type: "Forex"
+    },
+    {
+        symbol: "AUD/USD",
+        name: "Australian Dollar / US Dollar",
+        price: 0.7456,
+        change: -0.0023,
+        changePercent: -0.31,
+        volume: 76543210,
+        type: "Forex"
+    },
+    {
+        symbol: "USD/CAD",
+        name: "US Dollar / Canadian Dollar",
+        price: 1.2567,
+        change: 0.0034,
+        changePercent: 0.27,
+        volume: 65432109,
+        type: "Forex"
+    },
+    {
+        symbol: "USD/CHF",
+        name: "US Dollar / Swiss Franc",
+        price: 0.9234,
+        change: -0.0012,
+        changePercent: -0.13,
+        volume: 54321098,
+        type: "Forex"
+    },
+    {
+        symbol: "NZD/USD",
+        name: "New Zealand Dollar / US Dollar",
+        price: 0.7023,
+        change: 0.0045,
+        changePercent: 0.64,
+        volume: 43210987,
+        type: "Forex"
+    },
+    {
+        symbol: "EUR/GBP",
+        name: "Euro / British Pound",
+        price: 0.8589,
+        change: -0.0031,
+        changePercent: -0.36,
+        volume: 32109876,
+        type: "Forex"
+    },
+    {
+        symbol: "AUD/JPY",
+        name: "Australian Dollar / Japanese Yen",
+        price: 82.25,
+        change: 0.18,
+        changePercent: 0.22,
+        volume: 21098765,
+        type: "Forex"
+    },
+    {
+        symbol: "USD/MXN",
+        name: "US Dollar / Mexican Peso",
+        price: 20.1234,
+        change: 0.0567,
+        changePercent: 0.28,
+        volume: 10987654,
+        type: "Forex"
+    },
+
+    // Cryptocurrencies
+    {
+        symbol: "BTC/USD",
+        name: "Bitcoin / US Dollar",
+        price: 34256.78,
+        change: 1234.56,
+        changePercent: 3.74,
+        volume: 28901234,
+        type: "Crypto"
+    },
+    {
+        symbol: "ETH/USD",
+        name: "Ethereum / US Dollar",
+        price: 2198.45,
+        change: -56.78,
+        changePercent: -2.52,
+        volume: 15678901,
+        type: "Crypto"
+    },
+    {
+        symbol: "XRP/USD",
+        name: "Ripple / US Dollar",
+        price: 0.6789,
+        change: 0.0234,
+        changePercent: 3.57,
+        volume: 98765432,
+        type: "Crypto"
+    },
+    {
+        symbol: "LTC/USD",
+        name: "Litecoin / US Dollar",
+        price: 145.67,
+        change: 3.21,
+        changePercent: 2.25,
+        volume: 5432109,
+        type: "Crypto"
+    },
+    {
+        symbol: "ADA/USD",
+        name: "Cardano / US Dollar",
+        price: 1.2345,
+        change: -0.0234,
+        changePercent: -1.86,
+        volume: 43210987,
+        type: "Crypto"
+    },
+    {
+        symbol: "DOT/USD",
+        name: "Polkadot / US Dollar",
+        price: 15.67,
+        change: 0.45,
+        changePercent: 2.95,
+        volume: 7654321,
+        type: "Crypto"
+    },
+    {
+        symbol: "DOGE/USD",
+        name: "Dogecoin / US Dollar",
+        price: 0.2345,
+        change: 0.0056,
+        changePercent: 2.45,
+        volume: 87654321,
+        type: "Crypto"
+    },
+    {
+        symbol: "UNI/USD",
+        name: "Uniswap / US Dollar",
+        price: 21.34,
+        change: -0.67,
+        changePercent: -3.04,
+        volume: 3210987,
+        type: "Crypto"
+    },
+    {
+        symbol: "LINK/USD",
+        name: "Chainlink / US Dollar",
+        price: 24.56,
+        change: 0.78,
+        changePercent: 3.28,
+        volume: 6543210,
+        type: "Crypto"
+    },
+    {
+        symbol: "SOL/USD",
+        name: "Solana / US Dollar",
+        price: 37.89,
+        change: 1.23,
+        changePercent: 3.36,
+        volume: 9876543,
+        type: "Crypto"
+    },
+
+    // Indices
+    {
+        symbol: "GSPC",
+        name: "S&P 500",
+        price: 4185.47,
+        change: 15.23,
+        changePercent: 0.37,
+        volume: 2345678901,
+        type: "Index"
+    },
+    {
+        symbol: "DJI",
+        name: "Dow Jones Industrial Average",
+        price: 33800.60,
+        change: -12.86,
+        changePercent: -0.04,
+        volume: 345678901,
+        type: "Index"
+    },
+    {
+        symbol: "IXIC",
+        name: "NASDAQ Composite",
+        price: 14032.93,
+        change: 140.47,
+        changePercent: 1.01,
+        volume: 4567890123,
+        type: "Index"
+    },
+    {
+        symbol: "FTSE",
+        name: "FTSE 100",
+        price: 6915.75,
+        change: 26.47,
+        changePercent: 0.38,
+        volume: 567890123,
+        type: "Index"
+    },
+    {
+        symbol: "GDAXI",
+        name: "DAX PERFORMANCE-INDEX",
+        price: 15234.16,
+        change: -78.45,
+        changePercent: -0.51,
+        volume: 678901234,
+        type: "Index"
+    },
+    {
+        symbol: "FCHI",
+        name: "CAC 40",
+        price: 6169.41,
+        change: 19.82,
+        changePercent: 0.32,
+        volume: 789012345,
+        type: "Index"
+    },
+    {
+        symbol: "N225",
+        name: "Nikkei 225",
+        price: 29768.06,
+        change: 59.08,
+        changePercent: 0.20,
+        volume: 890123456,
+        type: "Index"
+    },
+    {
+        symbol: "HSI",
+        name: "HANG SENG INDEX",
+        price: 28698.80,
+        change: -309.27,
+        changePercent: -1.07,
+        volume: 901234567,
+        type: "Index"
+    },
+    {
+        symbol: "BSESN",
+        name: "S&P BSE SENSEX",
+        price: 48832.03,
+        change: 28.35,
+        changePercent: 0.06,
+        volume: 1012345678,
+        type: "Index"
+    },
+    {
+        symbol: "BVSP",
+        name: "IBOVESPA",
+        price: 120530.06,
+        change: 1456.71,
+        changePercent: 1.22,
+        volume: 1123456789,
+        type: "Index"
+    }
+];
+
+        function formatNumber(num) {
+            return num.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function createMarketDataCard(data) {
+            const card = document.createElement('div');
+            card.className = 'market-card';
+            let trendClass = 'trend-neutral';
+            let trendIcon = 'minus';
+            if (data.changePercent > 0) {
+                trendClass = 'trend-up';
+                trendIcon = 'trending-up';
+            } else if (data.changePercent < 0) {
+                trendClass = 'trend-down';
+                trendIcon = 'trending-down';
+            }
+            card.innerHTML = `
+                <h2 class="market-card__title">${data.symbol} - ${data.name}</h2>
+                <div class="market-card__content">
+                    <p>Price: $${formatNumber(data.price)}</p>
+                    <p>Change: ${formatNumber(data.change)} (${data.changePercent.toFixed(2)}%)</p>
+                    <p>Volume: ${data.volume.toLocaleString()}</p>
+                </div>
+                <div class="market-card__meta">
+                    <span>Last updated: ${new Date().toLocaleTimeString()}</span>
+                    <span class="trend-indicator ${trendClass}">
+                        <i data-lucide="${trendIcon}" class="h-4 w-4 inline-block mr-1"></i>
+                        ${Math.abs(data.changePercent).toFixed(2)}%
+                    </span>
+                </div>
+            `;
+            return card;
+        }
+
+        function loadMarketData() {
+            const marketDataContainer = document.getElementById('market-data-container');
+            marketDataContainer.innerHTML = ''; // Clear existing content
+            marketData.forEach(data => {
+                const marketDataCard = createMarketDataCard(data);
+                marketDataContainer.appendChild(marketDataCard);
+            });
+            lucide.createIcons(); // Refresh icons for newly added cards
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMarketData();
+            
+            const refreshButton = document.getElementById('refresh-data');
+            if (refreshButton) {
+                refreshButton.addEventListener('click', () => {
+                    // In a real application, you would fetch new data here
+                    // For this example, we'll just reload the existing data
+                    loadMarketData();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

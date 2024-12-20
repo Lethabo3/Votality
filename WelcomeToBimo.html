@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-G7WREYHFF7');
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votality AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="icon" href="b2.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(error) {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
+        }
+    </script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .logo {
+            width: 120px;
+            height: 120px;
+            opacity: 0;
+            filter: blur(10px);
+        }
+        .logo.animate {
+            animation: blurInOut 2s ease-in-out forwards;
+        }
+        @keyframes blurInOut {
+            0% {
+                opacity: 0;
+                filter: blur(10px);
+            }
+            30% {
+                opacity: 1;
+                filter: blur(0);
+            }
+            70% {
+                opacity: 1;
+                filter: blur(0);
+            }
+            100% {
+                opacity: 0;
+                filter: blur(10px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-white font-sans">
+    <div class="content">
+        <img src="zero.png" alt="Votality.jpg AI Logo" class="logo" id="logo">
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const logo = document.getElementById('logo');
+            
+            // Start the animation immediately
+            logo.classList.add('animate');
+
+            // Redirect after the animation completes
+            setTimeout(() => {
+                window.location.href = 'Votality.html';
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
