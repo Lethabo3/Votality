@@ -1,5 +1,5 @@
 <?php
-define('GEMINI_API_KEY', 'AIzaSyDTUxKt1aKW_amIE-bP-np_Xl9Ew8y38SU');
+define('GEMINI_API_KEY', 'AIzaSyC8N6WCtOpRXQJa8JcGJ01CFlioasdK8Q0');
 define('GEMINI_API_URL', 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent');
 
 define('QDRANT_URL', 'https://344b1416-5371-4c71-80a0-3776cfab59ea.europe-west3-0.gcp.cloud.qdrant.io:6333');
