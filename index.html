@@ -48,33 +48,7 @@
             <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
             <i data-lucide="chevron-first" class="collapse-arrow h-5 w-5" data-tooltip="Collapse"></i>
             <span class="logo-text">Votality</span>
-            <div class="sidebar-button-container">
-                <a href="index.html" class="relative flex items-center justify-center group" data-tooltip="New Thread">
-                    <i data-lucide="plus" class="h-5 w-5 text-black transition-colors group-hover:text-gray-900" style="stroke-width: 1.5"></i>
-                    <span class="absolute left-full ml-4 px-3 py-1.5 bg-[#1a1a1a] text-white text-sm rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50">New Chat</span>
-                    <span class="sidebar-text new-thread-text">New Thread</span>
-                    <span class="absolute left-full ml-1.5 w-0 h-0 border-[5px] border-transparent border-r-[#1a1a1a] translate-y-[-50%] top-[50%] opacity-0 group-hover:opacity-100 transition-opacity duration-200"></span>
-                </a>
-            </div>
-    
-            <a href="news.v2.html" data-tooltip="News" class="sidebar__icon">
-                <i data-lucide="book-open" ></i>
-                <span class="sidebar-text">News</span>
-            </a>
-            <a href="postv2.html" data-tooltip="Posts" class="sidebar__icon">
-                <i data-lucide="users"></i>
-                <span class="sidebar-text">Posts</span>
-            </a>
-            <a href="markets.v2.html" data-tooltip="Market" class="sidebar__icon">
-                <i data-lucide="trending-up"></i>
-                <span class="sidebar-text">Markets</span>
-            </a>
-            
-            
-            <div class="toggle-sidebar sidebar-button-container" data-tooltip="Expand">
-                <i data-lucide="sidebar" class="h-5 w-5 text-gray-400"></i>
-                <span class="sidebar-text">Collapse</span>
-            </div>
+
     
             <div class="try-pro-container">
                 <div class="try-pro-title">Try Pro</div>
@@ -116,7 +90,7 @@
                 <button id="learn-more-btn" class="panel-button">
                     <div class="panel-button-content">
                         Learn More
-                    </div>
+                    </div>new
                     <i data-lucide="chevron-right" class="panel-button-arrow"></i>
                 </button>
                 <button id="help-support-btn" class="panel-button">
@@ -153,29 +127,30 @@
                     
                     <button type="button" id="attachment-button" class="focus:outline-none" style="position: absolute; left: 10px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;">
                         <div class="attachment-container" style="padding: 0.5rem;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4" style="color: #666;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                             </svg>
+                            <span class="text-sm" style="color: #666;">  Analyse</span>
+
                         </div>
                         <div class="tooltip">
                             <span class="tooltip-text">Attach Files </span>
-                            <span class="tooltip-subtext">(Max 3, 3.75MB each)</span>
                         </div>
                     </button>
                     
                     <button type="button" id="research-button" class="attachment-button focus:outline-none" style="position: absolute; left: 55px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;" data-tooltip="Add Research">
                         <div class="attachment-container" style="display: flex; align-items: center; gap: 4px; padding: 6px 10px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4" style="color: #666;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            <span class="text-gray-500 text-sm">Analyse</span>
+                            <span class="text-sm" style="color: #666;">Analyse</span>
                         </div>
                     </button>
                 </div>
                 <div id="chat-container" class="chat-container"></div>
                 <button id="scroll-to-bottom" class="scroll-to-bottom-button" aria-label="Scroll to bottom">
-                    <div class="custom-rounded">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="custom-rounded" style="border: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                         </svg>
                     </div>
@@ -291,6 +266,10 @@
     border-radius: 8px;
     border: 1px solid var(--border-color);
 }
+
+.arrow-icon {
+    stroke: #666; /* Set the initial color to #666 */
+}
 </style>
     <script>
 lucide.createIcons();
@@ -321,11 +300,13 @@ textarea.addEventListener('input', function() {
     if (this.value.trim() !== '') {
         submitButton.querySelector('div').classList.remove('bg-gray-100');
         submitButton.querySelector('div').classList.add('bg-gray-800');
+        submitButton.querySelector('div').classList.add('dark');
         submitButton.querySelector('svg').classList.remove('text-gray-300');
         submitButton.querySelector('svg').classList.add('text-white');
     } else {
         submitButton.querySelector('div').classList.add('bg-gray-100');
         submitButton.querySelector('div').classList.remove('bg-gray-800');
+        submitButton.querySelector('div').classList.remove('dark');
         submitButton.querySelector('svg').classList.add('text-gray-300');
         submitButton.querySelector('svg').classList.remove('text-white');
     }
@@ -662,11 +643,22 @@ async function saveSharedContent(id, content, topic) {
 document.addEventListener('DOMContentLoaded', function() {
     const collapseArrow = document.querySelector('.collapse-arrow');
     const sidebar = document.querySelector('.sidebar');
-    
+    const expandSidebarIcon = document.querySelector('.expand-sidebar-icon');
+    // Collapse the sidebar when the collapse arrow is clicked
     collapseArrow.addEventListener('click', function() {
-        sidebar.classList.remove('expanded');
+        sidebar.classList.add('collapsed'); // Add collapsed class to hide the sidebar
+        sidebar.classList.remove('expanded'); // Ensure expanded class is removed
+        expandSidebarIcon.style.display = 'flex'; // Show the expand icon when collapsed
+    });
+    // Expand the sidebar when the expand icon is clicked
+    expandSidebarIcon.addEventListener('click', function() {
+        sidebar.classList.remove('collapsed'); // Remove collapsed class to show the sidebar
+        sidebar.classList.add('expanded'); // Add expanded class
+        expandSidebarIcon.style.display = 'none'; // Hide the expand icon when expanded
     });
 });
+
+
 
 // Add this to your existing JavaScript
 document.addEventListener('DOMContentLoaded', function() {
@@ -1551,6 +1543,10 @@ function toggleMobileNav() {
 window.addEventListener('resize', toggleMobileNav);
 
 
+
+
+
+
 // New functions for AI integration
 
 async function loadRecentChats() {
@@ -1858,43 +1854,22 @@ function toggleFilePanel() {
 document.addEventListener('DOMContentLoaded', function() {
     const toggleButton = document.querySelector('.toggle-sidebar');
     const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
-    const desktopTopNav = document.querySelector('.desktop-top-nav');
-    const desktopTopNavLeft = document.querySelector('.desktop-top-nav__left');
-    
+
+    // Set the sidebar to be expanded by default
+    sidebar.classList.add('expanded');
+
     toggleButton.addEventListener('click', function() {
-        sidebar.classList.toggle('expanded');
-        
-        // Update tooltip text based on sidebar state
-        const isExpanded = sidebar.classList.contains('expanded');
-        toggleButton.setAttribute('data-tooltip', isExpanded ? 'Collapse' : 'Expand');
-        
-        // Update the desktop top nav left margin
-        if (desktopTopNavLeft) {
-            if (isExpanded) {
-                desktopTopNavLeft.style.marginLeft = '14rem'; // Width for expanded sidebar
-            } else {
-                desktopTopNavLeft.style.marginLeft = '0';
-            }
-            // Add transition for smooth movement
-            desktopTopNavLeft.style.transition = 'margin-left 0.3s ease';
-        }
-        
-        // Rotate the sidebar icon when expanded
+        // Collapse the sidebar when the button is clicked
+        sidebar.classList.add('collapsed');
+        sidebar.classList.remove('expanded');
+
+        // Update tooltip text to always say "Collapse"
+        toggleButton.setAttribute('data-tooltip', 'Collapse');
+
+        // No need for rotation effect on the sidebar icon
         const sidebarIcon = toggleButton.querySelector('[data-lucide="sidebar"]');
         if (sidebarIcon) {
-            sidebarIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
-            sidebarIcon.style.transition = 'transform 0.3s ease';
-        }
-    });
-    
-    // Close sidebar on clicking outside
-    document.addEventListener('click', function(e) {
-        if (!sidebar.contains(e.target) && 
-            !toggleButton.contains(e.target) && 
-            sidebar.classList.contains('expanded')) {
-            sidebar.classList.remove('expanded');
-            desktopTopNavLeft.style.marginLeft = '0';
+            sidebarIcon.style.transform = 'none'; // No rotation
         }
     });
 
@@ -1902,9 +1877,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', function() {
         if (window.innerWidth <= 768 && sidebar.classList.contains('expanded')) {
             sidebar.classList.remove('expanded');
-            if (desktopTopNavLeft) {
-                desktopTopNavLeft.style.marginLeft = '0';
-            }
+            sidebar.classList.add('collapsed');
         }
     });
 });
@@ -2080,11 +2053,30 @@ function addMessage(text, sender, relatedTopics = []) {
             
             lastChatGroup.appendChild(sourcesContainer);
             
-            // Add Answer heading
+            // Add Answer heading with logo
+            const answerHeadingContainer = document.createElement('div');
+            answerHeadingContainer.className = 'section-heading answer-heading-container';
+            answerHeadingContainer.style.display = 'flex';
+            answerHeadingContainer.style.alignItems = 'center';
+
+            const logoImg = document.createElement('img');
+            logoImg.src = 'y7.png';
+            logoImg.alt = 'Votality Logo';
+            logoImg.className = 'answer-heading-logo';
+            logoImg.style.width = '30px';
+            logoImg.style.height = '30px';
+            logoImg.style.position = 'absolute';  // Add this
+            logoImg.style.marginLeft = '-2px';
+            logoImg.style.marginTop = '28px';
+
+
             const answerHeading = document.createElement('div');
-            answerHeading.className = 'section-heading answer-heading';
+            answerHeading.className = 'answer-heading';
             answerHeading.textContent = 'Answer';
-            lastChatGroup.appendChild(answerHeading);
+
+            answerHeadingContainer.appendChild(logoImg);
+            answerHeadingContainer.appendChild(answerHeading);
+            lastChatGroup.appendChild(answerHeadingContainer);
 
             messageElement = document.createElement('div');
             messageElement.className = 'message ai-message';
