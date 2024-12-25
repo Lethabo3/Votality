@@ -43,11 +43,15 @@
         </div>
     </nav>
 
+    <!-- Add this right after the opening <body> tag -->
+        <button type="button" class="sidebar-toggle" data-tooltip="Expand">
+            <i data-lucide="columns" class="h-5 w-5" style="color: #666;"></i>
+        </button>
+
     <div class="layout">
         <aside class="sidebar">
             <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
             <i data-lucide="chevron-first" class="collapse-arrow h-5 w-5" data-tooltip="Collapse"></i>
-            <span class="logo-text">Votality</span>
 
     
             <div class="try-pro-container">
@@ -60,7 +64,7 @@
             </div>
             
             <div class="account-container sidebar__account">
-                <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                <i data-lucide="user" class="h-5 w-5 text-gray-400" data-lucide="user-fill"></i>
                 <span class="sidebar-text">Account</span>
             </div>
         </aside>
@@ -68,7 +72,7 @@
         <div id="account-panel" class="account-panel">
             <div class="account-panel-header">
                 <div class="user-icon">
-                    <i data-lucide="user" class="h-5 w-5 text-gray-400"></i>
+                    <i data-lucide="user" class="h-5 w-5 text-gray-400" data-lucide="user-fill"></i>
                 </div>
                 <div class="user-info">
                     <span id="user-email" class="user-email">user@example.com</span>
@@ -130,8 +134,6 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4" style="color: #666;">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                             </svg>
-                            <span class="text-sm" style="color: #666;">  Analyse</span>
-
                         </div>
                         <div class="tooltip">
                             <span class="tooltip-text">Attach Files </span>
@@ -150,9 +152,9 @@
                 <div id="chat-container" class="chat-container"></div>
                 <button id="scroll-to-bottom" class="scroll-to-bottom-button" aria-label="Scroll to bottom">
                     <div class="custom-rounded" style="border: none;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>
+                        </svg>                        
                     </div>
                 </button>
                 <div id="suggested-queries" class="suggested-queries">
@@ -267,9 +269,6 @@
     border: 1px solid var(--border-color);
 }
 
-.arrow-icon {
-    stroke: #666; /* Set the initial color to #666 */
-}
 </style>
     <script>
 lucide.createIcons();
@@ -300,13 +299,11 @@ textarea.addEventListener('input', function() {
     if (this.value.trim() !== '') {
         submitButton.querySelector('div').classList.remove('bg-gray-100');
         submitButton.querySelector('div').classList.add('bg-gray-800');
-        submitButton.querySelector('div').classList.add('dark');
         submitButton.querySelector('svg').classList.remove('text-gray-300');
         submitButton.querySelector('svg').classList.add('text-white');
     } else {
         submitButton.querySelector('div').classList.add('bg-gray-100');
         submitButton.querySelector('div').classList.remove('bg-gray-800');
-        submitButton.querySelector('div').classList.remove('dark');
         submitButton.querySelector('svg').classList.add('text-gray-300');
         submitButton.querySelector('svg').classList.remove('text-white');
     }
@@ -644,20 +641,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const collapseArrow = document.querySelector('.collapse-arrow');
     const sidebar = document.querySelector('.sidebar');
     const expandSidebarIcon = document.querySelector('.expand-sidebar-icon');
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    
+    console.log('Initial elements found:', {
+        collapseArrow,
+        sidebar,
+        expandSidebarIcon,
+        sidebarToggle
+    });
+
     // Collapse the sidebar when the collapse arrow is clicked
     collapseArrow.addEventListener('click', function() {
-        sidebar.classList.add('collapsed'); // Add collapsed class to hide the sidebar
-        sidebar.classList.remove('expanded'); // Ensure expanded class is removed
-        expandSidebarIcon.style.display = 'flex'; // Show the expand icon when collapsed
+        console.log('Collapse arrow clicked');
+        sidebar.classList.add('collapsed');
+        sidebar.classList.remove('expanded');
+        expandSidebarIcon.style.display = 'flex';
     });
-    // Expand the sidebar when the expand icon is clicked
+
+    // Expand the sidebar when the expand icon is clicked 
     expandSidebarIcon.addEventListener('click', function() {
-        sidebar.classList.remove('collapsed'); // Remove collapsed class to show the sidebar
-        sidebar.classList.add('expanded'); // Add expanded class
-        expandSidebarIcon.style.display = 'none'; // Hide the expand icon when expanded
+        console.log('Expand icon clicked');
+        sidebar.classList.remove('collapsed');
+        sidebar.classList.add('expanded');
+        expandSidebarIcon.style.display = 'none';
     });
 });
 
+// Put the sidebar toggle listener outside DOMContentLoaded
+const sidebarToggle = document.querySelector('.sidebar-toggle');
+const sidebar = document.querySelector('.sidebar');
+const expandSidebarIcon = document.querySelector('.expand-sidebar-icon');
+
+if (sidebarToggle) {
+    console.log('Found sidebar toggle button');
+    sidebarToggle.addEventListener('click', function() {
+        console.log('Sidebar toggle clicked');
+        if (sidebar.classList.contains('collapsed')) {
+            sidebar.classList.remove('collapsed');
+            sidebar.classList.add('expanded');
+            expandSidebarIcon.style.display = 'none';
+        } else {
+            sidebar.classList.add('collapsed');
+            sidebar.classList.remove('expanded');
+            expandSidebarIcon.style.display = 'flex';
+        }
+    });
+}
 
 
 // Add this to your existing JavaScript
@@ -1542,13 +1571,6 @@ function toggleMobileNav() {
 // Add event listener for window resize
 window.addEventListener('resize', toggleMobileNav);
 
-
-
-
-
-
-// New functions for AI integration
-
 async function loadRecentChats() {
     try {
         const response = await fetch('VotalityChat2.php', {
@@ -2053,21 +2075,38 @@ function addMessage(text, sender, relatedTopics = []) {
             
             lastChatGroup.appendChild(sourcesContainer);
             
-            // Add Answer heading with logo
-            const answerHeadingContainer = document.createElement('div');
-            answerHeadingContainer.className = 'section-heading answer-heading-container';
-            answerHeadingContainer.style.display = 'flex';
-            answerHeadingContainer.style.alignItems = 'center';
+// Add Answer heading with logo
+const answerHeadingContainer = document.createElement('div');
+answerHeadingContainer.className = 'section-heading answer-heading-container';
+answerHeadingContainer.style.display = 'flex';
+answerHeadingContainer.style.alignItems = 'center';
 
-            const logoImg = document.createElement('img');
-            logoImg.src = 'y7.png';
-            logoImg.alt = 'Votality Logo';
-            logoImg.className = 'answer-heading-logo';
-            logoImg.style.width = '30px';
-            logoImg.style.height = '30px';
-            logoImg.style.position = 'absolute';  // Add this
-            logoImg.style.marginLeft = '-2px';
-            logoImg.style.marginTop = '28px';
+const logoContainer = document.createElement('div');
+logoContainer.style.width = '24px';
+logoContainer.style.height = '24px';
+logoContainer.style.position = 'absolute';
+logoContainer.style.marginLeft = '-2px';
+logoContainer.style.marginTop = '28px';
+logoContainer.style.border = '1px solid #E5E7EB';
+logoContainer.style.borderRadius = '6px';
+logoContainer.style.display = 'flex';
+logoContainer.style.alignItems = 'center';
+logoContainer.style.justifyContent = 'center';
+logoContainer.style.backgroundColor = '#f9f9f9';
+logoContainer.style.zIndex = '1';
+
+const logoImg = document.createElement('img');
+logoImg.src = 'y7.png';
+logoImg.alt = 'Votality Logo';
+logoImg.className = 'answer-heading-logo';
+logoImg.style.width = '18px';
+logoImg.style.height = '18px';
+logoImg.style.transform = 'translateX(14px)';
+logoImg.style.transform = 'translateY(14px)'; // Using transform instead of margin
+logoImg.style.zIndex = '2';
+
+logoContainer.appendChild(logoImg);
+answerHeadingContainer.appendChild(logoContainer);
 
 
             const answerHeading = document.createElement('div');
@@ -2288,7 +2327,7 @@ function addMessageInteractions(messageElement, sender) {
 
         likeButton.addEventListener('click', () => {
             const icon = likeButton.querySelector('i');
-            icon.style.fill = 'currentColor';
+            icon.style.fill = '#000';
             icon.style.color = '#000000';
             dislikeButton.querySelector('i').removeAttribute('style');
             handleLike(messageElement);
@@ -2364,7 +2403,7 @@ if (likeButton) {
 
 dislikeButton.addEventListener('click', () => {
     const icon = dislikeButton.querySelector('i');
-    icon.style.fill = 'currentColor';
+    icon.style.fill = '#000';
     icon.style.color = '#000000';
     likeButton.querySelector('i').removeAttribute('style');
     handleDislike(messageElement);
@@ -2407,6 +2446,7 @@ document.getElementById('feedback-modal').addEventListener('click', function(e) 
         closeFeedbackModal();
     }
 });
+
 </script>
 </body>
 </html>

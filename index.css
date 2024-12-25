@@ -36,27 +36,26 @@ position: relative;
 }
 
 .sidebar {
-width: 3.5rem; /* Reduced width */
-background-color: #f9f9f9;
-border-right: 1px solid #e0e0e0;
-display: flex;
-flex-direction: column;
-align-items: center;
-padding: 0.5rem 0;
-position: fixed;
-top: 0;
-left: 0;
-bottom: 0;
-transition: width 0.3s ease;
+    width: 15rem; /* Width when expanded */
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transition: width 0.3s ease;
 }
 
 .sidebar.expanded {
-width: 15rem; /* Width when expanded */
-z-index: 200;
+    width: 15rem; /* Width when expanded */
+    z-index: 200;
 }
 
 .sidebar-button-container:hover {
-background-color: var(--hover-color);
+    background-color: var(--hover-color);
 }
 
 .sidebar__logo {
@@ -67,47 +66,53 @@ background-color: var(--hover-color);
 }
 
 .sidebar-button-container {
-width: 2.3rem; /* Smaller buttons */
-height: 2.3rem;
-background-color: var(--background-color);
-border: 1px solid var(--border-color);
-color: #000000;
-border-radius: 8px;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: all 0.3s ease;
-margin-bottom: 1rem;
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+    width: 2.3rem; /* Smaller buttons */
+    height: 2.3rem;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    color: #000000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
 }
 
 .account-container {
-    width: 2.3rem; /* Default width when collapsed */
-    background-color: var(--background-color);
-    border: 1px solid var(--border-color);
-    padding: 0.35rem;
-    border-radius: 10px;
+    width: calc(100% + 20px); /* Adjust width to exceed the sidebar's width */
+    background-color: transparent;
+    border-top: 1px solid var(--border-color);
+    padding: 0 10px; /* Add horizontal padding to shift contents to the right */
+    margin: 0; /* Negative margin to offset the padding of the sidebar */
+    border-radius: 0; /* Remove border-radius to ensure it touches edges */
     display: flex;
     color: #000000;
     align-items: center;
-    justify-content: flex-start; /* Changed from center to flex-start */
+    justify-content: flex-start; /* Align items to the start */
     transition: all 0.3s ease;
     margin-top: auto;
-    margin-bottom: 0.5rem;
+    margin-bottom: -0.2rem;
 }
 
 .sidebar.expanded .account-container {
-    width: calc(100% - 1rem); /* Full width minus some spacing */
-    padding: 0.5rem 0.75rem; /* Added horizontal padding */
+    width: 15rem; /* Full width minus some spacing */
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem; /* Added horizontal padding */
     margin-left: 0.5rem; /* Added left margin */
     margin-right: 0.5rem; /* Added right margin */
 }
 
 /* Styles for expanded state */
 .sidebar.expanded {
-width: 15rem;
-justify-content: flex-start;
-padding-left: 1rem;
-padding: 0.5rem 1rem; /* Added consistent padding */
+    width: 15rem;
+    justify-content: flex-start;
+    padding-left: 1rem;
+    padding: 0.5rem 1rem; /* Added consistent padding */
 }
 
 /* Make containers wider when sidebar is expanded */
@@ -209,12 +214,12 @@ padding: 0.5rem 1rem; /* Added consistent padding */
 
 .try-pro-container {
     display: none;
-    background-color: var(--background-color);
-    border: 1px solid var(--border-color);
+    background-color: transparent;
+    border: 0px solid var(--border-color);
     color: #000000;
     border-radius: 8px;
     margin-top: auto;
-    margin-bottom:-16rem;
+    margin-bottom:-30rem;
     cursor: pointer;
 }
 
@@ -223,7 +228,7 @@ padding: 0.5rem 1rem; /* Added consistent padding */
     width: calc(100% - 1rem);
     padding: 0.75rem;
     margin-left: 0.5rem;
-    margin-right: 0.5rem;
+    margin-right: 2.675rem;
     flex-direction: column;
     align-items: flex-start;
 }
@@ -235,19 +240,22 @@ padding: 0.5rem 1rem; /* Added consistent padding */
 }
 
 .try-pro-description {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: #9ca3af;
     margin-bottom: 0.75rem;
     line-height: 1.4;
 }
 
 .learn-more-link {
-    font-size: 0.75rem;
-    color: #9ca3af;
+    font-size: 0.85rem;
+    color: #000;
     text-decoration: none;
     display: flex;
+    background-color: #f0f0f0;
+    border-radius: 4px;
     align-items: center;
     gap: 0.25rem;
+    padding: 0.25rem 1rem; /* Added padding to create space between text and border */
 }
 
 /* Keep toggle sidebar position unchanged */
@@ -298,6 +306,7 @@ padding: 0.5rem 1rem; /* Added consistent padding */
     transform: rotate(180deg);
     cursor: pointer;
     color: #9CA3AF;
+    z-index: 1000; /* Increased z-index to be above chat */
     padding: 7px;
     border-radius: 8px;
     transition: none 0.3s ease;
@@ -543,9 +552,10 @@ padding: 0.5rem 1rem; /* Added consistent padding */
     height: 120px;
     padding: 1rem 0.7rem;
     font-size: 1rem;
-    border: 2px solid var(--border-color);
+    border: 0px solid var(--border-color);
     border-radius: 0.5rem;
     resize: none;
+    background-color: #f9f9f9;
     outline: none;
     overflow-y: auto;
     transition: border-color 0.3s ease;
@@ -616,6 +626,7 @@ padding: 0.5rem 1rem; /* Added consistent padding */
     right: 10px;
     bottom: 15px;
     top: auto;
+    border: none;
     transform: none;
 }
 
@@ -680,8 +691,8 @@ padding: 0.5rem 1rem; /* Added consistent padding */
     }
 }
 .attachment-container {
-    background-color: var(--background-color);
-    border: 1px solid var(--border-color);
+    background-color: var(--hover-color);
+    border: 0px solid var(--hover-color);
     border-radius: 8px;
     padding: 0.25rem;
     display: flex;
@@ -700,8 +711,14 @@ padding: 0.5rem 1rem; /* Added consistent padding */
 
 .custom-rounded {
     border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: rgba(255, 255, 255, 0.1);
+    color: red;
+    border: none !important; /* Ensure there is no border */
+    background-color: var(--hover-color);
+}
+
+/* Set z-index to 100 when the sidebar is expanded */
+.sidebar.expanded .collapse-arrow {
+    z-index: 100; /* Set z-index to 100 when expanded */
 }
 
 .suggested-queries {
@@ -816,6 +833,7 @@ z-index: 0;
     padding-top: 60px; /* Make room for top nav */
     padding-bottom: 60px; /* Make room for bottom nav */
     margin-top: 0; /* Ensure no top margin */
+    
 
 }
 
@@ -1015,7 +1033,8 @@ background-image: none;
 }
 .skeleton-loader {
 width: 100%;
-padding: 20px 0 0 0; /* Add top padding to lower the position of lines */}
+padding: 20px 0 0 0; /* Add top padding to lower the position of lines */
+}
 
 .skeleton-line {
 height: 12px;
@@ -1108,7 +1127,10 @@ margin-bottom: 0.25rem;
 
 .answer-heading {
 font-size: 1.25em;
-margin-top: 1rem;
+position: absolute;
+margin-top: 0.75rem;
+margin-left: 2rem;
+color: #000;
 margin-bottom: -1rem;
 }
 
@@ -1893,4 +1915,95 @@ margin-top: 0.5rem;
     background-color: #000;
     color: white;
     border-color: #000;
+}
+
+/* Set the sidebar to be expanded by default */
+.sidebar {
+    width: 15rem; /* Width when expanded */
+    /* ... existing styles ... */
+}
+
+/* Remove the default collapsed state styles */
+.sidebar.collapsed {
+    width: 0; /* Set width to 0 when collapsed */
+    overflow: hidden; /* Prevent content overflow */
+    transition: width 0.3s ease; /* Smooth transition */
+}
+
+/* Update the toggle button styles to show only the icon */
+.toggle-sidebar {
+    display: flex; /* Ensure it is displayed */
+    margin-top: auto; /* Position it at the bottom */
+}
+
+/* Ensure the sidebar is expanded initially */
+.sidebar.expanded {
+    width: 15rem; /* Width when expanded */
+}
+
+/* Adjust the transition for smooth collapsing */
+.sidebar {
+    transition: width 0.3s ease; /* Ensure smooth transition */
+}
+
+/* Remove any styles that might affect the second button */
+.sidebar-button-container {
+    display: none; /* Hide the second button completely */
+}
+
+/* Ensure no other styles are affecting the toggle button */
+.sidebar.expanded .toggle-sidebar {
+    display: flex; /* Ensure it is displayed when expanded */
+}
+
+/* Hide the toggle button when the sidebar is collapsed */
+.sidebar.collapsed .toggle-sidebar {
+    display: none; /* Hide the toggle button when collapsed */
+}
+
+.expand-sidebar-icon {
+    position: fixed; /* Fixed position on the left corner */
+    top: 50%; /* Center vertically */
+    left: 0; /* Align to the left */
+    transform: translateY(-50%); /* Center the icon */
+    background-color: #f9f9f9; /* Background color */
+    border: 1px solid var(--border-color); /* Border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 7px; /* Padding */
+    display: none; /* Initially hidden */
+    z-index: 100; /* Ensure it is above other elements */
+    cursor: pointer; /* Pointer cursor */
+}
+
+/* Show the icon when the sidebar is collapsed */
+.sidebar.collapsed ~ .expand-sidebar-icon {
+    display: flex; /* Show the icon */
+}
+
+.sidebar-toggle {
+    position: fixed; /* Position relative for tooltip positioning */
+    top: 1rem;
+    left: 1rem;
+    background-color: transparent;
+    border: 0px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 7px;
+    cursor: pointer;
+    content: attr(data-tooltip);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-toggle:hover .tooltip {
+    opacity: 1; /* Show tooltip on hover */
+    content: attr(data-tooltip);
+
+}
+
+.sidebar-toggle:hover {
+    background-color: #f3f4f6;
+    content: attr(data-tooltip);
+
 }
