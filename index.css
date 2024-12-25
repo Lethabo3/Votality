@@ -42,7 +42,7 @@ position: relative;
     flex-direction: column;
     align-items: center;
     padding: 0.5rem 0;
-    position: fixed;
+    position: relative; /* Set position to relative */
     top: 0;
     left: 0;
     bottom: 0;
@@ -66,21 +66,20 @@ position: relative;
 }
 
 .sidebar-button-container {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
+    position: relative;
+    top: 0.5em;
     z-index: 100;
     width: 2.3rem; /* Smaller buttons */
     height: 2.3rem;
-    background-color: var(--background-color);
-    border: 1px solid var(--border-color);
-    color: #000000;
+    background-color: transparent;
+    border: 0px solid var(--border-color);
+    color: #000;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    margin-bottom: 1rem;
+    left: -0.7rem;
 }
 
 .account-container {
@@ -156,7 +155,7 @@ position: relative;
 
 /* Update the expanded state for consistent button styling */
 .sidebar.expanded .sidebar-button-container {
-    width: 13rem;
+    width: 13.5rem;
     padding: 0.5rem 0.75rem;
     margin-left: 0.5rem;
     display: flex;
@@ -219,7 +218,7 @@ position: relative;
     color: #000000;
     border-radius: 8px;
     margin-top: auto;
-    margin-bottom:-30rem;
+    margin-bottom:-27rem;
     cursor: pointer;
 }
 
@@ -512,6 +511,18 @@ position: relative;
     flex: 1;
     display: flex;
     flex-direction: column;
+    transition: margin-left 0.3s ease;
+    margin-left: 4rem;
+}
+
+/* When sidebar is expanded */
+.sidebar.expanded ~ .main-content {
+    margin-left: 15rem;
+}
+
+/* When sidebar is collapsed */
+.sidebar.collapsed ~ .main-content {
+    margin-left: 0;
 }
 
 .hero {
@@ -924,9 +935,9 @@ z-index: 0;
 }
 
 .scroll-to-bottom-button {
-    position: fixed;
-    bottom: 200px; /* Positioned higher up */
-    right: 40rem;
+    position: relative;
+    bottom: 100px; /* Positioned higher up */
+    right: 0rem;
     background-color: transparent;
     border: none;
     cursor: pointer;
@@ -1335,7 +1346,7 @@ margin-bottom: 0;
 
 .desktop-top-nav {
     display: none;
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 4rem; /* Width of the sidebar */
     right: 0;
@@ -1343,6 +1354,7 @@ margin-bottom: 0;
     height: 60px;
     padding: 0 2rem;
     z-index: 1;
+    flex-grow: 1; /* Allow the top nav to take remaining space */
     justify-content: space-between;
     align-items: center;
     opacity: 0;
@@ -2007,3 +2019,13 @@ margin-top: 0.5rem;
     content: attr(data-tooltip);
 
 }
+
+/* Adjust the top nav's margin based on the sidebar's state */
+.sidebar.collapsed + .desktop-top-nav {
+    margin-left: 60px; /* Adjust margin when sidebar is collapsed */
+}
+
+.sidebar.expanded + .desktop-top-nav {
+    margin-left: 250px; /* Adjust margin when sidebar is expanded */
+}
+

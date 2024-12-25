@@ -53,7 +53,12 @@
             <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
             <i data-lucide="chevron-first" class="collapse-arrow h-5 w-5" data-tooltip="Collapse"></i>
 
-    
+        <!-- New Chat Button -->
+        <div class="sidebar-button-container">
+            <i data-lucide="plus"></i>
+            <span class="new-thread-text">New Chat</span>
+        </div>
+        
             <div class="try-pro-container">
                 <div class="try-pro-title">Try Pro</div>
                 <div class="try-pro-description">Upgrade for image upload, smarter AI, and more Pro Search.</div>
@@ -152,9 +157,10 @@
                 <div id="chat-container" class="chat-container"></div>
                 <button id="scroll-to-bottom" class="scroll-to-bottom-button" aria-label="Scroll to bottom">
                     <div class="custom-rounded" style="border: none;">
-                        <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>                        
+                        </svg>
+                                           
                     </div>
                 </button>
                 <div id="suggested-queries" class="suggested-queries">
@@ -637,57 +643,135 @@ async function saveSharedContent(id, content, topic) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const collapseArrow = document.querySelector('.collapse-arrow');
-    const sidebar = document.querySelector('.sidebar');
-    const expandSidebarIcon = document.querySelector('.expand-sidebar-icon');
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
-    
-    console.log('Initial elements found:', {
-        collapseArrow,
-        sidebar,
-        expandSidebarIcon,
-        sidebarToggle
-    });
-
-    // Collapse the sidebar when the collapse arrow is clicked
-    collapseArrow.addEventListener('click', function() {
-        console.log('Collapse arrow clicked');
-        sidebar.classList.add('collapsed');
-        sidebar.classList.remove('expanded');
-        expandSidebarIcon.style.display = 'flex';
-    });
-
-    // Expand the sidebar when the expand icon is clicked 
-    expandSidebarIcon.addEventListener('click', function() {
-        console.log('Expand icon clicked');
-        sidebar.classList.remove('collapsed');
-        sidebar.classList.add('expanded');
-        expandSidebarIcon.style.display = 'none';
-    });
-});
-
-// Put the sidebar toggle listener outside DOMContentLoaded
+// Get all required elements outside DOMContentLoaded
 const sidebarToggle = document.querySelector('.sidebar-toggle');
 const sidebar = document.querySelector('.sidebar');
 const expandSidebarIcon = document.querySelector('.expand-sidebar-icon');
 
-if (sidebarToggle) {
-    console.log('Found sidebar toggle button');
-    sidebarToggle.addEventListener('click', function() {
-        console.log('Sidebar toggle clicked');
-        if (sidebar.classList.contains('collapsed')) {
-            sidebar.classList.remove('collapsed');
-            sidebar.classList.add('expanded');
-            expandSidebarIcon.style.display = 'none';
-        } else {
-            sidebar.classList.add('collapsed');
-            sidebar.classList.remove('expanded');
-            expandSidebarIcon.style.display = 'flex';
+// Debug initial state
+console.log('Initial elements found:', {
+    sidebarToggle,
+    sidebar,
+    expandSidebarIcon
+});
+
+// Function to handle collapse arrow click
+function handleCollapseArrowClick() {
+    console.log('=== Collapse Arrow Click Debug ===');
+    console.log('Before collapse - Sidebar classes:', sidebar.classList.toString());
+    
+    sidebar.classList.add('collapsed');
+    sidebar.classList.remove('expanded');
+    expandSidebarIcon.style.display = 'flex';
+    
+    console.log('After collapse - Sidebar classes:', sidebar.classList.toString());
+    console.log('After collapse - Expand icon display:', expandSidebarIcon.style.display);
+    console.log('================================');
+}
+
+// Function to attach collapse arrow listener
+function attachCollapseArrowListener() {
+    const collapseArrow = document.querySelector('.collapse-arrow');
+    console.log('Attempting to attach collapse listener to:', collapseArrow);
+    
+    if (collapseArrow) {
+        console.log('Found collapse arrow, attaching listener');
+        // Remove any existing listeners first
+        collapseArrow.removeEventListener('click', handleCollapseArrowClick);
+        // Add new listener
+        collapseArrow.addEventListener('click', handleCollapseArrowClick);
+    }
+}
+
+// Initial attachment
+attachCollapseArrowListener();
+
+// Watch for changes that might affect the collapse arrow
+const observer = new MutationObserver((mutations) => {
+    console.log('DOM changed, checking collapse arrow');
+    attachCollapseArrowListener();
+});
+
+// Start observing
+observer.observe(document.body, {
+    childList: true,
+    subtree: true
+});
+
+// Get the scroll to bottom button
+const scrollToBottomButton = document.getElementById('scroll-to-bottom');
+
+// Expand icon functionality
+if (expandSidebarIcon) {
+    expandSidebarIcon.addEventListener('click', function() {
+        console.log('=== Expand Icon Click Debug ===');
+        console.log('Before expand - Sidebar classes:', sidebar.classList.toString());
+        const topNavLeft = document.querySelector('.desktop-top-nav__left');
+        console.log('Found topNavLeft:', topNavLeft); // Debug log
+       
+        sidebar.classList.remove('collapsed');
+        sidebar.classList.add('expanded');
+        expandSidebarIcon.style.display = 'none';
+
+        if (topNavLeft) {
+            console.log('Setting margin-left to 11.5rem'); // Debug log
+            topNavLeft.style.marginLeft = '11.5rem';
+            console.log('Current margin-left:', topNavLeft.style.marginLeft); // Debug log
         }
+
+        // Move the scroll button
+        if (scrollToBottomButton) {
+            scrollToBottomButton.style.marginLeft = '15rem'; // Adjust margin when expanded
+        }
+       
+        console.log('After expand - Sidebar classes:', sidebar.classList.toString());
+        console.log('==============================');
     });
 }
 
+// Sidebar toggle functionality
+sidebarToggle.addEventListener('click', function() {
+    console.log('=== Sidebar Toggle Click Debug ===');
+    console.log('Before toggle - Sidebar classes:', sidebar.classList.toString());
+    const mainContent = document.querySelector('.main-content');
+    const desktopTopNav = document.querySelector('.desktop-top-nav');
+    const topNavLeft = document.querySelector('.desktop-top-nav__left'); // Get topNavLeft here
+   
+    if (sidebar.classList.contains('collapsed')) {
+        sidebar.classList.remove('collapsed');
+        sidebar.classList.add('expanded');
+        expandSidebarIcon.style.display = 'none';
+        if (mainContent) mainContent.style.marginLeft = '15rem';
+        if (desktopTopNav) {
+            desktopTopNav.style.paddingLeft = '1rem'; // Decrease padding when sidebar expands
+        }
+        if (topNavLeft) {
+            topNavLeft.style.marginLeft = '11.5rem'; // Set margin when expanded
+        }
+        // Move the scroll button
+        if (scrollToBottomButton) {
+            scrollToBottomButton.style.marginLeft = '15rem'; // Adjust margin when expanded
+        }
+    } else {
+        sidebar.classList.add('collapsed');
+        sidebar.classList.remove('expanded');
+        expandSidebarIcon.style.display = 'flex';
+        if (mainContent) mainContent.style.marginLeft = '0';
+        if (desktopTopNav) {
+            desktopTopNav.style.paddingLeft = '2rem'; // Reset padding when sidebar collapses
+        }
+        if (topNavLeft) {
+            topNavLeft.style.marginLeft = '0'; // Reset margin when collapsed
+        }
+        // Move the scroll button
+        if (scrollToBottomButton) {
+            scrollToBottomButton.style.marginLeft = '0'; // Reset margin when collapsed
+        }
+    }
+   
+    console.log('After toggle - Sidebar classes:', sidebar.classList.toString());
+    console.log('===============================');
+});
 
 // Add this to your existing JavaScript
 document.addEventListener('DOMContentLoaded', function() {
@@ -1412,16 +1496,9 @@ function generateHeading(paragraph) {
     return 'Market Analysis';
 }
 
-
 function showAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
     const lastChatGroup = chatContainer.lastElementChild;
-    
-    // Sources heading (visible)
-    const sourcesHeading = document.createElement('div');
-    sourcesHeading.className = 'section-heading sources-heading';
-    sourcesHeading.textContent = 'Sources';
-    lastChatGroup.appendChild(sourcesHeading);
     
     // Single sources container skeleton
     const sourcesContainerSkeleton = document.createElement('div');
@@ -1452,12 +1529,6 @@ function showAIThinking() {
     sourceChipSkeleton.appendChild(circlesContainer);
     sourcesContainerSkeleton.appendChild(sourceChipSkeleton);
     lastChatGroup.appendChild(sourcesContainerSkeleton);
-    
-    // Answer heading (visible)
-    const answerHeading = document.createElement('div');
-    answerHeading.className = 'section-heading answer-heading';
-    answerHeading.textContent = 'Answer';
-    lastChatGroup.appendChild(answerHeading);
     
     // AI message skeleton
     const skeletonLoader = document.createElement('div');
@@ -1498,26 +1569,15 @@ function showAIThinking() {
     // Scroll to the last chat group (user's message)
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
 function hideAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
     const lastChatGroup = chatContainer.lastElementChild;
-
-    // Remove sources heading
-    const sourcesHeading = lastChatGroup.querySelector('.sources-heading');
-    if (sourcesHeading) {
-        sourcesHeading.remove();
-    }
 
     // Remove sources container skeleton
     const sourcesContainerSkeleton = lastChatGroup.querySelector('.skeleton-sources-container');
     if (sourcesContainerSkeleton) {
         sourcesContainerSkeleton.remove();
-    }
-
-    // Remove answer heading
-    const answerHeading = lastChatGroup.querySelector('.answer-heading');
-    if (answerHeading) {
-        answerHeading.remove();
     }
 
     // Remove skeleton loader
@@ -2038,20 +2098,14 @@ function addMessage(text, sender, relatedTopics = []) {
             resolve(messageElement);
         } else {
             const lastChatGroup = chatContainer.lastElementChild;
-            
-            // Add Sources heading
-            const sourcesHeading = document.createElement('div');
-            sourcesHeading.className = 'section-heading sources-heading';
-            sourcesHeading.textContent = 'Sources';
-            lastChatGroup.appendChild(sourcesHeading);
 
             // Add sources container
             const sourcesContainer = document.createElement('div');
             sourcesContainer.className = 'sources-container';
             sourcesContainer.style.display = 'flex';
             sourcesContainer.style.flexWrap = 'wrap';
-            sourcesContainer.style.gap = '12px';
-            sourcesContainer.style.padding = '8px 16px';
+            sourcesContainer.style.gap = '8px'; // Further reduced gap between items
+            sourcesContainer.style.padding = '1px 16px'; // Further reduced padding
             
             if (attachedFiles && attachedFiles.length > 0) {
                 // Display attached files as sources
@@ -2074,51 +2128,48 @@ function addMessage(text, sender, relatedTopics = []) {
             }
             
             lastChatGroup.appendChild(sourcesContainer);
-            
-// Add Answer heading with logo
-const answerHeadingContainer = document.createElement('div');
-answerHeadingContainer.className = 'section-heading answer-heading-container';
-answerHeadingContainer.style.display = 'flex';
-answerHeadingContainer.style.alignItems = 'center';
 
-const logoContainer = document.createElement('div');
-logoContainer.style.width = '24px';
-logoContainer.style.height = '24px';
-logoContainer.style.position = 'absolute';
-logoContainer.style.marginLeft = '-2px';
-logoContainer.style.marginTop = '28px';
-logoContainer.style.border = '1px solid #E5E7EB';
-logoContainer.style.borderRadius = '6px';
-logoContainer.style.display = 'flex';
-logoContainer.style.alignItems = 'center';
-logoContainer.style.justifyContent = 'center';
-logoContainer.style.backgroundColor = '#f9f9f9';
-logoContainer.style.zIndex = '1';
+            // Create an outer wrapper for proper positioning context
+            const outerWrapper = document.createElement('div');
+            outerWrapper.style.position = 'relative';
+            outerWrapper.style.width = '100%';
+            outerWrapper.style.marginLeft = '0px'; // Make space for the logo
+            outerWrapper.style.zIndex = '1000'; // Increase z-index to ensure it appears above other elements
 
-const logoImg = document.createElement('img');
-logoImg.src = 'y7.png';
-logoImg.alt = 'Votality Logo';
-logoImg.className = 'answer-heading-logo';
-logoImg.style.width = '18px';
-logoImg.style.height = '18px';
-logoImg.style.transform = 'translateX(14px)';
-logoImg.style.transform = 'translateY(14px)'; // Using transform instead of margin
-logoImg.style.zIndex = '2';
+            // Create the message container
+            const messageContainer = document.createElement('div');
+            messageContainer.style.width = '100%';
+            messageContainer.style.boxSizing = 'border-box';
+            messageContainer.style.position = 'relative';
+            messageContainer.style.marginTop = '0px'; // Further reduced margin
 
-logoContainer.appendChild(logoImg);
-answerHeadingContainer.appendChild(logoContainer);
+            // Add logo container with absolute positioning
+            const logoContainer = document.createElement('div');
+            logoContainer.style.position = 'absolute';
+            logoContainer.style.left = '-36px'; // Position it to the left of the user message
+            logoContainer.style.width = '40px'; // Set width for the logo container
+            logoContainer.style.height = '40px'; // Set height for the logo container
+            logoContainer.style.borderRadius = '50%'; // Make it rounded
+            logoContainer.style.display = 'none';
+            logoContainer.style.alignItems = 'center';
+            logoContainer.style.justifyContent = 'center';
+            logoContainer.style.backgroundColor = '#f9f9f9';
+            logoContainer.style.border = '1px solid #E5E7EB'; // Optional border for the logo container
 
+            // Create initials text
+            const initials = document.createElement('span');
+            initials.textContent = 'LS'; // Set initials
+            initials.style.fontSize = '16px'; // Adjust font size as needed
+            initials.style.color = '#374151'; // Set text color
+            initials.style.fontWeight = 'bold'; // Make initials bold
 
-            const answerHeading = document.createElement('div');
-            answerHeading.className = 'answer-heading';
-            answerHeading.textContent = 'Answer';
+            logoContainer.appendChild(initials); // Append initials to the logo container
+            messageContainer.appendChild(logoContainer); // Append logo container to the message container
 
-            answerHeadingContainer.appendChild(logoImg);
-            answerHeadingContainer.appendChild(answerHeading);
-            lastChatGroup.appendChild(answerHeadingContainer);
-
+            // Create AI message
             messageElement = document.createElement('div');
             messageElement.className = 'message ai-message';
+            messageElement.style.width = '100%';
             
             // Add message content with animation
             const messageContent = document.createElement('div');
@@ -2233,7 +2284,9 @@ answerHeadingContainer.appendChild(logoContainer);
             });
 
             messageElement.appendChild(interactions);
-            lastChatGroup.appendChild(messageElement);
+            messageContainer.appendChild(messageElement);
+            outerWrapper.appendChild(messageContainer);
+            lastChatGroup.appendChild(outerWrapper);
 
             // Initialize Lucide icons
             lucide.createIcons();
@@ -2275,6 +2328,7 @@ answerHeadingContainer.appendChild(logoContainer);
         }
     });
 }
+
 
 function addMessageInteractions(messageElement, sender) {
     if (sender === 'ai') {
