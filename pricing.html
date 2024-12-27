@@ -36,14 +36,27 @@
             box-sizing: border-box;
         }
 
-        body, html {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            height: 100%;
-            overflow-x: hidden;
-        }
+        @font-face {
+    font-family: 'GeneralSans-Medium';
+    src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+         url('../fonts/GeneralSans-Medium.woff') format('woff'),
+         url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+  }
+  
+body, html {
+    font-family: 'GeneralSans-Medium';
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    height: auto; /* Allow height to adapt to content */
+    overflow: auto; /* Enable scrolling if content overflows */
+    position: static; /* Default position */
+    width: 100%;
+}
+
 
         body {
             background-color: var(--background-color);
@@ -95,6 +108,8 @@
             font-weight: bold;
             margin-bottom: 1rem;
             text-align: center;
+            font-family: 'GeneralSans-Medium';
+
             color: var(--text-color);
         }
 
@@ -173,11 +188,11 @@
 
         .cta-button {
             background-color: #000;
-            font-family: 'Inter', sans-serif; /* Add this line */
             color: #fff;
             border: none;
             border-radius: 12px;
             padding: 0.75rem 1rem;
+            font-family: 'GeneralSans-Medium';
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -243,14 +258,24 @@
         }
 
         .top-nav {
-    position: static;  /* Changed from fixed */
-    background-color: transparent;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 60px;
-    padding: 0 1.5rem;
-    z-index: 20;
+            position: static;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            margin-top: -18px;
+            padding: 0 1.5rem;
+        }
+
+        @font-face {
+  font-family: 'GeneralSans-Regular';
+  src: url('../fonts/GeneralSans-Regular.woff2') format('woff2'),
+       url('../fonts/GeneralSans-Regular.woff') format('woff'),
+       url('../fonts/GeneralSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
 }
 
         .top-nav__logo {
@@ -261,6 +286,7 @@
 
         .top-nav__buttons {
             display: flex;
+            font-family: 'GeneralSans-Regular';
             align-items: center;
             gap: 1rem;
         }
@@ -269,23 +295,20 @@
             font-size: 0.875rem;
             transition: all 0.3s ease;
             text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
         }
 
-        .top-nav__button--signin {
-            color: #000000;
+        .top-nav__button--home {
             background-color: #fff;
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-weight: 600;
-            border: 1px solid #e0e0e0;
+            color: #000;
         }
 
-        .top-nav__button--signup {
-            background-color: #000000;
-            color: #ffffff;
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-weight: 600;
+        .top-nav__button--contact {
+            color: #fff;
+            background-color: #000;
+            border: 1px solid #e0e0e0;
         }
 
         .footer-container {
@@ -429,15 +452,19 @@
             padding: 0 0 1.5rem 0;
         }
 
-    </style>
+    </style>`
 </head>
 <body>
-        <nav class="top-nav">
-            <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
-            <div class="top-nav__buttons">
-                <a href="index.html" class="top-nav__button top-nav__button--signup">Get Started</a>
-            </div>
-        </nav>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons">
+            <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
+            <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
+            <a href="about.html" class="top-nav__button top-nav__button--home">About</a>
+            <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
+            <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
+        </div>
+    </nav>
         <main class="main-content">
             <h1>Plans and Pricing</h1>
             <p class="subtitle">Choose the plan that fits your financial needs. From young traders to large investors, we have a plan best suited for you.</p>

@@ -15,6 +15,7 @@
     <title>signin</title>
         <link rel="icon" href="b2.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -25,16 +26,37 @@
             --hover-color: #f3f4f6;
         }
 
-        body, html {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow-x: hidden;
-        }
+@font-face {
+    font-family: 'GeneralSans-Medium';
+    src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+         url('../fonts/GeneralSans-Medium.woff') format('woff'),
+         url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+  }
+
+  @font-face {
+  font-family: 'GeneralSans-Regular';
+  src: url('../fonts/GeneralSans-Regular.woff2') format('woff2'),
+       url('../fonts/GeneralSans-Regular.woff') format('woff'),
+       url('../fonts/GeneralSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+  
+body, html {
+    font-family: 'GeneralSans-Medium';
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    height: auto; /* Allow height to adapt to content */
+    overflow: auto; /* Enable scrolling if content overflows */
+    position: static; /* Default position */
+    width: 100%;
+}
+
 
         body {
             background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
@@ -58,6 +80,7 @@
 
         .top-nav__buttons {
             display: flex;
+            font-family: 'GeneralSans-Regular';
             align-items: center;
             gap: 1rem;
         }
@@ -74,7 +97,7 @@
         .top-nav__button--signin {
             color: #000000;
             background-color: #fff;
-            border: 1px solid #e0e0e0;
+            border: 0px solid #e0e0e0;
         }
 
         .top-nav__button--signup {
@@ -90,7 +113,7 @@
         }
 
         .main-title {
-            font-size: 4rem;
+            font-size: 2.5rem;
             font-weight: 800;
             margin-bottom: 0.5rem;
             color: var(--text-color);
@@ -100,9 +123,9 @@
         .login-title {
             text-align: center;
             color: #4b5563;
-            margin-top: -0.8rem;
-            margin-bottom: 4rem;
+            margin-bottom: 3rem;
             font-size: 1rem;
+            font-weight: 500;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
@@ -281,7 +304,7 @@
             <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
             <a href="about.html" class="top-nav__button top-nav__button--home">About</a>
             <a href="contact.html" class="top-nav__button top-nav__button--signin">Contact</a>
-            <a href="signup.html" class="top-nav__button top-nav__button--signup">Sign Up</a>
+            <a href="index.html" class="top-nav__button top-nav__button--signup">Try Votality</a>
         </div>
     </nav>
 

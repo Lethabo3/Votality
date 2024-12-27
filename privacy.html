@@ -15,16 +15,37 @@
             --hover-color: #f3f4f6;
         }
         
-        body, html {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow-x: hidden;
-        }
+@font-face {
+    font-family: 'GeneralSans-Medium';
+    src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+         url('../fonts/GeneralSans-Medium.woff') format('woff'),
+         url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+  }
+
+  @font-face {
+  font-family: 'GeneralSans-Regular';
+  src: url('../fonts/GeneralSans-Regular.woff2') format('woff2'),
+       url('../fonts/GeneralSans-Regular.woff') format('woff'),
+       url('../fonts/GeneralSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+  
+body, html {
+    font-family: 'GeneralSans-Medium';
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    height: auto; /* Allow height to adapt to content */
+    overflow: auto; /* Enable scrolling if content overflows */
+    position: static; /* Default position */
+    width: 100%;
+}
+
         
         body {
             background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
@@ -163,6 +184,7 @@
         
         .top-nav__buttons {
             display: flex;
+            font-family: 'GeneralSans-Regular';
             align-items: center;
             gap: 1rem;
         }
@@ -387,11 +409,14 @@
         <section class="section">
             <div class="section-header">
                 <h2>Protecting Your Privacy</h2>
-                <div class="arrow-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                    </svg>
-                </div>
+<a href="terms.html" class="arrow-link">
+    <div class="arrow-container">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+    </div>
+</a>
+
             </div>
             
             <p>This Privacy Policy describes how Votality AI, Inc. ("we," "us," "our") collects, uses, and discloses information about individuals who use our websites, applications, services, tools, and features to access our products or otherwise interact with us (collectively, the "Services"). For the purposes of this Privacy Policy, we are the data controller, and "you" and "your" means you as the user of the Services, whether you are a customer, website visitor, job applicant, representative of a company with whom we do business, or another individual whose information we have collected pursuant to this Privacy Policy. This Privacy Policy does not cover the use of any Votality API or enterprise-level services, where we act solely as a processor, and which are governed by the applicable Terms and Conditions, including any Data Processing Addendums incorporated therein, that you agree to when signing up for a subscription to those services.</p>

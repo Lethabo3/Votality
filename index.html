@@ -17,6 +17,8 @@
         <link rel="icon" href="b2.png">
         <script src="https://cdn.tailwindcss.com"></script>
         <script src="https://unpkg.com/lucide@latest"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=General+Sans:wght@400&display=swap" rel="stylesheet"> <!-- Add this line -->
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="index.css">
 
@@ -36,8 +38,12 @@
         
          <!-- Add top navigation for mobile -->
      <nav class="top-nav" style="display: none;">
-        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
-        <div class="top-nav__buttons">
+        <a href="index.html">
+            <picture class="logo-container">
+                <source srcset="v-white.png" media="(prefers-color-scheme: dark)">
+                <img src="v.png" alt="Votality AI Logo" class="top-nav__logo">
+            </picture>
+        </a>        <div class="top-nav__buttons">
             <a href="signin.html" class="top-nav__button top-nav__button--signin">Sign In</a>
             <a href="signup.html" class="top-nav__button top-nav__button--signup">Sign Up</a>
         </div>
@@ -49,30 +55,72 @@
         </button>
 
     <div class="layout">
-        <aside class="sidebar">
-            <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
-            <i data-lucide="chevron-first" class="collapse-arrow h-5 w-5" data-tooltip="Collapse"></i>
+            <aside class="sidebar">
+                <img src="y7.png" alt="Votality AI Logo" class="sidebar__logo">
+                <i data-lucide="chevron-first" class="collapse-arrow h-5 w-5" data-tooltip="Collapse"></i>
 
-        <!-- New Chat Button -->
-        <div class="sidebar-button-container">
-            <i data-lucide="plus"></i>
-            <span class="new-thread-text">New Chat</span>
-        </div>
-        
-            <div class="try-pro-container">
-                <div class="try-pro-title">Try Pro</div>
-                <div class="try-pro-description">Upgrade for image upload, smarter AI, and more Pro Search.</div>
-                <a href="#" class="learn-more-link">
-                    Learn More
-                    <i data-lucide="arrow-up-right" class="h-3 w-3"></i>
-                </a>
+            <!-- New Chat Button -->
+            <div class="sidebar-button-container">
+                <i data-lucide="pen-square" style="color: #000; width: 20px; height: 20px;"></i>       <span class="new-thread-text">New Chat</span>
+            </div>
+                        <!-- New Chat Button -->
+                        <div class="sidebar-button-container">
+                            <i data-lucide="flag" style="color: #000; width: 20px; height: 20px;"></i>       <span class="new-thread-text">Feedback</span>
+                        </div>
+
+            <div class="recent-chats-container">
+                <h3 class="recent-chats-title">Recents</h3>
+                <div class="chat-list">
+                    <!-- Example chat items -->
+                    <div class="chat-item">
+                        <span class="chat-name">portfolio growth analysis</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">zar exchange rate dip</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">next repo rate on stocks</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">tech startups and stocks</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">latest news on stock market</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">doge coin risks and benefits</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">portfolio growth analysis</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">zar exchange rate dip</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">next repo rate on stocks</span>
+                    </div>
+                    <div class="chat-item">
+                        <span class="chat-name">tech startups and stocks</span>
+                    </div>
+
+                    <!-- Add more chat items as needed -->
+                </div>
             </div>
             
-            <div class="account-container sidebar__account">
-                <i data-lucide="user" class="h-5 w-5 text-gray-400" data-lucide="user-fill"></i>
-                <span class="sidebar-text">Account</span>
-            </div>
-        </aside>
+                <div class="try-pro-container">
+                    <div class="try-pro-title">Try Pro</div>
+                    <div class="try-pro-description">Upgrade for image upload, smarter AI, and more Analysis.</div>
+                    <a href="#" class="learn-more-link">
+                        Learn More
+                        <i data-lucide="arrow-up-right" class="h-3 w-3"></i>
+                    </a>
+                </div>
+                
+                <div class="account-container sidebar__account">
+                    <i data-lucide="user" class="h-5 w-5 text-gray-400" data-lucide="user-fill"></i>
+                    <span class="sidebar-text">Account</span>
+                </div>
+            </aside>
     
         <div id="account-panel" class="account-panel">
             <div class="account-panel-header">
@@ -99,7 +147,7 @@
                 <button id="learn-more-btn" class="panel-button">
                     <div class="panel-button-content">
                         Learn More
-                    </div>new
+                    </div>
                     <i data-lucide="chevron-right" class="panel-button-arrow"></i>
                 </button>
                 <button id="help-support-btn" class="panel-button">
@@ -122,7 +170,8 @@
         <main class="main-content">
             <section class="hero">
                 <div id="initial-content">
-                    <h1 class="hero__title">Understand the Markets</h1>
+                    <h1 class="hero__title">What do you want to discover?</h1>
+                    <h2 class="subtitle">Your journey to knowledge on investing in markets starts here.</h2> <!-- Added subtitle -->
                 </div>
                 <div id="textarea-container" class="textarea-container">
                     <textarea id="query-input" class="textarea-input" placeholder="Ask Votality anything..."></textarea>
@@ -164,25 +213,25 @@
                     </div>
                 </button>
                 <div id="suggested-queries" class="suggested-queries">
-                    <button class="query-chip">
+                    <button class="query-chip" data-query="Market trends">
                         Market trends
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                         </svg>
                     </button>
-                    <button class="query-chip">
+                    <button class="query-chip" data-query="Investment strategies">
                         Investment strategies
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                         </svg>
                     </button>
-                    <button class="query-chip">
+                    <button class="query-chip" data-query="Economic indicators">
                         Economic indicators
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                         </svg>
                     </button>
-                    <button class="query-chip">
+                    <button class="query-chip" data-query="Risk analysis">
                         Risk analysis
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -301,20 +350,89 @@ let cooldownEndTime = null;
 const topNav = document.querySelector('.top-nav');
 const topNavButtons = topNav.querySelector('.top-nav__buttons');
 
+const staticText = "Ask Votality about "; // Original placeholder
+const phrases = [
+    "the latest trends in...",
+    "analyzing in...",
+    "investment strategies for...",
+    "the impact of recent...",
+    "how to interpret...",
+    "renewable energy investments",
+    "effects of...",
+    "building an investment portfolio",
+    "quarterly earnings reports",
+    "technology in investing"
+];
+let currentPhraseIndex = 0;
+let currentCharIndex = 0;
+let isDeleting = false;
+let typingAnimationActive = true; // Flag to control typing animation
+
+function type() {
+    // Check if the textarea has text entered
+    if (!typingAnimationActive || textarea.value.trim() !== '') {
+        textarea.placeholder = staticText; // Reset to default placeholder
+        return; // Exit the function to stop the animation
+    }
+
+    const currentPhrase = phrases[currentPhraseIndex];
+
+    if (isDeleting) {
+        // Remove a character from the dynamic part
+        textarea.placeholder = staticText + currentPhrase.substring(0, currentCharIndex);
+        currentCharIndex--;
+
+        if (currentCharIndex < 0) {
+            isDeleting = false; // Switch to typing mode
+            currentPhraseIndex = (currentPhraseIndex + 1) % phrases.length; // Move to the next phrase
+            currentCharIndex = 0; // Reset character index for the new phrase
+        }
+    } else {
+        // Add a character to the dynamic part
+        textarea.placeholder = staticText + currentPhrase.substring(0, currentCharIndex);
+        currentCharIndex++;
+
+        if (currentCharIndex > currentPhrase.length) {
+            isDeleting = true; // Switch to deleting mode after typing the full phrase
+            setTimeout(type, 1000); // Wait before starting to delete
+            return;
+        }
+    }
+
+    setTimeout(type, isDeleting ? 30 : 70); // Adjust typing and deleting speed (faster)
+}
+
+// Start typing effect when the page loads
+window.onload = function() {
+    type();
+};
+
 textarea.addEventListener('input', function() {
     if (this.value.trim() !== '') {
-        submitButton.querySelector('div').classList.remove('bg-gray-100');
-        submitButton.querySelector('div').classList.add('bg-gray-800');
-        submitButton.querySelector('svg').classList.remove('text-gray-300');
-        submitButton.querySelector('svg').classList.add('text-white');
+        typingAnimationActive = false;
+        textarea.placeholder = staticText;
+        
+        const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const customRounded = submitButton.querySelector('.custom-rounded');
+        
+        if (isDarkMode) {
+            customRounded.classList.add('typing-active');
+        } else {
+            customRounded.classList.remove('typing-active');
+            submitButton.querySelector('div').classList.remove('bg-gray-100');
+            submitButton.querySelector('div').classList.add('bg-gray-800');
+            submitButton.querySelector('svg').classList.remove('text-gray-300');
+            submitButton.querySelector('svg').classList.add('text-white');
+        }
     } else {
+        const customRounded = submitButton.querySelector('.custom-rounded');
+        customRounded.classList.remove('typing-active');
         submitButton.querySelector('div').classList.add('bg-gray-100');
         submitButton.querySelector('div').classList.remove('bg-gray-800');
         submitButton.querySelector('svg').classList.add('text-gray-300');
         submitButton.querySelector('svg').classList.remove('text-white');
     }
-
-    // Update signin/signup buttons visibility
+    
     updateSignInButtonsVisibility();
 });
 
@@ -325,9 +443,18 @@ textarea.addEventListener('keydown', function(e) {
         e.preventDefault(); // Prevent new line
         
         const message = this.value.trim();
-        if (message && !isInputLocked) {
+        console.log("User input:", message); // Log the user input
+
+        if (message) {
             // Trigger the submit button's click event
             submitButton.click();
+            console.log("Submit button clicked."); // Log when the submit button is clicked
+            
+            this.value = ''; // Clear the textarea after submission
+            textarea.placeholder = "Ask Votality anything..."; // Change placeholder to submitText
+            console.log("Placeholder changed to:", textarea.placeholder); // Log the new placeholder
+        } else {
+            console.log("No valid input to submit."); // Log if input is invalid
         }
     }
 });
@@ -1216,12 +1343,17 @@ function initializeAccountPanel() {
 // Call this when the page loads
 document.addEventListener('DOMContentLoaded', initializeAccountPanel);
 
+// Helper function to detect dark mode
+function isDarkMode() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
 // Helper function to create file source element
 function createFileSource(file) {
     const fileSource = document.createElement('div');
     fileSource.style.display = 'flex';
     fileSource.style.alignItems = 'center';
-    fileSource.style.backgroundColor = '#f3f4f6';
+    fileSource.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
     fileSource.style.borderRadius = '8px';
     fileSource.style.padding = '8px 12px';
     fileSource.style.width = '200px';
@@ -1229,12 +1361,13 @@ function createFileSource(file) {
     fileSource.style.cursor = 'pointer';
     fileSource.style.transition = 'background-color 0.2s ease';
     fileSource.style.position = 'relative';
-
+    
     fileSource.addEventListener('mouseover', () => {
-        fileSource.style.backgroundColor = '#e5e7eb';
+        fileSource.style.backgroundColor = isDarkMode() ? '#2a2d33' : '#e5e7eb';
     });
+    
     fileSource.addEventListener('mouseout', () => {
-        fileSource.style.backgroundColor = '#f3f4f6';
+        fileSource.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
     });
 
     const fileIcon = document.createElement('div');
@@ -1250,7 +1383,7 @@ function createFileSource(file) {
 
     const fileName = document.createElement('span');
     fileName.style.fontSize = '0.875rem';
-    fileName.style.color = '#374151';
+    fileName.style.color = isDarkMode() ? '#ffffff' : '#374151';
     fileName.style.whiteSpace = 'nowrap';
     fileName.style.overflow = 'hidden';
     fileName.style.textOverflow = 'ellipsis';
@@ -1270,7 +1403,7 @@ function createSourceItem(source) {
     const sourceItem = document.createElement('div');
     sourceItem.style.display = 'flex';
     sourceItem.style.alignItems = 'center';
-    sourceItem.style.backgroundColor = '#f3f4f6';
+    sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
     sourceItem.style.borderRadius = '8px';
     sourceItem.style.padding = '8px 12px';
     sourceItem.style.width = '200px';
@@ -1278,12 +1411,13 @@ function createSourceItem(source) {
     sourceItem.style.cursor = 'pointer';
     sourceItem.style.transition = 'background-color 0.2s ease';
     sourceItem.style.position = 'relative';
-
+    
     sourceItem.addEventListener('mouseover', () => {
-        sourceItem.style.backgroundColor = '#e5e7eb';
+        sourceItem.style.backgroundColor = isDarkMode() ? '#2a2d33' : '#e5e7eb';
     });
+    
     sourceItem.addEventListener('mouseout', () => {
-        sourceItem.style.backgroundColor = '#f3f4f6';
+        sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
     });
 
     const imageContainer = document.createElement('div');
@@ -1294,7 +1428,7 @@ function createSourceItem(source) {
     imageContainer.style.marginRight = '8px';
     imageContainer.style.display = 'flex';
     imageContainer.style.alignItems = 'center';
-    
+   
     const sourceImg = document.createElement('img');
     sourceImg.src = source.image;
     sourceImg.alt = source.name;
@@ -1302,10 +1436,10 @@ function createSourceItem(source) {
     sourceImg.style.height = '44px';
     sourceImg.style.borderRadius = '4px';
     sourceImg.style.objectFit = 'cover';
-    
+   
     const sourceName = document.createElement('span');
     sourceName.style.fontSize = '0.875rem';
-    sourceName.style.color = '#374151';
+    sourceName.style.color = isDarkMode() ? '#ffffff' : '#374151';
     sourceName.style.whiteSpace = 'nowrap';
     sourceName.style.overflow = 'hidden';
     sourceName.style.textOverflow = 'ellipsis';
@@ -1319,6 +1453,24 @@ function createSourceItem(source) {
     return sourceItem;
 }
 
+// Add event listener for system dark mode changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    const fileSourceElements = document.querySelectorAll('.file-source');
+    const sourceItemElements = document.querySelectorAll('.source-item');
+    
+    const backgroundColor = e.matches ? '#232323' : '#f3f4f6';
+    const textColor = e.matches ? '#ffffff' : '#374151';
+    
+    fileSourceElements.forEach(el => {
+        el.style.backgroundColor = backgroundColor;
+        el.querySelector('span').style.color = textColor;
+    });
+    
+    sourceItemElements.forEach(el => {
+        el.style.backgroundColor = backgroundColor;
+        el.querySelector('span').style.color = textColor;
+    });
+});
 function initializeAccountFunctionality() {
     const accountPanel = document.getElementById('account-panel');
     
@@ -2499,6 +2651,54 @@ document.getElementById('feedback-modal').addEventListener('click', function(e) 
     if (e.target === this) {
         closeFeedbackModal();
     }
+});
+
+// Add event listeners to query chips
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM fully loaded and parsed");
+    
+    const queryChips = document.querySelectorAll('.query-chip');
+    console.log("Query chips found:", queryChips.length); // Log the number of query chips found
+
+    queryChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            const queryText = this.getAttribute('data-query'); // Get the query text from data attribute
+            textarea.value = queryText; // Set the textarea value to the query text
+            textarea.placeholder = staticText + queryText; // Update the placeholder
+            
+            // Debugging logs
+            console.log("Query chip clicked:", queryText); // Log the clicked query
+            console.log("Updated placeholder:", textarea.placeholder); // Log the new placeholder
+            
+            submitButton.click(); // Optionally trigger the submit button click
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM fully loaded and parsed");
+    
+    const staticText = "Ask Votality about... "; // Original placeholder
+    const textarea = document.getElementById('query-input'); // Ensure this matches your textarea ID
+    const submitButton = document.getElementById('submit-button'); // Ensure this matches your submit button ID
+
+    const queryChips = document.querySelectorAll('.query-chip');
+    console.log("Query chips found:", queryChips.length); // Log the number of query chips found
+
+    queryChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            const queryText = this.getAttribute('data-query'); // Get the query text from data attribute
+            textarea.value = queryText; // Set the textarea value to the query text
+            textarea.placeholder = staticText + queryText; // Update the placeholder
+            
+            // Debugging logs
+            console.log("Query chip clicked:", queryText); // Log the clicked query
+            console.log("Updated placeholder:", textarea.placeholder); // Log the new placeholder
+            
+            // Optionally trigger the submit button click
+            submitButton.click();
+        });
+    });
 });
 
 </script>

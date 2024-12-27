@@ -1,9 +1,17 @@
 :root {
-    --background-color: #ffffff;
-    --text-color: #000;
-    --border-color: #e5e7eb;
-    --hover-color: #f3f4f6;
-    --grid-color: rgba(229, 231, 235, 0.5); /* Lighter, more transparent grid color */
+    color-scheme: light dark;
+    --background-color: light-dark(#ffffff, #1a1a1a);  
+    --text-color: light-dark(#000000, #ffffff);
+    --border-color: light-dark(#e5e7eb, #2e3138);
+    --hover-color: light-dark(#f3f4f6, #2a2d33);
+    --grid-color: light-dark(rgba(229, 231, 235, 0.5), rgba(46, 49, 56, 0.5));
+    --secondary-background: light-dark(#f9f9f9, #232323);
+    --tertiary-background: light-dark(#f0f0f0, #2a2a2a);
+    --secondary-text: light-dark(#4b5563, #9ba3af);
+    --muted-text: light-dark(#6B7280, #8c96a3);
+    --description-text: light-dark(#9ca3af, #666f7c);
+    --secondary-border: light-dark(#e0e0e0, #2d2d2d);
+    --hover-state: light-dark(rgba(75, 85, 99, 0.1), rgba(200, 210, 224, 0.1));
 }
 
 * {
@@ -12,8 +20,30 @@
     box-sizing: border-box;
 }
 
+.subtitle {
+    text-align: center;
+    color: var(--secondary-text);
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1.5rem;
+    font-size: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@font-face {
+    font-family: 'GeneralSans-Medium';
+    src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+         url('../fonts/GeneralSans-Medium.woff') format('woff'),
+         url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+  }
+  
 body, html {
-    font-family: 'Inter', sans-serif;
+    font-family: 'GeneralSans-Medium';
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
@@ -37,8 +67,7 @@ position: relative;
 
 .sidebar {
     width: 15rem; /* Width when expanded */
-    background-color: #f9f9f9;
-    display: flex;
+    background-color: var(--secondary-background);    display: flex;
     flex-direction: column;
     align-items: center;
     padding: 0.5rem 0;
@@ -86,12 +115,11 @@ position: relative;
     width: calc(100% + 20px); /* Adjust width to exceed the sidebar's width */
     background-color: transparent;
     border-top: 1px solid var(--border-color);
-    padding: 0 10px; /* Add horizontal padding to shift contents to the right */
+        padding: 0 10px; /* Add horizontal padding to shift contents to the right */
     margin: 0; /* Negative margin to offset the padding of the sidebar */
     border-radius: 0; /* Remove border-radius to ensure it touches edges */
     display: flex;
-    color: #000000;
-    align-items: center;
+    color: var(--text-color);    align-items: center;
     justify-content: flex-start; /* Align items to the start */
     transition: all 0.3s ease;
     margin-top: auto;
@@ -218,7 +246,7 @@ position: relative;
     color: #000000;
     border-radius: 8px;
     margin-top: auto;
-    margin-bottom:-27rem;
+    margin-bottom:-25rem;
     cursor: pointer;
 }
 
@@ -535,8 +563,19 @@ position: relative;
     text-align: center;
 }
 
+@font-face {
+    font-family: 'GeneralSans-Semibold';
+    src: url('../fonts/GeneralSans-Semibold.woff2') format('woff2'),
+         url('../fonts/GeneralSans-Semibold.woff') format('woff'),
+         url('../fonts/GeneralSans-Semibold.ttf') format('truetype');
+    font-weight: 600;
+    font-display: swap;
+    font-style: normal;
+  }
+
 .hero__title {
-    font-size: 3rem;
+    font-family: 'GeneralSans-Semibold';
+    font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 1rem;
     color: var(--text-color);
@@ -566,8 +605,7 @@ position: relative;
     border: 0px solid var(--border-color);
     border-radius: 0.5rem;
     resize: none;
-    background-color: #f9f9f9;
-    outline: none;
+    background-color: var(--secondary-background);    outline: none;
     overflow-y: auto;
     transition: border-color 0.3s ease;
 }
@@ -702,7 +740,7 @@ position: relative;
     }
 }
 .attachment-container {
-    background-color: var(--hover-color);
+    background-color: var(--tertiary-background);
     border: 0px solid var(--hover-color);
     border-radius: 8px;
     padding: 0.25rem;
@@ -722,7 +760,7 @@ position: relative;
 
 .custom-rounded {
     border-radius: 8px;
-    color: red;
+    color: transparent;
     border: none !important; /* Ensure there is no border */
     background-color: var(--hover-color);
 }
@@ -773,8 +811,7 @@ position: relative;
 }
 
 .footer-link {
-    color: #4b5563;
-    text-decoration: none;
+    color: var(--secondary-text);    text-decoration: none;
     font-size: 0.875rem;
     transition: color 0.3s ease;
 }
@@ -1329,12 +1366,12 @@ margin-bottom: 0.5em;
 margin-bottom: 1.5em;
 }
 
-.ai-message-paragraph-heading {
-font-size: 1em; 
-font-weight: bold;
-margin-bottom: 0.5em;
-color: #444;
-}
+    .ai-message-paragraph-heading {
+    font-size: 1em; 
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    color: #444;
+    }
 
 .ai-message-paragraph {
 margin-bottom: 0.5em;
@@ -1511,13 +1548,12 @@ position: fixed;
 margin-bottom: 10px; /* Adjust this value based on the height of your sidebar */
 margin-left: -3rem; /* Width of the collapsed sidebar */
 width: 300px;
-background-color: white;
+background-color: var(--background-color);
 border-radius: 12px;
 display: none;
 flex-direction: column;
-border: 1px solid #e0e0e0;
-z-index: 1000;
-font-family: 'Inter', sans-serif;
+border: 1px solid var(--secondary-border);z-index: 1000;
+font-family: 'GeneralSans-Medium';
 }
 
 @media (max-width: 640px) {
@@ -1555,13 +1591,11 @@ flex-direction: column;
 .user-email {
 font-size: 14px;
 font-weight: 600;
-color: #333;
-}
+color: var(--text-color);}
 
 .user-plan {
 font-size: 12px;
-color: #666;
-}
+color: var(--description-text);}
 
 .account-panel-content {
 padding: 16px;
@@ -1584,8 +1618,7 @@ transition: background-color 0.2s;
 }
 
 .panel-button:hover {
-background-color: #f3f4f6;
-border-radius: 10px;
+    background-color: var(--hover-color);border-radius: 10px;
 }
 
 .panel-button-content {
@@ -1791,8 +1824,7 @@ margin-top: 0.5rem;
     border-radius: 6px;
     border: none;
     background: transparent;
-    color: #6b7280;
-    cursor: pointer;
+    color: var(--text-color);    cursor: pointer;
     transition: all 0.2s ease;
 }
 
@@ -2029,3 +2061,416 @@ margin-top: 0.5rem;
     margin-left: 250px; /* Adjust margin when sidebar is expanded */
 }
 
+.recent-chats-title {
+    position: absolute;
+    top: 0.5rem;
+    z-index: 100;
+    width: 2.3rem; /* Smaller buttons */
+    height: 2.3rem;
+    background-color: transparent;
+    color: #000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    left: 2rem;
+}
+
+.recent-chats-title::after {
+    content: '';
+    position: absolute;
+    top: 100%; /* Start right below the title */
+    left: -50%; /* Center the line relative to the title */
+    transform: translateX(-50%);
+    height: calc(29rem - 10.5rem); /* Distance between the two elements */
+    width: 1px; /* Line thickness */
+    background-color: #e5e7eb; /* Line color */
+    z-index: 1;
+    border-radius: 1rem; /* Adds curvature to the ends */
+}
+
+.recent-chats-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+        position: absolute;
+    
+    margin-left: 0.5rem; /* Adjust based on spacing from the line */
+    margin-top: 9rem;
+    width: 15rem; /* Adjust width as needed */
+}
+
+.chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem; /* Space between chat items */
+    margin-top: 2.9rem;
+    position: absolute;
+    margin-left: 1.3rem;
+}
+
+.chat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.2rem;
+    background-color: #f9f9f9; /* Light background */
+    border: 0px solid #e5e7eb; /* Border color */
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.chat-item:hover {
+    background-color: var(--hover-color);
+}
+
+.chat-name {
+    font-size: 0.80rem;
+    color: #9ca3af;
+}
+
+@media (prefers-color-scheme: dark) {
+    /* Background Colors */
+    .white-background,
+    .desktop-top-nav,
+    .chat-active .textarea-container,
+    .textarea-container.disabled,
+    .file-panel,
+    .feedback-modal-content,
+    .editing,
+    .message-edit-input,
+    .edit-button {
+        background-color: #1a1a1a !important;
+    }
+
+    .chat-item,
+    .expand-sidebar-icon,
+    .user-icon {
+        background-color: #232323 !important;
+    }
+
+    /* Text Colors */
+    .section-heading,
+    .answer-heading,
+    .user-message,
+    .message-edit-input,
+    .panel-button,
+    .recent-chats-title,
+    .header-title {
+        color: #ffffff !important;
+    }
+
+    .disabled-message,
+    .ai-message-paragraph-heading,
+    .panel-button-arrow,
+    .cancel-edit-button,
+    .file-info {
+        color: #9ba3af !important;
+    }
+
+    .cooldown-timer,
+    .header-button {
+        color: #8c96a3 !important;
+    }
+
+    .feedback-header h3,
+    .feedback-option {
+        color: #9ba3af !important;
+    }
+
+    /* Border Colors */
+    .account-panel-header,
+    .account-panel-footer,
+    .file-panel-header,
+    .file-panel {
+        border-color: #2e3138 !important;
+    }
+
+    /* Skeleton Loading */
+    .skeleton-line {
+        background: linear-gradient(90deg, #2a2a2a 25%, #333333 50%, #2a2a2a 75%) !important;
+    }
+
+    .skeleton-source {
+        background-color: #2a2a2a !important;
+    }
+
+    /* Buttons and Interactive Elements */
+    .submit-edit-button {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+    }
+
+    .submit-edit-button:hover {
+        background-color: #e0e0e0 !important;
+    }
+
+    .desktop-top-nav__share-button {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+    }
+
+    .desktop-top-nav__share-button:hover {
+        background-color: #e0e0e0 !important;
+    }
+
+    .upgrade-btn,
+    .upgrade-link,
+    .feedback-option.selected {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+        border-color: #ffffff !important;
+    }
+
+    .upgrade-btn:hover,
+    .upgrade-link:hover {
+        background-color: #e0e0e0 !important;
+    }
+
+    /* Hover States */
+    .header-button:hover,
+    .file-item:hover,
+    .interaction-button:hover,
+    .sidebar-toggle:hover,
+    .edit-button:hover,
+    .feedback-option:hover {
+        background-color: #2a2d33 !important;
+        color: #ffffff !important;
+    }
+
+    /* Feedback Modal */
+    .feedback-popup {
+        background-color: #232323 !important;
+        color: #ffffff !important;
+        border-color: #2e3138 !important;
+    }
+
+    /* Chat Visual Elements */
+    .recent-chats-title::after {
+        background-color: #2e3138 !important;
+    }
+
+    /* Icons and Fills */
+    .interaction-button i[data-lucide="thumbs-up"].filled {
+        color: #ffffff !important;
+    }
+
+    /* Box Shadows */
+    .textarea-container.disabled {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    #submit-button .custom-rounded {
+        background-color: var(--tertiary-background) !important;
+    }
+
+    /* Active typing state */
+    #submit-button .custom-rounded.typing-active {
+        background-color: #ffffff !important;
+    }
+
+    #submit-button .typing-active svg {
+        color: #1a1a1a !important;
+    }
+
+    #submit-button:hover .custom-rounded {
+        background-color: #2a2d33 !important; /* Darker on hover */
+    }
+
+    #submit-button svg {
+        color: #666f7c !important; /* Muted text color for the icon */
+    }
+
+    /* Learn More Link */
+    .learn-more-link {
+        background-color: var(--tertiary-background) !important;
+        color: #ffffff !important;
+    }
+
+    .learn-more-link:hover {
+        background-color: #2a2d33 !important;
+    }
+
+    /* Sidebar Button Container */
+    .sidebar-button-container {
+        background-color: transparent !important;
+        color: #ffffff !important;
+        border-color: #2e3138 !important;
+    }
+
+    .sidebar-button-container:hover {
+        background-color: #2a2d33 !important;
+    }
+
+    /* Arrow Up Right Icon */
+    .arrow-up-right {
+        color: var(--secondary-text) !important;
+    }
+
+    /* Any SVG icons that use currentColor */
+    svg[stroke="currentColor"] {
+        color: var(--secondary-text) !important;
+    }
+
+    /* Update hover states for icon containers */
+    .custom-rounded:hover {
+        background-color: #2a2d33 !important;
+    }
+
+    .top-nav__logo {
+        filter: invert(1); /* Optional: Use this if you want to invert a black logo */
+    }
+
+    /* For browsers that don't support content url, provide a fallback using a picture element */
+    picture.logo-container source[media="(prefers-color-scheme: dark)"] {
+        content: url("v-white.png") !important;
+    }
+
+    .new-thread-text,
+    .sidebar-text,
+    .try-pro-title {
+        color: #ffffff !important;
+    }
+
+    .desktop-top-nav__topic span {
+        color: #ffffff !important;
+    }
+
+    /* Share Button */
+    .desktop-top-nav__share-button {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+    }
+
+    .desktop-top-nav__share-button:hover {
+        background-color: #e0e0e0 !important;
+    }
+
+    /* File Sources and Items */
+    /* For the JavaScript-generated elements, we need to update the style properties */
+    .file-source,
+    .source-item {
+        background-color: #232323 !important;
+    }
+
+    .file-source:hover,
+    .source-item:hover {
+        background-color: #2a2d33 !important;
+    }
+
+    .file-source span,
+    .source-item span {
+        color: #ffffff !important;
+    }
+
+    .file-source svg,
+    .source-item svg {
+        color: #9ba3af !important;
+    }
+
+.desktop-top-nav__share-button {
+        background-color: #232323 !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+
+    .desktop-top-nav__share-button:hover {
+        background-color: #2a2d33 !important;
+    }
+    .text-sm[style*="color: #666"] {
+        color: var(--secondary-text) !important;
+    }
+
+    .query-chip {
+        background-color: none !important;
+        color: var(--description-text);  /* Setting text color to white for contrast */
+    }
+
+    .query-chip:hover {
+        background-color: #232323 !important;  /* Maintaining the sidebar color for hover state */
+    }
+    [data-lucide="pen-square"],
+    [data-lucide="flag"] {
+        --icon-color: #ffffff !important;
+        color: var(--icon-color) !important;
+    }
+
+    [data-lucide="pen-square"] svg,
+    [data-lucide="flag"] svg {
+        color: var(--icon-color) !important;
+        stroke: var(--icon-color) !important;
+        fill: var(--icon-color) !important;
+    }
+
+    .scroll-to-bottom-button {
+        background-color: transparent !important;
+    }
+
+    .scroll-to-bottom-button .custom-rounded {
+        background-color: #232323 !important;
+    }
+
+    .scroll-to-bottom-button:hover .custom-rounded {
+        background-color: #2a2d33 !important;
+    }
+
+    .scroll-to-bottom-button svg {
+        color: #9ba3af !important;
+    }
+
+    .sidebar__logo {
+        content: url("vdof.png");
+    }
+
+    .edit-button {
+        background-color: #232323 !important;
+        border-color: #2e3138 !important;
+        color: #ffffff !important;
+    }
+
+    .submit-edit-button {
+        background-color: #232323 !important;
+        color: #9ba3af !important;
+        border-color: #2e3138 !important;
+
+    }
+
+    .cancel-edit-button {
+        background-color: #232323 !important;
+        color: #9ba3af !important;
+    }
+
+    /* Hover states */
+    .edit-button:hover,
+    .submit-edit-button:hover,
+    .cancel-edit-button:hover {
+        background-color: #2a2d33 !important;
+    }
+
+    /* SVG icons within buttons */
+    .edit-button svg,
+    .submit-edit-button svg,
+    .cancel-edit-button svg {
+        stroke: currentColor !important;
+    }
+
+    /* Edit input */
+    .message-edit-input {
+        background-color: #232323 !important;
+        color: #ffffff !important;
+        border-color: #2e3138 !important;
+    }
+
+    .message-edit-input:focus {
+        border-color: #ffffff !important;
+    }
+
+    /* When message is in editing state */
+    .editing {
+        border-color: #2e3138 !important;
+        background-color: #232323 !important;
+    }
+}
