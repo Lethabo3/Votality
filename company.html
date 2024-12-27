@@ -8,12 +8,82 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root {
-            --background-color: #ffffff;
-            --text-color: #000;
-            --border-color: #e5e7eb;
-            --hover-color: #f3f4f6;
-        }
+:root {
+    color-scheme: light dark;
+    --background-color: light-dark(#ffffff, #1a1a1a);
+    --text-color: light-dark(#000000, #ffffff);
+    --border-color: light-dark(#e5e7eb, #2e3138);
+    --hover-color: light-dark(#f3f4f6, #2a2d33);
+    --secondary-text: light-dark(#4b5563, #9ba3af);
+    --muted-text: light-dark(#6B7280, #8c96a3);
+}
+
+/* Add dark mode styles */
+@media (prefers-color-scheme: dark) {
+    /* Background and gradient */
+    body {
+        background-image: linear-gradient(to bottom right, rgba(26,26,26,0.8) 0%, transparent 50%, transparent 100%) !important;
+    }
+
+    /* Hero section */
+    .hero .last-updated {
+        color: var(--secondary-text) !important;
+    }
+
+    .hero p {
+        color: var(--secondary-text) !important;
+    }
+
+    /* Stats */
+    .stat-label {
+        color: var(--muted-text) !important;
+    }
+
+    /* Section text */
+    .section p {
+        color: var(--secondary-text) !important;
+    }
+
+    /* Arrow container */
+    .arrow-container {
+        border-color: var(--text-color) !important;
+    }
+
+    .arrow-container:hover {
+        background-color: var(--hover-color) !important;
+    }
+
+    /* Navigation buttons */
+    .top-nav__button--home {
+        background-color: transparent !important;
+        color: #ffffff !important;
+    }
+
+    .top-nav__button--contact {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+        border-color: #2e3138 !important;
+    }
+
+    /* Footer links */
+    .footer-link {
+        color: var(--muted-text) !important;
+    }
+
+    .footer-link:hover {
+        color: var(--text-color) !important;
+    }
+
+    /* Logo switch for dark mode */
+    .top-nav__logo {
+        content: url("vdof.png") !important;
+        height: 45px !important;
+        width: 45px !important;
+        left: 5rem;
+        top: 0.8rem;
+        position: absolute;
+    }
+}
 
 @font-face {
     font-family: 'GeneralSans-Medium';
@@ -263,7 +333,6 @@ body, html {
     </nav>
 
     <div class="hero">
-        <p class="last-updated">Our Company</p>
         <h1>Empowering Financial Decisions</h1>
         <p>Revolutionizing the way you interact with financial markets through advanced AI technology.</p>
     </div>

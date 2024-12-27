@@ -21,14 +21,118 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root {
-            --background-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #e5e7eb;
-            --button-color: #333333;
-            --hover-color: #f3f4f6;
-            --grid-color: rgba(229, 231, 235, 0.3);
-        }
+:root {
+    color-scheme: light dark;
+    --background-color: light-dark(#ffffff, #1a1a1a);
+    --text-color: light-dark(#333333, #ffffff);
+    --border-color: light-dark(#e5e7eb, #2e3138);
+    --button-color: light-dark(#333333, #ffffff);
+    --hover-color: light-dark(#f3f4f6, #2a2d33);
+    --grid-color: light-dark(rgba(229, 231, 235, 0.3), rgba(46, 49, 56, 0.3));
+    --secondary-text: light-dark(#4b5563, #9ba3af);
+    --muted-text: light-dark(#6B7280, #8c96a3);
+}
+
+@media (prefers-color-scheme: dark) {
+    /* Background and base styles */
+    body {
+        background-color: var(--background-color) !important;
+    }
+
+    /* Pricing plans */
+    .pricing-plan {
+        background-color: #232323 !important;
+        border-color: var(--border-color) !important;
+    }
+
+    .plan-name {
+        color: var(--text-color) !important;
+    }
+
+    .plan-price {
+        color: var(--text-color) !important;
+    }
+
+    .plan-price span,
+    .plan-description {
+        color: var(--secondary-text) !important;
+    }
+
+    /* Feature list */
+    .feature-list li::before {
+        color: var(--text-color) !important;
+    }
+
+    /* Buttons */
+    .cta-button {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+    }
+
+    .cta-button:hover {
+        background-color: #e0e0e0 !important;
+    }
+
+    .cta-button.outline {
+        background-color: #373b42 !important;
+        color: #ffffff !important;
+    }
+
+    .cta-button.outline:hover {
+        background-color: #373b42 !important;
+    }
+
+    /* FAQ section */
+    .faq-container {
+        background-color: #232323 !important;
+    }
+
+    .faq-question {
+        color: var(--text-color) !important;
+    }
+
+    .faq-answer p {
+        color: var(--secondary-text) !important;
+    }
+
+    .faq-toggle svg {
+        stroke: var(--text-color) !important;
+    }
+
+    /* Navigation */
+    .top-nav__button--home {
+        background-color: transparent !important;
+        color: #ffffff !important;
+    }
+
+    .top-nav__button--contact {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+        border-color: #2e3138 !important;
+    }
+
+    /* Logo switch for dark mode */
+    .top-nav__logo {
+        content: url("vdof.png") !important;
+        height: 45px !important;
+        width: 45px !important;
+        left: 5rem;
+        top: 0.8rem;
+        position: absolute;
+    }
+
+    /* Subtitle and text */
+    .subtitle,
+    .faq-section p {
+        color: var(--secondary-text) !important;
+    }
+
+    /* Headings */
+    h1,
+    .faq-section h2 {
+        color: var(--text-color) !important;
+    }
+}
 
         * {
             margin: 0;
@@ -132,7 +236,6 @@ body, html {
 
         .pricing-plan {
     background-color: #fff;
-    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 3rem 2rem;  /* Increased padding */
     flex: 1;
