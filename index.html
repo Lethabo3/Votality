@@ -1076,7 +1076,6 @@ async function sendMessage(message, file = null) {
             }
 
             try {
-                // Get stayLoggedOut status from sessionStorage
                 const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
 
                 const response = await fetch('VotalityChat2.php', {
@@ -1137,6 +1136,7 @@ async function sendMessage(message, file = null) {
         await addMessage("Error: " + error.message, 'ai');
     }
 }
+
 
 // Update DOM content loaded handler
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1760,6 +1760,7 @@ function updateChatListUI(chats) {
 
 async function loadRecentChats() {
     try {
+        console.log('Loading recent chats...');
         const response = await fetch('VotalityChat2.php', {
             method: 'POST',
             headers: {
@@ -1768,6 +1769,7 @@ async function loadRecentChats() {
             body: JSON.stringify({
                 action: 'getRecentChats'
             }),
+            credentials: 'same-origin' // Add this to ensure cookies/session are sent
         });
 
         if (!response.ok) {
@@ -1775,22 +1777,30 @@ async function loadRecentChats() {
         }
 
         const data = await response.json();
+        console.log('Recent chats data:', data);
 
         if (data.error) {
             console.error('Error fetching chats:', data.error);
             return;
         }
 
-        // Update UI with recent chats
         updateRecentChatsUI(data.chats);
     } catch (error) {
         console.error('Error loading recent chats:', error);
+        // Show "No recent chats" in the UI
+        const chatList = document.querySelector('.chat-list');
+        if (chatList) {
+            chatList.innerHTML = `
+                <div class="chat-item no-chats">
+                    <span class="chat-name">No recent chats</span>
+                </div>
+            `;
+        }
     }
 }
 
-
 function updateRecentChatsUI(chats) {
-    console.log('Updating recent chats UI:', chats);
+    console.log('Updating recent chats UI with:', chats);
     
     const chatList = document.querySelector('.chat-list');
     if (!chatList) {
@@ -1804,7 +1814,7 @@ function updateRecentChatsUI(chats) {
     if (!chats || chats.length === 0) {
         console.log('No chats to display');
         chatList.innerHTML = `
-            <div class="chat-item">
+            <div class="chat-item no-chats">
                 <span class="chat-name">No recent chats</span>
             </div>
         `;
@@ -1821,12 +1831,10 @@ function updateRecentChatsUI(chats) {
             chatItem.classList.add('active');
         }
 
-        // Create chat name element with topic
         const chatName = document.createElement('span');
         chatName.className = 'chat-name';
         chatName.textContent = chat.topic || 'New Chat';
 
-        // Add click handler
         chatItem.addEventListener('click', () => {
             console.log('Chat clicked:', chat.chat_id);
             
@@ -1949,19 +1957,89 @@ async function createNewChat() {
             }),
         });
 
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
-        if (data.error) throw new Error(data.error);
-        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Update current chat ID
         currentChatId = data.chatId;
+
+        // Reset UI
         resetUI();
-        await loadRecentChats(); // Reload recent chats
+
+        // Clear chat container
+        chatContainer.innerHTML = '';
+
+        // Show initial content
+        initialContent.style.display = 'block';
+        suggestedQueries.style.display = 'flex';
+        footerLinks.style.display = 'block';
         
+        // Reset header topic
+        if (chatTopicElement) {
+            chatTopicElement.textContent = 'Current Chat Topic';
+        }
+
+        // Reset textarea
+        if (textarea) {
+            textarea.value = '';
+            textarea.placeholder = "Ask Votality anything...";
+        }
+
+        // Remove white background if present
+        document.body.classList.remove('white-background');
+
+        // Reset desktop top nav
+        const desktopTopNav = document.querySelector('.desktop-top-nav');
+        if (desktopTopNav) {
+            desktopTopNav.style.display = 'none';
+            desktopTopNav.classList.remove('fade-in');
+        }
+
+        // Reset chat container and disclaimer
+        chatContainer.classList.remove('fade-in');
+        if (disclaimer) {
+            disclaimer.style.display = 'none';
+            disclaimer.classList.remove('fade-in');
+        }
+
+        // Remove any transitions
+        initialContent.classList.remove('fade-out');
+        suggestedQueries.classList.remove('fade-out');
+        footerLinks.classList.remove('fade-out');
+        textareaContainer.classList.remove('repositioned');
+
+        // Load recent chats to update the sidebar
+        await loadRecentChats();
+
         return currentChatId;
     } catch (error) {
         console.error('Error creating new chat:', error);
         throw error;
     }
 }
+
+// Event listener for new chat button
+document.addEventListener('DOMContentLoaded', function() {
+    const newChatButton = document.querySelector('.sidebar-button-container');
+    if (newChatButton) {
+        newChatButton.addEventListener('click', async () => {
+            try {
+                await createNewChat();
+            } catch (error) {
+                console.error('Error handling new chat:', error);
+            }
+        });
+    }
+
+    // Initial load of recent chats
+    loadRecentChats();
+});
 
 function resetUI() {
     // Reset UI elements to initial state

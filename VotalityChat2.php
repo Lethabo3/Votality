@@ -488,58 +488,115 @@ function getSharedContent($id) {
 
 function getRecentChats() {
     debug_log("getRecentChats called. Session data: " . print_r($_SESSION, true));
+    
     $userId = $_SESSION['user_id'] ?? null;
     debug_log("User ID from session: " . ($userId ?? 'null'));
 
-    if ($userId) {
-        $result = getRecentChatsFromDatabase($userId);
-    } else {
-        $result = getRecentChatsFromSession();
-    }
+    global $conn;
+    try {
+        // Verify chats exist for this user
+        $checkQuery = "SELECT COUNT(*) as chat_count FROM votality_chats WHERE user_id = ?";
+        $stmt = $conn->prepare($checkQuery);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $count = $result->fetch_assoc()['chat_count'];
+        
+        debug_log("Number of chats found in database for user $userId: $count");
 
-    debug_log("getRecentChats result: " . print_r($result, true));
-    return $result;
+        if ($userId) {
+            $result = getRecentChatsFromDatabase($userId);
+        } else {
+            $result = getRecentChatsFromSession();
+        }
+
+        debug_log("Final result being returned: " . print_r($result, true));
+        return $result;
+    } catch (Exception $e) {
+        debug_log("Error in getRecentChats: " . $e->getMessage());
+        return ['error' => 'Failed to fetch recent chats', 'chats' => []];
+    }
 }
 
 function getRecentChatsFromDatabase($userId) {
     global $conn;
     try {
-        // Get recent chats with their latest messages
-        $stmt = $conn->prepare("
+        $query = "
             SELECT 
                 c.chat_id,
-                c.topic,
                 c.created_at,
-                (SELECT content 
+                (SELECT m.content 
                  FROM votality_messages m 
                  WHERE m.chat_id = c.chat_id 
-                 ORDER BY m.timestamp DESC 
-                 LIMIT 1) as latest_message
+                 AND m.sender = 'user'
+                 ORDER BY m.timestamp ASC 
+                 LIMIT 1) as first_message
             FROM votality_chats c
             WHERE c.user_id = ?
             ORDER BY c.created_at DESC
             LIMIT 10
-        ");
+        ";
         
+        debug_log("Executing query for user $userId: $query");
+
+        $stmt = $conn->prepare($query);
+        if (!$stmt) {
+            debug_log("Prepare failed: " . $conn->error);
+            return ['error' => 'Database error', 'chats' => []];
+        }
+
         $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
         
+        if (!$stmt->execute()) {
+            debug_log("Execute failed: " . $stmt->error);
+            return ['error' => 'Database error', 'chats' => []];
+        }
+
+        $result = $stmt->get_result();
         $chats = [];
+        
         while ($row = $result->fetch_assoc()) {
+            // Generate a topic from the first user message
+            $firstMessage = $row['first_message'] ?? '';
+            $topic = generateTopicFromMessage($firstMessage);
+            
             $chats[] = [
                 'chat_id' => $row['chat_id'],
-                'topic' => $row['topic'] ?? 'New Chat',
-                'latest_message' => $row['latest_message'],
+                'topic' => $topic,
                 'created_at' => $row['created_at']
             ];
         }
+
+        debug_log("Retrieved chats: " . print_r($chats, true));
         
         return ['chats' => $chats];
     } catch (Exception $e) {
-        error_log("Database error in getRecentChatsFromDatabase: " . $e->getMessage());
-        return ['error' => 'Failed to fetch recent chats', 'chats' => []];
+        debug_log("Database error in getRecentChatsFromDatabase: " . $e->getMessage());
+        return ['error' => 'Database error', 'chats' => []];
     }
+}
+
+// Helper function to generate concise topics
+function generateTopicFromMessage($message) {
+    if (empty($message)) {
+        return 'New Chat';
+    }
+
+    // Remove punctuation and extra spaces
+    $message = preg_replace('/[^\w\s]/', ' ', $message);
+    $message = trim(preg_replace('/\s+/', ' ', $message));
+
+    // Get first few significant words (3-5 words)
+    $words = explode(' ', $message);
+    $words = array_slice($words, 0, 5);
+    $topic = implode(' ', $words);
+
+    // If topic is too long, trim it
+    if (strlen($topic) > 40) {
+        $topic = substr($topic, 0, 37) . '...';
+    }
+
+    return $topic;
 }
 
 function getRecentChatsFromSession() {
