@@ -1191,7 +1191,6 @@ width: 100%; /* Ensure full width within the chat group */
 display: flex;
 justify-content: space-between;
 align-items: center;
-font-weight: bold;
 padding: 0.75rem 0;
 border-top: 1px solid var(--border-color);
 color: var(--text-color);
@@ -1212,7 +1211,7 @@ border-top: none;
 .related-item-text {
 flex-grow: 1;
 text-align: left;
-font-weight: bold;
+font-weight: 600; /* Adjust font weight to match AI response */
 margin-left: 0.2rem;
 }
 
@@ -2108,6 +2107,10 @@ margin-top: 0.5rem;
     margin-top: 2.9rem;
     position: absolute;
     margin-left: 1.3rem;
+}
+
+.chat-item.active {
+    background-color: var(--hover-color);
 }
 
 .chat-item {

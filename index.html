@@ -68,44 +68,12 @@
                             <i data-lucide="flag" style="color: #000; width: 20px; height: 20px;"></i>       <span class="new-thread-text">Feedback</span>
                         </div>
 
-            <div class="recent-chats-container">
-                <h3 class="recent-chats-title">Recents</h3>
-                <div class="chat-list">
-                    <!-- Example chat items -->
-                    <div class="chat-item">
-                        <span class="chat-name">portfolio growth analysis</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">zar exchange rate dip</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">next repo rate on stocks</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">tech startups and stocks</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">latest news on stock market</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">doge coin risks and benefits</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">portfolio growth analysis</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">zar exchange rate dip</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">next repo rate on stocks</span>
-                    </div>
-                    <div class="chat-item">
-                        <span class="chat-name">tech startups and stocks</span>
-                    </div>
-
-                    <!-- Add more chat items as needed -->
-                </div>
-            </div>
+                        <div class="recent-chats-container">
+                            <h3 class="recent-chats-title">Recents</h3>
+                            <div class="chat-list">
+                                <!-- Dynamic content will be inserted here -->
+                            </div>
+                        </div>
             
                 <div class="try-pro-container">
                     <div class="try-pro-title">Try Pro</div>
@@ -1120,7 +1088,7 @@ async function sendMessage(message, file = null) {
                         action: 'sendMessage',
                         message: message,
                         chatId: currentChatId,
-                        stayLoggedOut: stayLoggedOut, // Add this to the request
+                        stayLoggedOut: stayLoggedOut,
                         file: file ? { data: await readFileAsDataURL(file), type: file.type } : null
                     }),
                     credentials: 'same-origin'
@@ -1154,9 +1122,8 @@ async function sendMessage(message, file = null) {
                     currentChatId = data.chatId;
                 }
 
-                if (!stayLoggedOut) {
-                    loadRecentChats();
-                }
+                // Load recent chats after successful message
+                await loadRecentChats();
 
             } catch (error) {
                 console.error('Error:', error);
@@ -1651,7 +1618,8 @@ function generateHeading(paragraph) {
 function showAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
     const lastChatGroup = chatContainer.lastElementChild;
-    
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+   
     // Single sources container skeleton
     const sourcesContainerSkeleton = document.createElement('div');
     sourcesContainerSkeleton.className = 'sources-container skeleton-sources-container';
@@ -1661,64 +1629,46 @@ function showAIThinking() {
         padding: 0 16px;
         margin-right: 0px;
     `;
-    
+   
     // Create single source chip skeleton with overlapping circles
     const sourceChipSkeleton = document.createElement('div');
-    sourceChipSkeleton.className = 'flex items-center bg-gray-100 rounded-xl p-2 animate-pulse';
+    sourceChipSkeleton.className = 'flex items-center rounded-xl p-2 animate-pulse';
     sourceChipSkeleton.style.width = '192px';
-    
+    sourceChipSkeleton.style.backgroundColor = isDarkMode ? '#232323' : '#f3f4f6';
+   
     const circlesContainer = document.createElement('div');
     circlesContainer.className = 'flex space-x-1';
-    
+   
     // Create five overlapping circles
     for (let i = 0; i < 5; i++) {
         const circle = document.createElement('div');
-        circle.className = 'w-8 h-8 bg-gray-200 rounded-full';
-        circle.style.marginRight = i < 4 ? '-16px' : '0'; // Apply margin to all except last circle
+        circle.className = 'w-8 h-8 rounded-full';
+        circle.style.backgroundColor = isDarkMode ? '#2a2d33' : '#e5e7eb';
+        circle.style.marginRight = i < 4 ? '-16px' : '0';
         circlesContainer.appendChild(circle);
     }
-    
+   
     sourceChipSkeleton.appendChild(circlesContainer);
     sourcesContainerSkeleton.appendChild(sourceChipSkeleton);
     lastChatGroup.appendChild(sourcesContainerSkeleton);
-    
+   
     // AI message skeleton
     const skeletonLoader = document.createElement('div');
     skeletonLoader.className = 'skeleton-loader';
-    
+   
     for (let i = 0; i < 4; i++) {
         const skeletonLine = document.createElement('div');
         skeletonLine.className = 'skeleton-line';
         skeletonLine.style.width = `${100 - i * 5}%`;
         skeletonLine.style.height = '16px';
         skeletonLine.style.marginBottom = '8px';
+        skeletonLine.style.background = isDarkMode ? 
+            'linear-gradient(90deg, #232323 25%, #2a2d33 50%, #232323 75%)' : 
+            'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)';
         skeletonLoader.appendChild(skeletonLine);
     }
-    
+   
     lastChatGroup.appendChild(skeletonLoader);
-
-    // Related heading (visible)
-    const relatedHeading = document.createElement('div');
-    relatedHeading.className = 'section-heading related-heading';
-    relatedHeading.textContent = 'Related';
-    lastChatGroup.appendChild(relatedHeading);
-
-    // Related skeleton
-    const relatedSkeleton = document.createElement('div');
-    relatedSkeleton.className = 'skeleton-loader related-skeleton';
-
-    for (let i = 0; i < 5; i++) {
-        const relatedLine = document.createElement('div');
-        relatedLine.className = 'skeleton-line';
-        relatedLine.style.width = '100%';
-        relatedLine.style.height = '16px';
-        relatedLine.style.marginBottom = '8px';
-        relatedSkeleton.appendChild(relatedLine);
-    }
-
-    lastChatGroup.appendChild(relatedSkeleton);
-    
-    // Scroll to the last chat group (user's message)
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1737,20 +1687,7 @@ function hideAIThinking() {
     if (skeletonLoader) {
         skeletonLoader.remove();
     }
-
-    // Remove related heading
-    const relatedHeading = lastChatGroup.querySelector('.related-heading');
-    if (relatedHeading) {
-        relatedHeading.remove();
-    }
-
-    // Remove related skeleton
-    const relatedSkeleton = lastChatGroup.querySelector('.related-skeleton');
-    if (relatedSkeleton) {
-        relatedSkeleton.remove();
-    }
 }
-
 
 function toggleMobileNav() {
     const bottomNav = document.querySelector('.bottom-nav');
@@ -1783,6 +1720,44 @@ function toggleMobileNav() {
 // Add event listener for window resize
 window.addEventListener('resize', toggleMobileNav);
 
+function updateChatListUI(chats) {
+    if (!chatList) return;
+    
+    chatList.innerHTML = ''; // Clear existing chats
+    
+    if (!chats || chats.length === 0) {
+        chatList.innerHTML = `
+            <div class="chat-item no-chats">
+                <span class="chat-name">No recent chats</span>
+            </div>
+        `;
+        return;
+    }
+    
+    chats.forEach(chat => {
+        const chatItem = document.createElement('div');
+        chatItem.className = 'chat-item';
+        if (chat.chat_id === currentChatId) {
+            chatItem.classList.add('active');
+        }
+        
+        chatItem.innerHTML = `
+            <span class="chat-name">${chat.topic || 'New Chat'}</span>
+        `;
+        
+        chatItem.addEventListener('click', () => {
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            chatItem.classList.add('active');
+            currentChatId = chat.chat_id;
+            loadChat(chat.chat_id);
+        });
+        
+        chatList.appendChild(chatItem);
+    });
+}
+
 async function loadRecentChats() {
     try {
         const response = await fetch('VotalityChat2.php', {
@@ -1806,18 +1781,161 @@ async function loadRecentChats() {
             return;
         }
 
-        // Update UI with recent chats (you'll need to implement this part)
+        // Update UI with recent chats
         updateRecentChatsUI(data.chats);
     } catch (error) {
         console.error('Error loading recent chats:', error);
     }
 }
 
+
 function updateRecentChatsUI(chats) {
-    // Implement this function to update your UI with recent chats
-    // This will depend on how you want to display recent chats in your design
-    console.log('Recent chats:', chats);
+    console.log('Updating recent chats UI:', chats);
+    
+    const chatList = document.querySelector('.chat-list');
+    if (!chatList) {
+        console.error('Chat list container not found');
+        return;
+    }
+
+    // Clear existing chats
+    chatList.innerHTML = '';
+
+    if (!chats || chats.length === 0) {
+        console.log('No chats to display');
+        chatList.innerHTML = `
+            <div class="chat-item">
+                <span class="chat-name">No recent chats</span>
+            </div>
+        `;
+        return;
+    }
+
+    // Add each chat to the sidebar
+    chats.forEach(chat => {
+        console.log('Processing chat:', chat);
+        
+        const chatItem = document.createElement('div');
+        chatItem.className = 'chat-item';
+        if (chat.chat_id === currentChatId) {
+            chatItem.classList.add('active');
+        }
+
+        // Create chat name element with topic
+        const chatName = document.createElement('span');
+        chatName.className = 'chat-name';
+        chatName.textContent = chat.topic || 'New Chat';
+
+        // Add click handler
+        chatItem.addEventListener('click', () => {
+            console.log('Chat clicked:', chat.chat_id);
+            
+            // Remove active class from all chats
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked chat
+            chatItem.classList.add('active');
+            
+            // Update current chat ID
+            currentChatId = chat.chat_id;
+            
+            // Load the chat messages
+            loadChat(chat.chat_id);
+        });
+
+        chatItem.appendChild(chatName);
+        chatList.appendChild(chatItem);
+    });
 }
+
+// Add this helper function to load chat content
+async function loadChat(chatId) {
+    console.log('Loading chat:', chatId);
+    
+    try {
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'loadChat',
+                chatId: chatId
+            }),
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+        console.log('Chat data received:', data);
+
+        if (data.error) {
+            console.error('Error loading chat:', data.error);
+            return;
+        }
+
+        // Clear existing chat content
+        const chatContainer = document.getElementById('chat-container');
+        if (chatContainer) {
+            chatContainer.innerHTML = '';
+        }
+
+        // Remove initial content if present
+        const initialContent = document.getElementById('initial-content');
+        if (initialContent) {
+            initialContent.style.display = 'none';
+        }
+
+        // Remove suggested queries if present
+        const suggestedQueries = document.getElementById('suggested-queries');
+        if (suggestedQueries) {
+            suggestedQueries.style.display = 'none';
+        }
+
+        // Add chat messages
+        if (data.messages && data.messages.length > 0) {
+            data.messages.forEach(message => {
+                addMessage(message.content, message.sender, message.relatedTopics);
+            });
+        }
+
+        // Update chat topic if available
+        if (data.topic) {
+            updateChatTopicDisplay(data.topic);
+        }
+
+        // Show chat container
+        if (chatContainer) {
+            chatContainer.style.display = 'block';
+            chatContainer.classList.add('fade-in');
+        }
+
+    } catch (error) {
+        console.error('Failed to load chat:', error);
+    }
+}
+
+// Update the existing event listener for the new chat button
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Setting up new chat button handler');
+    
+    const newChatButton = document.querySelector('.sidebar-button-container');
+    if (newChatButton) {
+        newChatButton.addEventListener('click', async () => {
+            console.log('New chat button clicked');
+            try {
+                await createNewChat();
+                loadRecentChats();
+            } catch (error) {
+                console.error('Error handling new chat:', error);
+            }
+        });
+    }
+
+    // Initial load of recent chats
+    loadRecentChats();
+});
 
 async function createNewChat() {
     try {
@@ -1831,21 +1949,13 @@ async function createNewChat() {
             }),
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const data = await response.json();
-
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
+        if (data.error) throw new Error(data.error);
+        
         currentChatId = data.chatId;
-        chatContainer.innerHTML = '';
         resetUI();
-        loadRecentChats();
-
+        await loadRecentChats(); // Reload recent chats
+        
         return currentChatId;
     } catch (error) {
         console.error('Error creating new chat:', error);

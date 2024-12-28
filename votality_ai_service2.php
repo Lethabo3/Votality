@@ -32,62 +32,118 @@ class VotalityAIService {
     }
 
     public function generateResponse($message, $chatId) {
-        $this->addToHistory('user', $message);
-    
-        $symbol = $this->extractFinancialInstrument($message);
-        $marketData = null;
-        $economicData = null;
-    
-        if ($symbol || preg_match('/(buy|sell|invest|divest)/i', $message)) {
-            if ($symbol) {
-                $marketData = $this->fetchMarketData($symbol);
-            }
+        try {
+            $this->addToHistory('user', $message);
             
-            if (preg_match('/(buy|sell|invest|divest|econom|gdp|inflation|unemployment|interest rate)/i', $message)) {
-                $economicData = $this->fetchEconomicData();
-            }
-        }
-    
-        $instructions = $this->prepareInstructions($marketData, $economicData);
-        
-        $aiRequest = [
-            'contents' => array_merge(
-                $this->getConversationHistoryForAI(),
-                [
+            // Log configuration for debugging
+            error_log("API URL: " . $this->apiUrl);
+            error_log("Using model: gemini-1.5-flash-latest");
+            
+            // Prepare the request - Note the structure for Gemini 1.5
+            $aiRequest = [
+                'contents' => [
                     [
                         'role' => 'user',
-                        'parts' => [['text' => $instructions . "\n\nUser message: " . $message]]
+                        'parts' => [
+                            [
+                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
+                            ]
+                        ]
                     ]
+                ],
+                'safetySettings' => [
+                    [
+                        'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                        'threshold' => 'BLOCK_NONE'
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.7,
+                    'topK' => 40,
+                    'topP' => 0.95,
+                    'maxOutputTokens' => 1448,
+                    'stopSequences' => []
                 ]
-            ),
-            'generationConfig' => [
-                'temperature' => 0.7,
-                'topK' => 40,
-                'topP' => 0.95,
-                'maxOutputTokens' => 1448,
-            ]
-        ];
+            ];
     
-        $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($aiRequest));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            // Log the request payload for debugging
+            error_log("Request payload: " . json_encode($aiRequest, JSON_PRETTY_PRINT));
     
-        $response = curl_exec($ch);
-        curl_close($ch);
+            $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($aiRequest),
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Accept: application/json'
+                ],
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_VERBOSE => true
+            ]);
     
-        $result = json_decode($response, true);
+            // Create a temporary file handle for CURL debugging
+            $verbose = fopen('php://temp', 'w+');
+            curl_setopt($ch, CURLOPT_STDERR, $verbose);
     
-        if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+            // Execute the request and capture response details
+            $response = curl_exec($ch);
+            $curlError = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            
+            // Get verbose debug information
+            rewind($verbose);
+            $verboseLog = stream_get_contents($verbose);
+            fclose($verbose);
+    
+            // Log detailed debug information
+            error_log("HTTP Code: " . $httpCode);
+            error_log("Curl Error: " . $curlError);
+            error_log("Verbose log: " . $verboseLog);
+            error_log("Raw response: " . $response);
+    
+            curl_close($ch);
+    
+            if ($curlError) {
+                throw new Exception("Curl error: " . $curlError);
+            }
+    
+            if ($httpCode !== 200) {
+                throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
+            }
+    
+            if (empty($response)) {
+                throw new Exception("Empty response received from API");
+            }
+    
+            $result = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("JSON decode error. Response received: " . substr($response, 0, 1000));
+                throw new Exception("JSON decode error: " . json_last_error_msg());
+            }
+    
+            // Log the decoded response structure
+            error_log("Decoded response structure: " . json_encode($result, JSON_PRETTY_PRINT));
+    
+            // Updated path for response content in Gemini 1.5
+            if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                throw new Exception("Unexpected response structure: " . json_encode($result));
+            }
+    
             $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
             $cleanedResponse = $this->removeAsterisks($aiResponse);
             
             $this->addToHistory('ai', $cleanedResponse);
             
+            // Log successful response
+            error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
+            
             return $cleanedResponse;
-        } else {
-            return "I apologize, but I couldn't generate a proper response at this time. Is there anything else I can assist you with?";
+    
+        } catch (Exception $e) {
+            error_log("Error in generateResponse: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return "I apologize, but I encountered an error processing your request. Please try again in a moment. Error details: " . $e->getMessage();
         }
     }
 
