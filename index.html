@@ -63,10 +63,10 @@
             <div class="sidebar-button-container">
                 <i data-lucide="pen-square" style="color: #000; width: 20px; height: 20px;"></i>       <span class="new-thread-text">New Chat</span>
             </div>
-                        <!-- New Chat Button -->
-                        <div class="sidebar-button-container">
-                            <i data-lucide="flag" style="color: #000; width: 20px; height: 20px;"></i>       <span class="new-thread-text">Feedback</span>
-                        </div>
+            <div class="sidebar-button-container" data-feedback>
+                <i data-lucide="flag" style="color: #000; width: 20px; height: 20px;"></i>
+                <span class="new-thread-text">Feedback</span>
+            </div>
 
                         <div class="recent-chats-container">
                             <h3 class="recent-chats-title">Recents</h3>
@@ -240,6 +240,8 @@
             </div>
         </div>
     </div>
+
+
 <style>
 .tooltip {
     position: absolute;
@@ -2889,6 +2891,51 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const container = document.querySelector('.support-feedback-container');
+    const textarea = container.querySelector('.support-feedback-textarea');
+    const submitButton = container.querySelector('.support-feedback-submit');
+    const cancelButton = container.querySelector('.support-feedback-cancel');
+
+    // Enable/disable submit button based on textarea content
+    textarea.addEventListener('input', () => {
+        submitButton.disabled = !textarea.value.trim();
+    });
+
+    // Submit functionality
+    submitButton.addEventListener('click', () => {
+        if (textarea.value.trim()) {
+            console.log('Feedback submitted:', textarea.value);
+            // Reset form
+            textarea.value = '';
+            submitButton.disabled = true;
+        }
+    });
+
+    // Cancel functionality
+    cancelButton.addEventListener('click', () => {
+        textarea.value = '';
+        submitButton.disabled = true;
+        // Here you would typically close the modal
+    });
+});
+
 </script>
+<div class="feedback-overlay">
+    <div class="support-feedback-container">
+        <div class="support-feedback-header">
+            <h3>Leave Feedback</h3>
+        </div>
+        <div class="support-feedback-description">
+            We'd love to hear what went well or how we can improve the product experience.
+        </div>
+        <textarea class="support-feedback-textarea" placeholder="Your feedback"></textarea>
+        <div class="support-feedback-actions">
+            <button class="support-feedback-button support-feedback-cancel">Cancel</button>
+            <button class="support-feedback-button support-feedback-submit">Submit</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
