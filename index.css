@@ -2496,11 +2496,16 @@ margin-top: 0.5rem;
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
+    display: none; /* Set display to 'none' by default */
     justify-content: center;
     align-items: center;
     z-index: 999;
 }
+
+.feedback-overlay.active {
+    display: flex; /* Show when 'active' class is added */
+}
+
 
 .support-feedback-container {
     background-color: var(--background-color);

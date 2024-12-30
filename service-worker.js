@@ -7,7 +7,7 @@ self.addEventListener('install', (event) => {
         '/index.html',
         '/signup.html',
         '/signin.html',
-        '/about.html',
+        '/Blog.html',
         '/Features.html',
         '/index.html',
         '/LoginPageBimo.html',

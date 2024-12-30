@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Votality</title>
+    <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Theme variables remain the same */
+        :root {
+            color-scheme: light dark;
+            --background-color: #1a1a1a;
+            --card-background: #000000;
+            --text-color: #ffffff;
+            --border-color: #2e3138;
+            --hover-color: #2a2d33;
+            --secondary-text: #9ba3af;
+            --muted-text: #8c96a3;
+        }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --background-color: #ffffff;
+                --card-background: #ffffff;
+                --text-color: #000000;
+                --border-color: #e5e7eb;
+                --hover-color: #f3f4f6;
+                --secondary-text: #4b5563;
+                --muted-text: #6B7280;
+            }
+        }
+
+        /* Base styles remain the same */
+        body, html {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Previous styles remain unchanged until blog-content */
+        .top-nav {
+            position: static;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1.5rem;
+        }
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .top-nav__button--home {
+            background-color: transparent;
+            color: var(--text-color);
+        }
+
+        .top-nav__button--contact {
+            color: #fff;
+            background-color: #000;
+            border: 1px solid var(--border-color);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+            background-color: transparent;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--secondary-text);
+            max-width: 800px;
+            margin: 1rem auto 3rem;
+            line-height: 1.75;
+        }
+
+        .blog-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+
+        .featured-post {
+            margin-bottom: 2rem;
+        }
+
+        .featured-post .blog-image {
+            aspect-ratio: 21/9;  /* Wider aspect ratio for featured post */
+        }
+
+        .featured-post .blog-title {
+            font-size: 1.75rem;  /* Larger title for featured post */
+            line-height: 1.3;
+        }
+
+        /* Regular posts grid */
+        .regular-posts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .regular-posts {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .regular-posts {
+                grid-template-columns: 1fr;
+            }
+
+            .featured-post .blog-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        .blog-card {
+            position: relative;
+            background-color: transparent;
+            border-radius: 3px;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .blog-image {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: var(--border-color);
+        }
+
+        /* Updated blog content styles */
+        .blog-content {
+            padding: 1.5rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            position: relative;
+        }
+
+        .blog-title-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Pushes arrow to the right */
+}
+
+        .blog-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .blog-meta {
+            font-size: 0.875rem;
+            color: var(--muted-text);
+        }
+
+        .arrow-icon {
+    width: 16px;
+    height: 16px;
+    color: #ffffff;
+    flex-shrink: 0;
+    transform: rotate(45deg); /* Rotates arrow 45 degrees */
+}
+
+        /* Footer styles remain the same */
+        .footer-container {
+            padding: 2rem 0;
+            margin-top: 4rem;
+            border-top: 0px solid var(--border-color);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: var(--muted-text);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-color);
+        }
+
+        /* Dark mode styles */
+        @media (prefers-color-scheme: dark) {
+            .top-nav__logo {
+                content: url("vdof.png");
+                height: 45px;
+                width: 45px;
+                left: 5rem;
+                top: 0.8rem;
+                position: absolute;
+            }
+
+            .top-nav__button--contact {
+                background-color: #ffffff;
+                color: #1a1a1a;
+            }
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.125rem;
+                padding: 0 1rem;
+            }
+
+            .blog-container {
+                padding: 0 1rem;
+                grid-template-columns: 1fr;
+            }
+
+            .footer-links {
+                flex-wrap: wrap;
+                gap: 1rem;
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <div class="top-nav__buttons">
+            <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
+            <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
+            <a href="about.html" class="top-nav__button top-nav__button--home">Blog</a>
+            <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
+            <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
+        </div>
+    </nav>
+
+    <!-- Hero section -->
+    <div class="hero">
+        <h1>Latest Updates</h1>
+        <p>Stay informed about Votality's latest features, improvements, and company news.</p>
+    </div>
+
+    <div class="blog-container">
+        <!-- Featured Blog Post -->
+        <div class="featured-post">
+            <a href="blogy blog.html" class="blog-card">
+                <img src="IMG_6316.jpeg" alt="Blog post image" class="blog-image">
+                <div class="blog-content">
+                    <div class="blog-title-container">
+                        <h2 class="blog-title">Bringing Votality to Everyone</h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="arrow-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </div>
+                    <div class="blog-meta">December 12, 2024</div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Regular Blog Posts Grid -->
+        <div class="regular-posts">
+            <!-- Regular Blog Post 1 -->
+            <a href="#" class="blog-card" style="display: none;">
+                <img src="/api/placeholder/400/320" alt="Blog post image" class="blog-image">
+                <div class="blog-content">
+                    <div class="blog-title-container">
+                        <h2 class="blog-title">Votality Image Generation Release</h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="arrow-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </div>
+                    <div class="blog-meta">December 9, 2024</div>
+                </div>
+            </a>
+
+            <!-- Regular Blog Post 2 -->
+            <a href="#" class="blog-card" style="display: none;">
+                <img src="/api/placeholder/400/320" alt="Blog post image" class="blog-image">
+                <div class="blog-content">
+                    <div class="blog-title-container">
+                        <h2 class="blog-title">API Public Beta</h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="arrow-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </div>
+                    <div class="blog-meta">November 4, 2024</div>
+                </div>
+            </a>
+
+            <!-- Regular Blog Post 3 -->
+            <a href="#" class="blog-card" style="display: none;">
+                <img src="/api/placeholder/400/320" alt="Blog post image" class="blog-image">
+                <div class="blog-content">
+                    <div class="blog-title-container">
+                        <h2 class="blog-title">New Features Coming Soon</h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="arrow-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                        </svg>
+                    </div>
+                    <div class="blog-meta">November 1, 2024</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

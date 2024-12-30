@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bringing Votality to Everyone - Blog Post</title>
+    <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Theme variables */
+        :root {
+            color-scheme: light dark;
+            --background-color: #1a1a1a;
+            --card-background: #000000;
+            --text-color: #ffffff;
+            --border-color: #2e3138;
+            --hover-color: #2a2d33;
+            --secondary-text: #9ba3af;
+            --muted-text: #8c96a3;
+        }
+
+        @font-face {
+    font-family: 'GeneralSans-Medium';
+    src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+         url('../fonts/GeneralSans-Medium.woff') format('woff'),
+         url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+  }
+
+        @media (prefers-color-scheme: light) {
+            :root {
+                --background-color: #ffffff;
+                --card-background: #ffffff;
+                --text-color: #000000;
+                --border-color: #e5e7eb;
+                --hover-color: #f3f4f6;
+                --secondary-text: #4b5563;
+                --muted-text: #6B7280;
+            }
+        }
+
+        /* Base styles */
+        body, html {
+            font-family: 'GeneralSans-Medium';
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation */
+        .top-nav {
+            position: relative;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            padding: 0 1.5rem;
+            z-index: 1000;
+        }
+
+        .top-nav__logo {
+            height: 120px;
+            width: 120px;
+            margin-left: -2.5rem;
+        }
+
+        .top-nav__buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .top-nav__hamburger {
+            display: none;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            padding: 0.5rem;
+        }
+
+        .top-nav__hamburger svg {
+            width: 24px;
+            height: 24px;
+            color: var(--text-color);
+        }
+
+        @media (max-width: 768px) {
+            .top-nav__hamburger {
+                display: block;
+            }
+
+            .top-nav__buttons {
+                display: none;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background-color: var(--background-color);
+                flex-direction: column;
+                padding: 1rem;
+                gap: 0.5rem;
+                border-top: 1px solid var(--border-color);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+
+            .top-nav__buttons.active {
+                display: flex;
+            }
+
+            .top-nav__button {
+                width: 100%;
+                text-align: center;
+                padding: 0.75rem;
+            }
+
+            .top-nav__logo {
+                height: 45px;
+                width: 45px;
+                margin-left: -3.5rem;
+            }
+        }
+
+        /* Dark mode adjustments */
+        @media (prefers-color-scheme: dark) {
+            .top-nav__logo {
+                content: url("vdof.png");
+                height: 45px;
+                width: 45px;
+                position: static;
+            }
+        }
+
+        .top-nav__button {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .top-nav__button--home {
+            background-color: transparent;
+            color: var(--text-color);
+        }
+
+        .top-nav__button--contact {
+            color: #fff;
+            background-color: #000;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Post container */
+        .post-container {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Image section */
+        .post-image-container {
+            width: 90%;
+            padding: 0 1.5rem;
+            margin: 2rem auto;
+        }
+
+        .post-image {
+            width: calc(100% + 5rem);
+            margin-left: -2.5rem;
+            aspect-ratio: 21/9;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .post-metadata {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: left;
+        }
+
+        .post-metadata__info {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            color: var(--secondary-text);
+            font-size: 0.875rem;
+        }
+
+        .metadata-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .post-metadata__label {
+            color: var(--muted-text);
+            font-size: 0.875rem;
+        }
+
+        .post-metadata__value {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .post-metadata__social {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .social-link:hover {
+            background-color: var(--hover-color);
+        }
+
+        .social-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            color: var(--text-color);
+        }
+
+        /* Content section */
+        .post-content-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+
+            padding: 0 1.5rem;
+        }
+
+        .post-content {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--secondary-text);
+        }
+
+        .post-content p {
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .post-content h2 {
+            font-size: 1.75rem;
+            margin: 3rem 0 1.5rem;
+            color: var(--text-color);
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .post-content h3 {
+            font-size: 1.5rem;
+            margin: 2.5rem 0 1.25rem;
+            color: var(--text-color);
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .post-content ul, 
+        .post-content ol {
+            margin: 1.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .post-content li {
+            margin-bottom: 0.75rem;
+        }
+
+        .post-footer {
+            margin: 4rem 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--muted-text);
+            font-size: 0.875rem;
+        }
+
+        /* Dark mode styles */
+        @media (prefers-color-scheme: dark) {
+            .top-nav__logo {
+                content: url("vdof.png");
+                height: 45px;
+                width: 45px;
+                left: 5rem;
+                top: 0.8rem;
+                position: absolute;
+            }
+
+            .top-nav__button--contact {
+                background-color: #ffffff;
+                color: #1a1a1a;
+            }
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .post-image {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .post-content {
+                font-size: 1rem;
+            }
+
+            .post-metadata {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .post-metadata__social {
+                justify-content: flex-start;
+            }
+        }
+
+        .footer-container {
+            padding: 2rem 0;
+            margin-top: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .footer-link {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--text-color);
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="top-nav">
+        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <button class="top-nav__hamburger" aria-label="Toggle navigation menu">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+        </button>
+        <div class="top-nav__buttons">
+            <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
+            <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
+            <a href="about.html" class="top-nav__button top-nav__button--home">Blog</a>
+            <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
+            <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
+        </div>
+    </nav>
+
+    <article class="post-container">
+        <div class="post-image-container">
+            <img src="IMG_6316.jpeg" alt="Blog post feature image" class="post-image">
+        </div>
+
+        <div class="post-metadata">
+            <div class="post-metadata__info">
+                <div class="metadata-group">
+                    <div class="post-metadata__label">Written by</div>
+                    <div class="post-metadata__value">Perplexity Team</div>
+                </div>
+                <div class="metadata-group">
+                    <div class="post-metadata__label">Published on</div>
+                    <div class="post-metadata__value">Dec 18, 2024</div>
+                </div>
+            </div>
+            <div class="post-metadata__social">
+                <a href="#" class="social-link" aria-label="Share on X (Twitter)">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                    </svg>
+                </a>
+                <a href="#" class="social-link" aria-label="Share on LinkedIn">
+                    <svg class="social-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                        <rect x="2" y="9" width="4" height="12"></rect>
+                        <circle cx="4" cy="4" r="2"></circle>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <div class="post-content-wrapper">
+            <div class="post-content">
+
+                <p>The financial markets have always been driven by information. Today, we're experiencing an unprecedented explosion in the volume and velocity of market-moving data – from social media sentiment to economic indicators, from geopolitical events to company earnings. For investors and traders, this creates both an opportunity and a challenge: how do you cut through the noise to find actionable insights?</p>
+
+            
+                <p>As former quantitative traders and machine learning researchers, we experienced firsthand the limitations of traditional market analysis tools. Excel spreadsheets and legacy terminal systems weren't designed for the age of big data and AI. We saw an opportunity to democratize access to sophisticated market intelligence tools that were previously available only to elite institutions.</p>
+            
+                <p>Votality represents a new paradigm in financial analysis – one where artificial intelligence works alongside human expertise, not to replace it but to enhance it. Our platform combines state-of-the-art large language models with specialized financial knowledge to deliver real-time market insights, risk analysis, and trading opportunities.</p>
+            
+            
+                <p>While many AI companies are building general-purpose chatbots, we've taken a different approach. Votality is purpose-built for financial markets, with specialized capabilities that matter to investors and traders. Our platform offers real-time processing of market data, news, and social sentiment, alongside deep understanding of financial instruments and market mechanics. We've developed sophisticated risk modeling and scenario analysis capabilities, all accessible through a natural language interface that speaks the language of finance.</p>
+            
+                <p>Our AI doesn't just regurgitate information – it synthesizes data from multiple sources, identifies patterns, and provides actionable insights with supporting evidence. Whether you're a day trader looking for technical setups or an institutional investor conducting fundamental analysis, Votality adapts to your needs.</p>
+            
+            
+                <p>During our private beta with select hedge funds and trading desks, Votality has demonstrated remarkable capabilities. Our system consistently identifies market-moving news minutes before traditional alerts, generates comprehensive company analyses in seconds instead of hours, detects market anomalies and potential trading opportunities, and provides real-time risk assessment across complex portfolios.</p>
+            
+            
+                <p>Today's launch is just the beginning. We're committed to pushing the boundaries of what's possible in AI-powered market analysis. Our roadmap includes enhanced multimodal analysis incorporating visual data, advanced portfolio optimization and risk management tools, expanded coverage of alternative data sources, and deeper integration with existing trading infrastructure.</p>
+            
+            
+                <p>We believe we're at the beginning of a fundamental shift in how financial analysis is conducted. The combination of artificial intelligence and human expertise will create opportunities that were previously unimaginable.</p>
+            
+                <p>Starting today, Votality is available to qualified investors and traders. We're offering a limited number of early access spots to ensure we can provide the highest level of service to our initial users.</p>
+            
+                <p>Visit our website to learn more and request access. We look forward to partnering with you to shape the future of financial markets.</p>
+            
+            
+                <p>Votality was founded by a team of experienced quantitative traders, AI researchers, and software engineers from leading financial institutions and technology companies. We're backed by top-tier venture capital firms and strategic investors from the financial services industry.</p>
+            </div>
+        </div>
+    </article>
+
+    <div class="footer-container">
+        <div class="footer-links">
+            <a href="Blog.html" class="footer-link">Blog</a>
+            <a href="pricing.html" class="footer-link">Pricing</a>
+            <a href="terms.html" class="footer-link">Terms</a>
+            <a href="privacy.html" class="footer-link">Privacy</a>
+            <a href="contact.html" class="footer-link">Contact</a>
+        </div>
+    </div>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Add hamburger menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const hamburger = document.querySelector('.top-nav__hamburger');
+            const navButtons = document.querySelector('.top-nav__buttons');
+
+            hamburger.addEventListener('click', function() {
+                navButtons.classList.toggle('active');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.top-nav')) {
+                    navButtons.classList.remove('active');
+                }
+            });
+        });    </script>
+</body>
+</html>
