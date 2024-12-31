@@ -35,37 +35,18 @@ class VotalityAIService {
         try {
             $this->addToHistory('user', $message);
             
-            // Extract any financial instruments mentioned in the message
-            $instrument = $this->extractFinancialInstrument($message);
-            
-            // Only fetch market data if relevant financial instrument is mentioned
-            $marketData = null;
-            $economicData = null;
-            if ($instrument) {
-                try {
-                    $marketData = $this->fetchMarketData($instrument);
-                    // Only attempt to fetch economic data if market data was successful
-                    if ($marketData) {
-                        $economicData = $this->fetchEconomicData();
-                    }
-                } catch (Exception $e) {
-                    error_log("Error fetching market/economic data: " . $e->getMessage());
-                    // Continue without the data rather than failing the whole request
-                }
-            }
-            
             // Log configuration for debugging
             error_log("API URL: " . $this->apiUrl);
             error_log("Using model: gemini-1.5-flash-latest");
             
-            // Prepare the request - maintaining the exact structure for Gemini 1.5
+            // Prepare the request - Note the structure for Gemini 1.5
             $aiRequest = [
                 'contents' => [
                     [
                         'role' => 'user',
                         'parts' => [
                             [
-                                'text' => $this->prepareInstructions($marketData, $economicData) . "\n\nUser message: " . $message
+                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
                             ]
                         ]
                     ]
@@ -572,56 +553,40 @@ class VotalityAIService {
     }
 
     private function prepareInstructions($marketData, $economicData) {
-        $instructions = "You are Votality, a sophisticated AI assistant specializing in financial markets and investment analysis. Provide precise, data-driven insights with a focus on actionable market information. Guidelines:
-    
-        1. Lead with the most critical market data points and their immediate implications.
-        2. No greetings unless user greets first - prioritize direct market insights.
-        3. Structure responses in clear sections:
-           - Market Context (key prices, trends, volumes)
-           - Technical Analysis (when relevant)
-           - Fundamental Factors
-           - Risk Considerations
-        4. Use precise financial terminology while maintaining clarity.
-        5. For market analysis, always include:
-           - Price action and volume analysis
-           - Key support/resistance levels with specific numbers
-           - Relative strength compared to relevant indices
-           - Notable technical indicators (RSI, MACD, Moving Averages)
-           - Market sentiment indicators
-           - Institutional trading patterns when available
-        6. For fundamental analysis, emphasize:
-           - Valuation metrics (P/E, P/B, PEG ratios)
-           - Sector performance comparisons
-           - Market cap and float details
-           - Earnings and revenue trends
-           - Industry-specific metrics
-        7. No emojis or informal language.
-        8. Integrate macro factors:
-           - Interest rate impacts
-           - Sector rotation analysis
-           - Global market correlations
-           - Economic indicator effects
-        9. Present balanced risk/reward scenarios with specific price levels and ratios.
-        10. Conclude with 3 strategic considerations or emerging trends (150 words max).
-        11. Focus on data-driven insights rather than assumptions.
-        12. Maintain temporal neutrality - focus on patterns and data rather than timing.
+        $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data. Guidelines:
+        1. Respond directly to user input with detailed, well-structured answers that include relevant statistics and numbers.
+        2. Greet only when the user greets first. Otherwise, dive straight into the topic.
+        3. Provide thorough explanations, using 3 paragraphs when appropriate, incorporating specific data points throughout.
+        4. Use a formal yet engaging tone, balancing technical information with clear explanations.
+        5. For financial instruments, provide in-depth analysis including:
+           - Specific current price or value
+           - Recent percentage changes (daily, weekly, monthly as relevant)
+           - Key financial ratios or metrics (e.g., P/E ratio for stocks, market cap, volume)
+           - Historical comparisons with exact figures and dates
+        6. Explain complex concepts clearly, breaking them down into digestible parts, using real-world examples with actual numbers when possible.
+        7. No emojis.
+        8. Include relevant economic context with specific figures (e.g., GDP growth rates, inflation percentages, interest rates) and their potential effects on the topic at hand.
+        9. Present balanced information to aid decision-making, including both positive and negative statistics when available, but avoid direct financial advice.
+        10. After your main response, provide 3 concise related topics or questions to explore further(150 words max).
+        11. Don't make any assumptions 
+        12. Don't mention the time like: as of...
     
         Format your response as follows:
-        [Comprehensive analysis structured in clear sections, emphasizing specific data points and their implications]
+        [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
     
-        Strategic Considerations:
-        1. [First strategic insight or emerging trend]
-        2. [Second strategic insight or emerging trend]
-        3. [Third strategic insight or emerging trend]";
+        Related Topics:
+        1. [First related topic or question]
+        2. [Second related topic or question]
+        3. [Third related topic or question]";
     
         if ($marketData) {
-            $instructions .= "\n\nCurrent Market Data: " . json_encode($marketData);
+            $instructions .= "\n\nLatest market data: " . json_encode($marketData);
         }
         if ($economicData) {
-            $instructions .= "\n\nMacro Environment: " . json_encode($economicData);
+            $instructions .= "\n\nEconomic indicators: " . json_encode($economicData);
         }
     
-        $instructions .= "\n\nIntegrate all available market data and economic indicators into your analysis, citing specific figures and relationships between different metrics. Focus on providing context that enables informed decision-making while avoiding direct trading advice.";
+        $instructions .= "\n\nRemember to incorporate the provided market data and economic indicators into your main response, using the exact figures when relevant.";
     
         return $instructions;
     }
