@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - Votality</title>
+    <link rel="icon" href="b2.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light dark;
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+            --secondary-text: #4b5563;
+            --muted-text: #6B7280;
+            --secondary-background: #f9f9f9;
+            --tertiary-background: #f3f4f6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #1a1a1a;
+                --text-color: #ffffff;
+                --border-color: #2e3138;
+                --hover-color: #2a2d33;
+                --secondary-text: #9ba3af;
+                --muted-text: #8c96a3;
+                --secondary-background: #232323;
+                --tertiary-background: #2a2d33;
+            }
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body, html {
+            font-family: 'GeneralSans-Medium';
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .support-feedback-container {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            border: 0px solid var(--border-color);
+            padding: 1.5rem;
+            width: 35rem;
+            position: relative;
+            z-index: 1000;
+            font-family: 'GeneralSans-Medium';
+            transition: background-color 0.3s ease;
+        }
+        
+        .support-feedback-container.thank-you {
+            background-color: transparent;
+        }
+
+        .support-feedback-header {
+            margin-bottom: 0.5rem;
+        }
+
+        .support-feedback-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .support-feedback-description {
+            color: var(--secondary-text);
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
+            line-height: 1.5;
+        }
+
+        .support-feedback-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 0.75rem;
+            border: 0px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--secondary-background);
+            color: var(--text-color);
+            font-family: 'GeneralSans-Medium';
+            font-size: 0.875rem;
+            resize: vertical;
+            margin-bottom: 1.25rem;
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .support-feedback-textarea::placeholder {
+            color: var(--secondary-text);
+        }
+
+        .support-feedback-textarea:focus {
+            outline: none;
+            border-color: var(--text-color);
+        }
+
+        .support-feedback-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .support-feedback-button {
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-family: 'GeneralSans-Medium';
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .support-feedback-cancel {
+            background: var(--tertiary-background);
+            border: none;
+            color: var(--secondary-text);
+        }
+
+        .support-feedback-cancel:hover {
+            color: var(--text-color);
+        }
+
+        .support-feedback-submit {
+            background-color: var(--text-color);
+            color: var(--background-color);
+            border: none;
+        }
+
+        .support-feedback-submit:hover {
+            opacity: 0.9;
+        }
+
+        .support-feedback-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .thank-you-message {
+            text-align: center;
+            display: none;
+        }
+
+        .thank-you-message h3 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .thank-you-message p {
+            color: var(--secondary-text);
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 640px) {
+            .support-feedback-container {
+                width: calc(100% - 2rem);
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="feedback-overlay" id="feedback-overlay">
+        <div class="support-feedback-container">
+            <div id="feedback-form">
+                <div class="support-feedback-header">
+                    <h3>Leave Feedback</h3>
+                </div>
+                <div class="support-feedback-description">
+                    We'd love to hear what went well or how we can improve the product experience.
+                </div>
+                <textarea class="support-feedback-textarea" placeholder="Your feedback"></textarea>
+                <div class="support-feedback-actions">
+                    <button class="support-feedback-button support-feedback-cancel" onclick="window.location.href='index.html'">Cancel</button>
+                    <button class="support-feedback-button support-feedback-submit" disabled>Submit</button>
+                </div>
+            </div>
+            <div class="thank-you-message" id="thank-you-message">
+                <h3>Thank You for Your Feedback!</h3>
+                <p>We appreciate you taking the time to help us improve.</p>
+                <button class="support-feedback-button support-feedback-submit" onclick="window.location.href='index.html'">Return to Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enable/disable submit button based on textarea content
+        const textarea = document.querySelector('.support-feedback-textarea');
+        const submitButton = document.querySelector('.support-feedback-submit');
+        const feedbackForm = document.getElementById('feedback-form');
+        const thankYouMessage = document.getElementById('thank-you-message');
+
+        textarea.addEventListener('input', () => {
+            submitButton.disabled = textarea.value.trim().length === 0;
+        });
+
+        // Handle submit button click
+        submitButton.addEventListener('click', () => {
+            if (textarea.value.trim().length > 0) {
+                // Here you would typically send the feedback to your server
+                // For now, we'll just show the thank you message
+                feedbackForm.style.display = 'none';
+                thankYouMessage.style.display = 'block';
+                document.querySelector('.support-feedback-container').classList.add('thank-you');
+            }
+        });
+    </script>
+</body>
+</html>

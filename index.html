@@ -63,7 +63,7 @@
                 <div class="sidebar-button-container">
                     <i data-lucide="pen-square" style="color: #000; width: 20px; height: 20px;"></i>       <span class="new-thread-text">New Chat</span>
                 </div>
-                <div class="sidebar-button-container" data-feedback>
+                <div class="sidebar-button-container" data-feedback onclick="window.location.href='feedback.html'">
                     <i data-lucide="flag" style="color: #000; width: 20px; height: 20px;"></i>
                     <span class="new-thread-text">Feedback</span>
                 </div>
@@ -2891,29 +2891,9 @@
         });
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const overlay = document.querySelector('.feedback-overlay');
-        const cancelButton = document.querySelector('.support-feedback-cancel');
-        const feedbackButton = document.querySelector('.sidebar-button-container[data-feedback]'); // Sidebar button to open overlay
-
-        // Show the overlay when the Feedback button is clicked
-        feedbackButton.addEventListener('click', () => {
-            overlay.classList.add('active'); // Show the overlay
-        });
-
-        // Close the overlay when the Cancel button is clicked
-        cancelButton.addEventListener('click', () => {
-            overlay.classList.remove('active'); // Hide the overlay
-        });
-
-        // Close the overlay if you click outside the feedback container (on the dark overlay background)
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.classList.remove('active'); // Hide the overlay if you click outside the form
-            }
-        });
-    });
-
+    document.querySelector('[data-feedback]').addEventListener('click', () => {
+    window.location.href = 'feedback.html';
+});
 
     </script>
     <div class="feedback-overlay" id="feedback-overlay">
