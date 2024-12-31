@@ -191,20 +191,20 @@
 <body>
     <div class="feedback-overlay" id="feedback-overlay">
         <div class="support-feedback-container">
-            <div id="feedback-form">
+            <form id="feedback-form" method="POST" onsubmit="submitFeedback(event)">
                 <div class="support-feedback-header">
                     <h3>Leave Feedback</h3>
                 </div>
                 <div class="support-feedback-description">
                     We'd love to hear what went well or how we can improve the product experience.
                 </div>
-                <textarea class="support-feedback-textarea" placeholder="Your feedback"></textarea>
+                <textarea class="support-feedback-textarea" name="feedback" placeholder="Your feedback" required></textarea>
                 <div class="support-feedback-actions">
-                    <button class="support-feedback-button support-feedback-cancel" onclick="window.location.href='index.html'">Cancel</button>
-                    <button class="support-feedback-button support-feedback-submit" disabled>Submit</button>
+                    <button type="button" class="support-feedback-button support-feedback-cancel" onclick="window.location.href='index.html'">Cancel</button>
+                    <button type="submit" class="support-feedback-button support-feedback-submit">Submit</button>
                 </div>
-            </div>
-            <div class="thank-you-message" id="thank-you-message">
+            </form>
+            <div class="thank-you-message" id="thank-you-message" style="display: none;">
                 <h3>Thank You for Your Feedback!</h3>
                 <p>We appreciate you taking the time to help us improve.</p>
                 <button class="support-feedback-button support-feedback-submit" onclick="window.location.href='index.html'">Return to Home</button>
@@ -213,26 +213,29 @@
     </div>
 
     <script>
-        // Enable/disable submit button based on textarea content
-        const textarea = document.querySelector('.support-feedback-textarea');
-        const submitButton = document.querySelector('.support-feedback-submit');
-        const feedbackForm = document.getElementById('feedback-form');
-        const thankYouMessage = document.getElementById('thank-you-message');
+        function submitFeedback(event) {
+            event.preventDefault(); // Prevent the default form submission
 
-        textarea.addEventListener('input', () => {
-            submitButton.disabled = textarea.value.trim().length === 0;
-        });
+            const formData = new FormData(document.getElementById('feedback-form'));
 
-        // Handle submit button click
-        submitButton.addEventListener('click', () => {
-            if (textarea.value.trim().length > 0) {
-                // Here you would typically send the feedback to your server
-                // For now, we'll just show the thank you message
-                feedbackForm.style.display = 'none';
-                thankYouMessage.style.display = 'block';
-                document.querySelector('.support-feedback-container').classList.add('thank-you');
-            }
-        });
+            fetch('submit_feedback.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('feedback-form').style.display = 'none'; // Hide the form
+                    document.getElementById('thank-you-message').style.display = 'block'; // Show thank you message
+                } else {
+                    alert(data.message); // Show error message
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting feedback.');
+            });
+        }
     </script>
 </body>
 </html>
