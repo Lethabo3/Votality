@@ -10,6 +10,24 @@
 
   gtag('config', 'G-G7WREYHFF7');
 </script>
+<script>
+    // Mobile detection code
+    function isMobileDevice() {
+        const mobileKeywords = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const isSmallScreen = window.innerWidth <= 768;
+        return mobileKeywords.test(navigator.userAgent) || (isTouchDevice && isSmallScreen);
+    }
+
+    function handleMobileRedirect() {
+        if (isMobileDevice()) {
+            sessionStorage.setItem('redirectedFrom', window.location.pathname);
+            window.location.href = 'Votality.html';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', handleMobileRedirect);
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>signin</title>
