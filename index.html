@@ -918,9 +918,9 @@
                 const response = await fetch('/check_login_status.php');
                 const data = await response.json();
 
-                if (!data.isLoggedIn && !window.location.pathname.includes('signin.html')) {
+                if (!data.isLoggedIn && !window.location.pathname.includes('signup.html')) {
                     sessionStorage.setItem('returnUrl', window.location.href);
-                    window.location.href = '/signin.html';
+                    window.location.href = '/signup.html'; // Change this line to redirect to the sign-up page
                     return;
                 }
 
@@ -1149,9 +1149,9 @@
                 const response = await fetch('/check_login_status.php');
                 const data = await response.json();
 
-                if (!data.isLoggedIn && !window.location.pathname.includes('signin.html')) {
+                if (!data.isLoggedIn && !window.location.pathname.includes('signup.html')) {
                     sessionStorage.setItem('returnUrl', window.location.href);
-                    window.location.href = '/signin.html';
+                    window.location.href = '/signup.html'; // Change this line to redirect to the sign-up page
                     return;
                 }
 
