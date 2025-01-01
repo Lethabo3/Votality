@@ -438,6 +438,25 @@ body, html {
             font-weight: 500;
             margin-right: auto;
         }
+
+        .signin-link {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.signin-link a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 0.25rem;
+}
+
+.signin-link a:hover {
+    text-decoration: underline;
+}
     </style>
 </head>
 <body>
@@ -487,6 +506,10 @@ body, html {
                 <input type="password" name="password" id="password" placeholder="Password" class="input-field" required>
                 <button type="submit" class="submit-button">Create Account</button>
             </form>
+            
+            <p class="signin-link">
+                Already have an account? <a href="signin.html">Sign in</a>
+            </p>
             
             <p class="terms">
                 By continuing, you agree to Votality's <a href="terms.html">Terms of Service</a>, and 
