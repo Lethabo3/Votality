@@ -549,70 +549,134 @@
             });
         });
             
-    submitButton.addEventListener('click', async function() {
-        const message = textarea.value.trim();
-        if (message) {
-            // Hide initial content, suggested queries, and footer links
-            initialContent.classList.add('fade-out');
-            suggestedQueries.classList.add('fade-out');
-            footerLinks.classList.add('fade-out');
+// Your existing submit button code - keep this exactly as is
+submitButton.addEventListener('click', async function() {
+    const message = textarea.value.trim();
+    if (message) {
+        // Hide initial content, suggested queries, and footer links
+        initialContent.classList.add('fade-out');
+        suggestedQueries.classList.add('fade-out');
+        footerLinks.classList.add('fade-out');
+       
+        // Start repositioning textarea immediately
+        textareaContainer.classList.add('repositioned');
+       
+        // Change background to white
+        document.body.classList.add('white-background');
+       
+        // After the fade-out animation
+        setTimeout(async () => {
+            initialContent.style.display = 'none';
+            suggestedQueries.style.display = 'none';
+            footerLinks.style.display = 'none';
+           
+            // Show chat container
+            chatContainer.style.display = 'block';
+            chatContainer.classList.add('fade-in');
+           
+            // Show disclaimer
+            if (window.innerWidth > 640) {
+                disclaimer.style.display = 'block';
+                setTimeout(() => {
+                    disclaimer.classList.add('fade-in');
+                }, 50);
+            }
             
-            // Start repositioning textarea immediately
-            textareaContainer.classList.add('repositioned');
-            
-            // Change background to white
-            document.body.classList.add('white-background');
-            
-            // After the fade-out animation
-            setTimeout(async () => {
-                initialContent.style.display = 'none';
-                suggestedQueries.style.display = 'none';
-                footerLinks.style.display = 'none';
-                
-                // Show chat container
-                chatContainer.style.display = 'block';
-                chatContainer.classList.add('fade-in');
-                
-                // Show disclaimer
-                if (window.innerWidth > 640) {
-        disclaimer.style.display = 'block';
-        setTimeout(() => {
-            disclaimer.classList.add('fade-in');
-        }, 50);
+            // Show desktop top nav for larger screens
+            if (window.innerWidth > 640) {
+                const desktopTopNav = document.querySelector('.desktop-top-nav');
+                desktopTopNav.style.display = 'flex';
+                setTimeout(() => {
+                    desktopTopNav.classList.add('fade-in');
+                }, 50);
+            } else {
+                // Hide top navigation for mobile when chat container appears
+                const topNav = document.querySelector('.top-nav');
+                if (topNav) {
+                    topNav.style.display = 'none';
+                }
+                // Add 'chat-active' class to body for mobile-specific styling
+                document.body.classList.add('chat-active');
+            }
+           
+            // Send message to AI and get response
+            await sendMessage(message);
+        }, 500);
     }
+});
 
-    // Show desktop top nav for larger screens
-    if (window.innerWidth > 640) {
-                    const desktopTopNav = document.querySelector('.desktop-top-nav');
-                    desktopTopNav.style.display = 'flex';
-                    setTimeout(() => {
-                        desktopTopNav.classList.add('fade-in');
-                    }, 50);
-                } else {
-                    // Hide top navigation for mobile when chat container appears
-                    const topNav = document.querySelector('.top-nav');
-                    if (topNav) {
-                        topNav.style.display = 'none';
-                    }
-                    // Add 'chat-active' class to body for mobile-specific styling
-                    document.body.classList.add('chat-active');
-                }
-                
-                // Show desktop top nav for larger screens
-                if (window.innerWidth > 640) {
-                    const desktopTopNav = document.querySelector('.desktop-top-nav');
-                    desktopTopNav.style.display = 'flex';
-                    setTimeout(() => {
-                        desktopTopNav.classList.add('fade-in');
-                    }, 50);
-                }
-
-                // Send message to AI and get response
-                await sendMessage(message);
-            }, 500);
+// Add the new "New Chat" button code right after your existing code
+document.querySelector('.sidebar-button-container').addEventListener('click', function() {
+    // First, let's remove the white background
+    document.body.classList.remove('white-background');
+    
+    // Remove the chat-active class for mobile
+    document.body.classList.remove('chat-active');
+    
+    // Reset the textarea container positioning
+    const textareaContainer = document.querySelector('.textarea-container');
+    textareaContainer.classList.remove('repositioned');
+    
+    // Clear the textarea value
+    const textarea = document.querySelector('textarea');
+    textarea.value = '';
+    
+    // Hide the chat container with fade out
+    const chatContainer = document.querySelector('.chat-container');
+    chatContainer.classList.remove('fade-in');
+    chatContainer.classList.add('fade-out');
+    
+    // Hide the disclaimer with fade out
+    const disclaimer = document.querySelector('.disclaimer');
+    if (disclaimer) {
+        disclaimer.classList.remove('fade-in');
+        disclaimer.classList.add('fade-out');
+    }
+    
+    // Handle desktop top nav
+    const desktopTopNav = document.querySelector('.desktop-top-nav');
+    if (desktopTopNav) {
+        desktopTopNav.classList.remove('fade-in');
+        desktopTopNav.classList.add('fade-out');
+    }
+    
+    // After fade-out animation completes
+    setTimeout(() => {
+        // Hide chat container and disclaimer
+        chatContainer.style.display = 'none';
+        if (disclaimer) {
+            disclaimer.style.display = 'none';
         }
-    });
-
+        if (desktopTopNav) {
+            desktopTopNav.style.display = 'none';
+        }
+        
+        // Show initial content, suggested queries, and footer links
+        const initialContent = document.querySelector('.initial-content');
+        const suggestedQueries = document.querySelector('.suggested-queries');
+        const footerLinks = document.querySelector('.footer-links');
+        
+        initialContent.style.display = 'block';
+        suggestedQueries.style.display = 'block';
+        footerLinks.style.display = 'block';
+        
+        // Remove fade-out classes
+        initialContent.classList.remove('fade-out');
+        suggestedQueries.classList.remove('fade-out');
+        footerLinks.classList.remove('fade-out');
+        
+        // Add fade-in classes
+        initialContent.classList.add('fade-in');
+        suggestedQueries.classList.add('fade-in');
+        footerLinks.classList.add('fade-in');
+        
+        // Handle mobile top navigation
+        const topNav = document.querySelector('.top-nav');
+        if (window.innerWidth <= 640 && topNav) {
+            topNav.style.display = 'flex';
+        }
+    }, 500); // Match the fade-out animation duration
+});
 
     function updateUsername() {
         fetch('get_user_info.php')

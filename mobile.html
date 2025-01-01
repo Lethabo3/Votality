@@ -1,7 +1,16 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+                <!-- Google tag (gtag.js) -->
+                <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
+                <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+            
+                gtag('config', 'G-G7WREYHFF7');
+                </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ask Bimo</title>
@@ -526,1111 +535,552 @@ footer {
 </head>
 
 <body class="bg-white text-gray-800 font-sans">
-
     <div class="top-icons">
-
         <button id="nav-toggle" class="nav-toggle text-gray-600 hover:text-gray-800">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
-
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h12M4 18h8" />
-
             </svg>
-
         </button>
-
         <div id="name-dropdown" class="flex items-center cursor-pointer">
-
             <span class="mr-1">Votality</span>
-
-            
-
         </div>
-
-        
-
         <button id="new-chat-button" class="icon-button">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-
             </svg>
-
         </button>
-
     </div>
-
-
 
     <div id="nav-hover-area" class="nav-hover-area"></div>
 
-
-
     <nav id="nav-menu" class="nav-menu">
-
         <div class="nav-content">
-
             <button id="close-nav" class="close-nav">
-
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6">
-
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h12M4 18h8" />
-
                 </svg>
-
             </button>
-
             <div class="nav-header">
-
                 <h2>Conversations</h2>
-
             </div>
-
             <div class="recent-chats-container" id="recent-chats">
-
                 <!-- Recent chats will be dynamically added here -->
-
             </div>
-
         </div>
-
         <div id="userEmailContainer" class="user-email-container">
-
             <div id="userProfileCircle" class="user-profile-circle"></div>
-
             <div id="userEmail" class="user-email"></div>
-
         </div>
-
         <div id="emailDropdown" class="email-dropdown">
-
             <div id="dropdownEmail" class="email-dropdown-item font-bold"></div>
-
             <div class="email-dropdown-divider"></div>
-
             <div class="email-dropdown-item" onclick="openHelp()">Help & FAQ</div>
-
             <div class="email-dropdown-item" onclick="openSettings()">Settings</div>
-
             <div class="email-dropdown-item" onclick="openLearnMore()">Learn More</div>
-
             <div class="email-dropdown-divider"></div>
-
             <div class="email-dropdown-item text-red-600" onclick="logout()">Log out</div>
-
         </div>
-
     </nav>
-
-
 
     <div id="nav-overlay" class="nav-overlay"></div>
 
-
-
     <div class="container mx-auto px-4 min-h-screen flex flex-col relative pt-16">
-
         <div id="logo-container" class="logo-container fade-in">
-
             <img src="Votality.jpg" alt="Votality.jpg Campus Logo" class="w-32 h-32 object-cover mb-4">
-
         </div>
 
-
-
         <main class="flex-grow flex flex-col">
-
             <div id="chat-container" class="chat-container flex flex-col p-4" style="display: none;"></div>
-
         </main>
 
-
-
         <footer class="py-4 fixed bottom-0 left-0 right-0 bg-white">
-
-            
-
             <form id="chat-form" class="flex flex-col items-center max-w-3xl mx-auto px-4 mt-4">
-
-            <div id="file-preview" class="w-full mb-2" style="display: none;"></div>
-
-            <div class="input-container w-full relative">
-
-                <textarea id="user-input" placeholder="Message Votality AI" class="w-full p-3 pl-12 pr-12 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 custom-rounded resize-none overflow-hidden" rows="1" style="height: 50px;"></textarea>
-
-                <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt">
-
-                <button type="button" id="attachment-button" class="absolute left-2 top-1/2 transform -translate-y-1/2 focus:outline-none">
-
-                    <div class="custom-rounded bg-transparent p-2 transition-colors duration-200">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="black" class="h-5 w-5">
-
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-
-                        </svg>                        
-
+                <div id="file-preview" class="w-full mb-2" style="display: none;"></div>
+                <div class="input-container w-full relative">
+                    <textarea id="user-input" placeholder="Message Votality AI" class="w-full p-3 pl-12 pr-12 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300 custom-rounded resize-none overflow-hidden" rows="1" style="height: 50px;"></textarea>
+                    <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt">
+                    <button type="button" id="attachment-button" class="absolute left-2 top-1/2 transform -translate-y-1/2 focus:outline-none">
+                        <div class="custom-rounded bg-transparent p-2 transition-colors duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="black" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                            </svg>                        
+                        </div>
+                    </button>
+                    <div id="wave-animation" class="absolute right-2 top-1/2 transform -translate-y-1/2">
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
+                        <div class="wave-bar"></div>
                     </div>
-
-                </button>
-
-                <div id="wave-animation" class="absolute right-2 top-1/2 transform -translate-y-1/2">
-
-                    <div class="wave-bar"></div>
-
-                    <div class="wave-bar"></div>
-
-                    <div class="wave-bar"></div>
-
-                    <div class="wave-bar"></div>
-
-                    <div class="wave-bar"></div>
-
+                    <button type="submit" id="submit-button" class="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none" style="display: none;">
+                        <div class="custom-rounded bg-gray-200 p-2 hover:bg-gray-300 transition-colors duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5 text-gray-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                            </svg>
+                        </div>
+                    </button>
                 </div>
-
-                <button type="submit" id="submit-button" class="absolute right-2 top-1/2 transform -translate-y-1/2 focus:outline-none" style="display: none;">
-
-                    <div class="custom-rounded bg-gray-200 p-2 hover:bg-gray-300 transition-colors duration-200">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5 text-gray-600">
-
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-
-                        </svg>
-
-                    </div>
-
-                </button>
-
-            </div>
-
-        </form>
-
-    </footer>
-
+            </form>
+        </footer>
     </div>
 
-
-
     <script>
-
         // DOM Elements
-
         const userInput = document.getElementById('user-input');
-
         const submitButton = document.getElementById('submit-button');
-
         const logoContainer = document.getElementById('logo-container');
-
         const chatContainer = document.getElementById('chat-container');
-
         const bentoGrid = document.getElementById('bento-grid');
-
         const navToggle = document.getElementById('nav-toggle');
-
         const navMenu = document.getElementById('nav-menu');
-
         const navHoverArea = document.getElementById('nav-hover-area');
-
         const newChatButton = document.getElementById('new-chat-button');
-
         const navOverlay = document.getElementById('nav-overlay');
-
         const userEmailContainer = document.getElementById('userEmailContainer');
-
         const emailDropdown = document.getElementById('emailDropdown');
-
-
 
         let currentChatId = null;
 
-
-
         // Event Listeners
-
         userInput.addEventListener('input', function() {
-
             submitButton.classList.toggle('visible', this.value.trim() !== '');
-
         });
-
-
 
         navToggle.addEventListener('mouseenter', openNav);
-
         navHoverArea.addEventListener('mouseenter', openNav);
-
         navMenu.addEventListener('mouseleave', closeNav);
-
         navOverlay.addEventListener('click', closeNav);
 
-
-
         navToggle.addEventListener('mouseleave', (e) => {
-
             if (!navMenu.contains(e.relatedTarget) && e.relatedTarget !== navHoverArea) {
-
                 closeNav();
-
             }
-
         });
-
-
 
         newChatButton.addEventListener('click', createNewChat);
 
-
-
         userEmailContainer.addEventListener('click', function(e) {
-
             e.stopPropagation();
-
             emailDropdown.classList.toggle('show');
-
         });
-
-
 
         document.addEventListener('click', function(e) {
-
             if (!emailDropdown.contains(e.target) && !userEmailContainer.contains(e.target)) {
-
                 emailDropdown.classList.remove('show');
-
             }
-
         });
-
-
 
         // Functions
-
         function openNav() {
-
             navMenu.classList.add('open');
-
             navOverlay.style.display = 'block';
-
             updateUserEmailDisplay();
-
             loadRecentChats();
-
         }
-
-
 
         function closeNav() {
-
             navMenu.classList.remove('open');
-
             navOverlay.style.display = 'none';
-
         }
-
-
 
         async function sendMessage(message) {
+            if (logoContainer.style.display !== 'none') {
+                logoContainer.classList.add('fade-out');
+                setTimeout(() => {
+                    logoContainer.style.display = 'none';
+                    chatContainer.style.display = 'flex';
+                    bentoGrid.style.display = 'none';
+                }, 500);
+            }
+            addMessage(message, 'user');
+            userInput.value = '';
+            submitButton.classList.remove('visible');
 
-    if (logoContainer.style.display !== 'none') {
+            try {
+                const response = await fetch('VotalityChat.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'sendMessage',
+                        message: message,
+                        chatId: currentChatId
+                    }),
+                });
 
-        logoContainer.classList.add('fade-out');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
-        setTimeout(() => {
+                const data = await response.json();
 
-            logoContainer.style.display = 'none';
+                if (data.error) {
+                    throw new Error(data.error);
+                }
 
-            chatContainer.style.display = 'flex';
+                addMessage(data.response, 'ai');
 
-            bentoGrid.style.display = 'none';
-
-        }, 500);
-
-    }
-
-    addMessage(message, 'user');
-
-    userInput.value = '';
-
-    submitButton.classList.remove('visible');
-
-
-
-    try {
-
-        const response = await fetch('VotalityChat.php', {
-
-            method: 'POST',
-
-            headers: {
-
-                'Content-Type': 'application/json',
-
-            },
-
-            body: JSON.stringify({
-
-                action: 'sendMessage',
-
-                message: message,
-
-                chatId: currentChatId
-
-            }),
-
-        });
-
-    
-
-        if (!response.ok) {
-
-            throw new Error(`HTTP error! status: ${response.status}`);
-
+                // Refresh recent chats to update summary if it was the first message
+                loadRecentChats();
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
+            }
         }
-
-    
-
-        const data = await response.json();
-
-    
-
-        if (data.error) {
-
-            throw new Error(data.error);
-
-        }
-
-    
-
-        addMessage(data.response, 'ai');
-
-        
-
-        // Refresh recent chats to update summary if it was the first message
-
-        loadRecentChats();
-
-    } catch (error) {
-
-        console.error('Error:', error);
-
-        addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
-
-    }
-
-}
-
-
 
         function updateUserEmailDisplay() {
-
             fetch('get_user_email.php')
-
                 .then(response => response.json())
-
                 .then(data => {
-
                     const userEmailContainer = document.getElementById('userEmailContainer');
-
                     const userProfileCircle = document.getElementById('userProfileCircle');
-
                     const userEmail = document.getElementById('userEmail');
-
                     const dropdownEmail = document.getElementById('dropdownEmail');
 
-                    
-
                     if (data.email && data.email !== 'Not logged in') {
-
                         userEmail.textContent = data.email;
-
                         dropdownEmail.textContent = data.email;
-
                         userEmailContainer.style.display = 'flex';
 
-                        
-
                         // Get initials from the full name
-
                         const initials = data.fullname.split(' ').map(n => n[0]).join('').toUpperCase();
-
                         userProfileCircle.textContent = initials;
-
                     } else {
-
                         userEmailContainer.style.display = 'none';
-
                     }
-
                 })
-
                 .catch(error => {
-
                     console.error('Error fetching user email:', error);
-
                 });
-
         }
-
-
 
         function sendBentoMessage(message) {
-
             sendMessage(message);
-
         }
-
-
 
         function addMessage(text, sender) {
-
             const messageDiv = document.createElement('div');
-
             messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'ai-message', 'slide-in');
-
             messageDiv.textContent = text;
-
             chatContainer.appendChild(messageDiv);
-
             chatContainer.scrollTop = chatContainer.scrollHeight;
-
         }
-
-
 
         async function createNewChat() {
-
             try {
-
                 const response = await fetch('VotalityChat.php', {
-
                     method: 'POST',
-
                     headers: {
-
                         'Content-Type': 'application/json',
-
                     },
-
                     body: JSON.stringify({
-
                         action: 'createNewChat'
-
                     }),
-
                 });
 
-
-
                 if (!response.ok) {
-
                     throw new Error(`HTTP error! status: ${response.status}`);
-
                 }
-
-
 
                 const data = await response.json();
 
-
-
                 if (data.error) {
-
                     throw new Error(data.error);
-
                 }
-
-
 
                 currentChatId = data.chatId;
-
                 chatContainer.innerHTML = '';
-
                 logoContainer.style.display = 'flex';
-
                 bentoGrid.style.display = 'flex';
-
                 userInput.value = '';
-
                 submitButton.classList.remove('visible');
-
                 addRecentChat(data.summary, currentChatId);
-
                 loadRecentChats();
-
             } catch (error) {
-
                 console.error('Error creating new chat:', error);
-
             }
-
         }
-
-
 
         async function loadRecentChats() {
-
             try {
-
                 const response = await fetch('VotalityChat.php', {
-
                     method: 'POST',
-
                     headers: {
-
                         'Content-Type': 'application/json',
-
                     },
-
                     body: JSON.stringify({
-
                         action: 'getRecentChats'
-
                     }),
-
                 });
 
-
-
                 if (!response.ok) {
-
                     throw new Error(`HTTP error! status: ${response.status}`);
-
                 }
-
-
 
                 const data = await response.json();
 
-
-
                 if (data.error) {
-
                     throw new Error(data.error);
-
                 }
-
-
 
                 const recentChatsContainer = document.getElementById('recent-chats');
-
                 recentChatsContainer.innerHTML = '';
 
-
-
                 data.chats.forEach(chat => {
-
                     addRecentChat(chat.summary, chat.id);
-
                 });
-
             } catch (error) {
-
                 console.error('Error loading recent chats:', error);
-
             }
-
         }
-
-
 
         function addRecentChat(summary, chatId) {
-
             const recentChatsContainer = document.getElementById('recent-chats');
-
             let chatElement = document.querySelector(`.recent-chat[data-chat-id="${chatId}"]`);
-
             
-
             if (!chatElement) {
-
                 chatElement = document.createElement('div');
-
                 chatElement.classList.add('recent-chat');
-
                 chatElement.dataset.chatId = chatId;
-
                 
-
                 const menuIcon = document.createElement('i');
-
                 menuIcon.setAttribute('data-feather', 'more-horizontal');
-
                 menuIcon.classList.add('menu-icon');
-
-                
-
-                chatElement.appendChild(menuIcon);
-
-                chatElement.onclick = () => loadChat(chatId);
-
-                
-
-                // Insert the new chat at the beginning of the list
-
-                if (recentChatsContainer.firstChild) {
-
-                    recentChatsContainer.insertBefore(chatElement, recentChatsContainer.firstChild);
-
-                } else {
-
-                    recentChatsContainer.appendChild(chatElement);
-
-                }
-
-            }
-
             
-
-            const span = chatElement.querySelector('span') || document.createElement('span');
-
-            span.textContent = summary;
-
-            if (!chatElement.contains(span)) {
-
-                chatElement.insertBefore(span, chatElement.firstChild);
-
+                chatElement.appendChild(menuIcon);
+                chatElement.onclick = () => loadChat(chatId);
+                
+                // Insert the new chat at the beginning of the list
+                if (recentChatsContainer.firstChild) {
+                    recentChatsContainer.insertBefore(chatElement, recentChatsContainer.firstChild);
+                } else {
+                    recentChatsContainer.appendChild(chatElement);
+                }
             }
-
-
+            
+            const span = chatElement.querySelector('span') || document.createElement('span');
+            span.textContent = summary;
+            if (!chatElement.contains(span)) {
+                chatElement.insertBefore(span, chatElement.firstChild);
+            }
 
             feather.replace();
-
-
 
             // Limit to 10 recent chats
-
             while (recentChatsContainer.children.length > 10) {
-
                 recentChatsContainer.removeChild(recentChatsContainer.lastChild);
-
             }
-
-
 
             // Ensure the container scrolls to the top to show the newest chat
-
             recentChatsContainer.scrollTop = 0;
-
         }
-
-
 
         async function loadChat(chatId) {
-
             try {
-
                 const response = await fetch('VotalityChat.php', {
-
                     method: 'POST',
-
                     headers: {
-
                         'Content-Type': 'application/json',
-
                     },
-
                     body: JSON.stringify({
-
                         action: 'loadChat',
-
                         chatId: chatId
-
                     }),
-
                 });
-
-
-
                 if (!response.ok) {
-
                     throw new Error(`HTTP error! status: ${response.status}`);
-
                 }
-
-
 
                 const data = await response.json();
-
-
-
                 if (data.error) {
-
                     throw new Error(data.error);
-
                 }
 
-
-
                 chatContainer.innerHTML = '';
-
                 data.messages.forEach(message => {
-
                     addMessage(message.content, message.sender);
-
                 });
-
-
 
                 logoContainer.style.display = 'none';
-
                 bentoGrid.style.display = 'none';
-
                 chatContainer.style.display = 'flex';
-
                 currentChatId = chatId;
-
                 closeNav();
-
             } catch (error) {
-
                 console.error('Error loading chat:', error);
-
             }
-
         }
-
-
 
         function openHelp() {
-
             // Implement help & FAQ functionality
-
             console.log('Opening Help & FAQ');
-
         }
-
-
 
         function openSettings() {
-
             // Implement settings functionality
-
             console.log('Opening Settings');
-
         }
-
-
 
         function openLearnMore() {
-
             // Implement learn more functionality
-
             console.log('Opening Learn More');
-
         }
-
-
 
         function logout() {
-
             fetch('profile_handler.php', {
-
                 method: 'POST',
-
                 headers: {
-
                     'Content-Type': 'application/x-www-form-urlencoded',
-
                 },
-
                 body: 'action=logout'
-
             }).then(() => {
-
                 window.location.href = 'LoginPageBimo.html';
-
             }).catch(error => console.error('Error:', error));
-
         }
-
-
 
         // Debug function to check if hover is working
-
         function debugHover() {
-
             const recentChats = document.querySelectorAll('.recent-chat');
-
             recentChats.forEach(chat => {
-
                 chat.addEventListener('mouseenter', () => {
-
                     console.log('Hover started on:', chat.querySelector('span').textContent);
-
                     const menuIcon = chat.querySelector('.menu-icon');
-
                     console.log('Menu icon display:', getComputedStyle(menuIcon).display);
-
                 });
-
                 chat.addEventListener('mouseleave', () => {
-
                     console.log('Hover ended on:', chat.querySelector('span').textContent);
-
                 });
-
             });
-
         }
-
-
 
         // Prevent menu icon click from triggering the chat
-
         document.addEventListener('click', function(e) {
-
             if (e.target.closest('.menu-icon')) {
-
                 e.stopPropagation();
-
                 console.log('Menu clicked for:', e.target.closest('.recent-chat').querySelector('span').textContent);
-
                 // Add your menu functionality here
-
             }
-
         });
-
-
 
         // Initialize
-
         document.addEventListener('DOMContentLoaded', () => {
-
             feather.replace();
-
             debugHover();
-
             console.log('Debug hover function initialized');
-
             updateUserEmailDisplay();
-
             loadRecentChats();
-
         });
 
-
-
 // Add these variables at the top of your script
-
 const waveAnimation = document.getElementById('wave-animation');
-
 const attachmentButton = document.getElementById('attachment-button');
-
 let isRecording = false;
-
 let mediaRecorder;
-
 let audioChunks = [];
 
-
-
 // Speech recognition setup
-
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
 const recognition = new SpeechRecognition();
-
 recognition.continuous = true;
-
 recognition.interimResults = true;
 
-
-
 // Add these event listeners
-
 waveAnimation.addEventListener('click', toggleRecording);
-
 userInput.addEventListener('input', handleUserInput);
 
-
-
 function handleUserInput() {
-
     const hasText = userInput.value.trim() !== '';
-
     waveAnimation.style.display = hasText ? 'none' : 'flex';
-
     submitButton.style.display = hasText ? 'block' : 'none';
-
 }
-
-
 
 function toggleRecording() {
-
     if (!isRecording) {
-
         startRecording();
-
     } else {
-
         stopRecording();
-
     }
-
 }
-
-
 
 function startRecording() {
-
     try {
-
         recognition.start();
-
         isRecording = true;
-
         waveAnimation.classList.add('recording');
-
         attachmentButton.innerHTML = `
-
             <div class="custom-rounded bg-transparent p-2 transition-colors duration-200">
-
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5 text-gray-600">
-
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-
                 </svg>
-
             </div>
-
         `;
-
         attachmentButton.removeEventListener('click', handleAttachment);
-
         attachmentButton.addEventListener('click', cancelRecording);
-
     } catch (err) {
-
         console.error('Error starting speech recognition:', err);
-
     }
-
 }
-
-
 
 function stopRecording() {
-
     if (isRecording) {
-
         recognition.stop();
-
         isRecording = false;
-
         waveAnimation.classList.remove('recording');
-
         submitButton.style.display = 'block';
-
         resetAttachmentButton();
-
     }
-
 }
-
-
 
 function cancelRecording() {
-
     if (isRecording) {
-
         recognition.stop();
-
         isRecording = false;
-
         waveAnimation.classList.remove('recording');
-
         userInput.value = '';
-
         resetAttachmentButton();
-
     }
-
 }
-
-
 
 function resetAttachmentButton() {
-
     attachmentButton.innerHTML = `
-
         <div class="custom-rounded bg-transparent p-2 transition-colors duration-200">
-
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-5 w-5 text-gray-600">
-
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-
             </svg>
-
         </div>
-
     `;
-
     attachmentButton.removeEventListener('click', cancelRecording);
-
     attachmentButton.addEventListener('click', handleAttachment);
-
     waveAnimation.style.display = 'flex';
-
 }
 
-
-
 recognition.onresult = (event) => {
-
     const resultIndex = event.resultIndex;
-
     const transcript = event.results[resultIndex][0].transcript;
-
     userInput.value = transcript;
-
     handleUserInput();
-
 };
 
-
-
 // Update the chat form submit event
-
 document.getElementById('chat-form').addEventListener('submit', function(e) {
-
     e.preventDefault();
-
     const message = userInput.value.trim();
-
     if (message || audioChunks.length > 0) {
-
         if (audioChunks.length > 0) {
-
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-
             sendMessage(message, audioBlob);
-
             audioChunks = [];
-
         } else {
-
             sendMessage(message);
-
         }
-
         userInput.value = '';
-
         submitButton.style.display = 'none';
-
         waveAnimation.style.display = 'flex';
-
         isRecording = false; // Reset recording state
-
     }
-
 });
-
     </script>
-
 </body>
-
 </html>
