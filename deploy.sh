@@ -1,13 +1,16 @@
 #!/bin/bash
 
-# Log the deployment start time
-echo "Deployment started at $(date)" >> /home/votalik6n1q7/deployment.log
-
-# Change to your website directory
+# Set working directory
 cd /home/votalik6n1q7/public_html
 
-# Pull the latest changes
-git pull origin main >> /home/votalik6n1q7/deployment.log 2>&1
+# Log start
+echo "Deployment started at $(date)" >> /home/votalik6n1q7/deployment.log
 
-# Log the deployment completion
+# Fetch latest changes
+git fetch origin main
+
+# Reset to match origin/main
+git reset --hard origin/main
+
+# Log the result
 echo "Deployment completed at $(date)" >> /home/votalik6n1q7/deployment.log
