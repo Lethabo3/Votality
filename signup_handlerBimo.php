@@ -75,17 +75,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->bind_param("sssss", $user_id, $fullname, $hashed_password, $email, $session_id);
         if ($stmt->execute()) {
             log_message("User inserted successfully");
-           
+            
+            // Set session variables to log the user in
             $_SESSION['user_id'] = $user_id;
             $_SESSION['session_id'] = $session_id;
             $_SESSION['username'] = $fullname;
             $_SESSION['email'] = $email;
             $_SESSION['fullname'] = $fullname;
-           
+            $_SESSION['logged_in'] = true; // Set this to indicate the user is logged in
+
             log_message("Session variables set - User ID: $user_id, Session ID: $session_id");
-           
+            
             log_message("Redirecting to index.html");
-            header('Location: index.html');
+            header('Location: index.html'); // Redirect to the Votality page
             exit();
         } else {
             log_message("Error inserting user: " . $stmt->error);
