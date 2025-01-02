@@ -229,11 +229,17 @@ function getWorldTime($timezone) {
 function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     global $conn;
    
-    if (empty($message) && empty($file)) {
-        return ['error' => 'No message or file provided'];
-    }
-
     try {
+        // Enable error reporting for debugging
+        error_log("Starting handleSendMessage");
+        error_log("Message: " . $message);
+        error_log("File data received: " . ($file ? json_encode($file) : 'No file'));
+
+        // Input validation
+        if (empty($message) && empty($file)) {
+            return ['error' => 'No message or file provided'];
+        }
+
         // Initialize chat if it doesn't exist
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
@@ -252,21 +258,44 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         $fileContent = null;
         $fileType = null;
         if ($file) {
-            $fileType = $file['type'];
-            $fileContent = processUploadedFile($file);
+            try {
+                error_log("Processing file...");
+                // Extract file data
+                $fileData = $file['data'];
+                $fileType = $file['type'];
+                
+                // Remove data URL prefix if present
+                if (preg_match('/^data:([^;]+);base64,/', $fileData, $matches)) {
+                    $fileType = $matches[1];
+                    $fileData = substr($fileData, strpos($fileData, ',') + 1);
+                }
+                
+                // Decode base64 data
+                $fileContent = base64_decode($fileData);
+                
+                if ($fileContent === false) {
+                    throw new Exception("Failed to decode file data");
+                }
+                
+                error_log("File processed successfully. Type: " . $fileType);
+            } catch (Exception $e) {
+                error_log("File processing error: " . $e->getMessage());
+                return ['error' => 'Failed to process file: ' . $e->getMessage()];
+            }
         }
 
-        // Generate AI response
-        $aiPrompt = "Current time: {$formattedTime}\n";
-        $aiPrompt .= "User message: {$message}\n";
-        
+        // Prepare AI prompt with file content if available
+        $aiPrompt = "Current time: {$formattedTime}\nUser message: {$message}";
         if ($fileContent) {
-            $aiPrompt .= "\nFile Content:\n{$fileContent}";
+            // Process file content based on type
+            $processedContent = processFileContent($fileContent, $fileType);
+            $aiPrompt .= "\n\nFile Content:\n" . $processedContent;
         }
        
+        error_log("Sending to AI service. Prompt length: " . strlen($aiPrompt));
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
-        // Process the response to separate main content and related topics
+        // Process the response
         $parts = explode("\nRelated Topics:", $fullResponse, 2);
         $aiResponse = trim($parts[0]);
         $relatedTopics = [];
@@ -286,23 +315,30 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Store in database if user is logged in and has a session_id
+        // Store in database if user is logged in
         if (isset($_SESSION['user_id']) && isset($_SESSION['session_id'])) {
             $userId = $_SESSION['user_id'];
             $sessionId = $_SESSION['session_id'];
 
-            // First, ensure chat exists in database
+            // Ensure chat exists
             $stmt = $conn->prepare("INSERT IGNORE INTO votality_chats (chat_id, user_id) VALUES (?, ?)");
-            $stmt->bind_param("si", $chatId, $userId);
+            $stmt->bind_param("ss", $chatId, $userId);
             $stmt->execute();
 
-            // Store user message with file if present
+            // Store user message with file
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
                 (chat_id, user_id, session_id, sender, content, file_content, file_type) 
                 VALUES (?, ?, ?, 'user', ?, ?, ?)
             ");
-            $stmt->bind_param("sisss", $chatId, $userId, $sessionId, $message, $fileContent, $fileType);
+            $stmt->bind_param("ssssss", 
+                $chatId, 
+                $userId, 
+                $sessionId, 
+                $message,
+                $fileContent,
+                $fileType
+            );
             $stmt->execute();
 
             // Store AI response
@@ -311,91 +347,52 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 (chat_id, user_id, session_id, sender, content) 
                 VALUES (?, ?, ?, 'ai', ?)
             ");
-            $stmt->bind_param("siss", $chatId, $userId, $sessionId, $aiResponse);
+            $stmt->bind_param("ssss", $chatId, $userId, $sessionId, $aiResponse);
             $stmt->execute();
         }
 
-        // Store in session for current conversation
-        if (!isset($_SESSION['chats'][$chatId])) {
-            $_SESSION['chats'][$chatId] = [
-                'messages' => [],
-                'created_at' => time()
-            ];
-        }
-
-        $_SESSION['chats'][$chatId]['messages'][] = [
-            'sender' => 'user',
-            'content' => $message,
-            'file_content' => $fileContent,
-            'file_type' => $fileType,
-            'timestamp' => time()
-        ];
-
-        $_SESSION['chats'][$chatId]['messages'][] = [
-            'sender' => 'ai',
-            'content' => $aiResponse,
-            'timestamp' => time(),
-            'relatedTopics' => $relatedTopics
-        ];
-
-        // Update chat topic if not set
-        if (!isset($_SESSION['chats'][$chatId]['topic'])) {
-            updateChatTopic($chatId, $message);
-        }
-
-        return [
+        // Prepare response
+        $response = [
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
-            'chatTopic' => $_SESSION['chats'][$chatId]['topic'] ?? null
+            'chatTopic' => generateChatTopic($message)
         ];
 
+        error_log("Sending response: " . json_encode($response));
+        return $response;
+
     } catch (Exception $e) {
-        logMessage("Error in handleSendMessage: " . $e->getMessage());
+        error_log("Error in handleSendMessage: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
         return ['error' => $e->getMessage()];
     }
 }
 
-function processUploadedFile($file) {
+function processFileContent($content, $type) {
     try {
-        // If file is base64 encoded
-        if (isset($file['data'])) {
-            // Extract the base64 data
-            $base64_string = $file['data'];
-            // Remove data URL prefix if present
-            if (strpos($base64_string, ',') !== false) {
-                list(, $base64_string) = explode(',', $base64_string);
-            }
-            $fileData = base64_decode($base64_string);
-        } else {
-            return null;
-        }
-
-        // Process different file types
-        switch ($file['type']) {
-            case 'text/plain':
-                return $fileData;
-                
+        switch ($type) {
             case 'text/csv':
-                return processCsvContent($fileData);
-                
+                return processCsvContent($content);
             case 'application/json':
-                return processJsonContent($fileData);
-                
-            case 'application/pdf':
-                return processPdfContent($fileData);
-                
+                return processJsonContent($content);
+            case 'text/plain':
+                return $content;
             default:
-                throw new Exception("Unsupported file type: " . $file['type']);
+                return "File content of type $type";
         }
     } catch (Exception $e) {
-        logMessage("Error processing uploaded file: " . $e->getMessage());
-        throw $e;
+        error_log("Error processing file content: " . $e->getMessage());
+        return "Error processing file: " . $e->getMessage();
     }
 }
 
-function processCsvContent($fileData) {
-    $lines = explode("\n", $fileData);
+function processCsvContent($content) {
+    $lines = explode("\n", $content);
+    if (empty($lines)) {
+        return "Empty CSV file";
+    }
+    
     $headers = str_getcsv(array_shift($lines));
     $data = [];
     
@@ -411,32 +408,12 @@ function processCsvContent($fileData) {
     return json_encode($data, JSON_PRETTY_PRINT);
 }
 
-function processJsonContent($fileData) {
-    $data = json_decode($fileData, true);
+function processJsonContent($content) {
+    $data = json_decode($content, true);
     if (json_last_error() === JSON_ERROR_NONE) {
         return json_encode($data, JSON_PRETTY_PRINT);
     } else {
-        throw new Exception("Invalid JSON file");
-    }
-}
-
-function processPdfContent($fileData) {
-    // For now, return a message that PDF processing is not supported
-    return "PDF content processing is not currently supported.";
-}
-
-// Update the database schema
-$schemaUpdates = [
-    "ALTER TABLE votality_messages ADD COLUMN file_content LONGTEXT",
-    "ALTER TABLE votality_messages ADD COLUMN file_type VARCHAR(255)"
-];
-
-foreach ($schemaUpdates as $query) {
-    try {
-        $conn->query($query);
-    } catch (Exception $e) {
-        // Ignore errors if columns already exist
-        continue;
+        throw new Exception("Invalid JSON content");
     }
 }
 
