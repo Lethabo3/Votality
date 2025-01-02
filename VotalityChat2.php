@@ -254,15 +254,20 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $formattedTime = $dateTime->format('l, jS g:ia');
         }
 
-        // Process file if provided
+        // Enhanced file processing
         $fileContent = null;
         $fileType = null;
+        $fileName = null;
+        $fileSize = null;
+
         if ($file) {
             try {
                 error_log("Processing file...");
-                // Extract file data
+                // Extract file metadata
                 $fileData = $file['data'];
                 $fileType = $file['type'];
+                $fileName = $file['name'];
+                $fileSize = $file['size'];
                 
                 // Remove data URL prefix if present
                 if (preg_match('/^data:([^;]+);base64,/', $fileData, $matches)) {
@@ -277,19 +282,25 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                     throw new Exception("Failed to decode file data");
                 }
                 
-                error_log("File processed successfully. Type: " . $fileType);
+                error_log("File processed successfully. Type: " . $fileType . ", Name: " . $fileName);
             } catch (Exception $e) {
                 error_log("File processing error: " . $e->getMessage());
                 return ['error' => 'Failed to process file: ' . $e->getMessage()];
             }
         }
 
-        // Prepare AI prompt with file content if available
+        // Enhanced AI prompt with better file content handling
         $aiPrompt = "Current time: {$formattedTime}\nUser message: {$message}";
         if ($fileContent) {
+            $aiPrompt .= "\n\nFile Information:";
+            $aiPrompt .= "\nFilename: " . $fileName;
+            $aiPrompt .= "\nFile type: " . $fileType;
+            $aiPrompt .= "\nFile size: " . $fileSize . " bytes";
+            $aiPrompt .= "\n\nFile Content:\n";
+            
             // Process file content based on type
             $processedContent = processFileContent($fileContent, $fileType);
-            $aiPrompt .= "\n\nFile Content:\n" . $processedContent;
+            $aiPrompt .= $processedContent;
         }
        
         error_log("Sending to AI service. Prompt length: " . strlen($aiPrompt));
@@ -315,7 +326,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Store in database if user is logged in
+        // Enhanced database storage with file metadata
         if (isset($_SESSION['user_id']) && isset($_SESSION['session_id'])) {
             $userId = $_SESSION['user_id'];
             $sessionId = $_SESSION['session_id'];
@@ -325,19 +336,21 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $stmt->bind_param("ss", $chatId, $userId);
             $stmt->execute();
 
-            // Store user message with file
+            // Store user message with enhanced file data
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
-                (chat_id, user_id, session_id, sender, content, file_content, file_type) 
-                VALUES (?, ?, ?, 'user', ?, ?, ?)
+                (chat_id, user_id, session_id, sender, content, file_content, file_type, file_name, file_size) 
+                VALUES (?, ?, ?, 'user', ?, ?, ?, ?, ?)
             ");
-            $stmt->bind_param("ssssss", 
+            $stmt->bind_param("sssssssi", 
                 $chatId, 
                 $userId, 
                 $sessionId, 
                 $message,
                 $fileContent,
-                $fileType
+                $fileType,
+                $fileName,
+                $fileSize
             );
             $stmt->execute();
 
@@ -351,12 +364,17 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $stmt->execute();
         }
 
-        // Prepare response
+        // Enhanced response with file processing info
         $response = [
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
-            'chatTopic' => generateChatTopic($message)
+            'chatTopic' => generateChatTopic($message),
+            'fileProcessed' => $fileContent ? [
+                'name' => $fileName,
+                'type' => $fileType,
+                'size' => $fileSize
+            ] : null
         ];
 
         error_log("Sending response: " . json_encode($response));
@@ -371,6 +389,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
 
 function processFileContent($content, $type) {
     try {
+        // Handle different file types appropriately
         switch ($type) {
             case 'text/csv':
                 return processCsvContent($content);
@@ -378,6 +397,10 @@ function processFileContent($content, $type) {
                 return processJsonContent($content);
             case 'text/plain':
                 return $content;
+            case 'image/png':
+            case 'image/jpeg':
+            case 'image/gif':
+                return "[Image data available for analysis]";
             default:
                 return "File content of type $type";
         }

@@ -1032,7 +1032,7 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
     // Update the sendMessage function in your JavaScript
     async function sendMessage(message, file = null) {
     try {
-        // Validate file before proceeding
+        // Enhanced file validation
         if (file) {
             // Check file size (e.g., 10MB limit)
             const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
@@ -1040,22 +1040,31 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
                 throw new Error('File size exceeds 10MB limit');
             }
 
-            // Check allowed file types
+            // Enhanced allowed file types
             const ALLOWED_TYPES = [
                 'text/plain',
                 'text/csv',
                 'application/json',
                 'application/pdf',
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
-                'application/vnd.ms-excel' // xls
+                'application/vnd.ms-excel', // xls
+                'image/png',
+                'image/jpeg',
+                'image/gif'
             ];
             
             if (!ALLOWED_TYPES.includes(file.type)) {
-                throw new Error('Unsupported file type. Please upload CSV, TXT, JSON, PDF, or Excel files.');
+                throw new Error('Unsupported file type. Please upload CSV, TXT, JSON, PDF, Excel files, or images.');
             }
+
+            console.log('Processing file:', {
+                name: file.name,
+                type: file.type,
+                size: file.size
+            });
         }
 
-        // Do the UI transitions first
+        // UI transitions
         initialContent.classList.add('fade-out');
         suggestedQueries.classList.add('fade-out');
         footerLinks.classList.add('fade-out');
@@ -1071,7 +1080,7 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
         chatContainer.style.display = 'block';
         chatContainer.classList.add('fade-in');
 
-        // Handle responsive UI elements
+        // Handle responsive UI
         if (window.innerWidth > 640) {
             disclaimer.style.display = 'block';
             setTimeout(() => disclaimer.classList.add('fade-in'), 50);
@@ -1084,7 +1093,7 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
             document.body.classList.add('chat-active');
         }
 
-        // Add user message to UI
+        // Add user message to UI with file
         const userMessageElement = await addMessage(message, 'user', null, file);
         textarea.value = '';
         showAIThinking();
@@ -1093,18 +1102,29 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
             userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // Prepare file data if present
+        // Enhanced file data preparation
         let fileData = null;
         if (file) {
-            fileData = {
-                data: await readFileAsDataURL(file),
-                type: file.type,
-                name: file.name,
-                size: file.size
-            };
+            try {
+                const base64Data = await readFileAsDataURL(file);
+                fileData = {
+                    data: base64Data,
+                    type: file.type,
+                    name: file.name,
+                    size: file.size
+                };
+                console.log('File prepared for sending:', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+            } catch (error) {
+                console.error('Error preparing file:', error);
+                throw new Error('Failed to prepare file for upload');
+            }
         }
 
-        // Send request to server
+        // Enhanced server request
         const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
         const response = await fetch('VotalityChat2.php', {
             method: 'POST',
@@ -1120,6 +1140,13 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
             }),
             credentials: 'same-origin'
         });
+
+        // Enhanced response handling
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server error:', errorText);
+            throw new Error(`Server error: ${response.status}`);
+        }
 
         const data = await response.json();
 
@@ -1139,7 +1166,7 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
             }
         }
 
-        // Update UI with response
+        // Update UI
         if (data.chatTopic) {
             updateChatTopicDisplay(data.chatTopic);
         }
@@ -1158,8 +1185,6 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
         console.error('Error in sendMessage:', error);
         hideAIThinking();
         await addMessage(`Error: ${error.message}`, 'ai');
-        
-        // Show user-friendly error notification
         showErrorNotification(error.message);
     }
 }
@@ -2122,13 +2147,13 @@ function showErrorNotification(message) {
     }
 
     async function readFileAsDataURL(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
 
     // Event listener for attachment button
     attachmentButton.addEventListener('click', handleAttachment);
@@ -2916,6 +2941,29 @@ function addMessage(text, sender, relatedTopics = [], file = null) {
     document.querySelector('[data-feedback]').addEventListener('click', () => {
     window.location.href = 'feedback.html';
 });
+
+async function handleFileSelection(file) {
+    // First, validate the file
+    if (!file) {
+        console.error('No file selected');
+        return;
+    }
+
+    // Read the file as an ArrayBuffer first
+    const arrayBuffer = await file.arrayBuffer();
+    // Convert to Base64
+    const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    
+    // Create the complete data URL
+    const fileData = {
+        data: `data:${file.type};base64,${base64String}`,
+        type: file.type,
+        name: file.name,
+        size: file.size
+    };
+
+    return fileData;
+}
 
     </script>
     <div class="feedback-overlay" id="feedback-overlay">
