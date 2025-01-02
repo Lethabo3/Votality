@@ -248,10 +248,20 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $formattedTime = $dateTime->format('l, jS g:ia');
         }
 
-        // Generate AI response
-        $aiPrompt = "Current time: {$formattedTime}. User message: {$message}";
+        // Process file if provided
+        $fileContent = null;
+        $fileType = null;
         if ($file) {
-            $aiPrompt .= " [File attached: " . $file['type'] . "]";
+            $fileType = $file['type'];
+            $fileContent = processUploadedFile($file);
+        }
+
+        // Generate AI response
+        $aiPrompt = "Current time: {$formattedTime}\n";
+        $aiPrompt .= "User message: {$message}\n";
+        
+        if ($fileContent) {
+            $aiPrompt .= "\nFile Content:\n{$fileContent}";
         }
        
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
@@ -286,18 +296,26 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $stmt->bind_param("si", $chatId, $userId);
             $stmt->execute();
 
-            // Store user message
-            $stmt = $conn->prepare("INSERT INTO votality_messages (chat_id, user_id, session_id, sender, content) VALUES (?, ?, ?, 'user', ?)");
-            $stmt->bind_param("siss", $chatId, $userId, $sessionId, $message);
+            // Store user message with file if present
+            $stmt = $conn->prepare("
+                INSERT INTO votality_messages 
+                (chat_id, user_id, session_id, sender, content, file_content, file_type) 
+                VALUES (?, ?, ?, 'user', ?, ?, ?)
+            ");
+            $stmt->bind_param("sisss", $chatId, $userId, $sessionId, $message, $fileContent, $fileType);
             $stmt->execute();
 
             // Store AI response
-            $stmt = $conn->prepare("INSERT INTO votality_messages (chat_id, user_id, session_id, sender, content) VALUES (?, ?, ?, 'ai', ?)");
+            $stmt = $conn->prepare("
+                INSERT INTO votality_messages 
+                (chat_id, user_id, session_id, sender, content) 
+                VALUES (?, ?, ?, 'ai', ?)
+            ");
             $stmt->bind_param("siss", $chatId, $userId, $sessionId, $aiResponse);
             $stmt->execute();
         }
 
-        // Store in session for current conversation (keeping existing session storage)
+        // Store in session for current conversation
         if (!isset($_SESSION['chats'][$chatId])) {
             $_SESSION['chats'][$chatId] = [
                 'messages' => [],
@@ -308,6 +326,8 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         $_SESSION['chats'][$chatId]['messages'][] = [
             'sender' => 'user',
             'content' => $message,
+            'file_content' => $fileContent,
+            'file_type' => $fileType,
             'timestamp' => time()
         ];
 
@@ -333,6 +353,90 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     } catch (Exception $e) {
         logMessage("Error in handleSendMessage: " . $e->getMessage());
         return ['error' => $e->getMessage()];
+    }
+}
+
+function processUploadedFile($file) {
+    try {
+        // If file is base64 encoded
+        if (isset($file['data'])) {
+            // Extract the base64 data
+            $base64_string = $file['data'];
+            // Remove data URL prefix if present
+            if (strpos($base64_string, ',') !== false) {
+                list(, $base64_string) = explode(',', $base64_string);
+            }
+            $fileData = base64_decode($base64_string);
+        } else {
+            return null;
+        }
+
+        // Process different file types
+        switch ($file['type']) {
+            case 'text/plain':
+                return $fileData;
+                
+            case 'text/csv':
+                return processCsvContent($fileData);
+                
+            case 'application/json':
+                return processJsonContent($fileData);
+                
+            case 'application/pdf':
+                return processPdfContent($fileData);
+                
+            default:
+                throw new Exception("Unsupported file type: " . $file['type']);
+        }
+    } catch (Exception $e) {
+        logMessage("Error processing uploaded file: " . $e->getMessage());
+        throw $e;
+    }
+}
+
+function processCsvContent($fileData) {
+    $lines = explode("\n", $fileData);
+    $headers = str_getcsv(array_shift($lines));
+    $data = [];
+    
+    foreach ($lines as $line) {
+        if (trim($line)) {
+            $row = str_getcsv($line);
+            if (count($row) === count($headers)) {
+                $data[] = array_combine($headers, $row);
+            }
+        }
+    }
+    
+    return json_encode($data, JSON_PRETTY_PRINT);
+}
+
+function processJsonContent($fileData) {
+    $data = json_decode($fileData, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        return json_encode($data, JSON_PRETTY_PRINT);
+    } else {
+        throw new Exception("Invalid JSON file");
+    }
+}
+
+function processPdfContent($fileData) {
+    // For now, return a message that PDF processing is not supported
+    return "PDF content processing is not currently supported.";
+}
+
+// Update the database schema
+$schemaUpdates = [
+    "ALTER TABLE votality_messages ADD COLUMN file_content LONGTEXT",
+    "ALTER TABLE votality_messages ADD COLUMN file_type VARCHAR(255)"
+];
+
+foreach ($schemaUpdates as $query) {
+    try {
+        $conn->query($query);
+    } catch (Exception $e) {
+        // Ignore errors if columns already exist
+        continue;
     }
 }
 

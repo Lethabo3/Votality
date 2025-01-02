@@ -2619,3 +2619,23 @@ margin-top: 0.5rem;
         margin: 1rem;
     }
 }
+
+.error-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ef4444;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.error-notification.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
