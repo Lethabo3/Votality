@@ -22,6 +22,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+// Custom error handler
+function votalityErrorHandler($errno, $errstr, $errfile, $errline) {
+    $message = date('[Y-m-d H:i:s] ') . "Error ($errno): $errstr in $errfile on line $errline\n";
+    error_log($message, 3, '/path/to/votality-error.log');
+    
+    // Don't execute PHP's internal error handler
+    return true;
+}
+
+// Set the custom error handler
+set_error_handler("votalityErrorHandler");
+
+// Custom exception handler
+function votalityExceptionHandler($exception) {
+    $message = date('[Y-m-d H:i:s] ') . 
+        "Uncaught Exception: " . $exception->getMessage() . "\n" .
+        "Stack trace: " . $exception->getTraceAsString() . "\n";
+    error_log($message, 3, '/path/to/votality-error.log');
+}
+
+// Set the custom exception handler
+set_exception_handler("votalityExceptionHandler");
+
 function debug_log($message) {
     error_log(date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n", 3, '/path/to/votality-debug.log');
 }
@@ -228,33 +251,27 @@ function getWorldTime($timezone) {
 
 function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     global $conn;
-   
+    
     try {
-        // Enable error reporting for debugging
         error_log("Starting handleSendMessage");
         error_log("Message: " . $message);
         error_log("File data received: " . ($file ? json_encode($file) : 'No file'));
 
         // Input validation
         if (empty($message) && empty($file)) {
-            return ['error' => 'No message or file provided'];
+            throw new Exception('No message or file provided');
         }
 
-        // Initialize chat if it doesn't exist
+        // Initialize chat if needed
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
         }
 
-        $aiService = new VotalityAIService();
-       
-        // Format time
-        $formattedTime = getWorldTime($timezone);
-        if (!$formattedTime) {
-            $dateTime = new DateTime('now', new DateTimeZone($timezone));
-            $formattedTime = $dateTime->format('l, jS g:ia');
-        }
+        // Get user info
+        $userId = $_SESSION['user_id'] ?? null;
+        $sessionId = $_SESSION['session_id'] ?? null;
 
-        // Enhanced file processing
+        // Process file if present
         $fileContent = null;
         $fileType = null;
         $fileName = null;
@@ -263,34 +280,43 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         if ($file) {
             try {
                 error_log("Processing file...");
+                
                 // Extract file metadata
                 $fileData = $file['data'];
                 $fileType = $file['type'];
                 $fileName = $file['name'];
                 $fileSize = $file['size'];
-                
-                // Remove data URL prefix if present
+
+                // Validate file size
+                $maxSize = 10 * 1024 * 1024; // 10MB
+                if ($fileSize > $maxSize) {
+                    throw new Exception("File size exceeds limit of 10MB");
+                }
+
+                // Process base64 data
                 if (preg_match('/^data:([^;]+);base64,/', $fileData, $matches)) {
                     $fileType = $matches[1];
                     $fileData = substr($fileData, strpos($fileData, ',') + 1);
                 }
-                
-                // Decode base64 data
+
                 $fileContent = base64_decode($fileData);
-                
                 if ($fileContent === false) {
                     throw new Exception("Failed to decode file data");
                 }
-                
-                error_log("File processed successfully. Type: " . $fileType . ", Name: " . $fileName);
+
+                error_log("File processed successfully. Type: $fileType, Name: $fileName");
             } catch (Exception $e) {
                 error_log("File processing error: " . $e->getMessage());
-                return ['error' => 'Failed to process file: ' . $e->getMessage()];
+                throw new Exception("File processing failed: " . $e->getMessage());
             }
         }
 
-        // Enhanced AI prompt with better file content handling
-        $aiPrompt = "Current time: {$formattedTime}\nUser message: {$message}";
+        // Create AI Service instance
+        $aiService = new VotalityAIService();
+
+        // Prepare AI prompt
+        $aiPrompt = "Current time: " . getWorldTime($timezone) . "\nUser message: $message";
+        
         if ($fileContent) {
             $aiPrompt .= "\n\nFile Information:";
             $aiPrompt .= "\nFilename: " . $fileName;
@@ -302,11 +328,12 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $processedContent = processFileContent($fileContent, $fileType);
             $aiPrompt .= $processedContent;
         }
-       
+
+        // Get AI response
         error_log("Sending to AI service. Prompt length: " . strlen($aiPrompt));
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
-        // Process the response
+        // Process AI response
         $parts = explode("\nRelated Topics:", $fullResponse, 2);
         $aiResponse = trim($parts[0]);
         $relatedTopics = [];
@@ -314,7 +341,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         if (isset($parts[1])) {
             $topicsText = trim($parts[1]);
             $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
-           
+            
             foreach ($topicsLines as $line) {
                 $line = trim($line);
                 if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
@@ -326,22 +353,28 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Enhanced database storage with file metadata
-        if (isset($_SESSION['user_id']) && isset($_SESSION['session_id'])) {
-            $userId = $_SESSION['user_id'];
-            $sessionId = $_SESSION['session_id'];
-
+        // Store in database
+        if ($userId && $sessionId) {
             // Ensure chat exists
             $stmt = $conn->prepare("INSERT IGNORE INTO votality_chats (chat_id, user_id) VALUES (?, ?)");
+            if (!$stmt) {
+                throw new Exception("Failed to prepare chat insert: " . $conn->error);
+            }
             $stmt->bind_param("ss", $chatId, $userId);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to create chat: " . $stmt->error);
+            }
 
-            // Store user message with enhanced file data
+            // Store user message
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
                 (chat_id, user_id, session_id, sender, content, file_content, file_type, file_name, file_size) 
                 VALUES (?, ?, ?, 'user', ?, ?, ?, ?, ?)
             ");
+            if (!$stmt) {
+                throw new Exception("Failed to prepare message insert: " . $conn->error);
+            }
+            
             $stmt->bind_param("sssssssi", 
                 $chatId, 
                 $userId, 
@@ -352,7 +385,10 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 $fileName,
                 $fileSize
             );
-            $stmt->execute();
+            
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to store user message: " . $stmt->error);
+            }
 
             // Store AI response
             $stmt = $conn->prepare("
@@ -360,11 +396,17 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 (chat_id, user_id, session_id, sender, content) 
                 VALUES (?, ?, ?, 'ai', ?)
             ");
+            if (!$stmt) {
+                throw new Exception("Failed to prepare AI response insert: " . $conn->error);
+            }
+            
             $stmt->bind_param("ssss", $chatId, $userId, $sessionId, $aiResponse);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to store AI response: " . $stmt->error);
+            }
         }
 
-        // Enhanced response with file processing info
+        // Prepare response
         $response = [
             'response' => $aiResponse,
             'chatId' => $chatId,

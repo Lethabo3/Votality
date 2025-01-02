@@ -1032,38 +1032,6 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
     // Update the sendMessage function in your JavaScript
     async function sendMessage(message, file = null) {
     try {
-        // Enhanced file validation
-        if (file) {
-            // Check file size (e.g., 10MB limit)
-            const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
-            if (file.size > MAX_FILE_SIZE) {
-                throw new Error('File size exceeds 10MB limit');
-            }
-
-            // Enhanced allowed file types
-            const ALLOWED_TYPES = [
-                'text/plain',
-                'text/csv',
-                'application/json',
-                'application/pdf',
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
-                'application/vnd.ms-excel', // xls
-                'image/png',
-                'image/jpeg',
-                'image/gif'
-            ];
-            
-            if (!ALLOWED_TYPES.includes(file.type)) {
-                throw new Error('Unsupported file type. Please upload CSV, TXT, JSON, PDF, Excel files, or images.');
-            }
-
-            console.log('Processing file:', {
-                name: file.name,
-                type: file.type,
-                size: file.size
-            });
-        }
-
         // UI transitions
         initialContent.classList.add('fade-out');
         suggestedQueries.classList.add('fade-out');
@@ -1084,7 +1052,6 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
         if (window.innerWidth > 640) {
             disclaimer.style.display = 'block';
             setTimeout(() => disclaimer.classList.add('fade-in'), 50);
-            
             desktopTopNav.style.display = 'flex';
             setTimeout(() => desktopTopNav.classList.add('fade-in'), 50);
         } else {
@@ -1093,27 +1060,19 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
             document.body.classList.add('chat-active');
         }
 
-        // Add user message to UI with file
-        const userMessageElement = await addMessage(message, 'user', null, file);
-        textarea.value = '';
-        showAIThinking();
-
-        if (userMessageElement) {
-            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // Enhanced file data preparation
+        // Process file if present
         let fileData = null;
         if (file) {
             try {
-                const base64Data = await readFileAsDataURL(file);
+                const arrayBuffer = await file.arrayBuffer();
+                const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
                 fileData = {
-                    data: base64Data,
+                    data: `data:${file.type};base64,${base64String}`,
                     type: file.type,
                     name: file.name,
                     size: file.size
                 };
-                console.log('File prepared for sending:', {
+                console.log('File prepared:', {
                     name: file.name,
                     type: file.type,
                     size: file.size
@@ -1124,7 +1083,16 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
             }
         }
 
-        // Enhanced server request
+        // Add user message to UI
+        const userMessageElement = await addMessage(message, 'user', null, file);
+        textarea.value = '';
+        showAIThinking();
+
+        if (userMessageElement) {
+            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Send to backend
         const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
         const response = await fetch('VotalityChat2.php', {
             method: 'POST',
@@ -1141,7 +1109,6 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
             credentials: 'same-origin'
         });
 
-        // Enhanced response handling
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Server error:', errorText);
@@ -1159,22 +1126,18 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
                 return;
             }
 
-            if (data.error === 'auth_required' && stayLoggedOut) {
-                // Ignore auth error if user chose to stay logged out
-            } else {
-                throw new Error(data.error);
-            }
+            throw new Error(data.error);
         }
 
-        // Update UI
+        // Update UI with response
+        hideAIThinking();
+        await addMessage(data.response, 'ai', data.relatedTopics);
+        
         if (data.chatTopic) {
             updateChatTopicDisplay(data.chatTopic);
         }
 
-        hideAIThinking();
-        await addMessage(data.response, 'ai', data.relatedTopics);
-        
-        if (!currentChatId) {
+        if (!currentChatId && data.chatId) {
             currentChatId = data.chatId;
         }
 
@@ -1185,7 +1148,6 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
         console.error('Error in sendMessage:', error);
         hideAIThinking();
         await addMessage(`Error: ${error.message}`, 'ai');
-        showErrorNotification(error.message);
     }
 }
 
