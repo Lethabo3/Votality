@@ -2851,6 +2851,16 @@ function displayInstrumentNews(stories) {
         newsContainer.appendChild(newsItem);
     });
 }
+
+document.addEventListener('click', function(event) {
+    const container = document.getElementById('attached-files-container');
+    const fileInput = document.getElementById('file-input');
+
+    // Check if the click was outside the container and the file input
+    if (!container.contains(event.target) && !fileInput.contains(event.target)) {
+        container.style.display = 'none'; // Hide the container
+    }
+});
 </script>
 </body>
 </html>
