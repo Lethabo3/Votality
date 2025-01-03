@@ -46,8 +46,11 @@ function votalityExceptionHandler($exception) {
 set_exception_handler("votalityExceptionHandler");
 
 function debug_log($message) {
-    error_log(date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n", 3, '/path/to/votality-debug.log');
+    $formatted_message = date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n";
+    error_log($formatted_message, 3, '/path/to/votality-debug.log');
 }
+
+debug_log("Processing file with name: " . $fileName);
 
 function checkSession() {
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
