@@ -1721,79 +1721,92 @@ if (window.innerWidth <= 640) {
 window.addEventListener('resize', toggleMobileNav);
 
 function updateChatListUI(chats) {
-if (!chatList) return;
-
-chatList.innerHTML = ''; // Clear existing chats
-
-if (!chats || chats.length === 0) {
-    chatList.innerHTML = `
-        <div class="chat-item no-chats">
-            <span class="chat-name">No recent chats</span>
-        </div>
-    `;
-    return;
-}
-
-chats.forEach(chat => {
-    const chatItem = document.createElement('div');
-    chatItem.className = 'chat-item';
-    if (chat.chat_id === currentChatId) {
-        chatItem.classList.add('active');
+    const chatList = document.querySelector('.chat-list');
+    console.log('Chat list element:', chatList);  // Debug log
+    console.log('Received chats:', chats);        // Debug log
+    
+    if (!chatList) {
+        console.error('Chat list container not found');
+        return;
     }
     
-    chatItem.innerHTML = `
-        <span class="chat-name">${chat.topic || 'New Chat'}</span>
-    `;
+    chatList.innerHTML = '';
     
-    chatItem.addEventListener('click', () => {
-        document.querySelectorAll('.chat-item').forEach(item => {
-            item.classList.remove('active');
+    if (!chats || chats.length === 0) {
+        console.log('No chats available to display');
+        chatList.innerHTML = `
+            <div class="chat-item no-chats">
+                <span class="chat-name">No recent chats</span>
+            </div>
+        `;
+        return;
+    }
+    
+    chats.forEach(chat => {
+        console.log('Processing chat:', chat);  // Debug log
+        
+        const chatItem = document.createElement('div');
+        chatItem.className = 'chat-item';
+        if (chat.chat_id === currentChatId) {
+            chatItem.classList.add('active');
+        }
+        
+        chatItem.innerHTML = `
+            <span class="chat-name">${chat.topic || 'New Chat'}</span>
+        `;
+        
+        chatItem.addEventListener('click', () => {
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            chatItem.classList.add('active');
+            currentChatId = chat.chat_id;
+            loadChat(chat.chat_id);
         });
-        chatItem.classList.add('active');
-        currentChatId = chat.chat_id;
-        loadChat(chat.chat_id);
+        
+        chatList.appendChild(chatItem);
     });
-    
-    chatList.appendChild(chatItem);
-});
 }
-
 
 async function loadRecentChats() {
     try {
-        console.log('Loading recent chats...');
         const response = await fetch('VotalityChat2.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'getRecentChats'
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getRecentChats' }),
             credentials: 'same-origin'
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const data = await response.json();
-        console.log('Recent chats data received:', data);
-
-        if (data.error) {
-            console.error('Error fetching chats:', data.error);
-            return;
-        }
-
-        // Replace updateRecentChatsUI with updateChatListUI
-        updateChatListUI(data.chats);
+        const chatList = document.querySelector('.chat-list');
         
+        if (!chatList) return;
+        chatList.innerHTML = '';
+
+        // Directly process the chats
+        if (data.chats && data.chats.length > 0) {
+            data.chats.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.innerHTML = `
+                    <span class="chat-name">${chat.topic}</span>
+                `;
+                chatList.appendChild(chatItem);
+            });
+        } else {
+            chatList.innerHTML = `
+                <div class="chat-item no-chats">
+                    <span class="chat-name">No recent chats</span>
+                </div>
+            `;
+        }
     } catch (error) {
-        console.error('Error loading recent chats:', error);
-        updateChatListUI([]); // This will show "No recent chats" message
+        console.error('Failed to load recent chats:', error);
     }
 }
 
+// Make sure this runs when the page loads
+document.addEventListener('DOMContentLoaded', loadRecentChats);
 // Make sure this gets called when the page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, fetching recent chats');
