@@ -494,18 +494,11 @@ function getSharedContent($id) {
 }
 
 function getRecentChats() {
-    debug_log("getRecentChats called. Session data: " . print_r($_SESSION, true));
     $userId = $_SESSION['user_id'] ?? null;
-    debug_log("User ID from session: " . ($userId ?? 'null'));
-
     if ($userId) {
-        $result = getRecentChatsFromDatabase($userId);
-    } else {
-        $result = getRecentChatsFromSession();
+        return getRecentChatsFromDatabase($userId);
     }
-
-    debug_log("getRecentChats result: " . print_r($result, true));
-    return $result;
+    return ['chats' => []];
 }
 
 function getRecentChatsFromDatabase($userId) {
