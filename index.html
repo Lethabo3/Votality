@@ -1758,46 +1758,47 @@ chats.forEach(chat => {
 }
 
 async function loadRecentChats() {
-try {
-    console.log('Loading recent chats...');
-    const response = await fetch('VotalityChat2.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'getRecentChats'
-        }),
-        credentials: 'same-origin' // Add this to ensure cookies/session are sent
-    });
+    try {
+        console.log('Loading recent chats...');
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'getRecentChats'
+            }),
+            credentials: 'same-origin'
+        });
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    const data = await response.json();
-    console.log('Recent chats data:', data);
+        const data = await response.json();
+        // Add these two lines here
+        console.log('Raw data from backend:', data);
+        console.log('Chats array:', data.chats);
+        // End of new lines
 
-    if (data.error) {
-        console.error('Error fetching chats:', data.error);
-        return;
-    }
+        if (data.error) {
+            console.error('Error fetching chats:', data.error);
+            return;
+        }
 
-    updateRecentChatsUI(data.chats);
-} catch (error) {
-    console.error('Error loading recent chats:', error);
-    // Show "No recent chats" in the UI
-    const chatList = document.querySelector('.chat-list');
-    if (chatList) {
-        chatList.innerHTML = `
-            <div class="chat-item no-chats">
-                <span class="chat-name">No recent chats</span>
-            </div>
-        `;
+        updateRecentChatsUI(data.chats);
+    } catch (error) {
+        console.error('Error loading recent chats:', error);
+        const chatList = document.querySelector('.chat-list');
+        if (chatList) {
+            chatList.innerHTML = `
+                <div class="chat-item no-chats">
+                    <span class="chat-name">No recent chats</span>
+                </div>
+            `;
+        }
     }
 }
-}
-
 function updateRecentChatsUI(chats) {
 console.log('Updating recent chats UI with:', chats);
 

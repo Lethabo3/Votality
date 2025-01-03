@@ -511,8 +511,9 @@ function getRecentChats() {
 function getRecentChatsFromDatabase($userId) {
     global $conn;
     try {
-        debug_log("Fetching recent chats for user: " . $userId);
-        
+        error_log("Starting getRecentChatsFromDatabase for userId: " . $userId);
+ 
+        // Get recent chats with their latest messages
         $stmt = $conn->prepare("
             SELECT
                 c.chat_id,
@@ -523,19 +524,21 @@ function getRecentChatsFromDatabase($userId) {
                  WHERE m.chat_id = c.chat_id
                  ORDER BY m.timestamp DESC
                  LIMIT 1) as latest_message
-            FROM votality_chats c
+            FROM votality_chats c 
             WHERE c.user_id = ?
             ORDER BY c.created_at DESC
             LIMIT 6
         ");
-        
+ 
         if (!$stmt) {
+            error_log("Prepare failed: " . $conn->error);
             throw new Exception("Prepare failed: " . $conn->error);
         }
         
         $stmt->bind_param("i", $userId);
         
         if (!$stmt->execute()) {
+            error_log("Execute failed: " . $stmt->error);
             throw new Exception("Execute failed: " . $stmt->error);
         }
         
@@ -543,7 +546,7 @@ function getRecentChatsFromDatabase($userId) {
         $chats = [];
         
         while ($row = $result->fetch_assoc()) {
-            debug_log("Processing chat: " . json_encode($row));
+            error_log("Found chat: " . $row['chat_id'] . " with topic: " . ($row['topic'] ?? 'No topic'));
             
             $chats[] = [
                 'chat_id' => $row['chat_id'],
@@ -553,14 +556,16 @@ function getRecentChatsFromDatabase($userId) {
             ];
         }
         
-        debug_log("Retrieved chats: " . json_encode($chats));
+        error_log("Total chats found: " . count($chats));
+        error_log("Final chats array: " . json_encode($chats));
+        
         return ['chats' => $chats];
         
     } catch (Exception $e) {
-        debug_log("Database error in getRecentChatsFromDatabase: " . $e->getMessage());
+        error_log("Error in getRecentChatsFromDatabase: " . $e->getMessage());
         return ['error' => 'Database error', 'chats' => []];
     }
-}
+ }
 
 function getRecentChatsFromSession() {
     $chats = [];
