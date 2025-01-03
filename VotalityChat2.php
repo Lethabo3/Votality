@@ -243,6 +243,11 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         // Initialize chat if it doesn't exist
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
+            // Create new chat entry
+            $stmt = $conn->prepare("INSERT INTO votality_chats (chat_id, user_id, created_at) VALUES (?, ?, NOW())");
+            $userId = $_SESSION['user_id'] ?? null;
+            $stmt->bind_param("ss", $chatId, $userId);
+            $stmt->execute();
         }
 
         $aiService = new VotalityAIService();
@@ -289,7 +294,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Enhanced AI prompt with better file content handling
+        // Enhanced AI prompt
         $aiPrompt = "Current time: {$formattedTime}\nUser message: {$message}";
         if ($fileContent) {
             $aiPrompt .= "\n\nFile Information:";
@@ -326,17 +331,19 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Enhanced database storage with file metadata
+        // Generate and save chat topic
+        $chatTopic = generateChatTopic($message);
+        $topicUpdated = updateChatTopicInDatabase($chatId, $chatTopic);
+        if (!$topicUpdated) {
+            logMessage("Warning: Failed to update chat topic in database");
+        }
+
+        // Store messages in database
         if (isset($_SESSION['user_id']) && isset($_SESSION['session_id'])) {
             $userId = $_SESSION['user_id'];
             $sessionId = $_SESSION['session_id'];
 
-            // Ensure chat exists
-            $stmt = $conn->prepare("INSERT IGNORE INTO votality_chats (chat_id, user_id) VALUES (?, ?)");
-            $stmt->bind_param("ss", $chatId, $userId);
-            $stmt->execute();
-
-            // Store user message with enhanced file data
+            // Store user message
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
                 (chat_id, user_id, session_id, sender, content, file_content, file_type, file_name, file_size) 
@@ -364,12 +371,12 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $stmt->execute();
         }
 
-        // Enhanced response with file processing info
+        // Prepare response
         $response = [
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
-            'chatTopic' => generateChatTopic($message),
+            'chatTopic' => $chatTopic,
             'fileProcessed' => $fileContent ? [
                 'name' => $fileName,
                 'type' => $fileType,
@@ -529,27 +536,47 @@ function generateChatTopic($message) {
     return $topic;
 }
 
-// Updated function to save chat topic in database
 function updateChatTopicInDatabase($chatId, $topic) {
     global $conn;
     try {
+        // First verify the chat exists
+        $checkStmt = $conn->prepare("SELECT 1 FROM votality_chats WHERE chat_id = ?");
+        $checkStmt->bind_param("s", $chatId);
+        $checkStmt->execute();
+        $result = $checkStmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            logMessage("Error: Attempting to update topic for non-existent chat: " . $chatId);
+            return false;
+        }
+        
+        // Update the topic
         $stmt = $conn->prepare("
-            INSERT INTO votality_chats (chat_id, topic, updated_at)
-            VALUES (?, ?, NOW())
-            ON DUPLICATE KEY UPDATE 
-                topic = VALUES(topic),
-                updated_at = NOW()
+            UPDATE votality_chats 
+            SET topic = ?, 
+                updated_at = NOW() 
+            WHERE chat_id = ?
         ");
         
-        $stmt->bind_param("ss", $chatId, $topic);
-        $stmt->execute();
+        $stmt->bind_param("ss", $topic, $chatId);
+        $success = $stmt->execute();
         
-        if ($stmt->error) {
-            logMessage("Error updating chat topic: " . $stmt->error);
+        if (!$success) {
+            logMessage("Database error updating chat topic: " . $stmt->error);
+            return false;
         }
+        
+        if ($stmt->affected_rows === 0) {
+            logMessage("Warning: No rows updated when setting topic for chat: " . $chatId);
+            return false;
+        }
+        
+        logMessage("Successfully updated topic for chat $chatId: $topic");
+        return true;
         
     } catch (Exception $e) {
         logMessage("Error updating chat topic in database: " . $e->getMessage());
+        return false;
     }
 }
 
