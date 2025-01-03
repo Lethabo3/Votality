@@ -517,23 +517,21 @@ function checkChatBelongsToUser($userId, $chatId) {
     return $result->num_rows > 0;
 }
 
-function createNewChatInDatabase($userId, $chatId, $initialSummary) {
+function createNewChatInDatabase($userId, $chatId) {
     global $conn;
     try {
-        $stmt = $conn->prepare("
-            INSERT INTO votality_chats 
-            (chat_id, user_id, summary, topic, created_at, updated_at) 
-            VALUES (?, ?, ?, NULL, NOW(), NOW())
-        ");
-        $stmt->bind_param("sss", $chatId, $userId, $initialSummary);
-        
+        $stmt = $conn->prepare("INSERT INTO votality_chats (chat_id, user_id, created_at, updated_at) VALUES (?, ?, NOW(), NOW())");
+        if (!$stmt) {
+            throw new Exception("Failed to prepare chat insert: " . $conn->error);
+        }
+        $stmt->bind_param("ss", $chatId, $userId);
         if (!$stmt->execute()) {
-            throw new Exception("Failed to create new chat: " . $stmt->error);
+            throw new Exception("Failed to create chat: " . $stmt->error);
         }
         
-        return ['chatId' => $chatId, 'summary' => $initialSummary];
+        return ['chatId' => $chatId];
     } catch (Exception $e) {
-        error_log("Error creating chat: " . $e->getMessage());
+        debug_log("Error creating chat: " . $e->getMessage());
         return ['error' => $e->getMessage()];
     }
 }
