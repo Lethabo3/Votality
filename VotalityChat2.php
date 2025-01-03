@@ -677,13 +677,8 @@ function getRecentChatsFromDatabase($userId) {
         $query = "
             SELECT 
                 c.chat_id,
-                c.created_at,
-                (SELECT m.content 
-                 FROM votality_messages m 
-                 WHERE m.chat_id = c.chat_id 
-                 AND m.sender = 'user'
-                 ORDER BY m.timestamp ASC 
-                 LIMIT 1) as first_message
+                c.topic,
+                c.created_at
             FROM votality_chats c
             WHERE c.user_id = ?
             ORDER BY c.created_at DESC
@@ -709,13 +704,9 @@ function getRecentChatsFromDatabase($userId) {
         $chats = [];
         
         while ($row = $result->fetch_assoc()) {
-            // Generate a topic from the first user message
-            $firstMessage = $row['first_message'] ?? '';
-            $topic = generateTopicFromMessage($firstMessage);
-            
             $chats[] = [
                 'chat_id' => $row['chat_id'],
-                'topic' => $topic,
+                'topic' => $row['topic'] ?? 'New Chat', // Use the stored topic or default to 'New Chat'
                 'created_at' => $row['created_at']
             ];
         }
