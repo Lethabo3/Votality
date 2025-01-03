@@ -605,77 +605,10 @@ setTimeout(async () => {
 }
 });
 
-// Add the new "New Chat" button code right after your existing code
+// Add this event listener to your new chat button
 document.querySelector('.sidebar-button-container').addEventListener('click', function() {
-// First, let's remove the white background
-document.body.classList.remove('white-background');
-
-// Remove the chat-active class for mobile
-document.body.classList.remove('chat-active');
-
-// Reset the textarea container positioning
-const textareaContainer = document.querySelector('.textarea-container');
-textareaContainer.classList.remove('repositioned');
-
-// Clear the textarea value
-const textarea = document.querySelector('textarea');
-textarea.value = '';
-
-// Hide the chat container with fade out
-const chatContainer = document.querySelector('.chat-container');
-chatContainer.classList.remove('fade-in');
-chatContainer.classList.add('fade-out');
-
-// Hide the disclaimer with fade out
-const disclaimer = document.querySelector('.disclaimer');
-if (disclaimer) {
-disclaimer.classList.remove('fade-in');
-disclaimer.classList.add('fade-out');
-}
-
-// Handle desktop top nav
-const desktopTopNav = document.querySelector('.desktop-top-nav');
-if (desktopTopNav) {
-desktopTopNav.classList.remove('fade-in');
-desktopTopNav.classList.add('fade-out');
-}
-
-// After fade-out animation completes
-setTimeout(() => {
-// Hide chat container and disclaimer
-chatContainer.style.display = 'none';
-if (disclaimer) {
-    disclaimer.style.display = 'none';
-}
-if (desktopTopNav) {
-    desktopTopNav.style.display = 'none';
-}
-
-// Show initial content, suggested queries, and footer links
-const initialContent = document.querySelector('.initial-content');
-const suggestedQueries = document.querySelector('.suggested-queries');
-const footerLinks = document.querySelector('.footer-links');
-
-initialContent.style.display = 'block';
-suggestedQueries.style.display = 'block';
-footerLinks.style.display = 'block';
-
-// Remove fade-out classes
-initialContent.classList.remove('fade-out');
-suggestedQueries.classList.remove('fade-out');
-footerLinks.classList.remove('fade-out');
-
-// Add fade-in classes
-initialContent.classList.add('fade-in');
-suggestedQueries.classList.add('fade-in');
-footerLinks.classList.add('fade-in');
-
-// Handle mobile top navigation
-const topNav = document.querySelector('.top-nav');
-if (window.innerWidth <= 640 && topNav) {
-    topNav.style.display = 'flex';
-}
-}, 500); // Match the fade-out animation duration
+// This will refresh the current page, effectively resetting everything to its initial state
+window.location.reload();
 });
 
 function updateUsername() {
