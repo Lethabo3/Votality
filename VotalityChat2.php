@@ -1,9 +1,11 @@
 <?php
 session_start();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', '/path/to/votality-error.log');
+
 require_once 'logging.php';
 require_once 'UsersBimo.php';
 require_once 'votality_ai_service2.php';
@@ -20,40 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// Initialize session ID if not set
-if (!isset($_SESSION['session_id'])) {
-    $_SESSION['session_id'] = uniqid('session_', true);
-}
-
-// Custom error handler
-function votalityErrorHandler($errno, $errstr, $errfile, $errline) {
-    $message = date('[Y-m-d H:i:s] ') . "Error ($errno): $errstr in $errfile on line $errline\n";
-    error_log($message, 3, '/path/to/votality-error.log');
-    
-    // Don't execute PHP's internal error handler
-    return true;
-}
-
-// Set the custom error handler
-set_error_handler("votalityErrorHandler");
-
-// Custom exception handler
-function votalityExceptionHandler($exception) {
-    $message = date('[Y-m-d H:i:s] ') . 
-        "Uncaught Exception: " . $exception->getMessage() . "\n" .
-        "Stack trace: " . $exception->getTraceAsString() . "\n";
-    error_log($message, 3, '/path/to/votality-error.log');
-}
-
-// Set the custom exception handler
-set_exception_handler("votalityExceptionHandler");
-
 function debug_log($message) {
-    $formatted_message = date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n";
-    error_log($formatted_message, 3, '/path/to/votality-debug.log');
+    error_log(date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n", 3, '/path/to/votality-debug.log');
 }
-
-debug_log("Processing file with name: " . $fileName);
 
 function checkSession() {
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
@@ -257,31 +228,33 @@ function getWorldTime($timezone) {
 
 function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     global $conn;
-    
+   
     try {
+        // Enable error reporting for debugging
         error_log("Starting handleSendMessage");
         error_log("Message: " . $message);
         error_log("File data received: " . ($file ? json_encode($file) : 'No file'));
 
         // Input validation
         if (empty($message) && empty($file)) {
-            throw new Exception('No message or file provided');
+            return ['error' => 'No message or file provided'];
         }
 
-        // Initialize chat if needed
+        // Initialize chat if it doesn't exist
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
         }
 
-        // Get user info with explicit integer casting
-        $userId = (int)($_SESSION['user_id'] ?? 0);
-        $sessionId = $_SESSION['session_id'] ?? null;
-
-        if (!$sessionId) {
-            throw new Exception("No valid session ID found");
+        $aiService = new VotalityAIService();
+       
+        // Format time
+        $formattedTime = getWorldTime($timezone);
+        if (!$formattedTime) {
+            $dateTime = new DateTime('now', new DateTimeZone($timezone));
+            $formattedTime = $dateTime->format('l, jS g:ia');
         }
 
-        // Process file if present
+        // Enhanced file processing
         $fileContent = null;
         $fileType = null;
         $fileName = null;
@@ -290,43 +263,34 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         if ($file) {
             try {
                 error_log("Processing file...");
-                
                 // Extract file metadata
                 $fileData = $file['data'];
                 $fileType = $file['type'];
                 $fileName = $file['name'];
                 $fileSize = $file['size'];
-
-                // Validate file size
-                $maxSize = 10 * 1024 * 1024; // 10MB
-                if ($fileSize > $maxSize) {
-                    throw new Exception("File size exceeds limit of 10MB");
-                }
-
-                // Process base64 data
+                
+                // Remove data URL prefix if present
                 if (preg_match('/^data:([^;]+);base64,/', $fileData, $matches)) {
                     $fileType = $matches[1];
                     $fileData = substr($fileData, strpos($fileData, ',') + 1);
                 }
-
+                
+                // Decode base64 data
                 $fileContent = base64_decode($fileData);
+                
                 if ($fileContent === false) {
                     throw new Exception("Failed to decode file data");
                 }
-
-                error_log("File processed successfully. Type: $fileType, Name: $fileName");
+                
+                error_log("File processed successfully. Type: " . $fileType . ", Name: " . $fileName);
             } catch (Exception $e) {
                 error_log("File processing error: " . $e->getMessage());
-                throw new Exception("File processing failed: " . $e->getMessage());
+                return ['error' => 'Failed to process file: ' . $e->getMessage()];
             }
         }
 
-        // Create AI Service instance
-        $aiService = new VotalityAIService();
-
-        // Prepare AI prompt
-        $aiPrompt = "Current time: " . getWorldTime($timezone) . "\nUser message: $message";
-        
+        // Enhanced AI prompt with better file content handling
+        $aiPrompt = "Current time: {$formattedTime}\nUser message: {$message}";
         if ($fileContent) {
             $aiPrompt .= "\n\nFile Information:";
             $aiPrompt .= "\nFilename: " . $fileName;
@@ -338,12 +302,11 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $processedContent = processFileContent($fileContent, $fileType);
             $aiPrompt .= $processedContent;
         }
-
-        // Get AI response
+       
         error_log("Sending to AI service. Prompt length: " . strlen($aiPrompt));
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
-        // Process AI response
+        // Process the response
         $parts = explode("\nRelated Topics:", $fullResponse, 2);
         $aiResponse = trim($parts[0]);
         $relatedTopics = [];
@@ -351,7 +314,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         if (isset($parts[1])) {
             $topicsText = trim($parts[1]);
             $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
-            
+           
             foreach ($topicsLines as $line) {
                 $line = trim($line);
                 if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
@@ -363,42 +326,23 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Generate chat topic
-        $chatTopic = generateChatTopic($message);
+        // Enhanced database storage with file metadata
+        if (isset($_SESSION['user_id']) && isset($_SESSION['session_id'])) {
+            $userId = $_SESSION['user_id'];
+            $sessionId = $_SESSION['session_id'];
 
-        // Store in database
-        if ($userId && $sessionId) {
-            // FIRST: Create or update chat with topic
-            $stmt = $conn->prepare("
-                INSERT INTO votality_chats (chat_id, user_id, session_id, topic, created_at, updated_at) 
-                VALUES (?, ?, ?, ?, NOW(), NOW())
-                ON DUPLICATE KEY UPDATE 
-                    topic = VALUES(topic),
-                    session_id = VALUES(session_id),
-                    updated_at = NOW()
-            ");
-            
-            if (!$stmt) {
-                throw new Exception("Failed to prepare chat insert: " . $conn->error);
-            }
-            
-            // Note the 'i' for integer user_id
-            $stmt->bind_param("siss", $chatId, $userId, $sessionId, $chatTopic);
-            if (!$stmt->execute()) {
-                throw new Exception("Failed to create/update chat: " . $stmt->error);
-            }
+            // Ensure chat exists
+            $stmt = $conn->prepare("INSERT IGNORE INTO votality_chats (chat_id, user_id) VALUES (?, ?)");
+            $stmt->bind_param("ss", $chatId, $userId);
+            $stmt->execute();
 
-            // SECOND: Store user message
+            // Store user message with enhanced file data
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
                 (chat_id, user_id, session_id, sender, content, file_content, file_type, file_name, file_size) 
                 VALUES (?, ?, ?, 'user', ?, ?, ?, ?, ?)
             ");
-            if (!$stmt) {
-                throw new Exception("Failed to prepare message insert: " . $conn->error);
-            }
-            
-            $stmt->bind_param("sissssssi", 
+            $stmt->bind_param("sssssssi", 
                 $chatId, 
                 $userId, 
                 $sessionId, 
@@ -408,33 +352,24 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 $fileName,
                 $fileSize
             );
-            
-            if (!$stmt->execute()) {
-                throw new Exception("Failed to store user message: " . $stmt->error);
-            }
+            $stmt->execute();
 
-            // THIRD: Store AI response
+            // Store AI response
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
                 (chat_id, user_id, session_id, sender, content) 
                 VALUES (?, ?, ?, 'ai', ?)
             ");
-            if (!$stmt) {
-                throw new Exception("Failed to prepare AI response insert: " . $stmt->error);
-            }
-            
-            $stmt->bind_param("siss", $chatId, $userId, $sessionId, $aiResponse);
-            if (!$stmt->execute()) {
-                throw new Exception("Failed to store AI response: " . $stmt->error);
-            }
+            $stmt->bind_param("ssss", $chatId, $userId, $sessionId, $aiResponse);
+            $stmt->execute();
         }
 
-        // Prepare response
+        // Enhanced response with file processing info
         $response = [
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
-            'chatTopic' => $chatTopic,
+            'chatTopic' => generateChatTopic($message),
             'fileProcessed' => $fileContent ? [
                 'name' => $fileName,
                 'type' => $fileType,
@@ -531,29 +466,26 @@ function checkChatBelongsToUser($userId, $chatId) {
     return $result->num_rows > 0;
 }
 
-function createNewChatInDatabase($userId, $chatId) {
+function createNewChatInDatabase($userId, $chatId, $initialSummary) {
     global $conn;
     try {
-        $initialTopic = 'New Chat';
-        $stmt = $conn->prepare("
-            INSERT INTO votality_chats 
-            (chat_id, user_id, topic, created_at, updated_at) 
-            VALUES (?, ?, ?, NOW(), NOW())
-        ");
-        
-        if (!$stmt) {
-            throw new Exception("Failed to prepare chat insert: " . $conn->error);
+        $stmt = $conn->prepare("INSERT INTO votality_chats (chat_id, user_id, summary, created_at) VALUES (?, ?, ?, NOW())");
+        $stmt->bind_param("sis", $chatId, $userId, $initialSummary);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            debug_log("New chat created in database. Chat ID: $chatId");
+            return ['chatId' => $chatId, 'summary' => $initialSummary];
+        } else {
+            throw new Exception("Failed to create new chat in database");
         }
-        
-        $stmt->bind_param("sss", $chatId, $userId, $initialTopic);
-        if (!$stmt->execute()) {
-            throw new Exception("Failed to create chat: " . $stmt->error);
-        }
-        
-        return ['chatId' => $chatId, 'topic' => $initialTopic];
     } catch (Exception $e) {
-        debug_log("Error creating chat: " . $e->getMessage());
-        return ['error' => $e->getMessage()];
+        debug_log("Error creating new chat in database: " . $e->getMessage());
+        return ['error' => 'Database error: ' . $e->getMessage()];
+    } finally {
+        if (isset($stmt)) {
+            $stmt->close();
+        }
     }
 }
 
@@ -696,8 +628,13 @@ function getRecentChatsFromDatabase($userId) {
         $query = "
             SELECT 
                 c.chat_id,
-                c.topic,
-                c.created_at
+                c.created_at,
+                (SELECT m.content 
+                 FROM votality_messages m 
+                 WHERE m.chat_id = c.chat_id 
+                 AND m.sender = 'user'
+                 ORDER BY m.timestamp ASC 
+                 LIMIT 1) as first_message
             FROM votality_chats c
             WHERE c.user_id = ?
             ORDER BY c.created_at DESC
@@ -723,9 +660,13 @@ function getRecentChatsFromDatabase($userId) {
         $chats = [];
         
         while ($row = $result->fetch_assoc()) {
+            // Generate a topic from the first user message
+            $firstMessage = $row['first_message'] ?? '';
+            $topic = generateTopicFromMessage($firstMessage);
+            
             $chats[] = [
                 'chat_id' => $row['chat_id'],
-                'topic' => $row['topic'] ?? 'New Chat', // Use the stored topic or default to 'New Chat'
+                'topic' => $topic,
                 'created_at' => $row['created_at']
             ];
         }
