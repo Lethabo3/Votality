@@ -363,10 +363,11 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         if ($userId && $sessionId) {
             // FIRST: Create or update chat with topic
             $stmt = $conn->prepare("
-                INSERT INTO votality_chats (chat_id, user_id, topic, created_at, updated_at) 
-                VALUES (?, ?, ?, NOW(), NOW())
+                INSERT INTO votality_chats (chat_id, user_id, session_id, topic, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, NOW(), NOW())
                 ON DUPLICATE KEY UPDATE 
                     topic = VALUES(topic),
+                    session_id = VALUES(session_id),
                     updated_at = NOW()
             ");
             
@@ -374,7 +375,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 throw new Exception("Failed to prepare chat insert: " . $conn->error);
             }
             
-            $stmt->bind_param("sss", $chatId, $userId, $chatTopic);
+            $stmt->bind_param("ssss", $chatId, $userId, $sessionId, $chatTopic);
             if (!$stmt->execute()) {
                 throw new Exception("Failed to create/update chat: " . $stmt->error);
             }
