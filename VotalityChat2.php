@@ -230,84 +230,70 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     global $conn;
    
     try {
-        // Enable error reporting for debugging
-        error_log("Starting handleSendMessage");
+        error_log("=== Starting handleSendMessage ===");
         error_log("Message: " . $message);
-        error_log("File data received: " . ($file ? json_encode($file) : 'No file'));
+        error_log("ChatId: " . ($chatId ?? 'null'));
 
         // Input validation
         if (empty($message) && empty($file)) {
+            error_log("Error: No message or file provided");
             return ['error' => 'No message or file provided'];
         }
 
         // Initialize chat if it doesn't exist
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
-            // Create new chat entry
+            error_log("Generated new chatId: " . $chatId);
+            
             $stmt = $conn->prepare("INSERT INTO votality_chats (chat_id, user_id, created_at) VALUES (?, ?, NOW())");
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+            
             $userId = $_SESSION['user_id'] ?? null;
+            error_log("UserId for new chat: " . ($userId ?? 'null'));
+            
             $stmt->bind_param("ss", $chatId, $userId);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                throw new Exception("Execute failed: " . $stmt->error);
+            }
+            error_log("New chat created successfully");
+        }
+
+        // Generate chat topic
+        $chatTopic = generateChatTopic($message);
+        error_log("Generated topic: " . $chatTopic);
+
+        // Update topic immediately after generation
+        $updateStmt = $conn->prepare("
+            UPDATE votality_chats 
+            SET topic = ?, 
+                updated_at = NOW() 
+            WHERE chat_id = ?
+        ");
+        
+        if (!$updateStmt) {
+            error_log("Failed to prepare topic update statement: " . $conn->error);
+        } else {
+            $updateStmt->bind_param("ss", $chatTopic, $chatId);
+            if (!$updateStmt->execute()) {
+                error_log("Failed to execute topic update: " . $updateStmt->error);
+            } else {
+                error_log("Successfully updated topic for chat ID: " . $chatId);
+            }
         }
 
         $aiService = new VotalityAIService();
-       
-        // Format time
+        
+        // Format time for AI prompt
         $formattedTime = getWorldTime($timezone);
         if (!$formattedTime) {
             $dateTime = new DateTime('now', new DateTimeZone($timezone));
             $formattedTime = $dateTime->format('l, jS g:ia');
         }
 
-        // Enhanced file processing
-        $fileContent = null;
-        $fileType = null;
-        $fileName = null;
-        $fileSize = null;
-
-        if ($file) {
-            try {
-                error_log("Processing file...");
-                // Extract file metadata
-                $fileData = $file['data'];
-                $fileType = $file['type'];
-                $fileName = $file['name'];
-                $fileSize = $file['size'];
-                
-                // Remove data URL prefix if present
-                if (preg_match('/^data:([^;]+);base64,/', $fileData, $matches)) {
-                    $fileType = $matches[1];
-                    $fileData = substr($fileData, strpos($fileData, ',') + 1);
-                }
-                
-                // Decode base64 data
-                $fileContent = base64_decode($fileData);
-                
-                if ($fileContent === false) {
-                    throw new Exception("Failed to decode file data");
-                }
-                
-                error_log("File processed successfully. Type: " . $fileType . ", Name: " . $fileName);
-            } catch (Exception $e) {
-                error_log("File processing error: " . $e->getMessage());
-                return ['error' => 'Failed to process file: ' . $e->getMessage()];
-            }
-        }
-
-        // Enhanced AI prompt
+        // Generate AI response
         $aiPrompt = "Current time: {$formattedTime}\nUser message: {$message}";
-        if ($fileContent) {
-            $aiPrompt .= "\n\nFile Information:";
-            $aiPrompt .= "\nFilename: " . $fileName;
-            $aiPrompt .= "\nFile type: " . $fileType;
-            $aiPrompt .= "\nFile size: " . $fileSize . " bytes";
-            $aiPrompt .= "\n\nFile Content:\n";
-            
-            // Process file content based on type
-            $processedContent = processFileContent($fileContent, $fileType);
-            $aiPrompt .= $processedContent;
-        }
-       
         error_log("Sending to AI service. Prompt length: " . strlen($aiPrompt));
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
@@ -319,7 +305,6 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         if (isset($parts[1])) {
             $topicsText = trim($parts[1]);
             $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
-           
             foreach ($topicsLines as $line) {
                 $line = trim($line);
                 if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
@@ -331,66 +316,47 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Generate and save chat topic
-        $chatTopic = generateChatTopic($message);
-        $topicUpdated = updateChatTopicInDatabase($chatId, $chatTopic);
-        if (!$topicUpdated) {
-            logMessage("Warning: Failed to update chat topic in database");
-        }
-
-        // Store messages in database
-        if (isset($_SESSION['user_id']) && isset($_SESSION['session_id'])) {
+        // Store messages if user is logged in
+        if (isset($_SESSION['user_id'])) {
             $userId = $_SESSION['user_id'];
-            $sessionId = $_SESSION['session_id'];
-
+            
             // Store user message
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
-                (chat_id, user_id, session_id, sender, content, file_content, file_type, file_name, file_size) 
-                VALUES (?, ?, ?, 'user', ?, ?, ?, ?, ?)
+                (chat_id, user_id, sender, content) 
+                VALUES (?, ?, 'user', ?)
             ");
-            $stmt->bind_param("sssssssi", 
-                $chatId, 
-                $userId, 
-                $sessionId, 
-                $message,
-                $fileContent,
-                $fileType,
-                $fileName,
-                $fileSize
-            );
+            
+            $stmt->bind_param("sss", $chatId, $userId, $message);
             $stmt->execute();
 
             // Store AI response
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
-                (chat_id, user_id, session_id, sender, content) 
-                VALUES (?, ?, ?, 'ai', ?)
+                (chat_id, user_id, sender, content) 
+                VALUES (?, ?, 'ai', ?)
             ");
-            $stmt->bind_param("ssss", $chatId, $userId, $sessionId, $aiResponse);
+            
+            $stmt->bind_param("sss", $chatId, $userId, $aiResponse);
             $stmt->execute();
         }
 
-        // Prepare response
         $response = [
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
-            'chatTopic' => $chatTopic,
-            'fileProcessed' => $fileContent ? [
-                'name' => $fileName,
-                'type' => $fileType,
-                'size' => $fileSize
-            ] : null
+            'chatTopic' => $chatTopic
         ];
 
-        error_log("Sending response: " . json_encode($response));
+        error_log("=== handleSendMessage completed successfully ===");
+        error_log("Final response: " . json_encode($response));
         return $response;
 
     } catch (Exception $e) {
-        error_log("Error in handleSendMessage: " . $e->getMessage());
+        error_log("=== handleSendMessage failed ===");
+        error_log("Error: " . $e->getMessage());
         error_log("Stack trace: " . $e->getTraceAsString());
-        return ['error' => $e->getMessage()];
+        return ['error' => 'An error occurred: ' . $e->getMessage()];
     }
 }
 
