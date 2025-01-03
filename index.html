@@ -549,81 +549,61 @@
             });
         });
             
-
-// Update the sendMessage function
-async function sendMessage(message, fileData = null) {
-    try {
-        // UI setup for new message
-        const userMessageElement = await addMessage(message, 'user', null, fileData);
-        textarea.value = '';
-        
-        if (userMessageElement) {
-            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        showAIThinking();
-
-        // Prepare request data
-        const requestData = {
-            action: 'sendMessage',
-            message: message,
-            chatId: currentChatId,
-            stayLoggedOut: sessionStorage.getItem('stayLoggedOut') === 'true'
-        };
-
-        // Add file data if present
-        if (fileData) {
-            requestData.file = fileData;
-        }
-
-        // Send to backend
-        const response = await fetch('VotalityChat2.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-            credentials: 'same-origin'
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // Handle response
-        hideAIThinking();
-
-        if (data.error) {
-            if (data.error === 'auth_required' && !requestData.stayLoggedOut) {
-                sessionStorage.setItem('returnUrl', window.location.href);
-                window.location.href = '/signin.html';
-                return;
+// Your existing submit button code - keep this exactly as is
+submitButton.addEventListener('click', async function() {
+    const message = textarea.value.trim();
+    if (message) {
+        // Hide initial content, suggested queries, and footer links
+        initialContent.classList.add('fade-out');
+        suggestedQueries.classList.add('fade-out');
+        footerLinks.classList.add('fade-out');
+       
+        // Start repositioning textarea immediately
+        textareaContainer.classList.add('repositioned');
+       
+        // Change background to white
+        document.body.classList.add('white-background');
+       
+        // After the fade-out animation
+        setTimeout(async () => {
+            initialContent.style.display = 'none';
+            suggestedQueries.style.display = 'none';
+            footerLinks.style.display = 'none';
+           
+            // Show chat container
+            chatContainer.style.display = 'block';
+            chatContainer.classList.add('fade-in');
+           
+            // Show disclaimer
+            if (window.innerWidth > 640) {
+                disclaimer.style.display = 'block';
+                setTimeout(() => {
+                    disclaimer.classList.add('fade-in');
+                }, 50);
             }
-            throw new Error(data.error);
-        }
-
-        // Add AI response to chat
-        await addMessage(data.response, 'ai', data.relatedTopics);
-        
-        if (data.chatTopic) {
-            updateChatTopicDisplay(data.chatTopic);
-        }
-
-        if (!currentChatId && data.chatId) {
-            currentChatId = data.chatId;
-        }
-
-        // Refresh chat list
-        await loadRecentChats();
-
-    } catch (error) {
-        console.error('Error in sendMessage:', error);
-        hideAIThinking();
-        await addMessage(`Error: ${error.message}`, 'ai');
+            
+            // Show desktop top nav for larger screens
+            if (window.innerWidth > 640) {
+                const desktopTopNav = document.querySelector('.desktop-top-nav');
+                desktopTopNav.style.display = 'flex';
+                setTimeout(() => {
+                    desktopTopNav.classList.add('fade-in');
+                }, 50);
+            } else {
+                // Hide top navigation for mobile when chat container appears
+                const topNav = document.querySelector('.top-nav');
+                if (topNav) {
+                    topNav.style.display = 'none';
+                }
+                // Add 'chat-active' class to body for mobile-specific styling
+                document.body.classList.add('chat-active');
+            }
+           
+            // Send message to AI and get response
+            await sendMessage(message);
+        }, 500);
     }
-}
+});
 
 // Add this event listener to your new chat button
 document.querySelector('.sidebar-button-container').addEventListener('click', function() {
@@ -1048,6 +1028,166 @@ document.querySelector('.sidebar-button-container').addEventListener('click', fu
             console.error('Error checking message limits:', error);
         }
     });
+
+    // Update the sendMessage function in your JavaScript
+    async function sendMessage(message, file = null) {
+    try {
+        // Enhanced file validation
+        if (file) {
+            // Check file size (e.g., 10MB limit)
+            const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+            if (file.size > MAX_FILE_SIZE) {
+                throw new Error('File size exceeds 10MB limit');
+            }
+
+            // Enhanced allowed file types
+            const ALLOWED_TYPES = [
+                'text/plain',
+                'text/csv',
+                'application/json',
+                'application/pdf',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
+                'application/vnd.ms-excel', // xls
+                'image/png',
+                'image/jpeg',
+                'image/gif'
+            ];
+            
+            if (!ALLOWED_TYPES.includes(file.type)) {
+                throw new Error('Unsupported file type. Please upload CSV, TXT, JSON, PDF, Excel files, or images.');
+            }
+
+            console.log('Processing file:', {
+                name: file.name,
+                type: file.type,
+                size: file.size
+            });
+        }
+
+        // UI transitions
+        initialContent.classList.add('fade-out');
+        suggestedQueries.classList.add('fade-out');
+        footerLinks.classList.add('fade-out');
+        textareaContainer.classList.add('repositioned');
+        document.body.classList.add('white-background');
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Hide initial elements
+        initialContent.style.display = 'none';
+        suggestedQueries.style.display = 'none';
+        footerLinks.style.display = 'none';
+        chatContainer.style.display = 'block';
+        chatContainer.classList.add('fade-in');
+
+        // Handle responsive UI
+        if (window.innerWidth > 640) {
+            disclaimer.style.display = 'block';
+            setTimeout(() => disclaimer.classList.add('fade-in'), 50);
+            
+            desktopTopNav.style.display = 'flex';
+            setTimeout(() => desktopTopNav.classList.add('fade-in'), 50);
+        } else {
+            const topNav = document.querySelector('.top-nav');
+            if (topNav) topNav.style.display = 'none';
+            document.body.classList.add('chat-active');
+        }
+
+        // Add user message to UI with file
+        const userMessageElement = await addMessage(message, 'user', null, file);
+        textarea.value = '';
+        showAIThinking();
+
+        if (userMessageElement) {
+            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Enhanced file data preparation
+        let fileData = null;
+        if (file) {
+            try {
+                const base64Data = await readFileAsDataURL(file);
+                fileData = {
+                    data: base64Data,
+                    type: file.type,
+                    name: file.name,
+                    size: file.size
+                };
+                console.log('File prepared for sending:', {
+                    name: file.name,
+                    type: file.type,
+                    size: file.size
+                });
+            } catch (error) {
+                console.error('Error preparing file:', error);
+                throw new Error('Failed to prepare file for upload');
+            }
+        }
+
+        // Enhanced server request
+        const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'sendMessage',
+                message: message,
+                chatId: currentChatId,
+                stayLoggedOut: stayLoggedOut,
+                file: fileData
+            }),
+            credentials: 'same-origin'
+        });
+
+        // Enhanced response handling
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server error:', errorText);
+            throw new Error(`Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // Handle response
+        if (data.error) {
+            if (data.error === 'auth_required' && !stayLoggedOut) {
+                hideAIThinking();
+                sessionStorage.setItem('returnUrl', window.location.href);
+                window.location.href = '/signin.html';
+                return;
+            }
+
+            if (data.error === 'auth_required' && stayLoggedOut) {
+                // Ignore auth error if user chose to stay logged out
+            } else {
+                throw new Error(data.error);
+            }
+        }
+
+        // Update UI
+        if (data.chatTopic) {
+            updateChatTopicDisplay(data.chatTopic);
+        }
+
+        hideAIThinking();
+        await addMessage(data.response, 'ai', data.relatedTopics);
+        
+        if (!currentChatId) {
+            currentChatId = data.chatId;
+        }
+
+        // Refresh chat list
+        await loadRecentChats();
+
+    } catch (error) {
+        console.error('Error in sendMessage:', error);
+        hideAIThinking();
+        await addMessage(`Error: ${error.message}`, 'ai');
+        showErrorNotification(error.message);
+    }
+}
 
 // Helper function to show error notifications
 function showErrorNotification(message) {
@@ -2033,80 +2173,74 @@ function showErrorNotification(message) {
         // Add any other initialization code here
     });   
 
-// Global variable to store attached files
-let attachedFiles = [];
+    // Global variable to store attached files
+    let attachedFiles = [];
 
-// Create hidden file input
-const fileInput = document.createElement('input');
-fileInput.type = 'file';
-fileInput.multiple = true;
-fileInput.accept = 'image/*,.pdf,.doc,.docx,.csv,.json,.xlsx,.xls';
-fileInput.style.display = 'none';
-document.body.appendChild(fileInput);
+    // Create hidden file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.multiple = true;
+    fileInput.accept = 'image/*,.pdf,.doc,.docx';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
 
-// Handle attachment button click
-attachmentButton.addEventListener('click', function() {
-    if (attachedFiles.length > 0) {
-        // Show file panel if files are attached
-        toggleFilePanel();
-    } else {
-        // Trigger file selection if no files attached
-        fileInput.click();
-    }
-});
-
-// Handle file selection
-fileInput.addEventListener('change', function(e) {
-    const files = Array.from(e.target.files);
-    
-    // Check if adding new files would exceed the limit
-    const totalFiles = attachedFiles.length + files.length;
-    if (totalFiles > 3) {
-        alert('Maximum 3 files allowed');
-        return;
-    }
-    
-    // Check file size limits
-    const validFiles = files.filter(file => {
-        const maxSize = 3.75 * 1024 * 1024; // 3.75MB in bytes
-        if (file.size > maxSize) {
-            alert(`File ${file.name} exceeds size limit of 3.75MB`);
-            return false;
+    // Handle attachment button click
+    attachmentButton.addEventListener('click', function() {
+        if (attachedFiles.length > 0) {
+            // Show file panel if files are attached
+            toggleFilePanel();
+        } else {
+            // Trigger file selection if no files attached
+            fileInput.click();
         }
-        return true;
     });
 
-    if (validFiles.length > 0) {
-        // Add new files to existing ones
-        attachedFiles = [...attachedFiles, ...validFiles];
-        updateAttachmentButtonUI();
-        createFilePanel();
+    // Handle file selection
+    fileInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
         
-        // Show the panel after creating it
-        const panel = document.querySelector('.file-panel');
-        if (panel) {
-            panel.style.display = 'block';
-            positionFilePanel();
+        // Check if adding new files would exceed the limit
+        const totalFiles = attachedFiles.length + files.length;
+        if (totalFiles > 3) {
+            alert('Maximum 3 files allowed');
+            return;
         }
+        
+        // Check file size limits
+        const validFiles = files.filter(file => {
+            const maxSize = 3.75 * 1024 * 1024; // 3.75MB in bytes
+            return file.size <= maxSize;
+        });
+
+        if (validFiles.length > 0) {
+            // Add new files to existing ones
+            attachedFiles = [...attachedFiles, ...validFiles];
+            updateAttachmentButtonUI();
+            createFilePanel();
+            
+            // Show the panel after creating it
+            const panel = document.querySelector('.file-panel');
+            if (panel) {
+                panel.style.display = 'block';
+            }
+        }
+        
+        // Reset file input
+        fileInput.value = '';
+    });
+
+    // Update attachment button UI
+    function updateAttachmentButtonUI() {
+        const attachmentContainer = attachmentButton.querySelector('.attachment-container');
+        
+        attachmentContainer.innerHTML = attachedFiles.length > 0 
+            ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>`
+            : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+            </svg>`;
     }
-    
-    // Reset file input
-    fileInput.value = '';
-});
-
-// Update attachment button UI
-function updateAttachmentButtonUI() {
-    const attachmentContainer = attachmentButton.querySelector('.attachment-container');
-    
-    attachmentContainer.innerHTML = attachedFiles.length > 0 
-        ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-        </svg>`
-        : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-        </svg>`;
-}
-
 
     function createFilePanel() {
         const existingPanel = document.querySelector('.file-panel');
@@ -2364,252 +2498,226 @@ function getFileIcon(fileType) {
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-async function addMessage(text, sender, relatedTopics = [], file = null) {
-    const chatContainer = document.querySelector('.chat-container');
-    let messageElement;
+function addMessage(text, sender, relatedTopics = [], file = null) {
+    return new Promise((resolve) => {
+        const chatContainer = document.querySelector('.chat-container');
+        let messageElement;
 
-    if (sender === 'user') {
-        // Create a new chat group for user messages
-        const chatGroup = document.createElement('div');
-        chatGroup.className = 'chat-group';
-        
-        // Create the main message element
-        messageElement = document.createElement('div');
-        messageElement.className = 'message user-message';
-        
-        // Add text content
-        if (text) {
+        if (sender === 'user') {
+            // Create a new chat group for user messages
+            const chatGroup = document.createElement('div');
+            chatGroup.className = 'chat-group';
+            
+            // Create the main message element
+            messageElement = document.createElement('div');
+            messageElement.className = 'message user-message';
+            
+            // Add text content
             const textContent = document.createElement('div');
             textContent.className = 'message-text';
             textContent.textContent = text;
             messageElement.appendChild(textContent);
-        }
-        
-        chatGroup.appendChild(messageElement);
-        chatContainer.appendChild(chatGroup);
-        
-        // Add edit controls
-        addEditControls(messageElement);
-        
-    } else {
-        // For AI responses
-        const lastChatGroup = chatContainer.lastElementChild;
-
-        // Create sources container
-        const sourcesContainer = document.createElement('div');
-        sourcesContainer.className = 'sources-container';
-        sourcesContainer.style.cssText = `
-            display: flex;
-            margin-bottom: 16px;
-            padding: 0 16px;
-            gap: 8px;
-            flex-wrap: wrap;
-        `;
-        
-        // Default sources
-        const sourceData = [
-            { image: 'bus2.png', name: 'Nasdaq' },
-            { image: 'bus1.png', name: 'Alpha Vantage' },
-            { image: 'bus3.png', name: 'Bezinga' }
-        ];
-
-        sourceData.forEach(source => {
-            const sourceItem = createSourceItem(source);
-            sourcesContainer.appendChild(sourceItem);
-        });
-        
-        lastChatGroup.appendChild(sourcesContainer);
-
-        // Create message wrapper
-        const messageWrapper = document.createElement('div');
-        messageWrapper.style.cssText = `
-            position: relative;
-            width: 100%;
-            margin-left: 0px;
-            z-index: 1000;
-        `;
-
-        // Create message container
-        const messageContainer = document.createElement('div');
-        messageContainer.style.cssText = `
-            width: 100%;
-            box-sizing: border-box;
-            position: relative;
-            margin-top: 0px;
-        `;
-
-        // Create AI message element
-        messageElement = document.createElement('div');
-        messageElement.className = 'message ai-message';
-        
-        // Add message content with animation
-        const messageContent = document.createElement('div');
-        messageContent.className = 'ai-message-content';
-        
-        // Split text into paragraphs and animate them
-        const paragraphs = text.split('\n\n');
-        let delay = 0;
-
-        paragraphs.forEach((paragraph) => {
-            if (paragraph.trim()) {
-                const paragraphContainer = document.createElement('div');
-                paragraphContainer.className = 'ai-message-paragraph-container';
-
-                const pElement = document.createElement('p');
-                pElement.className = 'ai-message-paragraph';
+            
+            // Handle file attachment if present
+            if (file) {
+                const fileAttachment = document.createElement('div');
+                fileAttachment.className = 'file-attachment';
                 
-                // Animate each word
-                const words = paragraph.split(' ');
-                words.forEach(word => {
-                    const span = document.createElement('span');
-                    span.textContent = word + ' ';
-                    span.style.opacity = '0';
-                    span.style.animation = `fadeIn 0.2s forwards ${delay}ms`;
-                    pElement.appendChild(span);
-                    delay += 10;
-                });
+                const fileIcon = document.createElement('div');
+                fileIcon.className = 'file-icon';
+                fileIcon.innerHTML = getFileIconByType(file.type);
                 
-                paragraphContainer.appendChild(pElement);
-                messageContent.appendChild(paragraphContainer);
-                delay += 100;
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+                
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = file.name;
+                
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(file.size);
+                
+                fileInfo.appendChild(fileName);
+                fileInfo.appendChild(fileSize);
+                fileAttachment.appendChild(fileIcon);
+                fileAttachment.appendChild(fileInfo);
+                
+                messageElement.appendChild(fileAttachment);
             }
-        });
-        
-        messageElement.appendChild(messageContent);
+            
+            chatGroup.appendChild(messageElement);
+            chatContainer.appendChild(chatGroup);
+            
+            // Add edit controls
+            addEditControls(messageElement);
+            
+            // Scroll to the new message
+            messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            resolve(messageElement);
+            
+        } else {
+            // For AI responses
+            const lastChatGroup = chatContainer.lastElementChild;
 
-        // Add message interactions
-        addMessageInteractions(messageElement);
-        
-        messageContainer.appendChild(messageElement);
-        messageWrapper.appendChild(messageContainer);
-        lastChatGroup.appendChild(messageWrapper);
+            // Create sources container
+            const sourcesContainer = document.createElement('div');
+            sourcesContainer.className = 'sources-container';
+            sourcesContainer.style.cssText = `
+                display: flex;
+                margin-bottom: 16px;
+                padding: 0 16px;
+                gap: 8px;
+                flex-wrap: wrap;
+            `;
+            
+            // Add file source if there are attached files
+            if (attachedFiles && attachedFiles.length > 0) {
+                attachedFiles.forEach(file => {
+                    const fileSource = createFileSource(file);
+                    sourcesContainer.appendChild(fileSource);
+                });
+            } else {
+                // Default sources
+                const sourceData = [
+                    { image: 'bus2.png', name: 'Nasdaq' },
+                    { image: 'bus1.png', name: 'Alpha Vantage' },
+                    { image: 'bus3.png', name: 'Bezinga' }
+                ];
 
-        // Add related topics after a delay
-        if (relatedTopics && relatedTopics.length > 0) {
+                sourceData.forEach(source => {
+                    const sourceItem = createSourceItem(source);
+                    sourcesContainer.appendChild(sourceItem);
+                });
+            }
+            
+            lastChatGroup.appendChild(sourcesContainer);
+
+            // Create message wrapper
+            const messageWrapper = document.createElement('div');
+            messageWrapper.style.cssText = `
+                position: relative;
+                width: 100%;
+                margin-left: 0px;
+                z-index: 1000;
+            `;
+
+            // Create message container
+            const messageContainer = document.createElement('div');
+            messageContainer.style.cssText = `
+                width: 100%;
+                box-sizing: border-box;
+                position: relative;
+                margin-top: 0px;
+            `;
+
+            // Create AI message element
+            messageElement = document.createElement('div');
+            messageElement.className = 'message ai-message';
+            
+            // Add message content with animation
+            const messageContent = document.createElement('div');
+            messageContent.className = 'ai-message-content';
+            
+            // Split text into paragraphs and animate them
+            const paragraphs = text.split('\n\n');
+            let delay = 0;
+
+            paragraphs.forEach((paragraph) => {
+                if (paragraph.trim()) {
+                    const paragraphContainer = document.createElement('div');
+                    paragraphContainer.className = 'ai-message-paragraph-container';
+
+                    const pElement = document.createElement('p');
+                    pElement.className = 'ai-message-paragraph';
+                    
+                    // Animate each word
+                    const words = paragraph.split(' ');
+                    words.forEach(word => {
+                        const span = document.createElement('span');
+                        span.textContent = word + ' ';
+                        span.style.opacity = '0';
+                        span.style.animation = `fadeIn 0.2s forwards ${delay}ms`;
+                        pElement.appendChild(span);
+                        delay += 10;
+                    });
+                    
+                    paragraphContainer.appendChild(pElement);
+                    messageContent.appendChild(paragraphContainer);
+                    delay += 100;
+                }
+            });
+            
+            messageElement.appendChild(messageContent);
+
+            // Add interaction buttons
+            const interactions = document.createElement('div');
+            interactions.className = 'message-interactions';
+            interactions.innerHTML = `
+                <div class="message-feedback">
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Like message">
+                            <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Like</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Dislike message">
+                            <i data-lucide="thumbs-down" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Dislike</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-actions">
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Copy message">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Copy</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Retry message">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Retry</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add interaction handlers
+            addMessageInteractions(interactions, messageElement);
+            messageElement.appendChild(interactions);
+            
+            messageContainer.appendChild(messageElement);
+            messageWrapper.appendChild(messageContainer);
+            lastChatGroup.appendChild(messageWrapper);
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Add related topics after a delay
             setTimeout(() => {
-                addRelatedTopics(relatedTopics, lastChatGroup);
+                if (relatedTopics && relatedTopics.length > 0) {
+                    addRelatedTopics(relatedTopics, lastChatGroup);
+                }
+                resolve(messageElement);
             }, delay + 100);
         }
-    }
-
-    // Initialize any new Lucide icons
-    lucide.createIcons();
-
-    return messageElement;
+    });
 }
-
-// Submit button event listener
-submitButton.addEventListener('click', async function() {
-    const message = textarea.value.trim();
-    if (message || attachedFiles.length > 0) {
-        // Hide initial content, suggested queries, and footer links
-        initialContent.classList.add('fade-out');
-        suggestedQueries.classList.add('fade-out');
-        footerLinks.classList.add('fade-out');
-       
-        // Start repositioning textarea immediately
-        textareaContainer.classList.add('repositioned');
-       
-        // Change background to white
-        document.body.classList.add('white-background');
-       
-        // After the fade-out animation
-        setTimeout(async () => {
-            initialContent.style.display = 'none';
-            suggestedQueries.style.display = 'none';
-            footerLinks.style.display = 'none';
-           
-            // Show chat container
-            chatContainer.style.display = 'block';
-            chatContainer.classList.add('fade-in');
-           
-            // Show disclaimer
-            if (window.innerWidth > 640) {
-                disclaimer.style.display = 'block';
-                setTimeout(() => {
-                    disclaimer.classList.add('fade-in');
-                }, 50);
-            }
-           
-            // Show desktop top nav for larger screens
-            if (window.innerWidth > 640) {
-                const desktopTopNav = document.querySelector('.desktop-top-nav');
-                desktopTopNav.style.display = 'flex';
-                setTimeout(() => {
-                    desktopTopNav.classList.add('fade-in');
-                }, 50);
-            } else {
-                // Hide top navigation for mobile when chat container appears
-                const topNav = document.querySelector('.top-nav');
-                if (topNav) {
-                    topNav.style.display = 'none';
-                }
-                // Add 'chat-active' class to body for mobile-specific styling
-                document.body.classList.add('chat-active');
-            }
-
-            try {
-                let fileData = null;
-                if (attachedFiles.length > 0) {
-                    const file = attachedFiles[0];
-                    const reader = new FileReader();
-                    
-                    fileData = await new Promise((resolve, reject) => {
-                        reader.onload = () => {
-                            const content = reader.result;
-                            if (file.type.startsWith('text/') || 
-                                file.type === 'application/json' || 
-                                file.type === 'application/csv') {
-                                resolve({
-                                    data: content,
-                                    type: file.type,
-                                    name: file.name,
-                                    size: file.size
-                                });
-                            } else {
-                                resolve({
-                                    data: content,
-                                    type: file.type,
-                                    name: file.name,
-                                    size: file.size
-                                });
-                            }
-                        };
-                        reader.onerror = () => reject(new Error('Failed to read file'));
-                        
-                        if (file.type.startsWith('text/') || 
-                            file.type === 'application/json' || 
-                            file.type === 'application/csv') {
-                            reader.readAsText(file);
-                        } else {
-                            reader.readAsDataURL(file);
-                        }
-                    });
-                }
-
-                // Send message to AI and get response
-                await sendMessage(message, fileData);
-
-                // Clear attached files after successful send
-                attachedFiles = [];
-                updateAttachmentButtonUI();
-                
-                // Hide file panel if it's open
-                const panel = document.querySelector('.file-panel');
-                if (panel) {
-                    panel.style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error processing message:', error);
-            }
-        }, 500);
-    }
-});
 
     function addMessageInteractions(messageElement, sender) {
         if (sender === 'ai') {
