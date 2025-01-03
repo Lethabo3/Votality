@@ -234,9 +234,16 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     }
 
     try {
-        // Initialize chat if it doesn't exist
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
+            // Generate topic from initial message
+            $chatTopic = generateChatTopic($message);
+            
+            // Create new chat entry with topic
+            $stmt = $conn->prepare("INSERT IGNORE INTO votality_chats (chat_id, user_id, topic) VALUES (?, ?, ?)");
+            $userId = $_SESSION['user_id'] ?? null;
+            $stmt->bind_param("sis", $chatId, $userId, $chatTopic);
+            $stmt->execute();
         }
 
         $aiService = new VotalityAIService();
