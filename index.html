@@ -549,59 +549,96 @@
             });
         });
             
-// Your existing submit button code - keep this exactly as is
-submitButton.addEventListener('click', async function() {
+        submitButton.addEventListener('click', async function() {
     const message = textarea.value.trim();
-    if (message) {
-        // Hide initial content, suggested queries, and footer links
-        initialContent.classList.add('fade-out');
-        suggestedQueries.classList.add('fade-out');
-        footerLinks.classList.add('fade-out');
-       
-        // Start repositioning textarea immediately
-        textareaContainer.classList.add('repositioned');
-       
-        // Change background to white
-        document.body.classList.add('white-background');
-       
-        // After the fade-out animation
-        setTimeout(async () => {
-            initialContent.style.display = 'none';
-            suggestedQueries.style.display = 'none';
-            footerLinks.style.display = 'none';
-           
-            // Show chat container
-            chatContainer.style.display = 'block';
-            chatContainer.classList.add('fade-in');
-           
-            // Show disclaimer
-            if (window.innerWidth > 640) {
-                disclaimer.style.display = 'block';
-                setTimeout(() => {
-                    disclaimer.classList.add('fade-in');
-                }, 50);
+    if (message || attachedFiles.length > 0) {
+        try {
+            // Process all attached files
+            const processedFiles = await Promise.all(attachedFiles.map(async (file) => {
+                const arrayBuffer = await file.arrayBuffer();
+                const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+                
+                return {
+                    data: `data:${file.type};base64,${base64String}`,
+                    type: file.type,
+                    name: file.name,
+                    size: file.size
+                };
+            }));
+
+            // Add user message to UI
+            const userMessageElement = await addMessage(message, 'user', null, attachedFiles[0]); // Currently showing first file
+            textarea.value = '';
+            showAIThinking();
+
+            if (userMessageElement) {
+                userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+
+            // Send message and first file to backend
+            const response = await fetch('VotalityChat2.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'sendMessage',
+                    message: message,
+                    chatId: currentChatId,
+                    file: processedFiles[0] // Currently sending first file only
+                }),
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Handle response
+            hideAIThinking();
             
-            // Show desktop top nav for larger screens
-            if (window.innerWidth > 640) {
-                const desktopTopNav = document.querySelector('.desktop-top-nav');
-                desktopTopNav.style.display = 'flex';
-                setTimeout(() => {
-                    desktopTopNav.classList.add('fade-in');
-                }, 50);
-            } else {
-                // Hide top navigation for mobile when chat container appears
-                const topNav = document.querySelector('.top-nav');
-                if (topNav) {
-                    topNav.style.display = 'none';
-                }
-                // Add 'chat-active' class to body for mobile-specific styling
-                document.body.classList.add('chat-active');
+            if (data.error) {
+                throw new Error(data.error);
             }
-           
-            // Send message to AI and get response
-            await sendMessage(message);
-        }, 500);
+
+            // Add AI response to chat
+            await addMessage(data.response, 'ai', data.relatedTopics);
+            
+            if (data.chatTopic) {
+                updateChatTopicDisplay(data.chatTopic);
+            }
+
+            if (!currentChatId && data.chatId) {
+                currentChatId = data.chatId;
+            }
+
+            // Clear attached files
+            attachedFiles = [];
+            updateAttachmentButtonUI();
+            
+            // Hide file panel
+            const panel = document.querySelector('.file-panel');
+            if (panel) {
+                panel.style.display = 'none';
+            }
+
+            await loadRecentChats();
+
+        } catch (error) {
+            console.error('Error in sendMessage:', error);
+            hideAIThinking();
+            await addMessage(`Error: ${error.message}`, 'ai');
+            
+            // Clear attached files on error
+            attachedFiles = [];
+            updateAttachmentButtonUI();
+            const panel = document.querySelector('.file-panel');
+            if (panel) {
+                panel.style.display = 'none';
+            }
+        }
     }
 });
 
@@ -2135,74 +2172,80 @@ function showErrorNotification(message) {
         // Add any other initialization code here
     });   
 
-    // Global variable to store attached files
-    let attachedFiles = [];
+// Global variable to store attached files
+let attachedFiles = [];
 
-    // Create hidden file input
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.multiple = true;
-    fileInput.accept = 'image/*,.pdf,.doc,.docx';
-    fileInput.style.display = 'none';
-    document.body.appendChild(fileInput);
+// Create hidden file input
+const fileInput = document.createElement('input');
+fileInput.type = 'file';
+fileInput.multiple = true;
+fileInput.accept = 'image/*,.pdf,.doc,.docx,.csv,.json,.xlsx,.xls';
+fileInput.style.display = 'none';
+document.body.appendChild(fileInput);
 
-    // Handle attachment button click
-    attachmentButton.addEventListener('click', function() {
-        if (attachedFiles.length > 0) {
-            // Show file panel if files are attached
-            toggleFilePanel();
-        } else {
-            // Trigger file selection if no files attached
-            fileInput.click();
-        }
-    });
-
-    // Handle file selection
-    fileInput.addEventListener('change', function(e) {
-        const files = Array.from(e.target.files);
-        
-        // Check if adding new files would exceed the limit
-        const totalFiles = attachedFiles.length + files.length;
-        if (totalFiles > 3) {
-            alert('Maximum 3 files allowed');
-            return;
-        }
-        
-        // Check file size limits
-        const validFiles = files.filter(file => {
-            const maxSize = 3.75 * 1024 * 1024; // 3.75MB in bytes
-            return file.size <= maxSize;
-        });
-
-        if (validFiles.length > 0) {
-            // Add new files to existing ones
-            attachedFiles = [...attachedFiles, ...validFiles];
-            updateAttachmentButtonUI();
-            createFilePanel();
-            
-            // Show the panel after creating it
-            const panel = document.querySelector('.file-panel');
-            if (panel) {
-                panel.style.display = 'block';
-            }
-        }
-        
-        // Reset file input
-        fileInput.value = '';
-    });
-
-    // Update attachment button UI
-    function updateAttachmentButtonUI() {
-        const attachmentContainer = attachmentButton.querySelector('.attachment-container');
-        
-        attachmentContainer.innerHTML = attachedFiles.length > 0 
-            ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-            </svg>`
-            : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-            </svg>`;
+// Handle attachment button click
+attachmentButton.addEventListener('click', function() {
+    if (attachedFiles.length > 0) {
+        // Show file panel if files are attached
+        toggleFilePanel();
+    } else {
+        // Trigger file selection if no files attached
+        fileInput.click();
     }
+});
+
+// Handle file selection
+fileInput.addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    
+    // Check if adding new files would exceed the limit
+    const totalFiles = attachedFiles.length + files.length;
+    if (totalFiles > 3) {
+        alert('Maximum 3 files allowed');
+        return;
+    }
+    
+    // Check file size limits
+    const validFiles = files.filter(file => {
+        const maxSize = 3.75 * 1024 * 1024; // 3.75MB in bytes
+        if (file.size > maxSize) {
+            alert(`File ${file.name} exceeds size limit of 3.75MB`);
+            return false;
+        }
+        return true;
+    });
+
+    if (validFiles.length > 0) {
+        // Add new files to existing ones
+        attachedFiles = [...attachedFiles, ...validFiles];
+        updateAttachmentButtonUI();
+        createFilePanel();
+        
+        // Show the panel after creating it
+        const panel = document.querySelector('.file-panel');
+        if (panel) {
+            panel.style.display = 'block';
+            positionFilePanel();
+        }
+    }
+    
+    // Reset file input
+    fileInput.value = '';
+});
+
+// Update attachment button UI
+function updateAttachmentButtonUI() {
+    const attachmentContainer = attachmentButton.querySelector('.attachment-container');
+    
+    attachmentContainer.innerHTML = attachedFiles.length > 0 
+        ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-black">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+        </svg>`;
+}
+
 
     function createFilePanel() {
         const existingPanel = document.querySelector('.file-panel');
@@ -2460,225 +2503,174 @@ function getFileIcon(fileType) {
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ['Bytes', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-function addMessage(text, sender, relatedTopics = [], file = null) {
-    return new Promise((resolve) => {
-        const chatContainer = document.querySelector('.chat-container');
-        let messageElement;
+async function addMessage(text, sender, relatedTopics = [], file = null) {
+    const chatContainer = document.querySelector('.chat-container');
+    let messageElement;
 
-        if (sender === 'user') {
-            // Create a new chat group for user messages
-            const chatGroup = document.createElement('div');
-            chatGroup.className = 'chat-group';
-            
-            // Create the main message element
-            messageElement = document.createElement('div');
-            messageElement.className = 'message user-message';
-            
-            // Add text content
+    if (sender === 'user') {
+        // Create a new chat group for user messages
+        const chatGroup = document.createElement('div');
+        chatGroup.className = 'chat-group';
+        
+        // Create the main message element
+        messageElement = document.createElement('div');
+        messageElement.className = 'message user-message';
+        
+        // Add text content
+        if (text) {
             const textContent = document.createElement('div');
             textContent.className = 'message-text';
             textContent.textContent = text;
             messageElement.appendChild(textContent);
-            
-            // Handle file attachment if present
-            if (file) {
+        }
+        
+        // Add file attachments if present
+        if (attachedFiles.length > 0) {
+            const filesContainer = document.createElement('div');
+            filesContainer.className = 'files-container';
+
+            attachedFiles.forEach(file => {
                 const fileAttachment = document.createElement('div');
                 fileAttachment.className = 'file-attachment';
-                
-                const fileIcon = document.createElement('div');
-                fileIcon.className = 'file-icon';
-                fileIcon.innerHTML = getFileIconByType(file.type);
-                
-                const fileInfo = document.createElement('div');
-                fileInfo.className = 'file-info';
-                
-                const fileName = document.createElement('div');
-                fileName.className = 'file-name';
-                fileName.textContent = file.name;
-                
-                const fileSize = document.createElement('div');
-                fileSize.className = 'file-size';
-                fileSize.textContent = formatFileSize(file.size);
-                
-                fileInfo.appendChild(fileName);
-                fileInfo.appendChild(fileSize);
-                fileAttachment.appendChild(fileIcon);
-                fileAttachment.appendChild(fileInfo);
-                
-                messageElement.appendChild(fileAttachment);
-            }
-            
-            chatGroup.appendChild(messageElement);
-            chatContainer.appendChild(chatGroup);
-            
-            // Add edit controls
-            addEditControls(messageElement);
-            
-            // Scroll to the new message
-            messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            resolve(messageElement);
-            
-        } else {
-            // For AI responses
-            const lastChatGroup = chatContainer.lastElementChild;
-
-            // Create sources container
-            const sourcesContainer = document.createElement('div');
-            sourcesContainer.className = 'sources-container';
-            sourcesContainer.style.cssText = `
-                display: flex;
-                margin-bottom: 16px;
-                padding: 0 16px;
-                gap: 8px;
-                flex-wrap: wrap;
-            `;
-            
-            // Add file source if there are attached files
-            if (attachedFiles && attachedFiles.length > 0) {
-                attachedFiles.forEach(file => {
-                    const fileSource = createFileSource(file);
-                    sourcesContainer.appendChild(fileSource);
-                });
-            } else {
-                // Default sources
-                const sourceData = [
-                    { image: 'bus2.png', name: 'Nasdaq' },
-                    { image: 'bus1.png', name: 'Alpha Vantage' },
-                    { image: 'bus3.png', name: 'Bezinga' }
-                ];
-
-                sourceData.forEach(source => {
-                    const sourceItem = createSourceItem(source);
-                    sourcesContainer.appendChild(sourceItem);
-                });
-            }
-            
-            lastChatGroup.appendChild(sourcesContainer);
-
-            // Create message wrapper
-            const messageWrapper = document.createElement('div');
-            messageWrapper.style.cssText = `
-                position: relative;
-                width: 100%;
-                margin-left: 0px;
-                z-index: 1000;
-            `;
-
-            // Create message container
-            const messageContainer = document.createElement('div');
-            messageContainer.style.cssText = `
-                width: 100%;
-                box-sizing: border-box;
-                position: relative;
-                margin-top: 0px;
-            `;
-
-            // Create AI message element
-            messageElement = document.createElement('div');
-            messageElement.className = 'message ai-message';
-            
-            // Add message content with animation
-            const messageContent = document.createElement('div');
-            messageContent.className = 'ai-message-content';
-            
-            // Split text into paragraphs and animate them
-            const paragraphs = text.split('\n\n');
-            let delay = 0;
-
-            paragraphs.forEach((paragraph) => {
-                if (paragraph.trim()) {
-                    const paragraphContainer = document.createElement('div');
-                    paragraphContainer.className = 'ai-message-paragraph-container';
-
-                    const pElement = document.createElement('p');
-                    pElement.className = 'ai-message-paragraph';
-                    
-                    // Animate each word
-                    const words = paragraph.split(' ');
-                    words.forEach(word => {
-                        const span = document.createElement('span');
-                        span.textContent = word + ' ';
-                        span.style.opacity = '0';
-                        span.style.animation = `fadeIn 0.2s forwards ${delay}ms`;
-                        pElement.appendChild(span);
-                        delay += 10;
-                    });
-                    
-                    paragraphContainer.appendChild(pElement);
-                    messageContent.appendChild(paragraphContainer);
-                    delay += 100;
-                }
+                fileAttachment.innerHTML = `
+                    <div class="file-icon">
+                        ${getFileIcon(file.type)}
+                    </div>
+                    <div class="file-info">
+                        <span class="file-name">${file.name}</span>
+                        <span class="file-size">${formatFileSize(file.size)}</span>
+                    </div>
+                `;
+                filesContainer.appendChild(fileAttachment);
             });
             
-            messageElement.appendChild(messageContent);
+            messageElement.appendChild(filesContainer);
+        }
+        
+        chatGroup.appendChild(messageElement);
+        chatContainer.appendChild(chatGroup);
+        
+        // Add edit controls
+        addEditControls(messageElement);
+        
+    } else {
+        // For AI responses
+        const lastChatGroup = chatContainer.lastElementChild;
 
-            // Add interaction buttons
-            const interactions = document.createElement('div');
-            interactions.className = 'message-interactions';
-            interactions.innerHTML = `
-                <div class="message-feedback">
-                    <div class="tooltip-container">
-                        <button class="interaction-button" aria-label="Like message">
-                            <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                        </button>
-                        <div class="tooltip">
-                            <span class="tooltip-text">Like</span>
-                        </div>
-                    </div>
-                    <div class="tooltip-container">
-                        <button class="interaction-button" aria-label="Dislike message">
-                            <i data-lucide="thumbs-down" class="w-4 h-4"></i>
-                        </button>
-                        <div class="tooltip">
-                            <span class="tooltip-text">Dislike</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="message-actions">
-                    <div class="tooltip-container">
-                        <button class="interaction-button" aria-label="Copy message">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
-                        </button>
-                        <div class="tooltip">
-                            <span class="tooltip-text">Copy</span>
-                        </div>
-                    </div>
-                    <div class="tooltip-container">
-                        <button class="interaction-button" aria-label="Retry message">
-                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                        </button>
-                        <div class="tooltip">
-                            <span class="tooltip-text">Retry</span>
-                        </div>
-                    </div>
-                </div>
-            `;
+        // Create sources container if needed
+        const sourcesContainer = document.createElement('div');
+        sourcesContainer.className = 'sources-container';
+        sourcesContainer.style.cssText = `
+            display: flex;
+            margin-bottom: 16px;
+            padding: 0 16px;
+            gap: 8px;
+            flex-wrap: wrap;
+        `;
+        
+        if (attachedFiles && attachedFiles.length > 0) {
+            // Add file sources
+            attachedFiles.forEach(file => {
+                const fileSource = createFileSource(file);
+                sourcesContainer.appendChild(fileSource);
+            });
+        } else {
+            // Default sources
+            const sourceData = [
+                { image: 'bus2.png', name: 'Nasdaq' },
+                { image: 'bus1.png', name: 'Alpha Vantage' },
+                { image: 'bus3.png', name: 'Bezinga' }
+            ];
 
-            // Add interaction handlers
-            addMessageInteractions(interactions, messageElement);
-            messageElement.appendChild(interactions);
-            
-            messageContainer.appendChild(messageElement);
-            messageWrapper.appendChild(messageContainer);
-            lastChatGroup.appendChild(messageWrapper);
+            sourceData.forEach(source => {
+                const sourceItem = createSourceItem(source);
+                sourcesContainer.appendChild(sourceItem);
+            });
+        }
+        
+        lastChatGroup.appendChild(sourcesContainer);
 
-            // Initialize Lucide icons
-            lucide.createIcons();
+        // Create message wrapper
+        const messageWrapper = document.createElement('div');
+        messageWrapper.style.cssText = `
+            position: relative;
+            width: 100%;
+            margin-left: 0px;
+            z-index: 1000;
+        `;
 
-            // Add related topics after a delay
+        // Create message container
+        const messageContainer = document.createElement('div');
+        messageContainer.style.cssText = `
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            margin-top: 0px;
+        `;
+
+        // Create AI message element
+        messageElement = document.createElement('div');
+        messageElement.className = 'message ai-message';
+        
+        // Add message content with animation
+        const messageContent = document.createElement('div');
+        messageContent.className = 'ai-message-content';
+        
+        // Split text into paragraphs and animate them
+        const paragraphs = text.split('\n\n');
+        let delay = 0;
+
+        paragraphs.forEach((paragraph) => {
+            if (paragraph.trim()) {
+                const paragraphContainer = document.createElement('div');
+                paragraphContainer.className = 'ai-message-paragraph-container';
+
+                const pElement = document.createElement('p');
+                pElement.className = 'ai-message-paragraph';
+                
+                // Animate each word
+                const words = paragraph.split(' ');
+                words.forEach(word => {
+                    const span = document.createElement('span');
+                    span.textContent = word + ' ';
+                    span.style.opacity = '0';
+                    span.style.animation = `fadeIn 0.2s forwards ${delay}ms`;
+                    pElement.appendChild(span);
+                    delay += 10;
+                });
+                
+                paragraphContainer.appendChild(pElement);
+                messageContent.appendChild(paragraphContainer);
+                delay += 100;
+            }
+        });
+        
+        messageElement.appendChild(messageContent);
+
+        // Add message interactions
+        addMessageInteractions(messageElement);
+        
+        messageContainer.appendChild(messageElement);
+        messageWrapper.appendChild(messageContainer);
+        lastChatGroup.appendChild(messageWrapper);
+
+        // Add related topics after a delay
+        if (relatedTopics && relatedTopics.length > 0) {
             setTimeout(() => {
-                if (relatedTopics && relatedTopics.length > 0) {
-                    addRelatedTopics(relatedTopics, lastChatGroup);
-                }
-                resolve(messageElement);
+                addRelatedTopics(relatedTopics, lastChatGroup);
             }, delay + 100);
         }
-    });
+    }
+
+    // Initialize any new Lucide icons
+    lucide.createIcons();
+
+    return messageElement;
 }
 
     function addMessageInteractions(messageElement, sender) {
