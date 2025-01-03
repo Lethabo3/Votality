@@ -356,6 +356,12 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
+        // Generate and save chat topic
+        $chatTopic = generateChatTopic($message);
+        $stmt = $conn->prepare("UPDATE votality_chats SET topic = ? WHERE chat_id = ?");
+        $stmt->bind_param("ss", $chatTopic, $chatId);
+        $stmt->execute();
+
         // Store in database
         if ($userId && $sessionId) {
             // Ensure chat exists
@@ -400,7 +406,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 VALUES (?, ?, ?, 'ai', ?)
             ");
             if (!$stmt) {
-                throw new Exception("Failed to prepare AI response insert: " . $conn->error);
+                throw new Exception("Failed to prepare AI response insert: " . $stmt->error);
             }
             
             $stmt->bind_param("ssss", $chatId, $userId, $sessionId, $aiResponse);
@@ -414,7 +420,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
-            'chatTopic' => generateChatTopic($message),
+            'chatTopic' => $chatTopic,
             'fileProcessed' => $fileContent ? [
                 'name' => $fileName,
                 'type' => $fileType,
@@ -514,23 +520,21 @@ function checkChatBelongsToUser($userId, $chatId) {
 function createNewChatInDatabase($userId, $chatId, $initialSummary) {
     global $conn;
     try {
-        $stmt = $conn->prepare("INSERT INTO votality_chats (chat_id, user_id, summary, created_at) VALUES (?, ?, ?, NOW())");
-        $stmt->bind_param("sis", $chatId, $userId, $initialSummary);
-        $stmt->execute();
-
-        if ($stmt->affected_rows > 0) {
-            debug_log("New chat created in database. Chat ID: $chatId");
-            return ['chatId' => $chatId, 'summary' => $initialSummary];
-        } else {
-            throw new Exception("Failed to create new chat in database");
+        $stmt = $conn->prepare("
+            INSERT INTO votality_chats 
+            (chat_id, user_id, summary, topic, created_at, updated_at) 
+            VALUES (?, ?, ?, NULL, NOW(), NOW())
+        ");
+        $stmt->bind_param("sss", $chatId, $userId, $initialSummary);
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Failed to create new chat: " . $stmt->error);
         }
+        
+        return ['chatId' => $chatId, 'summary' => $initialSummary];
     } catch (Exception $e) {
-        debug_log("Error creating new chat in database: " . $e->getMessage());
-        return ['error' => 'Database error: ' . $e->getMessage()];
-    } finally {
-        if (isset($stmt)) {
-            $stmt->close();
-        }
+        error_log("Error creating chat: " . $e->getMessage());
+        return ['error' => $e->getMessage()];
     }
 }
 
