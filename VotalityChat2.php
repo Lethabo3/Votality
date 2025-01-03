@@ -229,19 +229,63 @@ function getWorldTime($timezone) {
 function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     global $conn;
    
-    if (empty($message) && empty($file)) {
-        return ['error' => 'No message or file provided'];
-    }
-
     try {
+        error_log("=== Starting handleSendMessage ===");
+        error_log("Message: " . $message);
+        error_log("ChatId: " . ($chatId ?? 'null'));
+
+        // Input validation
+        if (empty($message) && empty($file)) {
+            error_log("Error: No message or file provided");
+            return ['error' => 'No message or file provided'];
+        }
+
         // Initialize chat if it doesn't exist
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
+            error_log("Generated new chatId: " . $chatId);
+            
+            $stmt = $conn->prepare("INSERT INTO votality_chats (chat_id, user_id, created_at) VALUES (?, ?, NOW())");
+            if (!$stmt) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+            
+            $userId = $_SESSION['user_id'] ?? null;
+            error_log("UserId for new chat: " . ($userId ?? 'null'));
+            
+            $stmt->bind_param("ss", $chatId, $userId);
+            if (!$stmt->execute()) {
+                throw new Exception("Execute failed: " . $stmt->error);
+            }
+            error_log("New chat created successfully");
+        }
+
+        // Generate chat topic
+        $chatTopic = generateChatTopic($message);
+        error_log("Generated topic: " . $chatTopic);
+
+        // Update topic immediately after generation
+        $updateStmt = $conn->prepare("
+            UPDATE votality_chats 
+            SET topic = ?, 
+                updated_at = NOW() 
+            WHERE chat_id = ?
+        ");
+        
+        if (!$updateStmt) {
+            error_log("Failed to prepare topic update statement: " . $conn->error);
+        } else {
+            $updateStmt->bind_param("ss", $chatTopic, $chatId);
+            if (!$updateStmt->execute()) {
+                error_log("Failed to execute topic update: " . $updateStmt->error);
+            } else {
+                error_log("Successfully updated topic for chat ID: " . $chatId);
+            }
         }
 
         $aiService = new VotalityAIService();
-       
-        // Format time
+        
+        // Format time for AI prompt
         $formattedTime = getWorldTime($timezone);
         if (!$formattedTime) {
             $dateTime = new DateTime('now', new DateTimeZone($timezone));
@@ -249,14 +293,11 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         }
 
         // Generate AI response
-        $aiPrompt = "Current time: {$formattedTime}. User message: {$message}";
-        if ($file) {
-            $aiPrompt .= " [File attached: " . $file['type'] . "]";
-        }
-       
+        $aiPrompt = "Current time: {$formattedTime}\nUser message: {$message}";
+        error_log("Sending to AI service. Prompt length: " . strlen($aiPrompt));
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
-        // Process the response to separate main content and related topics
+        // Process the response
         $parts = explode("\nRelated Topics:", $fullResponse, 2);
         $aiResponse = trim($parts[0]);
         $relatedTopics = [];
@@ -264,7 +305,6 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         if (isset($parts[1])) {
             $topicsText = trim($parts[1]);
             $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
-           
             foreach ($topicsLines as $line) {
                 $line = trim($line);
                 if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
@@ -276,63 +316,47 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Store in database if user is logged in and has a session_id
-        if (isset($_SESSION['user_id']) && isset($_SESSION['session_id'])) {
+        // Store messages if user is logged in
+        if (isset($_SESSION['user_id'])) {
             $userId = $_SESSION['user_id'];
-            $sessionId = $_SESSION['session_id'];
-
-            // First, ensure chat exists in database
-            $stmt = $conn->prepare("INSERT IGNORE INTO votality_chats (chat_id, user_id) VALUES (?, ?)");
-            $stmt->bind_param("si", $chatId, $userId);
-            $stmt->execute();
-
+            
             // Store user message
-            $stmt = $conn->prepare("INSERT INTO votality_messages (chat_id, user_id, session_id, sender, content) VALUES (?, ?, ?, 'user', ?)");
-            $stmt->bind_param("siss", $chatId, $userId, $sessionId, $message);
+            $stmt = $conn->prepare("
+                INSERT INTO votality_messages 
+                (chat_id, user_id, sender, content) 
+                VALUES (?, ?, 'user', ?)
+            ");
+            
+            $stmt->bind_param("sss", $chatId, $userId, $message);
             $stmt->execute();
 
             // Store AI response
-            $stmt = $conn->prepare("INSERT INTO votality_messages (chat_id, user_id, session_id, sender, content) VALUES (?, ?, ?, 'ai', ?)");
-            $stmt->bind_param("siss", $chatId, $userId, $sessionId, $aiResponse);
+            $stmt = $conn->prepare("
+                INSERT INTO votality_messages 
+                (chat_id, user_id, sender, content) 
+                VALUES (?, ?, 'ai', ?)
+            ");
+            
+            $stmt->bind_param("sss", $chatId, $userId, $aiResponse);
             $stmt->execute();
         }
 
-        // Store in session for current conversation (keeping existing session storage)
-        if (!isset($_SESSION['chats'][$chatId])) {
-            $_SESSION['chats'][$chatId] = [
-                'messages' => [],
-                'created_at' => time()
-            ];
-        }
-
-        $_SESSION['chats'][$chatId]['messages'][] = [
-            'sender' => 'user',
-            'content' => $message,
-            'timestamp' => time()
-        ];
-
-        $_SESSION['chats'][$chatId]['messages'][] = [
-            'sender' => 'ai',
-            'content' => $aiResponse,
-            'timestamp' => time(),
-            'relatedTopics' => $relatedTopics
-        ];
-
-        // Update chat topic if not set
-        if (!isset($_SESSION['chats'][$chatId]['topic'])) {
-            updateChatTopic($chatId, $message);
-        }
-
-        return [
+        $response = [
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
-            'chatTopic' => $_SESSION['chats'][$chatId]['topic'] ?? null
+            'chatTopic' => $chatTopic
         ];
 
+        error_log("=== handleSendMessage completed successfully ===");
+        error_log("Final response: " . json_encode($response));
+        return $response;
+
     } catch (Exception $e) {
-        logMessage("Error in handleSendMessage: " . $e->getMessage());
-        return ['error' => $e->getMessage()];
+        error_log("=== handleSendMessage failed ===");
+        error_log("Error: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        return ['error' => 'An error occurred: ' . $e->getMessage()];
     }
 }
 
