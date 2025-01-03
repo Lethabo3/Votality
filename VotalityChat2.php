@@ -1,11 +1,9 @@
 <?php
 session_start();
-
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', '/path/to/votality-error.log');
-
 require_once 'logging.php';
 require_once 'UsersBimo.php';
 require_once 'votality_ai_service2.php';
@@ -20,6 +18,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type');
     exit(0);
+}
+
+// Initialize session ID if not set
+if (!isset($_SESSION['session_id'])) {
+    $_SESSION['session_id'] = uniqid('session_', true);
 }
 
 // Custom error handler
@@ -270,9 +273,13 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $chatId = uniqid('chat_', true);
         }
 
-        // Get user info
-        $userId = $_SESSION['user_id'] ?? null;
+        // Get user info with explicit integer casting
+        $userId = (int)($_SESSION['user_id'] ?? 0);
         $sessionId = $_SESSION['session_id'] ?? null;
+
+        if (!$sessionId) {
+            throw new Exception("No valid session ID found");
+        }
 
         // Process file if present
         $fileContent = null;
@@ -375,7 +382,8 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 throw new Exception("Failed to prepare chat insert: " . $conn->error);
             }
             
-            $stmt->bind_param("ssss", $chatId, $userId, $sessionId, $chatTopic);
+            // Note the 'i' for integer user_id
+            $stmt->bind_param("siss", $chatId, $userId, $sessionId, $chatTopic);
             if (!$stmt->execute()) {
                 throw new Exception("Failed to create/update chat: " . $stmt->error);
             }
@@ -390,7 +398,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 throw new Exception("Failed to prepare message insert: " . $conn->error);
             }
             
-            $stmt->bind_param("sssssssi", 
+            $stmt->bind_param("sissssssi", 
                 $chatId, 
                 $userId, 
                 $sessionId, 
@@ -415,7 +423,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 throw new Exception("Failed to prepare AI response insert: " . $stmt->error);
             }
             
-            $stmt->bind_param("ssss", $chatId, $userId, $sessionId, $aiResponse);
+            $stmt->bind_param("siss", $chatId, $userId, $sessionId, $aiResponse);
             if (!$stmt->execute()) {
                 throw new Exception("Failed to store AI response: " . $stmt->error);
             }
