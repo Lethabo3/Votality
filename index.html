@@ -1768,6 +1768,43 @@ function updateChatListUI(chats) {
     });
 }
 
+async function loadRecentChats() {
+    try {
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getRecentChats' }),
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+        const chatList = document.querySelector('.chat-list');
+        
+        if (!chatList) return;
+        chatList.innerHTML = '';
+
+        // Directly process the chats
+        if (data.chats && data.chats.length > 0) {
+            data.chats.forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.innerHTML = `
+                    <span class="chat-name">${chat.topic}</span>
+                `;
+                chatList.appendChild(chatItem);
+            });
+        } else {
+            chatList.innerHTML = `
+                <div class="chat-item no-chats">
+                    <span class="chat-name">No recent chats</span>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Failed to load recent chats:', error);
+    }
+}
+
 // Make sure this runs when the page loads
 document.addEventListener('DOMContentLoaded', loadRecentChats);
 // Make sure this gets called when the page loads
@@ -1843,7 +1880,6 @@ function updateRecentChatsUI(chats) {
         });
     }
 }
-
 // Add this helper function to load chat content
 async function loadChat(chatId) {
 console.log('Loading chat:', chatId);
