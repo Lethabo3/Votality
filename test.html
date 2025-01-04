@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Chats</title>
+    <!-- We add some modern styling while keeping it simple and clean -->
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        .chat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-card {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-card:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-icon {
+            background: #e3f2fd;
+            padding: 8px;
+            border-radius: 50%;
+            color: #1976d2;
+        }
+
+        .chat-details h3 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        .chat-details p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .loading, .error, .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .error {
+            color: #e74c3c;
+            background: #fdf0ed;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Recent Conversations</h1>
+        </div>
+        <div id="content">
+            <!-- Content will be dynamically inserted here -->
+            <div class="loading">
+                <div class="spinner"></div>
+                <span>Loading recent chats...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store DOM elements we'll need to update
+        const contentElement = document.getElementById('content');
+
+        // Function to create HTML for a chat card
+        function createChatCard(chat) {
+            return `
+                <div class="chat-card" onclick="openChat('${chat.chat_id}')">
+                    <div class="chat-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="chat-details">
+                        <h3>${chat.topic || 'New Chat'}</h3>
+                        <p>Click to continue conversation</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Function to show loading state
+        function showLoading() {
+            contentElement.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading recent chats...</span>
+                </div>
+            `;
+        }
+
+        // Function to show error state
+        function showError(message) {
+            contentElement.innerHTML = `
+                <div class="error">
+                    <p>Error loading recent chats: ${message}</p>
+                </div>
+            `;
+        }
+
+        // Function to show empty state
+        function showEmptyState() {
+            contentElement.innerHTML = `
+                <div class="empty-state">
+                    <p>No recent chats found. Start a new conversation!</p>
+                </div>
+            `;
+        }
+
+        // Function to display chats
+        function displayChats(chats) {
+            if (!chats.length) {
+                showEmptyState();
+                return;
+            }
+
+            contentElement.innerHTML = `
+                <div class="chat-list">
+                    ${chats.map(chat => createChatCard(chat)).join('')}
+                </div>
+            `;
+        }
+
+        // Function to open a chat
+        function openChat(chatId) {
+            // Navigate to the chat page
+            window.location.href = `/chat/${chatId}`;
+        }
+
+        // Function to fetch recent chats
+        async function fetchRecentChats() {
+            try {
+                showLoading();
+
+                const response = await fetch('/path/to/your/backend.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'getRecentChats'
+                    }),
+                    credentials: 'include' // Important for session handling
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch chats');
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                displayChats(data.chats || []);
+            } catch (error) {
+                showError(error.message);
+                console.error('Error fetching chats:', error);
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', fetchRecentChats);
+    </script>
+</body>
+</html>
