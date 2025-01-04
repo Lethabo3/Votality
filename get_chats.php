@@ -5,21 +5,20 @@ session_start();
 // Include the UsersBimo file for database connection
 require_once 'UsersBimo.php';
 
-// Set necessary headers for API response
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', 'chat_error.log');
+
+// Set necessary headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
 
-// Handle CORS preflight requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
-    exit(0);
-}
-
-// Function to log debug messages - using the same format as the main system
+// Function to log debug messages
 function debug_log($message) {
-    error_log(date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n", 3, '/path/to/votality-debug.log');
+    error_log(date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n", 3, 'chat_debug.log');
 }
 
 // Function to check if user is logged in
@@ -29,20 +28,35 @@ function checkSession() {
 
 // Function to get recent chats from database
 function getRecentChatsFromDatabase($userId) {
-    global $conn; // Using the connection from UsersBimo.php
+    global $conn;
     
     try {
-        // Prepare the query to get recent chats
+        debug_log("Starting database query for user: " . $userId);
+        
+        // Modified query to match your database structure
         $stmt = $conn->prepare("
-            SELECT chat_id, topic, created_at
+            SELECT 
+                chat_id,
+                topic,
+                created_at,
+                updated_at,
+                summary
             FROM votality_chats 
             WHERE user_id = ?
             ORDER BY created_at DESC
-            LIMIT 6
+            LIMIT 10
         ");
         
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        
         $stmt->bind_param("i", $userId);
-        $stmt->execute();
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        
         $result = $stmt->get_result();
         
         $chats = [];
@@ -50,23 +64,31 @@ function getRecentChatsFromDatabase($userId) {
             $chats[] = [
                 'chat_id' => $row['chat_id'],
                 'topic' => $row['topic'] ?? 'New Chat',
-                'created_at' => $row['created_at']
+                'created_at' => $row['created_at'],
+                'updated_at' => $row['updated_at'],
+                'summary' => $row['summary']
             ];
         }
         
-        debug_log("Successfully retrieved " . count($chats) . " chats for user " . $userId);
+        debug_log("Successfully retrieved " . count($chats) . " chats");
         return ['chats' => $chats];
 
     } catch (Exception $e) {
-        debug_log("Database error in getRecentChatsFromDatabase: " . $e->getMessage());
-        return ['error' => 'Database error: ' . $e->getMessage()];
+        debug_log("Database error: " . $e->getMessage());
+        throw $e;
     }
 }
 
 try {
-    // First check if user is logged in
+    // Verify database connection
+    if (!isset($conn) || $conn->connect_error) {
+        throw new Exception("Database connection failed");
+    }
+
+    debug_log("Checking session status");
+    
+    // Check authentication
     if (!checkSession()) {
-        debug_log("Session check failed - user not logged in");
         echo json_encode([
             'error' => 'auth_required',
             'message' => 'Please sign in to view chats'
@@ -74,15 +96,23 @@ try {
         exit;
     }
 
-    // Get user's chats using the global connection from UsersBimo.php
-    debug_log("Fetching chats for user ID: " . $_SESSION['user_id']);
+    debug_log("Session valid, fetching chats for user: " . $_SESSION['user_id']);
+    
+    // Get chats
     $response = getRecentChatsFromDatabase($_SESSION['user_id']);
     
-    debug_log("Final response: " . json_encode($response));
+    debug_log("Sending response: " . json_encode($response));
     echo json_encode($response);
 
 } catch (Exception $e) {
-    debug_log("Error in main execution: " . $e->getMessage());
-    echo json_encode(['error' => $e->getMessage()]);
+    $errorResponse = [
+        'error' => 'An error occurred',
+        'message' => $e->getMessage()
+    ];
+    debug_log("Error occurred: " . $e->getMessage());
+    echo json_encode($errorResponse);
 }
+
+// Ensure no additional output
+exit;
 ?>
