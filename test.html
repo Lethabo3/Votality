@@ -3,55 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recent Chats</title>
+    <meta name="description" content="View and manage your recent conversations">
+    <title>Recent Conversations | Votality AI</title>
     <style>
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
+        /* Reset and base styles for consistency */
+        * {
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            padding: 0;
+            box-sizing: border-box;
         }
 
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            color: #1a1a1a;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        /* Main container styles */
         .container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            padding: 24px;
         }
 
+        /* Header section styles */
         .header {
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e5e5;
         }
 
         .header h1 {
-            margin: 0;
-            color: #2c3e50;
             font-size: 24px;
+            color: #2c3e50;
+            font-weight: 600;
         }
 
-        .new-chat-button {
+        /* Button styles */
+        .button {
             background: #3498db;
             color: white;
             border: none;
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.2s;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .new-chat-button:hover {
+        .button:hover {
             background: #2980b9;
+            transform: translateY(-1px);
         }
 
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Chat list styles */
         .chat-list {
             display: flex;
             flex-direction: column;
@@ -60,45 +86,58 @@
 
         .chat-card {
             background: white;
-            border: 1px solid #eee;
-            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
             padding: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .chat-card:hover {
             background: #f8f9fa;
+            border-color: #d1d5db;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .chat-icon {
             background: #e3f2fd;
-            padding: 8px;
+            padding: 10px;
             border-radius: 50%;
             color: #1976d2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-details {
+            flex: 1;
         }
 
         .chat-details h3 {
             margin: 0 0 4px 0;
             font-size: 16px;
             color: #2c3e50;
+            font-weight: 500;
         }
 
         .chat-details p {
             margin: 0;
             font-size: 14px;
-            color: #666;
+            color: #64748b;
         }
 
+        /* Status display styles */
         .message {
             padding: 16px;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .message.error {
@@ -113,20 +152,27 @@
             border: 1px solid #fed7aa;
         }
 
+        .message.info {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #dbeafe;
+        }
+
+        /* Loading state styles */
         .loading {
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px;
-            color: #666;
-            gap: 8px;
+            color: #6b7280;
+            gap: 12px;
         }
 
         .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #3498db;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -136,22 +182,61 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Empty state styles */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            color: #9ca3af;
+            margin-bottom: 16px;
+        }
+
+        .empty-state p {
+            margin-bottom: 16px;
+        }
+
+        /* Debug panel styles */
         .debug-panel {
             margin-top: 20px;
             padding: 16px;
             background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
             font-family: monospace;
             font-size: 12px;
             white-space: pre-wrap;
             display: none;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .chat-card {
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -159,19 +244,24 @@
     <div class="container">
         <div class="header">
             <h1>Recent Conversations</h1>
-            <button onclick="createNewChat()" class="new-chat-button">New Chat</button>
+            <button onclick="createNewChat()" class="button" id="new-chat-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"></path>
+                </svg>
+                New Chat
+            </button>
         </div>
         <div id="content">
             <div class="loading">
                 <div class="spinner"></div>
-                <span>Loading recent chats...</span>
+                <span>Loading your conversations...</span>
             </div>
         </div>
         <div id="debug-panel" class="debug-panel"></div>
     </div>
 
     <script>
-        // Debug logging helper
+        // Utility function for debug logging
         function debugLog(message, data = null) {
             const debugPanel = document.getElementById('debug-panel');
             const timestamp = new Date().toISOString();
@@ -182,13 +272,78 @@
             }
             
             console.log(message, data);
-            debugPanel.style.display = 'block';
-            debugPanel.textContent += logMessage;
+            
+            // Show debug panel in development environment
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                debugPanel.style.display = 'block';
+                debugPanel.textContent += logMessage;
+            }
         }
 
-        // Function to create a new chat
+        // UI state management functions
+        function showLoading() {
+            document.getElementById('content').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading your conversations...</span>
+                </div>
+            `;
+        }
+
+        function showError(message, type = 'error') {
+            document.getElementById('content').innerHTML = `
+                <div class="message ${type}">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showAuthError(message) {
+            document.getElementById('content').innerHTML = `
+                <div class="message auth">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path>
+                    </svg>
+                    <div>
+                        <p>${message}</p>
+                        <p style="margin-top: 8px;">
+                            <a href="login.php" style="color: inherit; text-decoration: underline;">Sign in</a>
+                            to continue.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            document.getElementById('content').innerHTML = `
+                <div class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <p>No conversations yet</p>
+                    <button onclick="createNewChat()" class="button">Start a new chat</button>
+                </div>
+            `;
+        }
+
+        // Chat management functions
         async function createNewChat() {
             try {
+                const button = document.getElementById('new-chat-button');
+                button.disabled = true;
+                button.innerHTML = `
+                    <div class="spinner" style="width: 16px; height: 16px;"></div>
+                    Creating...
+                `;
+
+                debugLog('Creating new chat');
+
                 const response = await fetch('votality_ai_service2.php', {
                     method: 'POST',
                     headers: {
@@ -200,64 +355,46 @@
                     credentials: 'include'
                 });
 
-                const data = await response.json();
-                
-                if (data.error) {
-                    if (data.error === 'auth_required') {
-                        showAuthError(data.message);
-                    } else {
-                        showError(data.error);
-                    }
+                const rawText = await response.text();
+                debugLog('Create chat response:', { rawText });
+
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (parseError) {
+                    throw new Error('Server returned invalid response');
+                }
+
+                if (data.error === 'auth_required') {
+                    showAuthError(data.message);
                     return;
+                }
+
+                if (data.error) {
+                    throw new Error(data.error);
                 }
 
                 // Redirect to the new chat
                 window.location.href = `chat.php?id=${data.chatId}`;
+
             } catch (error) {
-                showError('Failed to create new chat');
-                debugLog('Error creating new chat:', error);
+                debugLog('Error creating chat:', error);
+                showError('Unable to create new chat. Please try again.');
+            } finally {
+                const button = document.getElementById('new-chat-button');
+                button.disabled = false;
+                button.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"></path>
+                    </svg>
+                    New Chat
+                `;
             }
         }
 
-        // Function to handle navigation to a specific chat
         function openChat(chatId) {
             debugLog('Opening chat:', { chatId });
             window.location.href = `chat.php?id=${chatId}`;
-        }
-
-        // UI helper functions
-        function showLoading() {
-            document.getElementById('content').innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <span>Loading recent chats...</span>
-                </div>
-            `;
-        }
-
-        function showError(message) {
-            document.getElementById('content').innerHTML = `
-                <div class="message error">
-                    <p>${message}</p>
-                </div>
-            `;
-        }
-
-        function showAuthError(message) {
-            document.getElementById('content').innerHTML = `
-                <div class="message auth">
-                    <p>${message}</p>
-                    <p>Please <a href="login.php">sign in</a> to continue.</p>
-                </div>
-            `;
-        }
-
-        function showEmptyState() {
-            document.getElementById('content').innerHTML = `
-                <div class="empty-state">
-                    <p>No recent chats found. Start a new conversation!</p>
-                </div>
-            `;
         }
 
         // Main function to fetch and display chats
@@ -282,28 +419,25 @@
                     statusText: response.statusText
                 });
 
-                // Get raw response first
                 const rawText = await response.text();
                 debugLog('Raw response:', { rawText });
 
-                // Parse the response
                 let data;
                 try {
                     data = JSON.parse(rawText);
                     debugLog('Parsed response:', data);
                 } catch (parseError) {
-                    throw new Error('Invalid response from server');
+                    debugLog('JSON parse error:', parseError);
+                    throw new Error('Server returned invalid response');
                 }
 
-                // Handle different response types
                 if (data.error === 'auth_required') {
                     showAuthError(data.message);
                     return;
                 }
 
                 if (data.error) {
-                    showError(data.error);
-                    return;
+                    throw new Error(data.error);
                 }
 
                 const chats = data.chats || [];
