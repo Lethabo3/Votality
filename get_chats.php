@@ -1,8 +1,8 @@
 <?php
-// This file handles only retrieving chats, expecting an existing session
+// Start session to access user data
 session_start();
 
-// Include the database connection
+// Include database connection
 require_once 'UsersBimo.php';
 
 // Set up headers for API responses
@@ -17,72 +17,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-// Helper function for logging debug information
-function debug_log($message) {
-    error_log(date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n", 3, 'chat_debug.log');
-}
-
-// Check if user is logged in
+// Function to check if user is properly logged in
 function checkSession() {
-    return isset($_SESSION['user_id']) && isset($_SESSION['logged_in']);
-}
-
-// Main function to retrieve chats from database
-function getRecentChatsFromDatabase($userId) {
-    global $conn;
-    
-    try {
-        // Query matches your database structure as shown in the screenshot
-        $stmt = $conn->prepare("
-            SELECT 
-                chat_id,
-                topic,
-                created_at,
-                updated_at,
-                summary
-            FROM votality_chats 
-            WHERE user_id = ?
-            ORDER BY created_at DESC
-            LIMIT 10
-        ");
-        
-        if (!$stmt) {
-            throw new Exception("Database query preparation failed");
-        }
-        
-        $stmt->bind_param("i", $userId);
-        
-        if (!$stmt->execute()) {
-            throw new Exception("Database query execution failed");
-        }
-        
-        $result = $stmt->get_result();
-        
-        $chats = [];
-        while ($row = $result->fetch_assoc()) {
-            $chats[] = [
-                'chat_id' => $row['chat_id'],
-                'topic' => $row['topic'] ?? 'New Chat',
-                'created_at' => $row['created_at'],
-                'updated_at' => $row['updated_at'],
-                'summary' => $row['summary']
-            ];
-        }
-        
-        return ['chats' => $chats];
-    } catch (Exception $e) {
-        debug_log("Database error: " . $e->getMessage());
-        throw $e;
-    }
+    return isset($_SESSION['user_id']) && 
+           isset($_SESSION['logged_in']) && 
+           isset($_SESSION['session_id']) &&
+           $_SESSION['logged_in'] === true;
 }
 
 try {
-    // Verify database connection first
+    // Check database connection
     if (!isset($conn) || $conn->connect_error) {
         throw new Exception("Database connection failed");
     }
 
-    // Check if user is logged in
+    // Verify user is logged in
     if (!checkSession()) {
         echo json_encode([
             'error' => 'auth_required',
@@ -91,9 +40,45 @@ try {
         exit;
     }
 
-    // Get and return the chats
-    $response = getRecentChatsFromDatabase($_SESSION['user_id']);
-    echo json_encode($response);
+    // Get user's chats
+    $stmt = $conn->prepare("
+        SELECT 
+            chat_id,
+            topic,
+            created_at,
+            updated_at,
+            summary
+        FROM votality_chats 
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+        LIMIT 10
+    ");
+
+    if (!$stmt) {
+        throw new Exception("Failed to prepare database query");
+    }
+
+    $userId = $_SESSION['user_id'];
+    $stmt->bind_param("i", $userId);
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Failed to execute database query");
+    }
+
+    $result = $stmt->get_result();
+    $chats = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $chats[] = [
+            'chat_id' => $row['chat_id'],
+            'topic' => $row['topic'] ?? 'New Chat',
+            'created_at' => $row['created_at'],
+            'updated_at' => $row['updated_at'],
+            'summary' => $row['summary']
+        ];
+    }
+
+    echo json_encode(['chats' => $chats]);
 
 } catch (Exception $e) {
     echo json_encode([

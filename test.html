@@ -10,6 +10,7 @@
             margin: 0;
             padding: 20px;
             background-color: #f5f5f5;
+            color: #333;
         }
 
         .container {
@@ -36,6 +37,13 @@
             font-size: 24px;
         }
 
+        .auth-section {
+            margin-top: 8px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
         .button {
             background: #3498db;
             color: white;
@@ -44,16 +52,12 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            text-decoration: none;
             transition: background-color 0.2s;
         }
 
         .button:hover {
             background: #2980b9;
-        }
-
-        .button-group {
-            display: flex;
-            gap: 8px;
         }
 
         .chat-list {
@@ -98,17 +102,31 @@
             margin-top: 8px;
         }
 
-        .loading, .error {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        .message {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
         }
 
-        .error {
-            color: #dc2626;
+        .message.error {
             background: #fee2e2;
-            border-radius: 8px;
-            margin: 20px 0;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .message.auth {
+            background: #fff7ed;
+            color: #9a3412;
+            border: 1px solid #fed7aa;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            color: #666;
+            gap: 12px;
         }
 
         .spinner {
@@ -118,18 +136,18 @@
             border-top: 3px solid #3498db;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
         }
 
         #debug-panel {
             margin-top: 20px;
             padding: 16px;
             background: #f8f9fa;
-            border: 1px solid #e9ecef;
+            border: 1px solid #dee2e6;
             border-radius: 8px;
             font-family: monospace;
             font-size: 12px;
             white-space: pre-wrap;
+            display: none;
         }
 
         @keyframes spin {
@@ -141,16 +159,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Chat History</h1>
-            <div class="button-group">
-                <button onclick="fetchChats('get_chats.php')" class="button">Load Chats (Session)</button>
-                <button onclick="fetchChats('get_chats_with_auth.php')" class="button">Load Chats (Auto Auth)</button>
-            </div>
+            <h1>Recent Conversations</h1>
+            <a href="signin.html" class="button">Sign In</a>
         </div>
         <div id="content">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>Choose a method to load chats...</p>
+                <span>Loading conversations...</span>
             </div>
         </div>
         <div id="debug-panel"></div>
@@ -168,10 +183,11 @@
             }
             
             console.log(message, data);
+            debugPanel.style.display = 'block';
             debugPanel.textContent += logMessage;
         }
 
-        // Format dates nicely
+        // Format date in a user-friendly way
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleString('en-US', {
@@ -183,20 +199,46 @@
             });
         }
 
-        // Main function to fetch and display chats
-        async function fetchChats(endpoint) {
-            const content = document.getElementById('content');
-            content.innerHTML = `
+        // Function to show loading state
+        function showLoading() {
+            document.getElementById('content').innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Loading chat history...</p>
+                    <span>Loading conversations...</span>
                 </div>
             `;
+        }
 
-            debugLog(`Fetching chats from ${endpoint}`);
+        // Function to show error message
+        function showError(message, type = 'error') {
+            document.getElementById('content').innerHTML = `
+                <div class="message ${type}">
+                    <p>${message}</p>
+                </div>
+            `;
+        }
 
+        // Function to show auth error
+        function showAuthError(message) {
+            document.getElementById('content').innerHTML = `
+                <div class="message auth">
+                    <p>${message}</p>
+                    <p style="margin-top: 8px;">
+                        <a href="signin.html" style="color: inherit; text-decoration: underline;">
+                            Sign in
+                        </a> to continue.
+                    </p>
+                </div>
+            `;
+        }
+
+        // Main function to fetch and display chats
+        async function loadChats() {
             try {
-                const response = await fetch(endpoint, {
+                showLoading();
+                debugLog('Fetching chats');
+
+                const response = await fetch('get_chats.php', {
                     method: 'GET',
                     credentials: 'include'
                 });
@@ -207,19 +249,29 @@
                 });
 
                 const text = await response.text();
-                debugLog('Raw response:', { rawText: text });
+                debugLog('Raw response:', { text });
 
-                const data = JSON.parse(text);
-                debugLog('Parsed response:', data);
+                let data;
+                try {
+                    data = JSON.parse(text);
+                    debugLog('Parsed response:', data);
+                } catch (e) {
+                    throw new Error('Invalid response from server');
+                }
+
+                if (data.error === 'auth_required') {
+                    showAuthError(data.message);
+                    return;
+                }
 
                 if (data.error) {
                     throw new Error(data.message || data.error);
                 }
 
-                const chats = data.chats;
-                if (!chats || chats.length === 0) {
-                    content.innerHTML = `
-                        <div class="loading">No chats found</div>
+                const chats = data.chats || [];
+                if (chats.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="message">No conversations found.</div>
                     `;
                     return;
                 }
@@ -230,6 +282,7 @@
                             <div class="chat-topic">${chat.topic || 'New Chat'}</div>
                             <div class="chat-date">${formatDate(chat.created_at)}</div>
                         </div>
+                        ${chat.summary ? `<div class="chat-summary">${chat.summary}</div>` : ''}
                     </div>
                 `).join('');
 
@@ -238,13 +291,13 @@
                 `;
 
             } catch (error) {
+                debugLog('Error occurred:', error);
                 showError('An error occurred while loading chats. Please try again.');
-                console.error('Error:', error);
             }
         }
 
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', fetchRecentChats);
+        // Load chats when page loads
+        document.addEventListener('DOMContentLoaded', loadChats);
     </script>
 </body>
 </html>
