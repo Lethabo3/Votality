@@ -3,25 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="View and manage your recent conversations">
-    <title>Recent Conversations | Votality AI</title>
+    <title>Recent Chats</title>
     <style>
-        /* Reset and base styles for consistency */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* Modern, clean styling */
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.5;
-            color: #1a1a1a;
-            background-color: #f5f5f5;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
             padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
         }
 
-        /* Main container styles */
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -31,53 +23,19 @@
             padding: 24px;
         }
 
-        /* Header section styles */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 24px;
             padding-bottom: 16px;
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid #eee;
         }
 
         .header h1 {
-            font-size: 24px;
+            margin: 0;
             color: #2c3e50;
-            font-weight: 600;
+            font-size: 24px;
         }
 
-        /* Button styles */
-        .button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .button:hover {
-            background: #2980b9;
-            transform: translateY(-1px);
-        }
-
-        .button:active {
-            transform: translateY(0);
-        }
-
-        .button svg {
-            width: 16px;
-            height: 16px;
-        }
-
-        /* Chat list styles */
+        /* Chat list styling */
         .chat-list {
             display: flex;
             flex-direction: column;
@@ -86,19 +44,18 @@
 
         .chat-card {
             background: white;
-            border: 1px solid #e5e5e5;
+            border: 1px solid #eee;
             border-radius: 8px;
             padding: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .chat-card:hover {
             background: #f8f9fa;
-            border-color: #d1d5db;
             transform: translateY(-1px);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
@@ -108,9 +65,6 @@
             padding: 10px;
             border-radius: 50%;
             color: #1976d2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .chat-details {
@@ -121,23 +75,24 @@
             margin: 0 0 4px 0;
             font-size: 16px;
             color: #2c3e50;
-            font-weight: 500;
         }
 
         .chat-details p {
             margin: 0;
             font-size: 14px;
-            color: #64748b;
+            color: #666;
         }
 
-        /* Status display styles */
+        .chat-date {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        /* Status displays */
         .message {
             padding: 16px;
             border-radius: 8px;
             margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
         .message.error {
@@ -152,20 +107,13 @@
             border: 1px solid #fed7aa;
         }
 
-        .message.info {
-            background: #eff6ff;
-            color: #1e40af;
-            border: 1px solid #dbeafe;
-        }
-
-        /* Loading state styles */
         .loading {
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px;
-            color: #6b7280;
-            gap: 12px;
+            color: #666;
+            gap: 8px;
         }
 
         .spinner {
@@ -182,61 +130,10 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Empty state styles */
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: #6b7280;
-        }
-
-        .empty-state svg {
-            width: 48px;
-            height: 48px;
-            color: #9ca3af;
-            margin-bottom: 16px;
-        }
-
-        .empty-state p {
-            margin-bottom: 16px;
-        }
-
-        /* Debug panel styles */
-        .debug-panel {
-            margin-top: 20px;
-            padding: 16px;
-            background: #f8f9fa;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            display: none;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 640px) {
-            body {
-                padding: 12px;
-            }
-
-            .container {
-                padding: 16px;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-
-            .button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .chat-card {
-                padding: 12px;
-            }
+            color: #666;
         }
     </style>
 </head>
@@ -244,60 +141,58 @@
     <div class="container">
         <div class="header">
             <h1>Recent Conversations</h1>
-            <button onclick="createNewChat()" class="button" id="new-chat-button">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 5v14M5 12h14"></path>
-                </svg>
-                New Chat
-            </button>
         </div>
         <div id="content">
             <div class="loading">
                 <div class="spinner"></div>
-                <span>Loading your conversations...</span>
+                <span>Loading conversations...</span>
             </div>
         </div>
-        <div id="debug-panel" class="debug-panel"></div>
     </div>
 
     <script>
-        // Utility function for debug logging
-        function debugLog(message, data = null) {
-            const debugPanel = document.getElementById('debug-panel');
-            const timestamp = new Date().toISOString();
-            let logMessage = `[${timestamp}] ${message}\n`;
+        // Format dates in a user-friendly way
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
             
-            if (data) {
-                logMessage += JSON.stringify(data, null, 2) + '\n';
+            // If less than 24 hours ago, show relative time
+            if (diff < 24 * 60 * 60 * 1000) {
+                const hours = Math.floor(diff / (60 * 60 * 1000));
+                if (hours === 0) {
+                    const minutes = Math.floor(diff / (60 * 1000));
+                    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+                }
+                return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
             }
             
-            console.log(message, data);
-            
-            // Show debug panel in development environment
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                debugPanel.style.display = 'block';
-                debugPanel.textContent += logMessage;
+            // If within this year, show month and day
+            if (date.getFullYear() === now.getFullYear()) {
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             }
+            
+            // Otherwise show full date
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
         }
 
-        // UI state management functions
+        // UI state management
         function showLoading() {
             document.getElementById('content').innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <span>Loading your conversations...</span>
+                    <span>Loading conversations...</span>
                 </div>
             `;
         }
 
-        function showError(message, type = 'error') {
+        function showError(message) {
             document.getElementById('content').innerHTML = `
-                <div class="message ${type}">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
+                <div class="message error">
                     <p>${message}</p>
                 </div>
             `;
@@ -306,16 +201,12 @@
         function showAuthError(message) {
             document.getElementById('content').innerHTML = `
                 <div class="message auth">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 7h3a5 5 0 0 1 5 5 5 5 0 0 1-5 5h-3m-6 0H6a5 5 0 0 1-5-5 5 5 0 0 1 5-5h3"></path>
-                    </svg>
-                    <div>
-                        <p>${message}</p>
-                        <p style="margin-top: 8px;">
-                            <a href="login.php" style="color: inherit; text-decoration: underline;">Sign in</a>
-                            to continue.
-                        </p>
-                    </div>
+                    <p>${message}</p>
+                    <p style="margin-top: 8px;">
+                        <a href="login.php" style="color: inherit; text-decoration: underline;">
+                            Sign in
+                        </a> to continue.
+                    </p>
                 </div>
             `;
         }
@@ -323,113 +214,22 @@
         function showEmptyState() {
             document.getElementById('content').innerHTML = `
                 <div class="empty-state">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    <p>No conversations yet</p>
-                    <button onclick="createNewChat()" class="button">Start a new chat</button>
+                    <p>No conversations yet. Start chatting to see your history here.</p>
                 </div>
             `;
-        }
-
-        // Chat management functions
-        async function createNewChat() {
-            try {
-                const button = document.getElementById('new-chat-button');
-                button.disabled = true;
-                button.innerHTML = `
-                    <div class="spinner" style="width: 16px; height: 16px;"></div>
-                    Creating...
-                `;
-
-                debugLog('Creating new chat');
-
-                const response = await fetch('votality_ai_service2.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'createNewChat'
-                    }),
-                    credentials: 'include'
-                });
-
-                const rawText = await response.text();
-                debugLog('Create chat response:', { rawText });
-
-                let data;
-                try {
-                    data = JSON.parse(rawText);
-                } catch (parseError) {
-                    throw new Error('Server returned invalid response');
-                }
-
-                if (data.error === 'auth_required') {
-                    showAuthError(data.message);
-                    return;
-                }
-
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                // Redirect to the new chat
-                window.location.href = `chat.php?id=${data.chatId}`;
-
-            } catch (error) {
-                debugLog('Error creating chat:', error);
-                showError('Unable to create new chat. Please try again.');
-            } finally {
-                const button = document.getElementById('new-chat-button');
-                button.disabled = false;
-                button.innerHTML = `
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 5v14M5 12h14"></path>
-                    </svg>
-                    New Chat
-                `;
-            }
-        }
-
-        function openChat(chatId) {
-            debugLog('Opening chat:', { chatId });
-            window.location.href = `chat.php?id=${chatId}`;
         }
 
         // Main function to fetch and display chats
         async function fetchRecentChats() {
             try {
                 showLoading();
-                debugLog('Fetching recent chats');
 
-                const response = await fetch('votality_ai_service2.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'getRecentChats'
-                    }),
+                const response = await fetch('get_chats.php', {
+                    method: 'GET',
                     credentials: 'include'
                 });
 
-                debugLog('Response received:', {
-                    status: response.status,
-                    statusText: response.statusText
-                });
-
-                const rawText = await response.text();
-                debugLog('Raw response:', { rawText });
-
-                let data;
-                try {
-                    data = JSON.parse(rawText);
-                    debugLog('Parsed response:', data);
-                } catch (parseError) {
-                    debugLog('JSON parse error:', parseError);
-                    throw new Error('Server returned invalid response');
-                }
+                const data = await response.json();
 
                 if (data.error === 'auth_required') {
                     showAuthError(data.message);
@@ -437,7 +237,8 @@
                 }
 
                 if (data.error) {
-                    throw new Error(data.error);
+                    showError(data.error);
+                    return;
                 }
 
                 const chats = data.chats || [];
@@ -448,7 +249,7 @@
 
                 // Display the chats
                 const chatsList = chats.map(chat => `
-                    <div class="chat-card" onclick="openChat('${chat.chat_id}')">
+                    <div class="chat-card" onclick="window.location.href='chat.php?id=${chat.chat_id}'">
                         <div class="chat-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -456,7 +257,7 @@
                         </div>
                         <div class="chat-details">
                             <h3>${chat.topic || 'New Chat'}</h3>
-                            <p>Click to continue conversation</p>
+                            <div class="chat-date">${formatDate(chat.created_at)}</div>
                         </div>
                     </div>
                 `).join('');
@@ -466,8 +267,8 @@
                 `;
 
             } catch (error) {
-                debugLog('Error occurred:', error);
-                showError('An error occurred while loading chats');
+                showError('An error occurred while loading chats. Please try again.');
+                console.error('Error:', error);
             }
         }
 
