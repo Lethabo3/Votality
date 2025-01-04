@@ -1,3 +1,4 @@
+# Frontend (index.html)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recent Chats</title>
     <style>
-        /* Previous styles remain the same */
+        /* Base styles for better readability and modern look */
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
@@ -35,6 +36,7 @@
             font-size: 24px;
         }
 
+        /* Chat list and card styles */
         .chat-list {
             display: flex;
             flex-direction: column;
@@ -78,6 +80,7 @@
             color: #666;
         }
 
+        /* Status display styles */
         .loading, .error, .empty-state {
             text-align: center;
             padding: 40px;
@@ -104,18 +107,32 @@
             color: #e74c3c;
             background: #fdf0ed;
             border-radius: 6px;
-            margin: 20px 0;
             padding: 16px;
+            margin: 20px 0;
         }
 
-        .debug-info {
+        /* Debug panel styles */
+        .debug-panel {
             margin-top: 20px;
             padding: 16px;
             background: #f8f9fa;
+            border: 1px solid #dee2e6;
             border-radius: 6px;
+            display: none;
+        }
+
+        .debug-panel pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
             font-family: monospace;
             font-size: 12px;
-            white-space: pre-wrap;
+        }
+
+        .debug-panel h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #495057;
         }
 
         @keyframes spin {
@@ -130,101 +147,49 @@
             <h1>Recent Conversations</h1>
         </div>
         <div id="content">
-            <!-- Content will be dynamically inserted here -->
             <div class="loading">
                 <div class="spinner"></div>
                 <span>Loading recent chats...</span>
             </div>
         </div>
-        <div id="debug-output" class="debug-info" style="display: none;"></div>
+        <div id="debug-panel" class="debug-panel">
+            <h3>Debug Information</h3>
+            <pre id="debug-output"></pre>
+        </div>
     </div>
 
     <script>
-        // Debug logging helper
+        // Debug logging helper function
         function debugLog(message, data = null) {
+            const debugPanel = document.getElementById('debug-panel');
             const debugOutput = document.getElementById('debug-output');
             const timestamp = new Date().toISOString();
-            const logMessage = `[${timestamp}] ${message}`;
+            let logMessage = `[${timestamp}] ${message}\n`;
             
-            console.log(logMessage, data);
-            
-            debugOutput.style.display = 'block';
-            debugOutput.innerHTML += `${logMessage}\n`;
             if (data) {
-                debugOutput.innerHTML += JSON.stringify(data, null, 2) + '\n';
+                logMessage += JSON.stringify(data, null, 2) + '\n';
             }
+            
+            console.log(message, data);
+            debugPanel.style.display = 'block';
+            debugOutput.textContent += logMessage;
         }
 
-        const contentElement = document.getElementById('content');
-
-        function createChatCard(chat) {
-            return `
-                <div class="chat-card" onclick="openChat('${chat.chat_id}')">
-                    <div class="chat-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                    </div>
-                    <div class="chat-details">
-                        <h3>${chat.topic || 'New Chat'}</h3>
-                        <p>Click to continue conversation</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function showLoading() {
-            contentElement.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <span>Loading recent chats...</span>
-                </div>
-            `;
-        }
-
-        function showError(message, details = '') {
-            contentElement.innerHTML = `
-                <div class="error">
-                    <p>Error loading recent chats: ${message}</p>
-                    ${details ? `<p style="font-size: 12px; margin-top: 8px;">${details}</p>` : ''}
-                </div>
-            `;
-        }
-
-        function showEmptyState() {
-            contentElement.innerHTML = `
-                <div class="empty-state">
-                    <p>No recent chats found. Start a new conversation!</p>
-                </div>
-            `;
-        }
-
-        function displayChats(chats) {
-            if (!chats.length) {
-                showEmptyState();
-                return;
-            }
-
-            contentElement.innerHTML = `
-                <div class="chat-list">
-                    ${chats.map(chat => createChatCard(chat)).join('')}
-                </div>
-            `;
-        }
-
-        function openChat(chatId) {
-            debugLog(`Attempting to open chat: ${chatId}`);
-            // You can customize this URL based on your application's structure
-            window.location.href = `chat.php?id=${chatId}`;
-        }
-
+        // Main function to fetch and display recent chats
         async function fetchRecentChats() {
             try {
-                showLoading();
-                debugLog('Initiating fetch request to backend');
+                const contentElement = document.getElementById('content');
+                contentElement.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Loading recent chats...</span>
+                    </div>
+                `;
 
-                // Update this URL to match your PHP file location
-                const response = await fetch('votality_ai_service2.php', {
+                debugLog('Initiating fetch request');
+
+                // Make the API request
+                const response = await fetch('get_chats.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -235,37 +200,79 @@
                     credentials: 'include' // Important for session handling
                 });
 
-                debugLog('Received response from server', {
+                debugLog('Response status:', {
                     status: response.status,
                     statusText: response.statusText
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                // Get the raw response text first
+                const rawText = await response.text();
+                debugLog('Raw response:', { rawText });
 
-                const data = await response.json();
-                debugLog('Parsed response data', data);
+                // Try to parse the response as JSON
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                    debugLog('Parsed JSON data:', data);
+                } catch (parseError) {
+                    throw new Error(`Invalid JSON response: ${rawText}`);
+                }
 
                 if (data.error) {
                     throw new Error(data.error);
                 }
 
-                displayChats(data.chats || []);
+                // Display the chats or show empty state
+                const chats = data.chats || [];
+                if (chats.length === 0) {
+                    contentElement.innerHTML = `
+                        <div class="empty-state">
+                            <p>No recent chats found. Start a new conversation!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Generate chat cards for each chat
+                const chatsList = chats.map(chat => `
+                    <div class="chat-card" onclick="openChat('${chat.chat_id}')">
+                        <div class="chat-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="chat-details">
+                            <h3>${chat.topic || 'New Chat'}</h3>
+                            <p>Click to continue conversation</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                contentElement.innerHTML = `
+                    <div class="chat-list">
+                        ${chatsList}
+                    </div>
+                `;
+
             } catch (error) {
-                debugLog('Error occurred during fetch', {
+                debugLog('Error occurred:', {
                     message: error.message,
                     stack: error.stack
                 });
-                
-                let errorDetails = '';
-                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    errorDetails = 'Could not connect to the server. Please check that the backend service is running and accessible.';
-                }
-                
-                showError(error.message, errorDetails);
-                console.error('Error fetching chats:', error);
+
+                const contentElement = document.getElementById('content');
+                contentElement.innerHTML = `
+                    <div class="error">
+                        <p>Error loading recent chats: ${error.message}</p>
+                    </div>
+                `;
             }
+        }
+
+        // Function to handle opening a specific chat
+        function openChat(chatId) {
+            debugLog('Opening chat:', { chatId });
+            window.location.href = `chat.php?id=${chatId}`;
         }
 
         // Initialize the page
