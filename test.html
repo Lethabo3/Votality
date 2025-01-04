@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recent Chats</title>
-    <!-- We add some modern styling while keeping it simple and clean -->
     <style>
+        /* Previous styles remain the same */
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
@@ -105,6 +105,17 @@
             background: #fdf0ed;
             border-radius: 6px;
             margin: 20px 0;
+            padding: 16px;
+        }
+
+        .debug-info {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
         }
 
         @keyframes spin {
@@ -125,13 +136,27 @@
                 <span>Loading recent chats...</span>
             </div>
         </div>
+        <div id="debug-output" class="debug-info" style="display: none;"></div>
     </div>
 
     <script>
-        // Store DOM elements we'll need to update
+        // Debug logging helper
+        function debugLog(message, data = null) {
+            const debugOutput = document.getElementById('debug-output');
+            const timestamp = new Date().toISOString();
+            const logMessage = `[${timestamp}] ${message}`;
+            
+            console.log(logMessage, data);
+            
+            debugOutput.style.display = 'block';
+            debugOutput.innerHTML += `${logMessage}\n`;
+            if (data) {
+                debugOutput.innerHTML += JSON.stringify(data, null, 2) + '\n';
+            }
+        }
+
         const contentElement = document.getElementById('content');
 
-        // Function to create HTML for a chat card
         function createChatCard(chat) {
             return `
                 <div class="chat-card" onclick="openChat('${chat.chat_id}')">
@@ -148,7 +173,6 @@
             `;
         }
 
-        // Function to show loading state
         function showLoading() {
             contentElement.innerHTML = `
                 <div class="loading">
@@ -158,16 +182,15 @@
             `;
         }
 
-        // Function to show error state
-        function showError(message) {
+        function showError(message, details = '') {
             contentElement.innerHTML = `
                 <div class="error">
                     <p>Error loading recent chats: ${message}</p>
+                    ${details ? `<p style="font-size: 12px; margin-top: 8px;">${details}</p>` : ''}
                 </div>
             `;
         }
 
-        // Function to show empty state
         function showEmptyState() {
             contentElement.innerHTML = `
                 <div class="empty-state">
@@ -176,7 +199,6 @@
             `;
         }
 
-        // Function to display chats
         function displayChats(chats) {
             if (!chats.length) {
                 showEmptyState();
@@ -190,18 +212,19 @@
             `;
         }
 
-        // Function to open a chat
         function openChat(chatId) {
-            // Navigate to the chat page
-            window.location.href = `/chat/${chatId}`;
+            debugLog(`Attempting to open chat: ${chatId}`);
+            // You can customize this URL based on your application's structure
+            window.location.href = `chat.php?id=${chatId}`;
         }
 
-        // Function to fetch recent chats
         async function fetchRecentChats() {
             try {
                 showLoading();
+                debugLog('Initiating fetch request to backend');
 
-                const response = await fetch('/path/to/your/backend.php', {
+                // Update this URL to match your PHP file location
+                const response = await fetch('votality_ai_service2.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -212,11 +235,17 @@
                     credentials: 'include' // Important for session handling
                 });
 
+                debugLog('Received response from server', {
+                    status: response.status,
+                    statusText: response.statusText
+                });
+
                 if (!response.ok) {
-                    throw new Error('Failed to fetch chats');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
+                debugLog('Parsed response data', data);
 
                 if (data.error) {
                     throw new Error(data.error);
@@ -224,7 +253,17 @@
 
                 displayChats(data.chats || []);
             } catch (error) {
-                showError(error.message);
+                debugLog('Error occurred during fetch', {
+                    message: error.message,
+                    stack: error.stack
+                });
+                
+                let errorDetails = '';
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    errorDetails = 'Could not connect to the server. Please check that the backend service is running and accessible.';
+                }
+                
+                showError(error.message, errorDetails);
                 console.error('Error fetching chats:', error);
             }
         }
