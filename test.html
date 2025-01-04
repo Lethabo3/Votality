@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recent Chats</title>
+    <title>Chat History</title>
     <style>
-        /* Modern, clean styling */
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
@@ -24,6 +23,9 @@
         }
 
         .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 24px;
             padding-bottom: 16px;
             border-bottom: 1px solid #eee;
@@ -35,7 +37,6 @@
             font-size: 24px;
         }
 
-        /* Chat list styling */
         .chat-list {
             display: flex;
             flex-direction: column;
@@ -49,9 +50,6 @@
             padding: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
         .chat-card:hover {
@@ -60,60 +58,36 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
-        .chat-icon {
-            background: #e3f2fd;
-            padding: 10px;
-            border-radius: 50%;
-            color: #1976d2;
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
         }
 
-        .chat-details {
-            flex: 1;
-        }
-
-        .chat-details h3 {
-            margin: 0 0 4px 0;
-            font-size: 16px;
+        .chat-topic {
+            font-weight: 600;
             color: #2c3e50;
         }
 
-        .chat-details p {
-            margin: 0;
-            font-size: 14px;
-            color: #666;
-        }
-
         .chat-date {
-            font-size: 12px;
+            font-size: 14px;
             color: #94a3b8;
         }
 
-        /* Status displays */
-        .message {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
+        .chat-summary {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 8px;
         }
 
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .message.auth {
-            background: #fff7ed;
-            color: #9a3412;
-            border: 1px solid #fed7aa;
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .loading, .error {
+            text-align: center;
             padding: 40px;
             color: #666;
-            gap: 8px;
+        }
+
+        .error {
+            color: #dc2626;
         }
 
         .spinner {
@@ -123,142 +97,70 @@
             border-top: 3px solid #3498db;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Recent Conversations</h1>
+            <h1>Chat History</h1>
         </div>
         <div id="content">
             <div class="loading">
                 <div class="spinner"></div>
-                <span>Loading conversations...</span>
+                <p>Loading chat history...</p>
             </div>
         </div>
     </div>
 
     <script>
-        // Format dates in a user-friendly way
+        // Format the date in a user-friendly way
         function formatDate(dateString) {
             const date = new Date(dateString);
-            const now = new Date();
-            const diff = now - date;
-            
-            // If less than 24 hours ago, show relative time
-            if (diff < 24 * 60 * 60 * 1000) {
-                const hours = Math.floor(diff / (60 * 60 * 1000));
-                if (hours === 0) {
-                    const minutes = Math.floor(diff / (60 * 1000));
-                    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
-                }
-                return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
-            }
-            
-            // If within this year, show month and day
-            if (date.getFullYear() === now.getFullYear()) {
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            }
-            
-            // Otherwise show full date
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
 
-        // UI state management
-        function showLoading() {
-            document.getElementById('content').innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <span>Loading conversations...</span>
-                </div>
-            `;
-        }
-
-        function showError(message) {
-            document.getElementById('content').innerHTML = `
-                <div class="message error">
-                    <p>${message}</p>
-                </div>
-            `;
-        }
-
-        function showAuthError(message) {
-            document.getElementById('content').innerHTML = `
-                <div class="message auth">
-                    <p>${message}</p>
-                    <p style="margin-top: 8px;">
-                        <a href="login.php" style="color: inherit; text-decoration: underline;">
-                            Sign in
-                        </a> to continue.
-                    </p>
-                </div>
-            `;
-        }
-
-        function showEmptyState() {
-            document.getElementById('content').innerHTML = `
-                <div class="empty-state">
-                    <p>No conversations yet. Start chatting to see your history here.</p>
-                </div>
-            `;
-        }
-
-        // Main function to fetch and display chats
-        async function fetchRecentChats() {
+        // Fetch and display chats
+        async function fetchChats() {
             try {
-                showLoading();
-
-                const response = await fetch('get_chats.php', {
+                const response = await fetch('get_chats_with_auth.php', {
                     method: 'GET',
                     credentials: 'include'
                 });
 
                 const data = await response.json();
 
-                if (data.error === 'auth_required') {
-                    showAuthError(data.message);
-                    return;
-                }
-
                 if (data.error) {
-                    showError(data.error);
+                    throw new Error(data.message || 'Failed to load chats');
+                }
+
+                const chats = data.chats;
+                if (!chats || chats.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="loading">No chats found</div>
+                    `;
                     return;
                 }
 
-                const chats = data.chats || [];
-                if (chats.length === 0) {
-                    showEmptyState();
-                    return;
-                }
-
-                // Display the chats
                 const chatsList = chats.map(chat => `
-                    <div class="chat-card" onclick="window.location.href='chat.php?id=${chat.chat_id}'">
-                        <div class="chat-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                        </div>
-                        <div class="chat-details">
-                            <h3>${chat.topic || 'New Chat'}</h3>
+                    <div class="chat-card">
+                        <div class="chat-header">
+                            <div class="chat-topic">${chat.topic || 'New Chat'}</div>
                             <div class="chat-date">${formatDate(chat.created_at)}</div>
                         </div>
+                        ${chat.summary ? `<div class="chat-summary">${chat.summary}</div>` : ''}
                     </div>
                 `).join('');
 
@@ -267,13 +169,17 @@
                 `;
 
             } catch (error) {
-                showError('An error occurred while loading chats. Please try again.');
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <p>Error loading chats: ${error.message}</p>
+                    </div>
+                `;
                 console.error('Error:', error);
             }
         }
 
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', fetchRecentChats);
+        // Load chats when page loads
+        document.addEventListener('DOMContentLoaded', fetchChats);
     </script>
 </body>
 </html>

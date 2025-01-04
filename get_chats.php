@@ -1,8 +1,8 @@
 <?php
-// get_chats.php
+// get_chats_with_auth.php
 session_start();
 
-// Include the UsersBimo file for database connection
+// Include necessary files
 require_once 'UsersBimo.php';
 
 // Enable error reporting for debugging
@@ -16,24 +16,46 @@ header('Content-Type: application/json');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
 
-// Function to log debug messages
+// Function for debug logging
 function debug_log($message) {
     error_log(date('[Y-m-d H:i:s] ') . print_r($message, true) . "\n", 3, 'chat_debug.log');
 }
 
-// Function to check if user is logged in
-function checkSession() {
-    return isset($_SESSION['user_id']) && isset($_SESSION['logged_in']);
-}
-
-// Function to get recent chats from database
-function getRecentChatsFromDatabase($userId) {
+// Function to handle login
+function performLogin($email, $password) {
     global $conn;
     
     try {
-        debug_log("Starting database query for user: " . $userId);
+        // Using prepared statement for security
+        $stmt = $conn->prepare("SELECT id, email FROM users WHERE email = ? AND password = ?");
+        $stmt->bind_param("ss", $email, $password);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
-        // Modified query to match your database structure
+        if ($row = $result->fetch_assoc()) {
+            // Set session variables
+            $_SESSION['user_id'] = $row['id'];
+            $_SESSION['logged_in'] = true;
+            $_SESSION['email'] = $row['email'];
+            
+            debug_log("Login successful for user: " . $email);
+            return true;
+        }
+        
+        debug_log("Login failed for user: " . $email);
+        return false;
+    } catch (Exception $e) {
+        debug_log("Login error: " . $e->getMessage());
+        throw $e;
+    }
+}
+
+// Function to get recent chats
+function getRecentChats($userId) {
+    global $conn;
+    
+    try {
+        // Query to get chats matching the database structure
         $stmt = $conn->prepare("
             SELECT 
                 chat_id,
@@ -47,16 +69,8 @@ function getRecentChatsFromDatabase($userId) {
             LIMIT 10
         ");
         
-        if (!$stmt) {
-            throw new Exception("Prepare failed: " . $conn->error);
-        }
-        
         $stmt->bind_param("i", $userId);
-        
-        if (!$stmt->execute()) {
-            throw new Exception("Execute failed: " . $stmt->error);
-        }
-        
+        $stmt->execute();
         $result = $stmt->get_result();
         
         $chats = [];
@@ -70,11 +84,9 @@ function getRecentChatsFromDatabase($userId) {
             ];
         }
         
-        debug_log("Successfully retrieved " . count($chats) . " chats");
         return ['chats' => $chats];
-
     } catch (Exception $e) {
-        debug_log("Database error: " . $e->getMessage());
+        debug_log("Error fetching chats: " . $e->getMessage());
         throw $e;
     }
 }
@@ -85,23 +97,21 @@ try {
         throw new Exception("Database connection failed");
     }
 
-    debug_log("Checking session status");
+    // Test credentials
+    $email = 'instinctslump@gmail.com';
+    $password = 'ttt';
+
+    debug_log("Attempting login for: " . $email);
     
-    // Check authentication
-    if (!checkSession()) {
-        echo json_encode([
-            'error' => 'auth_required',
-            'message' => 'Please sign in to view chats'
-        ]);
-        exit;
+    // Perform login
+    if (!performLogin($email, $password)) {
+        throw new Exception("Login failed");
     }
 
-    debug_log("Session valid, fetching chats for user: " . $_SESSION['user_id']);
+    // After successful login, get chats
+    $response = getRecentChats($_SESSION['user_id']);
+    debug_log("Retrieved chats: " . json_encode($response));
     
-    // Get chats
-    $response = getRecentChatsFromDatabase($_SESSION['user_id']);
-    
-    debug_log("Sending response: " . json_encode($response));
     echo json_encode($response);
 
 } catch (Exception $e) {
@@ -113,6 +123,5 @@ try {
     echo json_encode($errorResponse);
 }
 
-// Ensure no additional output
 exit;
 ?>
