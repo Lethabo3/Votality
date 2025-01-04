@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Dashboard</title>
+    <title>Recent Chats</title>
     <style>
-        /* Base styles for better readability and modern look */
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.5;
         }
 
         .container {
@@ -24,31 +21,6 @@
             padding: 24px;
         }
 
-        /* Header and status styles */
-        .login-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #22c55e;
-        }
-
-        /* Chat list and card styles */
         .chat-list {
             display: flex;
             flex-direction: column;
@@ -61,7 +33,6 @@
             border-radius: 8px;
             padding: 16px;
             transition: all 0.2s ease;
-            cursor: pointer;
         }
 
         .chat-card:hover {
@@ -77,30 +48,12 @@
             margin-bottom: 4px;
         }
 
-        .chat-date {
+        .chat-meta {
             color: #6b7280;
             font-size: 14px;
         }
 
-        /* Message and error styles */
-        .message {
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-        }
-
-        .error-message {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 6px;
-            margin: 8px 0;
-        }
-
-        /* Debug panel styles */
-        #debug-panel {
+        .debug-panel {
             margin-top: 20px;
             padding: 16px;
             background: #f8f9fa;
@@ -108,126 +61,59 @@
             border-radius: 8px;
             font-family: monospace;
             font-size: 12px;
-            white-space: pre-wrap;
-        }
-
-        .debug-entry {
-            margin-bottom: 8px;
-            padding: 4px;
-            border-left: 3px solid #cbd5e1;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Chat Dashboard</h1>
-        
-        <!-- Login status section -->
-        <div id="login-status" class="login-status">
-            <div class="status-indicator">
-                <div class="status-dot"></div>
-                <span>Connection Status</span>
-            </div>
-            <div class="user-email"></div>
-        </div>
-
-        <!-- Main content area -->
+        <h1>Recent Chats</h1>
         <div id="content"></div>
-
-        <!-- Debug information panel -->
-        <div id="debug-panel"></div>
+        <div id="debug-panel" class="debug-panel"></div>
     </div>
 
     <script>
-        // Utility function for consistent date formatting
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        // Enhanced debug logging function
         function debugLog(message, data = null) {
             const debugPanel = document.getElementById('debug-panel');
             const timestamp = new Date().toISOString();
-            const entry = document.createElement('div');
-            entry.className = 'debug-entry';
-            
             let logMessage = `[${timestamp}] ${message}`;
             if (data) {
                 logMessage += '\n' + JSON.stringify(data, null, 2);
             }
-            
-            entry.textContent = logMessage;
-            debugPanel.appendChild(entry);
+            debugPanel.textContent += logMessage + '\n';
             console.log(message, data);
         }
 
-        // Function to display error messages
-        function showError(message, details = null) {
-            const errorHtml = `
-                <div class="error-message">
-                    <strong>Error:</strong> ${message}
-                    ${details ? `<br><small>${details}</small>` : ''}
-                </div>
-            `;
-            document.getElementById('content').insertAdjacentHTML('beforeend', errorHtml);
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString();
         }
 
-        // Main function to load and display chats
         async function loadChats() {
             try {
-                debugLog('Starting chat load');
-                updateConnectionStatus('Loading...');
+                debugLog('Fetching chats');
 
-                const response = await fetch('get_chats.php', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
+                const response = await fetch('get_chats.php');
+                const data = await response.json();
 
-                debugLog('Response received', {
-                    status: response.status,
-                    statusText: response.statusText
-                });
+                debugLog('Received data', data);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (data.error) {
+                    throw new Error(data.message);
                 }
 
-                const text = await response.text();
-                debugLog('Raw response', { text });
-
-                const data = JSON.parse(text);
-                debugLog('Parsed response', data);
-
-                // Update login status
-                updateConnectionStatus(data.authenticated ? 'Connected' : 'Not authenticated');
-                if (data.email) {
-                    document.querySelector('.user-email').textContent = `User: ${data.email}`;
-                }
-
-                // Handle no chats case
                 if (!data.chats || data.chats.length === 0) {
                     document.getElementById('content').innerHTML = `
-                        <div class="message">
-                            No conversations found. Start a new chat to begin!
-                        </div>
+                        <div class="message">No chats found.</div>
                     `;
                     return;
                 }
 
-                // Display chats
                 const chatsList = data.chats.map(chat => `
-                    <div class="chat-card" data-chat-id="${chat.chat_id}">
+                    <div class="chat-card">
                         <div class="chat-topic">${chat.topic || 'Untitled Chat'}</div>
-                        <div class="chat-date">
-                            Created: ${formatDate(chat.created_at)}
-                            ${chat.updated_at ? `<br>Updated: ${formatDate(chat.updated_at)}` : ''}
+                        <div class="chat-meta">
+                            <div>By: ${chat.username || 'Anonymous'}</div>
+                            <div>Created: ${formatDate(chat.created_at)}</div>
+                            ${chat.updated_at ? `<div>Updated: ${formatDate(chat.updated_at)}</div>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -236,40 +122,17 @@
                     <div class="chat-list">${chatsList}</div>
                 `;
 
-                // Add click handlers for chat cards
-                document.querySelectorAll('.chat-card').forEach(card => {
-                    card.addEventListener('click', () => {
-                        const chatId = card.dataset.chatId;
-                        debugLog('Chat selected', { chatId });
-                        // Handle chat selection - you can add navigation or expand chat details here
-                    });
-                });
-
             } catch (error) {
-                debugLog('Error occurred', {
-                    message: error.message,
-                    stack: error.stack,
-                    type: error.name
-                });
-
-                showError(
-                    'Failed to load chats',
-                    `Technical details: ${error.message}`
-                );
-                updateConnectionStatus('Connection Error');
+                debugLog('Error occurred', error);
+                document.getElementById('content').innerHTML = `
+                    <div style="color: #991b1b; background: #fee2e2; padding: 12px; border-radius: 6px;">
+                        Error loading chats: ${error.message}
+                    </div>
+                `;
             }
         }
 
-        // Function to update connection status display
-        function updateConnectionStatus(status) {
-            const statusDot = document.querySelector('.status-dot');
-            const statusText = document.querySelector('.status-indicator span');
-            
-            statusDot.style.background = status === 'Connected' ? '#22c55e' : '#ef4444';
-            statusText.textContent = status;
-        }
-
-        // Initialize when page loads
+        // Load chats when page loads
         document.addEventListener('DOMContentLoaded', loadChats);
     </script>
 </body>
