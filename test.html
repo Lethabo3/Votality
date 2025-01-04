@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recent Chats</title>
     <style>
-        /* Base styles for better readability and modern look */
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
@@ -27,6 +26,9 @@
             margin-bottom: 24px;
             padding-bottom: 16px;
             border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .header h1 {
@@ -35,7 +37,21 @@
             font-size: 24px;
         }
 
-        /* Chat list and card styles */
+        .new-chat-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .new-chat-button:hover {
+            background: #2980b9;
+        }
+
         .chat-list {
             display: flex;
             flex-direction: column;
@@ -79,64 +95,63 @@
             color: #666;
         }
 
-        /* Status display styles */
-        .loading, .error, .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        .message {
+            padding: 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .message.auth {
+            background: #fff7ed;
+            color: #9a3412;
+            border: 1px solid #fed7aa;
         }
 
         .loading {
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 40px;
+            color: #666;
             gap: 8px;
         }
 
         .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        .error {
-            color: #e74c3c;
-            background: #fdf0ed;
-            border-radius: 6px;
-            padding: 16px;
-            margin: 20px 0;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* Debug panel styles */
         .debug-panel {
             margin-top: 20px;
             padding: 16px;
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
             display: none;
         }
 
-        .debug-panel pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            margin: 0;
-            font-family: monospace;
-            font-size: 12px;
-        }
-
-        .debug-panel h3 {
-            margin: 0 0 8px 0;
-            font-size: 14px;
-            color: #495057;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
         }
     </style>
 </head>
@@ -144,6 +159,7 @@
     <div class="container">
         <div class="header">
             <h1>Recent Conversations</h1>
+            <button onclick="createNewChat()" class="new-chat-button">New Chat</button>
         </div>
         <div id="content">
             <div class="loading">
@@ -151,17 +167,13 @@
                 <span>Loading recent chats...</span>
             </div>
         </div>
-        <div id="debug-panel" class="debug-panel">
-            <h3>Debug Information</h3>
-            <pre id="debug-output"></pre>
-        </div>
+        <div id="debug-panel" class="debug-panel"></div>
     </div>
 
     <script>
-        // Debug logging helper function
+        // Debug logging helper
         function debugLog(message, data = null) {
             const debugPanel = document.getElementById('debug-panel');
-            const debugOutput = document.getElementById('debug-output');
             const timestamp = new Date().toISOString();
             let logMessage = `[${timestamp}] ${message}\n`;
             
@@ -171,24 +183,90 @@
             
             console.log(message, data);
             debugPanel.style.display = 'block';
-            debugOutput.textContent += logMessage;
+            debugPanel.textContent += logMessage;
         }
 
-        // Main function to fetch and display recent chats
+        // Function to create a new chat
+        async function createNewChat() {
+            try {
+                const response = await fetch('votality_ai_service2.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'createNewChat'
+                    }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    if (data.error === 'auth_required') {
+                        showAuthError(data.message);
+                    } else {
+                        showError(data.error);
+                    }
+                    return;
+                }
+
+                // Redirect to the new chat
+                window.location.href = `chat.php?id=${data.chatId}`;
+            } catch (error) {
+                showError('Failed to create new chat');
+                debugLog('Error creating new chat:', error);
+            }
+        }
+
+        // Function to handle navigation to a specific chat
+        function openChat(chatId) {
+            debugLog('Opening chat:', { chatId });
+            window.location.href = `chat.php?id=${chatId}`;
+        }
+
+        // UI helper functions
+        function showLoading() {
+            document.getElementById('content').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <span>Loading recent chats...</span>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            document.getElementById('content').innerHTML = `
+                <div class="message error">
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showAuthError(message) {
+            document.getElementById('content').innerHTML = `
+                <div class="message auth">
+                    <p>${message}</p>
+                    <p>Please <a href="login.php">sign in</a> to continue.</p>
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            document.getElementById('content').innerHTML = `
+                <div class="empty-state">
+                    <p>No recent chats found. Start a new conversation!</p>
+                </div>
+            `;
+        }
+
+        // Main function to fetch and display chats
         async function fetchRecentChats() {
             try {
-                const contentElement = document.getElementById('content');
-                contentElement.innerHTML = `
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <span>Loading recent chats...</span>
-                    </div>
-                `;
+                showLoading();
+                debugLog('Fetching recent chats');
 
-                debugLog('Initiating fetch request');
-
-                // Make the API request
-                const response = await fetch('get_chats.php', {
+                const response = await fetch('votality_ai_service2.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -196,43 +274,45 @@
                     body: JSON.stringify({
                         action: 'getRecentChats'
                     }),
-                    credentials: 'include' // Important for session handling
+                    credentials: 'include'
                 });
 
-                debugLog('Response status:', {
+                debugLog('Response received:', {
                     status: response.status,
                     statusText: response.statusText
                 });
 
-                // Get the raw response text first
+                // Get raw response first
                 const rawText = await response.text();
                 debugLog('Raw response:', { rawText });
 
-                // Try to parse the response as JSON
+                // Parse the response
                 let data;
                 try {
                     data = JSON.parse(rawText);
-                    debugLog('Parsed JSON data:', data);
+                    debugLog('Parsed response:', data);
                 } catch (parseError) {
-                    throw new Error(`Invalid JSON response: ${rawText}`);
+                    throw new Error('Invalid response from server');
                 }
 
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                // Display the chats or show empty state
-                const chats = data.chats || [];
-                if (chats.length === 0) {
-                    contentElement.innerHTML = `
-                        <div class="empty-state">
-                            <p>No recent chats found. Start a new conversation!</p>
-                        </div>
-                    `;
+                // Handle different response types
+                if (data.error === 'auth_required') {
+                    showAuthError(data.message);
                     return;
                 }
 
-                // Generate chat cards for each chat
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                const chats = data.chats || [];
+                if (chats.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                // Display the chats
                 const chatsList = chats.map(chat => `
                     <div class="chat-card" onclick="openChat('${chat.chat_id}')">
                         <div class="chat-icon">
@@ -247,31 +327,14 @@
                     </div>
                 `).join('');
 
-                contentElement.innerHTML = `
-                    <div class="chat-list">
-                        ${chatsList}
-                    </div>
+                document.getElementById('content').innerHTML = `
+                    <div class="chat-list">${chatsList}</div>
                 `;
 
             } catch (error) {
-                debugLog('Error occurred:', {
-                    message: error.message,
-                    stack: error.stack
-                });
-
-                const contentElement = document.getElementById('content');
-                contentElement.innerHTML = `
-                    <div class="error">
-                        <p>Error loading recent chats: ${error.message}</p>
-                    </div>
-                `;
+                debugLog('Error occurred:', error);
+                showError('An error occurred while loading chats');
             }
-        }
-
-        // Function to handle opening a specific chat
-        function openChat(chatId) {
-            debugLog('Opening chat:', { chatId });
-            window.location.href = `chat.php?id=${chatId}`;
         }
 
         // Initialize the page
