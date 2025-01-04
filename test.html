@@ -22,7 +22,6 @@
             padding: 24px;
         }
 
-        /* Login status styles */
         .login-status {
             display: flex;
             justify-content: space-between;
@@ -46,7 +45,6 @@
             background: #22c55e;
         }
 
-        /* Chat list styles */
         .chat-list {
             display: flex;
             flex-direction: column;
@@ -79,7 +77,6 @@
             font-size: 14px;
         }
 
-        /* Message styles */
         .message {
             padding: 16px;
             border-radius: 8px;
@@ -88,7 +85,6 @@
             border: 1px solid #e2e8f0;
         }
 
-        /* Debug panel */
         #debug-panel {
             margin-top: 20px;
             padding: 16px;
@@ -98,6 +94,18 @@
             font-family: monospace;
             font-size: 12px;
             white-space: pre-wrap;
+        }
+
+        .topic-debug {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+            font-family: monospace;
+        }
+
+        .error-topic {
+            color: #dc2626;
+            font-style: italic;
         }
     </style>
 </head>
@@ -118,7 +126,6 @@
     </div>
 
     <script>
-        // Helper function for logging
         function debugLog(message, data = null) {
             const debugPanel = document.getElementById('debug-panel');
             const timestamp = new Date().toISOString();
@@ -132,7 +139,6 @@
             console.log(message, data);
         }
 
-        // Format date helper
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleString('en-US', {
@@ -144,7 +150,35 @@
             });
         }
 
-        // Main function to fetch and display chats
+        function validateTopic(topic) {
+            if (!topic) {
+                return {
+                    isValid: false,
+                    displayText: 'No Topic',
+                    debugInfo: 'Topic field is null or undefined'
+                };
+            }
+            if (typeof topic !== 'string') {
+                return {
+                    isValid: false,
+                    displayText: 'Invalid Topic Format',
+                    debugInfo: `Topic is not a string, received: ${typeof topic}`
+                };
+            }
+            if (topic.trim() === '') {
+                return {
+                    isValid: false,
+                    displayText: 'Empty Topic',
+                    debugInfo: 'Topic is an empty string or contains only whitespace'
+                };
+            }
+            return {
+                isValid: true,
+                displayText: topic,
+                debugInfo: `Valid topic: ${topic.length} characters`
+            };
+        }
+
         async function loadChats() {
             try {
                 debugLog('Fetching chats');
@@ -165,13 +199,11 @@
                 const data = JSON.parse(text);
                 debugLog('Parsed response:', data);
 
-                // Update login status
                 if (data.email) {
                     document.querySelector('.user-email').textContent = 
                         `Current user: ${data.email}`;
                 }
 
-                // Handle no chats case
                 if (!data.chats || data.chats.length === 0) {
                     document.getElementById('content').innerHTML = `
                         <div class="message">
@@ -182,16 +214,23 @@
                     return;
                 }
 
-                // Display chats
-                const chatsList = data.chats.map(chat => `
-                    <div class="chat-card">
-                        <div class="chat-topic">${chat.topic || 'New Chat'}</div>
-                        <div class="chat-date">
-                            Created: ${formatDate(chat.created_at)}
-                            ${chat.updated_at ? `<br>Updated: ${formatDate(chat.updated_at)}` : ''}
+                const chatsList = data.chats.map(chat => {
+                    const topicValidation = validateTopic(chat.topic);
+                    const topicDisplay = topicValidation.isValid ? 
+                        topicValidation.displayText : 
+                        `<span class="error-topic">${topicValidation.displayText}</span>`;
+                    
+                    return `
+                        <div class="chat-card">
+                            <div class="chat-topic">${topicDisplay}</div>
+                            <div class="topic-debug">Debug: ${topicValidation.debugInfo}</div>
+                            <div class="chat-date">
+                                Created: ${formatDate(chat.created_at)}
+                                ${chat.updated_at ? `<br>Updated: ${formatDate(chat.updated_at)}` : ''}
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 document.getElementById('content').innerHTML = `
                     <div class="chat-list">${chatsList}</div>
@@ -208,7 +247,6 @@
             }
         }
 
-        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', loadChats);
     </script>
 </body>
