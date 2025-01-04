@@ -1,23 +1,20 @@
 <?php
-// Start session to access user data
 session_start();
-
-// Include database connection
 require_once 'UsersBimo.php';
 
-// Set up headers for API responses
+// Set headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
 
-// Handle CORS preflight
+// Handle CORS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type');
     exit(0);
 }
 
-// Function to check if user is properly logged in
+// Function to check if user is logged in
 function checkSession() {
     return isset($_SESSION['user_id']) && 
            isset($_SESSION['logged_in']) && 
@@ -31,7 +28,7 @@ try {
         throw new Exception("Database connection failed");
     }
 
-    // Verify user is logged in
+    // Check authentication
     if (!checkSession()) {
         echo json_encode([
             'error' => 'auth_required',
@@ -40,7 +37,7 @@ try {
         exit;
     }
 
-    // Get user's chats
+    // Fetch chats for the authenticated user
     $stmt = $conn->prepare("
         SELECT 
             chat_id,
@@ -78,7 +75,12 @@ try {
         ];
     }
 
-    echo json_encode(['chats' => $chats]);
+    // Return response with authentication status and email
+    echo json_encode([
+        'chats' => $chats,
+        'email' => $_SESSION['email'] ?? null,
+        'authenticated' => true
+    ]);
 
 } catch (Exception $e) {
     echo json_encode([
