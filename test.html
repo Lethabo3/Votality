@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recent Conversations</title>
+    <title>Chat Dashboard</title>
     <style>
+        /* Base styles for better readability and modern look */
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f5f5f5;
             color: #333;
+            line-height: 1.5;
         }
 
         .container {
@@ -22,6 +24,7 @@
             padding: 24px;
         }
 
+        /* Header and status styles */
         .login-status {
             display: flex;
             justify-content: space-between;
@@ -45,6 +48,7 @@
             background: #22c55e;
         }
 
+        /* Chat list and card styles */
         .chat-list {
             display: flex;
             flex-direction: column;
@@ -57,6 +61,7 @@
             border-radius: 8px;
             padding: 16px;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .chat-card:hover {
@@ -77,6 +82,7 @@
             font-size: 14px;
         }
 
+        /* Message and error styles */
         .message {
             padding: 16px;
             border-radius: 8px;
@@ -85,6 +91,15 @@
             border: 1px solid #e2e8f0;
         }
 
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
+
+        /* Debug panel styles */
         #debug-panel {
             margin-top: 20px;
             padding: 16px;
@@ -96,49 +111,35 @@
             white-space: pre-wrap;
         }
 
-        .topic-debug {
-            font-size: 12px;
-            color: #666;
-            margin-top: 4px;
-            font-family: monospace;
-        }
-
-        .error-topic {
-            color: #dc2626;
-            font-style: italic;
+        .debug-entry {
+            margin-bottom: 8px;
+            padding: 4px;
+            border-left: 3px solid #cbd5e1;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Recent Conversations</h1>
+        <h1>Chat Dashboard</h1>
         
+        <!-- Login status section -->
         <div id="login-status" class="login-status">
             <div class="status-indicator">
                 <div class="status-dot"></div>
-                <span>Logged In</span>
+                <span>Connection Status</span>
             </div>
             <div class="user-email"></div>
         </div>
 
+        <!-- Main content area -->
         <div id="content"></div>
+
+        <!-- Debug information panel -->
         <div id="debug-panel"></div>
     </div>
 
     <script>
-        function debugLog(message, data = null) {
-            const debugPanel = document.getElementById('debug-panel');
-            const timestamp = new Date().toISOString();
-            let logMessage = `[${timestamp}] ${message}`;
-            
-            if (data) {
-                logMessage += '\n' + JSON.stringify(data, null, 2);
-            }
-            
-            debugPanel.textContent += logMessage + '\n';
-            console.log(message, data);
-        }
-
+        // Utility function for consistent date formatting
         function formatDate(dateString) {
             const date = new Date(dateString);
             return date.toLocaleString('en-US', {
@@ -150,103 +151,125 @@
             });
         }
 
-        function validateTopic(topic) {
-            if (!topic) {
-                return {
-                    isValid: false,
-                    displayText: 'No Topic',
-                    debugInfo: 'Topic field is null or undefined'
-                };
+        // Enhanced debug logging function
+        function debugLog(message, data = null) {
+            const debugPanel = document.getElementById('debug-panel');
+            const timestamp = new Date().toISOString();
+            const entry = document.createElement('div');
+            entry.className = 'debug-entry';
+            
+            let logMessage = `[${timestamp}] ${message}`;
+            if (data) {
+                logMessage += '\n' + JSON.stringify(data, null, 2);
             }
-            if (typeof topic !== 'string') {
-                return {
-                    isValid: false,
-                    displayText: 'Invalid Topic Format',
-                    debugInfo: `Topic is not a string, received: ${typeof topic}`
-                };
-            }
-            if (topic.trim() === '') {
-                return {
-                    isValid: false,
-                    displayText: 'Empty Topic',
-                    debugInfo: 'Topic is an empty string or contains only whitespace'
-                };
-            }
-            return {
-                isValid: true,
-                displayText: topic,
-                debugInfo: `Valid topic: ${topic.length} characters`
-            };
+            
+            entry.textContent = logMessage;
+            debugPanel.appendChild(entry);
+            console.log(message, data);
         }
 
+        // Function to display error messages
+        function showError(message, details = null) {
+            const errorHtml = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${message}
+                    ${details ? `<br><small>${details}</small>` : ''}
+                </div>
+            `;
+            document.getElementById('content').insertAdjacentHTML('beforeend', errorHtml);
+        }
+
+        // Main function to load and display chats
         async function loadChats() {
             try {
-                debugLog('Fetching chats');
+                debugLog('Starting chat load');
+                updateConnectionStatus('Loading...');
 
                 const response = await fetch('get_chats.php', {
                     method: 'GET',
                     credentials: 'include'
                 });
 
-                debugLog('Response received:', {
+                debugLog('Response received', {
                     status: response.status,
                     statusText: response.statusText
                 });
 
-                const text = await response.text();
-                debugLog('Raw response:', { text });
-
-                const data = JSON.parse(text);
-                debugLog('Parsed response:', data);
-
-                if (data.email) {
-                    document.querySelector('.user-email').textContent = 
-                        `Current user: ${data.email}`;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
+                const text = await response.text();
+                debugLog('Raw response', { text });
+
+                const data = JSON.parse(text);
+                debugLog('Parsed response', data);
+
+                // Update login status
+                updateConnectionStatus(data.authenticated ? 'Connected' : 'Not authenticated');
+                if (data.email) {
+                    document.querySelector('.user-email').textContent = `User: ${data.email}`;
+                }
+
+                // Handle no chats case
                 if (!data.chats || data.chats.length === 0) {
                     document.getElementById('content').innerHTML = `
                         <div class="message">
-                            You are logged in, but no conversations were found. 
-                            Start a new chat to begin!
+                            No conversations found. Start a new chat to begin!
                         </div>
                     `;
                     return;
                 }
 
-                const chatsList = data.chats.map(chat => {
-                    const topicValidation = validateTopic(chat.topic);
-                    const topicDisplay = topicValidation.isValid ? 
-                        topicValidation.displayText : 
-                        `<span class="error-topic">${topicValidation.displayText}</span>`;
-                    
-                    return `
-                        <div class="chat-card">
-                            <div class="chat-topic">${topicDisplay}</div>
-                            <div class="topic-debug">Debug: ${topicValidation.debugInfo}</div>
-                            <div class="chat-date">
-                                Created: ${formatDate(chat.created_at)}
-                                ${chat.updated_at ? `<br>Updated: ${formatDate(chat.updated_at)}` : ''}
-                            </div>
+                // Display chats
+                const chatsList = data.chats.map(chat => `
+                    <div class="chat-card" data-chat-id="${chat.chat_id}">
+                        <div class="chat-topic">${chat.topic || 'Untitled Chat'}</div>
+                        <div class="chat-date">
+                            Created: ${formatDate(chat.created_at)}
+                            ${chat.updated_at ? `<br>Updated: ${formatDate(chat.updated_at)}` : ''}
                         </div>
-                    `;
-                }).join('');
+                    </div>
+                `).join('');
 
                 document.getElementById('content').innerHTML = `
                     <div class="chat-list">${chatsList}</div>
                 `;
 
+                // Add click handlers for chat cards
+                document.querySelectorAll('.chat-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const chatId = card.dataset.chatId;
+                        debugLog('Chat selected', { chatId });
+                        // Handle chat selection - you can add navigation or expand chat details here
+                    });
+                });
+
             } catch (error) {
-                debugLog('Error occurred:', error);
-                document.getElementById('content').innerHTML = `
-                    <div class="message" style="background: #fee2e2; color: #991b1b;">
-                        An error occurred while loading chats. Please try again.
-                        <br>Error: ${error.message}
-                    </div>
-                `;
+                debugLog('Error occurred', {
+                    message: error.message,
+                    stack: error.stack,
+                    type: error.name
+                });
+
+                showError(
+                    'Failed to load chats',
+                    `Technical details: ${error.message}`
+                );
+                updateConnectionStatus('Connection Error');
             }
         }
 
+        // Function to update connection status display
+        function updateConnectionStatus(status) {
+            const statusDot = document.querySelector('.status-dot');
+            const statusText = document.querySelector('.status-indicator span');
+            
+            statusDot.style.background = status === 'Connected' ? '#22c55e' : '#ef4444';
+            statusText.textContent = status;
+        }
+
+        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', loadChats);
     </script>
 </body>

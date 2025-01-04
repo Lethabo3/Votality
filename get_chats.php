@@ -1,97 +1,129 @@
 <?php
-// Start the session and include required files
+// Initialize session and include core dependencies
 session_start();
 require_once 'UsersBimo.php';
 
-// Set headers for API response and CORS
+// Configure response headers for security and CORS
 header('Content-Type: application/json');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
 
-// Handle CORS preflight requests
+// Handle CORS preflight requests for browser security
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type');
     exit(0);
 }
 
-// Enhanced debug logging function with file rotation
+// Enhanced logging function with file rotation and structured output
 function debug_log($message, $data = null) {
     $log_file = 'chat_debug.log';
-    $max_size = 5 * 1024 * 1024; // 5MB max file size
+    $max_size = 5 * 1024 * 1024; // 5MB size limit
     
-    // Rotate log if it's too large
+    // Implement log rotation to manage file size
     if (file_exists($log_file) && filesize($log_file) > $max_size) {
-        rename($log_file, $log_file . '.old');
+        rename($log_file, $log_file . '.' . date('Y-m-d-H-i-s'));
     }
     
-    // Format the debug message
-    $log_entry = date('[Y-m-d H:i:s] ') . $message;
-    if ($data !== null) {
-        $log_entry .= ': ' . print_r($data, true);
-    }
-    $log_entry .= "\n";
+    // Create structured log entry
+    $log_entry = [
+        'timestamp' => date('Y-m-d H:i:s'),
+        'message' => $message,
+        'data' => $data,
+        'request_id' => $_SERVER['REQUEST_TIME_FLOAT'] ?? '',
+        'user_id' => $_SESSION['user_id'] ?? 'not_set'
+    ];
     
-    // Write to log file
-    error_log($log_entry, 3, $log_file);
+    // Write formatted log entry
+    error_log(
+        json_encode($log_entry, JSON_PRETTY_PRINT) . "\n",
+        3,
+        $log_file
+    );
+}
+
+// Wrapper function for standardized JSON responses
+function send_response($data, $status = 200) {
+    http_response_code($status);
+    echo json_encode($data);
+    exit;
+}
+
+// Error handler function for consistent error responses
+function handle_error($message, $code = 500, $additional_info = null) {
+    debug_log('Error occurred', [
+        'message' => $message,
+        'code' => $code,
+        'additional_info' => $additional_info
+    ]);
+    
+    send_response([
+        'error' => true,
+        'message' => $message,
+        'code' => $code,
+        'debug_info' => $additional_info
+    ], $code);
 }
 
 try {
-    // Start debugging session information
-    debug_log("Session state at start", [
+    // Log initial request information
+    debug_log('New request initiated', [
+        'method' => $_SERVER['REQUEST_METHOD'],
         'session_id' => session_id(),
-        'session_status' => session_status(),
-        'session_data' => $_SESSION
+        'ip' => $_SERVER['REMOTE_ADDR']
     ]);
 
     // Verify database connection
     if (!isset($conn)) {
-        debug_log("Database connection not initialized");
         throw new Exception("Database connection not initialized");
     }
 
     if ($conn->connect_error) {
-        debug_log("Database connection error", $conn->connect_error);
         throw new Exception("Database connection failed: " . $conn->connect_error);
     }
 
-    debug_log("Database connection successful", [
+    debug_log('Database connection verified', [
         'server_info' => $conn->server_info,
         'host_info' => $conn->host_info
     ]);
 
-    // Verify user authentication
+    // Authentication check
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
-        debug_log("Authentication failed - missing session data");
-        echo json_encode([
+        send_response([
             'error' => 'auth_required',
-            'message' => 'Please sign in to view chats'
-        ]);
-        exit;
+            'message' => 'Please sign in to view chats',
+            'authenticated' => false
+        ], 401);
     }
 
     $userId = $_SESSION['user_id'];
-    debug_log("User authentication successful", [
+    
+    // Verify user exists in database
+    $user_check = $conn->prepare("
+        SELECT user_id, email 
+        FROM users 
+        WHERE user_id = ?
+    ");
+    
+    if (!$user_check) {
+        throw new Exception("Failed to prepare user verification query");
+    }
+
+    $user_check->bind_param("i", $userId);
+    $user_check->execute();
+    $user_result = $user_check->get_result();
+
+    if ($user_result->num_rows === 0) {
+        throw new Exception("User not found in database");
+    }
+
+    $user_data = $user_result->fetch_assoc();
+    debug_log('User verified', [
         'user_id' => $userId,
-        'email' => $_SESSION['email'] ?? 'not_set'
+        'email' => $user_data['email']
     ]);
 
-    // Verify table existence
-    $table_check = $conn->query("SHOW TABLES LIKE 'votality_chats'");
-    if ($table_check->num_rows === 0) {
-        debug_log("Table 'votality_chats' does not exist");
-        throw new Exception("Required table 'votality_chats' not found");
-    }
-
-    // Get table structure
-    $structure = $conn->query("DESCRIBE votality_chats");
-    $columns = [];
-    while ($col = $structure->fetch_assoc()) {
-        $columns[] = $col;
-    }
-    debug_log("Table structure", $columns);
-
-    // Get total chat count for user
+    // Get total chat count for pagination planning
     $count_stmt = $conn->prepare("
         SELECT COUNT(*) as chat_count 
         FROM votality_chats 
@@ -99,17 +131,19 @@ try {
     ");
     
     if (!$count_stmt) {
-        debug_log("Count query preparation failed", $conn->error);
         throw new Exception("Failed to prepare count query: " . $conn->error);
     }
 
     $count_stmt->bind_param("i", $userId);
     $count_stmt->execute();
     $count_result = $count_stmt->get_result();
-    $count_row = $count_result->fetch_assoc();
-    debug_log("Total chats count", $count_row['chat_count']);
+    $count_data = $count_result->fetch_assoc();
+    
+    debug_log('Chat count retrieved', [
+        'total_chats' => $count_data['chat_count']
+    ]);
 
-    // Main query to get chats
+    // Main query to fetch chat data
     $stmt = $conn->prepare("
         SELECT
             chat_id,
@@ -122,48 +156,39 @@ try {
     ");
 
     if (!$stmt) {
-        debug_log("Main query preparation failed", $conn->error);
         throw new Exception("Failed to prepare main query: " . $conn->error);
     }
 
     $stmt->bind_param("i", $userId);
     
     if (!$stmt->execute()) {
-        debug_log("Main query execution failed", [
-            'error' => $stmt->error,
-            'errno' => $stmt->errno
-        ]);
         throw new Exception("Failed to execute main query: " . $stmt->error);
     }
 
     $result = $stmt->get_result();
-    debug_log("Query executed successfully", [
-        'num_rows' => $result->num_rows,
-        'field_count' => $result->field_count
-    ]);
-
     $chats = [];
-    while ($row = $result->fetch_assoc()) {
-        // Log each chat row for debugging
-        debug_log("Processing chat row", [
-            'chat_id' => $row['chat_id'],
-            'topic' => $row['topic'] ?? 'NULL',
-            'topic_type' => gettype($row['topic']),
-            'topic_length' => $row['topic'] ? strlen($row['topic']) : 0
-        ]);
 
-        $chats[] = [
-            'chat_id' => $row['chat_id'],
-            'topic' => $row['topic'],
+    while ($row = $result->fetch_assoc()) {
+        // Validate and sanitize each chat entry
+        $chat_entry = [
+            'chat_id' => htmlspecialchars($row['chat_id']),
+            'topic' => $row['topic'] ? htmlspecialchars($row['topic']) : null,
             'created_at' => $row['created_at'],
             'updated_at' => $row['updated_at']
         ];
+
+        debug_log('Processing chat row', [
+            'chat_id' => $row['chat_id'],
+            'topic_length' => $row['topic'] ? strlen($row['topic']) : 0
+        ]);
+
+        $chats[] = $chat_entry;
     }
 
-    // Prepare final response
+    // Prepare and send the final response
     $response = [
         'chats' => $chats,
-        'email' => $_SESSION['email'],
+        'email' => $user_data['email'],
         'authenticated' => true,
         'debug_info' => [
             'total_chats' => count($chats),
@@ -172,22 +197,29 @@ try {
         ]
     ];
 
-    debug_log("Sending final response", $response);
-    echo json_encode($response);
+    debug_log('Sending successful response', [
+        'chat_count' => count($chats)
+    ]);
+
+    send_response($response);
 
 } catch (Exception $e) {
-    debug_log("Error occurred", [
-        'message' => $e->getMessage(),
-        'trace' => $e->getTraceAsString()
-    ]);
-    
-    echo json_encode([
-        'error' => 'An error occurred',
-        'message' => $e->getMessage(),
-        'debug_info' => [
-            'timestamp' => date('Y-m-d H:i:s'),
-            'php_version' => PHP_VERSION,
-            'session_active' => session_status() === PHP_SESSION_ACTIVE
+    handle_error(
+        $e->getMessage(),
+        500,
+        [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
         ]
-    ]);
+    );
 }
+
+// Ensure database resources are properly closed
+finally {
+    if (isset($stmt)) $stmt->close();
+    if (isset($count_stmt)) $count_stmt->close();
+    if (isset($user_check)) $user_check->close();
+    if (isset($conn)) $conn->close();
+}
+?>
