@@ -2,34 +2,34 @@
 session_start();
 require_once 'UsersBimo.php';
 
-// Set headers
+// Set headers for API response
 header('Content-Type: application/json');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
 
-// Handle CORS
+// Handle CORS preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type');
     exit(0);
 }
 
-// Function to check if user is logged in
-function checkSession() {
-    return isset($_SESSION['user_id']) && 
-           isset($_SESSION['logged_in']) && 
-           isset($_SESSION['session_id']) &&
-           $_SESSION['logged_in'] === true;
+// Debug function to log variables
+function debug_log($message, $data = null) {
+    error_log(date('[Y-m-d H:i:s] ') . $message . ($data ? ': ' . print_r($data, true) : '') . "\n", 3, 'chat_debug.log');
 }
 
 try {
-    // Check database connection
+    // Verify we have a database connection
     if (!isset($conn) || $conn->connect_error) {
         throw new Exception("Database connection failed");
     }
 
-    // Check authentication
-    if (!checkSession()) {
+    // Log session data for debugging
+    debug_log("Session data", $_SESSION);
+
+    // Verify user is logged in
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in'])) {
         echo json_encode([
             'error' => 'auth_required',
             'message' => 'Please sign in to view chats'
@@ -37,52 +37,60 @@ try {
         exit;
     }
 
-    // Fetch chats for the authenticated user
+    $userId = $_SESSION['user_id'];
+    debug_log("Fetching chats for user ID", $userId);
+
+    // Query to get chats - note we're explicitly selecting the fields we saw in your database
     $stmt = $conn->prepare("
         SELECT 
             chat_id,
             topic,
             created_at,
-            updated_at,
-            summary
+            updated_at
         FROM votality_chats 
         WHERE user_id = ?
         ORDER BY created_at DESC
-        LIMIT 10
     ");
 
     if (!$stmt) {
-        throw new Exception("Failed to prepare database query");
+        debug_log("Query preparation failed", $conn->error);
+        throw new Exception("Failed to prepare database query: " . $conn->error);
     }
 
-    $userId = $_SESSION['user_id'];
     $stmt->bind_param("i", $userId);
     
     if (!$stmt->execute()) {
-        throw new Exception("Failed to execute database query");
+        debug_log("Query execution failed", $stmt->error);
+        throw new Exception("Failed to execute database query: " . $stmt->error);
     }
 
     $result = $stmt->get_result();
     $chats = [];
 
+    // Fetch all chats and include debug logging
     while ($row = $result->fetch_assoc()) {
         $chats[] = [
             'chat_id' => $row['chat_id'],
-            'topic' => $row['topic'] ?? 'New Chat',
+            'topic' => $row['topic'],
             'created_at' => $row['created_at'],
-            'updated_at' => $row['updated_at'],
-            'summary' => $row['summary']
+            'updated_at' => $row['updated_at']
         ];
     }
 
-    // Return response with authentication status and email
-    echo json_encode([
+    debug_log("Found chats", $chats);
+
+    // Return both authentication status and chats
+    $response = [
         'chats' => $chats,
-        'email' => $_SESSION['email'] ?? null,
+        'email' => $_SESSION['email'],
         'authenticated' => true
-    ]);
+    ];
+
+    debug_log("Sending response", $response);
+    echo json_encode($response);
 
 } catch (Exception $e) {
+    debug_log("Error occurred", $e->getMessage());
     echo json_encode([
         'error' => 'An error occurred',
         'message' => $e->getMessage()

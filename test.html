@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat History</title>
+    <title>Recent Conversations</title>
     <style>
-        /* Base styles remain the same */
         body {
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
@@ -23,177 +22,126 @@
             padding: 24px;
         }
 
-        .header {
+        /* Login status styles */
+        .login-status {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #eee;
-        }
-
-        /* New styles for status display */
-        .status-bar {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            padding: 12px;
+            background: #f8f9fa;
             border-radius: 6px;
-            padding: 12px 16px;
             margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .status-indicator {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
         }
 
         .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #22c55e; /* Green for logged in */
+            background: #22c55e;
         }
 
-        .status-dot.offline {
-            background: #ef4444; /* Red for logged out */
+        /* Chat list styles */
+        .chat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        .status-text {
-            color: #475569;
+        .chat-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            transition: all 0.2s ease;
         }
 
-        .user-info {
+        .chat-card:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .chat-topic {
+            font-weight: 500;
+            color: #1a1a1a;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .chat-date {
+            color: #6b7280;
             font-size: 14px;
-            color: #64748b;
         }
 
-        /* Rest of the existing styles */
+        /* Message styles */
         .message {
             padding: 16px;
             border-radius: 8px;
             margin-bottom: 16px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            color: #475569;
         }
 
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .message.auth {
-            background: #fff7ed;
-            color: #9a3412;
-            border: 1px solid #fed7aa;
-        }
-
+        /* Debug panel */
         #debug-panel {
             margin-top: 20px;
             padding: 16px;
             background: #f8f9fa;
-            border: 1px solid #dee2e6;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
             font-family: monospace;
             font-size: 12px;
             white-space: pre-wrap;
         }
-
-        /* Loading animation styles */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            color: #666;
-            gap: 12px;
-        }
-
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Recent Conversations</h1>
-        </div>
-        <div id="status-bar" class="status-bar">
+        <h1>Recent Conversations</h1>
+        
+        <div id="login-status" class="login-status">
             <div class="status-indicator">
                 <div class="status-dot"></div>
-                <span class="status-text">Checking login status...</span>
+                <span>Logged In</span>
             </div>
-            <div class="user-info"></div>
+            <div class="user-email"></div>
         </div>
-        <div id="content">
-            <div class="loading">
-                <div class="spinner"></div>
-                <span>Loading conversations...</span>
-            </div>
-        </div>
+
+        <div id="content"></div>
         <div id="debug-panel"></div>
     </div>
 
     <script>
-        // Debug logging helper
+        // Helper function for logging
         function debugLog(message, data = null) {
             const debugPanel = document.getElementById('debug-panel');
             const timestamp = new Date().toISOString();
-            let logMessage = `[${timestamp}] ${message}\n`;
+            let logMessage = `[${timestamp}] ${message}`;
             
             if (data) {
-                logMessage += JSON.stringify(data, null, 2) + '\n';
+                logMessage += '\n' + JSON.stringify(data, null, 2);
             }
             
+            debugPanel.textContent += logMessage + '\n';
             console.log(message, data);
-            debugPanel.textContent += logMessage;
         }
 
-        // Update the status bar with login state
-        function updateStatusBar(loggedIn, email = null) {
-            const statusDot = document.querySelector('.status-dot');
-            const statusText = document.querySelector('.status-text');
-            const userInfo = document.querySelector('.user-info');
-
-            if (loggedIn) {
-                statusDot.classList.remove('offline');
-                statusText.textContent = 'Logged In';
-                userInfo.textContent = email ? `Current user: ${email}` : '';
-            } else {
-                statusDot.classList.add('offline');
-                statusText.textContent = 'Not Logged In';
-                userInfo.textContent = '';
-            }
-        }
-
-        // Show empty state with login status
-        function showEmptyState(loggedIn) {
-            const message = loggedIn ? 
-                'You are logged in, but no conversations were found. Start a new chat to begin!' :
-                'Please sign in to view your conversations';
-
-            document.getElementById('content').innerHTML = `
-                <div class="message">
-                    <p>${message}</p>
-                    ${!loggedIn ? '<p><a href="signin.html">Sign in here</a></p>' : ''}
-                </div>
-            `;
+        // Format date helper
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
         // Main function to fetch and display chats
@@ -217,29 +165,31 @@
                 const data = JSON.parse(text);
                 debugLog('Parsed response:', data);
 
-                // Handle authentication status
-                if (data.error === 'auth_required') {
-                    updateStatusBar(false);
-                    showEmptyState(false);
-                    return;
+                // Update login status
+                if (data.email) {
+                    document.querySelector('.user-email').textContent = 
+                        `Current user: ${data.email}`;
                 }
 
-                // User is authenticated at this point
-                updateStatusBar(true, data.email);
-
+                // Handle no chats case
                 if (!data.chats || data.chats.length === 0) {
-                    showEmptyState(true);
+                    document.getElementById('content').innerHTML = `
+                        <div class="message">
+                            You are logged in, but no conversations were found. 
+                            Start a new chat to begin!
+                        </div>
+                    `;
                     return;
                 }
 
-                // Display chats if we have them
+                // Display chats
                 const chatsList = data.chats.map(chat => `
                     <div class="chat-card">
-                        <div class="chat-header">
-                            <div class="chat-topic">${chat.topic || 'New Chat'}</div>
-                            <div class="chat-date">${new Date(chat.created_at).toLocaleString()}</div>
+                        <div class="chat-topic">${chat.topic || 'New Chat'}</div>
+                        <div class="chat-date">
+                            Created: ${formatDate(chat.created_at)}
+                            ${chat.updated_at ? `<br>Updated: ${formatDate(chat.updated_at)}` : ''}
                         </div>
-                        ${chat.summary ? `<div class="chat-summary">${chat.summary}</div>` : ''}
                     </div>
                 `).join('');
 
@@ -250,9 +200,9 @@
             } catch (error) {
                 debugLog('Error occurred:', error);
                 document.getElementById('content').innerHTML = `
-                    <div class="message error">
-                        <p>An error occurred while loading chats. Please try again.</p>
-                        <p>${error.message}</p>
+                    <div class="message" style="background: #fee2e2; color: #991b1b;">
+                        An error occurred while loading chats. Please try again.
+                        <br>Error: ${error.message}
                     </div>
                 `;
             }
