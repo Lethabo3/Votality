@@ -494,40 +494,100 @@ function getSharedContent($id) {
 }
 
 function getRecentChats() {
+    debug_log("getRecentChats called. Session data: " . print_r($_SESSION, true));
     $userId = $_SESSION['user_id'] ?? null;
+    debug_log("User ID from session: " . ($userId ?? 'null'));
+
     if ($userId) {
-        return getRecentChatsFromDatabase($userId);
+        $result = getRecentChatsFromDatabase($userId);
+    } else {
+        $result = getRecentChatsFromSession();
     }
-    return ['chats' => []];
+
+    debug_log("getRecentChats result: " . print_r($result, true));
+    return $result;
 }
 
 function getRecentChatsFromDatabase($userId) {
     global $conn;
     try {
+        error_log("Starting getRecentChatsFromDatabase for userId: " . $userId);
+ 
+        // Get recent chats with their latest messages
         $stmt = $conn->prepare("
-            SELECT chat_id, topic, created_at
-            FROM votality_chats 
-            WHERE user_id = ?
-            ORDER BY created_at DESC
+            SELECT
+                c.chat_id,
+                c.topic,
+                c.created_at,
+                (SELECT content
+                 FROM votality_messages m
+                 WHERE m.chat_id = c.chat_id
+                 ORDER BY m.timestamp DESC
+                 LIMIT 1) as latest_message
+            FROM votality_chats c 
+            WHERE c.user_id = ?
+            ORDER BY c.created_at DESC
             LIMIT 6
         ");
+ 
+        if (!$stmt) {
+            error_log("Prepare failed: " . $conn->error);
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
         
         $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
         
+        if (!$stmt->execute()) {
+            error_log("Execute failed: " . $stmt->error);
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        
+        $result = $stmt->get_result();
         $chats = [];
+        
         while ($row = $result->fetch_assoc()) {
+            error_log("Found chat: " . $row['chat_id'] . " with topic: " . ($row['topic'] ?? 'No topic'));
+            
             $chats[] = [
                 'chat_id' => $row['chat_id'],
-                'topic' => $row['topic'] ?? 'New Chat'
+                'topic' => $row['topic'] ?? 'New Chat',
+                'latest_message' => $row['latest_message'],
+                'created_at' => $row['created_at']
             ];
         }
         
+        error_log("Total chats found: " . count($chats));
+        error_log("Final chats array: " . json_encode($chats));
+        
         return ['chats' => $chats];
+        
     } catch (Exception $e) {
+        error_log("Error in getRecentChatsFromDatabase: " . $e->getMessage());
         return ['error' => 'Database error', 'chats' => []];
     }
+ }
+
+function getRecentChatsFromSession() {
+    $chats = [];
+    if (isset($_SESSION['chats'])) {
+        foreach ($_SESSION['chats'] as $chatId => $chatData) {
+            $messages = $chatData['messages'] ?? [];
+            $lastMessage = !empty($messages) ? end($messages)['content'] : null;
+            
+            $chats[] = [
+                'chat_id' => $chatId,
+                'topic' => $chatData['topic'] ?? 'New Chat',
+                'last_message' => $lastMessage,
+                'created_at' => date('Y-m-d H:i:s', $chatData['created_at'])
+            ];
+        }
+    }
+    
+    usort($chats, function($a, $b) {
+        return strtotime($b['created_at']) - strtotime($a['created_at']);
+    });
+    
+    return ['chats' => array_slice($chats, 0, 10)];
 }
 
 function saveMessageToDatabase($chatId, $sender, $content, $fileData = null, $fileType = null) {
