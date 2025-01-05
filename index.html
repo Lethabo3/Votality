@@ -1768,43 +1768,6 @@ function updateChatListUI(chats) {
     });
 }
 
-async function loadRecentChats() {
-    try {
-        const response = await fetch('VotalityChat2.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'getRecentChats' }),
-            credentials: 'same-origin'
-        });
-
-        const data = await response.json();
-        const chatList = document.querySelector('.chat-list');
-        
-        if (!chatList) return;
-        chatList.innerHTML = '';
-
-        // Directly process the chats
-        if (data.chats && data.chats.length > 0) {
-            data.chats.forEach(chat => {
-                const chatItem = document.createElement('div');
-                chatItem.className = 'chat-item';
-                chatItem.innerHTML = `
-                    <span class="chat-name">${chat.topic}</span>
-                `;
-                chatList.appendChild(chatItem);
-            });
-        } else {
-            chatList.innerHTML = `
-                <div class="chat-item no-chats">
-                    <span class="chat-name">No recent chats</span>
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('Failed to load recent chats:', error);
-    }
-}
-
 // Make sure this runs when the page loads
 document.addEventListener('DOMContentLoaded', loadRecentChats);
 // Make sure this gets called when the page loads
@@ -1813,73 +1776,6 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRecentChats();
 });
 
-function updateRecentChatsUI(chats) {
-    console.log('Force updating recent chats UI');
-    
-    const chatList = document.querySelector('.chat-list');
-    if (!chatList) {
-        console.error('Chat list container not found');
-        return;
-    }
-
-    // Clear existing chats
-    chatList.innerHTML = '';
-
-    // If no chats are passed, fetch them directly from the database
-    if (!chats || chats.length === 0) {
-        fetch('VotalityChat2.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'getRecentChats'
-            }),
-            credentials: 'same-origin'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.chats && data.chats.length > 0) {
-                displayChats(data.chats);
-            } else {
-                chatList.innerHTML = `
-                    <div class="chat-item no-chats">
-                        <span class="chat-name">No recent chats</span>
-                    </div>
-                `;
-            }
-        });
-    } else {
-        displayChats(chats);
-    }
-
-    function displayChats(chatsToDisplay) {
-        chatsToDisplay.forEach(chat => {
-            const chatItem = document.createElement('div');
-            chatItem.className = 'chat-item';
-            if (chat.chat_id === currentChatId) {
-                chatItem.classList.add('active');
-            }
-
-            const chatName = document.createElement('span');
-            chatName.className = 'chat-name';
-            // Force display of topic or a default message
-            chatName.textContent = chat.topic || 'New Chat';
-            
-            chatItem.addEventListener('click', () => {
-                document.querySelectorAll('.chat-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                chatItem.classList.add('active');
-                currentChatId = chat.chat_id;
-                loadChat(chat.chat_id);
-            });
-
-            chatItem.appendChild(chatName);
-            chatList.appendChild(chatItem);
-        });
-    }
-}
 // Add this helper function to load chat content
 async function loadChat(chatId) {
 console.log('Loading chat:', chatId);
