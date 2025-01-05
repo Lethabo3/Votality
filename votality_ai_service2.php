@@ -39,14 +39,66 @@ class VotalityAIService {
             error_log("API URL: " . $this->apiUrl);
             error_log("Using model: gemini-1.5-flash-latest");
             
-            // Prepare the request - Note the structure for Gemini 1.5
+            // Extract any mentioned financial instruments
+            $instrument = $this->extractFinancialInstrument($message);
+    
+            // Gather comprehensive data
+            $marketData = [];
+            $economicData = $this->fetchEconomicData();
+            $newsData = $this->fetchTopStories(5);
+    
+            // If specific financial instrument mentioned, get detailed data
+            if ($instrument) {
+                $specificData = $this->fetchMarketData($instrument);
+                $marketData['specific_instrument'] = $specificData;
+            }
+    
+            // Get general market indicators
+            $indices = ['SPY', 'DIA', 'QQQ'];  // Major market indices
+            foreach ($indices as $index) {
+                $indexData = $this->fetchStockData($index);
+                if ($indexData) {
+                    $marketData['indices'][$index] = $indexData;
+                }
+            }
+    
+            // Get forex data for major pairs
+            $forexPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY'];
+            foreach ($forexPairs as $pair) {
+                $forexData = $this->fetchForexData($pair);
+                if ($forexData) {
+                    $marketData['forex'][$pair] = $forexData;
+                }
+            }
+    
+            // Get crypto market data
+            $cryptoPairs = ['BTC-USD', 'ETH-USD'];
+            foreach ($cryptoPairs as $crypto) {
+                $cryptoData = $this->fetchCryptoData($crypto);
+                if ($cryptoData) {
+                    $marketData['crypto'][$crypto] = $cryptoData;
+                }
+            }
+            
+            // Prepare the enhanced context for the AI
+            $context = [
+                'market_data' => $marketData,
+                'economic_indicators' => $economicData,
+                'recent_news' => $newsData,
+                'message_context' => [
+                    'detected_entities' => $this->extractEntities($message),
+                    'sentiment' => $this->analyzeSentiment($message)
+                ]
+            ];
+            
+            // Prepare the request with enhanced context
             $aiRequest = [
                 'contents' => [
                     [
                         'role' => 'user',
                         'parts' => [
                             [
-                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
+                                'text' => $this->prepareInstructions($context) . "\n\nUser message: " . $message
                             ]
                         ]
                     ]
@@ -61,7 +113,7 @@ class VotalityAIService {
                     'temperature' => 0.2,
                     'topK' => 40,
                     'topP' => 0.95,
-                    'maxOutputTokens' => 500,
+                    'maxOutputTokens' => 1000,
                     'stopSequences' => []
                 ]
             ];
@@ -125,7 +177,6 @@ class VotalityAIService {
             // Log the decoded response structure
             error_log("Decoded response structure: " . json_encode($result, JSON_PRETTY_PRINT));
     
-            // Updated path for response content in Gemini 1.5
             if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
                 throw new Exception("Unexpected response structure: " . json_encode($result));
             }
