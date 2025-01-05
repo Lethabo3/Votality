@@ -1032,178 +1032,110 @@ try {
 // Update the sendMessage function in your JavaScript
 async function sendMessage(message, file = null) {
 try {
-// Enhanced file validation
-if (file) {
-    // Check file size (e.g., 10MB limit)
-    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
-    if (file.size > MAX_FILE_SIZE) {
-        throw new Error('File size exceeds 10MB limit');
-    }
+    // Do the UI transitions first
+    initialContent.classList.add('fade-out');
+    suggestedQueries.classList.add('fade-out');
+    footerLinks.classList.add('fade-out');
+    textareaContainer.classList.add('repositioned');
+    document.body.classList.add('white-background');
 
-    // Enhanced allowed file types
-    const ALLOWED_TYPES = [
-        'text/plain',
-        'text/csv',
-        'application/json',
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
-        'application/vnd.ms-excel', // xls
-        'image/png',
-        'image/jpeg',
-        'image/gif'
-    ];
-    
-    if (!ALLOWED_TYPES.includes(file.type)) {
-        throw new Error('Unsupported file type. Please upload CSV, TXT, JSON, PDF, Excel files, or images.');
-    }
+    setTimeout(async () => {
+        initialContent.style.display = 'none';
+        suggestedQueries.style.display = 'none';
+        footerLinks.style.display = 'none';
+        chatContainer.style.display = 'block';
+        chatContainer.classList.add('fade-in');
 
-    console.log('Processing file:', {
-        name: file.name,
-        type: file.type,
-        size: file.size
-    });
-}
+        if (window.innerWidth > 640) {
+            disclaimer.style.display = 'block';
+            setTimeout(() => {
+                disclaimer.classList.add('fade-in');
+            }, 50);
+        }
 
-// UI transitions
-initialContent.classList.add('fade-out');
-suggestedQueries.classList.add('fade-out');
-footerLinks.classList.add('fade-out');
-textareaContainer.classList.add('repositioned');
-document.body.classList.add('white-background');
+        if (window.innerWidth > 640) {
+            desktopTopNav.style.display = 'flex';
+            setTimeout(() => {
+                desktopTopNav.classList.add('fade-in');
+            }, 50);
+        } else {
+            const topNav = document.querySelector('.top-nav');
+            if (topNav) {
+                topNav.style.display = 'none';
+            }
+            document.body.classList.add('chat-active');
+        }
 
-await new Promise(resolve => setTimeout(resolve, 500));
+        const userMessageElement = await addMessage(message, 'user');
+        textarea.value = '';
+        showAIThinking();
 
-// Hide initial elements
-initialContent.style.display = 'none';
-suggestedQueries.style.display = 'none';
-footerLinks.style.display = 'none';
-chatContainer.style.display = 'block';
-chatContainer.classList.add('fade-in');
+        if (userMessageElement) {
+            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
-// Handle responsive UI
-if (window.innerWidth > 640) {
-    disclaimer.style.display = 'block';
-    setTimeout(() => disclaimer.classList.add('fade-in'), 50);
-    
-    desktopTopNav.style.display = 'flex';
-    setTimeout(() => desktopTopNav.classList.add('fade-in'), 50);
-} else {
-    const topNav = document.querySelector('.top-nav');
-    if (topNav) topNav.style.display = 'none';
-    document.body.classList.add('chat-active');
-}
+        try {
+            const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
 
-// Add user message to UI with file
-const userMessageElement = await addMessage(message, 'user', null, file);
-textarea.value = '';
-showAIThinking();
+            const response = await fetch('VotalityChat2.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'sendMessage',
+                    message: message,
+                    chatId: currentChatId,
+                    stayLoggedOut: stayLoggedOut,
+                    file: file ? { data: await readFileAsDataURL(file), type: file.type } : null
+                }),
+                credentials: 'same-origin'
+            });
 
-if (userMessageElement) {
-    userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+            const data = await response.json();
 
-// Enhanced file data preparation
-let fileData = null;
-if (file) {
-    try {
-        const base64Data = await readFileAsDataURL(file);
-        fileData = {
-            data: base64Data,
-            type: file.type,
-            name: file.name,
-            size: file.size
-        };
-        console.log('File prepared for sending:', {
-            name: file.name,
-            type: file.type,
-            size: file.size
-        });
-    } catch (error) {
-        console.error('Error preparing file:', error);
-        throw new Error('Failed to prepare file for upload');
-    }
-}
+            if (data.error) {
+                if (data.error === 'auth_required' && !stayLoggedOut) {
+                    hideAIThinking();
+                    sessionStorage.setItem('returnUrl', window.location.href);
+                    window.location.href = '/signin.html';
+                    return;
+                }
 
-// Enhanced server request
-const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
-const response = await fetch('VotalityChat2.php', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-        action: 'sendMessage',
-        message: message,
-        chatId: currentChatId,
-        stayLoggedOut: stayLoggedOut,
-        file: fileData
-    }),
-    credentials: 'same-origin'
-});
+                if (data.error === 'auth_required' && stayLoggedOut) {
+                    // Ignore auth error if user chose to stay logged out
+                } else {
+                    throw new Error(data.error);
+                }
+            }
 
-// Enhanced response handling
-if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Server error:', errorText);
-    throw new Error(`Server error: ${response.status}`);
-}
+            if (data.chatTopic) {
+                updateChatTopicDisplay(data.chatTopic);
+            }
 
-const data = await response.json();
+            hideAIThinking();
+            await addMessage(data.response, 'ai', data.relatedTopics);
+            
+            if (!currentChatId) {
+                currentChatId = data.chatId;
+            }
 
-// Handle response
-if (data.error) {
-    if (data.error === 'auth_required' && !stayLoggedOut) {
-        hideAIThinking();
-        sessionStorage.setItem('returnUrl', window.location.href);
-        window.location.href = '/signin.html';
-        return;
-    }
+            // Load recent chats after successful message
+            await loadRecentChats();
 
-    if (data.error === 'auth_required' && stayLoggedOut) {
-        // Ignore auth error if user chose to stay logged out
-    } else {
-        throw new Error(data.error);
-    }
-}
-
-// Update UI
-if (data.chatTopic) {
-    updateChatTopicDisplay(data.chatTopic);
-}
-
-hideAIThinking();
-await addMessage(data.response, 'ai', data.relatedTopics);
-
-if (!currentChatId) {
-    currentChatId = data.chatId;
-}
-
-// Refresh chat list
-await loadRecentChats();
-
+        } catch (error) {
+            console.error('Error:', error);
+            hideAIThinking();
+            await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
+        }
+    }, 500);
 } catch (error) {
-console.error('Error in sendMessage:', error);
-hideAIThinking();
-await addMessage(`Error: ${error.message}`, 'ai');
-showErrorNotification(error.message);
+    console.error('Error in sendMessage:', error);
+    hideAIThinking();
+    await addMessage("Error: " + error.message, 'ai');
 }
 }
 
-// Helper function to show error notifications
-function showErrorNotification(message) {
-const notification = document.createElement('div');
-notification.className = 'error-notification';
-notification.textContent = message;
-document.body.appendChild(notification);
-
-setTimeout(() => {
-notification.classList.add('fade-in');
-setTimeout(() => {
-    notification.classList.remove('fade-in');
-    setTimeout(() => notification.remove(), 300);
-}, 3000);
-}, 100);
-}
 
 // Update DOM content loaded handler
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1825,106 +1757,115 @@ chats.forEach(chat => {
 });
 }
 
+
 async function loadRecentChats() {
-try {
-    console.log('Loading recent chats...');
-    const response = await fetch('VotalityChat2.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            action: 'getRecentChats'
-        }),
-        credentials: 'same-origin' // Add this to ensure cookies/session are sent
-    });
+    try {
+        console.log('Loading recent chats...');
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'getRecentChats'
+            }),
+            credentials: 'same-origin'
+        });
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Recent chats data received:', data);
+
+        if (data.error) {
+            console.error('Error fetching chats:', data.error);
+            return;
+        }
+
+        // Replace updateRecentChatsUI with updateChatListUI
+        updateChatListUI(data.chats);
+        
+    } catch (error) {
+        console.error('Error loading recent chats:', error);
+        updateChatListUI([]); // This will show "No recent chats" message
     }
+}
 
-    const data = await response.json();
-    console.log('Recent chats data:', data);
+// Make sure this gets called when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, fetching recent chats');
+    loadRecentChats();
+});
 
-    if (data.error) {
-        console.error('Error fetching chats:', data.error);
+function updateRecentChatsUI(chats) {
+    console.log('Force updating recent chats UI');
+    
+    const chatList = document.querySelector('.chat-list');
+    if (!chatList) {
+        console.error('Chat list container not found');
         return;
     }
 
-    updateRecentChatsUI(data.chats);
-} catch (error) {
-    console.error('Error loading recent chats:', error);
-    // Show "No recent chats" in the UI
-    const chatList = document.querySelector('.chat-list');
-    if (chatList) {
-        chatList.innerHTML = `
-            <div class="chat-item no-chats">
-                <span class="chat-name">No recent chats</span>
-            </div>
-        `;
-    }
-}
-}
+    // Clear existing chats
+    chatList.innerHTML = '';
 
-function updateRecentChatsUI(chats) {
-console.log('Updating recent chats UI with:', chats);
-
-const chatList = document.querySelector('.chat-list');
-if (!chatList) {
-    console.error('Chat list container not found');
-    return;
-}
-
-// Clear existing chats
-chatList.innerHTML = '';
-
-if (!chats || chats.length === 0) {
-    console.log('No chats to display');
-    chatList.innerHTML = `
-        <div class="chat-item no-chats">
-            <span class="chat-name">No recent chats</span>
-        </div>
-    `;
-    return;
-}
-
-// Add each chat to the sidebar
-chats.forEach(chat => {
-    console.log('Processing chat:', chat);
-    
-    const chatItem = document.createElement('div');
-    chatItem.className = 'chat-item';
-    if (chat.chat_id === currentChatId) {
-        chatItem.classList.add('active');
-    }
-
-    const chatName = document.createElement('span');
-    chatName.className = 'chat-name';
-    chatName.textContent = chat.topic || 'New Chat';
-
-    chatItem.addEventListener('click', () => {
-        console.log('Chat clicked:', chat.chat_id);
-        
-        // Remove active class from all chats
-        document.querySelectorAll('.chat-item').forEach(item => {
-            item.classList.remove('active');
+    // If no chats are passed, fetch them directly from the database
+    if (!chats || chats.length === 0) {
+        fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'getRecentChats'
+            }),
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.chats && data.chats.length > 0) {
+                displayChats(data.chats);
+            } else {
+                chatList.innerHTML = `
+                    <div class="chat-item no-chats">
+                        <span class="chat-name">No recent chats</span>
+                    </div>
+                `;
+            }
         });
-        
-        // Add active class to clicked chat
-        chatItem.classList.add('active');
-        
-        // Update current chat ID
-        currentChatId = chat.chat_id;
-        
-        // Load the chat messages
-        loadChat(chat.chat_id);
-    });
+    } else {
+        displayChats(chats);
+    }
 
-    chatItem.appendChild(chatName);
-    chatList.appendChild(chatItem);
-});
+    function displayChats(chatsToDisplay) {
+        chatsToDisplay.forEach(chat => {
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item';
+            if (chat.chat_id === currentChatId) {
+                chatItem.classList.add('active');
+            }
+
+            const chatName = document.createElement('span');
+            chatName.className = 'chat-name';
+            // Force display of topic or a default message
+            chatName.textContent = chat.topic || 'New Chat';
+            
+            chatItem.addEventListener('click', () => {
+                document.querySelectorAll('.chat-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                chatItem.classList.add('active');
+                currentChatId = chat.chat_id;
+                loadChat(chat.chat_id);
+            });
+
+            chatItem.appendChild(chatName);
+            chatList.appendChild(chatItem);
+        });
+    }
 }
-
 // Add this helper function to load chat content
 async function loadChat(chatId) {
 console.log('Loading chat:', chatId);
@@ -2148,10 +2089,10 @@ console.log('Attachment button clicked');
 
 async function readFileAsDataURL(file) {
 return new Promise((resolve, reject) => {
-const reader = new FileReader();
-reader.onload = () => resolve(reader.result);
-reader.onerror = reject;
-reader.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
 });
 }
 
@@ -2483,241 +2424,259 @@ controls.querySelector('.submit-edit-button').style.display = 'none';
 controls.querySelector('.cancel-edit-button').style.display = 'none';
 }
 
-// Helper function to get appropriate icon for file type
-function getFileIcon(fileType) {
-const iconMap = {
-'text/csv': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>`,
-'application/json': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 12a1 1 0 0 1 1 1v1a1 1 0 0 0 1 1 1 1 0 0 0-1 1v1a1 1 0 0 1-1 1"/></svg>`,
-'default': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`
-};
-
-return iconMap[fileType] || iconMap.default;
-}
-
-// Helper function to format file size
-function formatFileSize(bytes) {
-if (bytes === 0) return '0 Bytes';
-const k = 1024;
-const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-const i = Math.floor(Math.log(bytes) / Math.log(k));
-return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
-
-function addMessage(text, sender, relatedTopics = [], file = null) {
+function addMessage(text, sender, relatedTopics = []) {
 return new Promise((resolve) => {
-const chatContainer = document.querySelector('.chat-container');
-let messageElement;
-
-if (sender === 'user') {
-    // Create a new chat group for user messages
-    const chatGroup = document.createElement('div');
-    chatGroup.className = 'chat-group';
+    const chatContainer = document.querySelector('.chat-container');
+    let messageElement;
     
-    // Create the main message element
-    messageElement = document.createElement('div');
-    messageElement.className = 'message user-message';
-    
-    // Add text content
-    const textContent = document.createElement('div');
-    textContent.className = 'message-text';
-    textContent.textContent = text;
-    messageElement.appendChild(textContent);
-    
-    // Handle file attachment if present
-    if (file) {
-        const fileAttachment = document.createElement('div');
-        fileAttachment.className = 'file-attachment';
+    if (sender === 'user') {
+        const chatGroup = document.createElement('div');
+        chatGroup.className = 'chat-group';
         
-        const fileIcon = document.createElement('div');
-        fileIcon.className = 'file-icon';
-        fileIcon.innerHTML = getFileIconByType(file.type);
+        messageElement = document.createElement('div');
+        messageElement.className = 'message user-message';
+        messageElement.textContent = text;
         
-        const fileInfo = document.createElement('div');
-        fileInfo.className = 'file-info';
+        chatGroup.appendChild(messageElement);
+        chatContainer.appendChild(chatGroup);
         
-        const fileName = document.createElement('div');
-        fileName.className = 'file-name';
-        fileName.textContent = file.name;
+        // Add edit controls for user messages
+        addEditControls(messageElement);
         
-        const fileSize = document.createElement('div');
-        fileSize.className = 'file-size';
-        fileSize.textContent = formatFileSize(file.size);
-        
-        fileInfo.appendChild(fileName);
-        fileInfo.appendChild(fileSize);
-        fileAttachment.appendChild(fileIcon);
-        fileAttachment.appendChild(fileInfo);
-        
-        messageElement.appendChild(fileAttachment);
-    }
-    
-    chatGroup.appendChild(messageElement);
-    chatContainer.appendChild(chatGroup);
-    
-    // Add edit controls
-    addEditControls(messageElement);
-    
-    // Scroll to the new message
-    messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    resolve(messageElement);
-    
-} else {
-    // For AI responses
-    const lastChatGroup = chatContainer.lastElementChild;
-
-    // Create sources container
-    const sourcesContainer = document.createElement('div');
-    sourcesContainer.className = 'sources-container';
-    sourcesContainer.style.cssText = `
-        display: flex;
-        margin-bottom: 16px;
-        padding: 0 16px;
-        gap: 8px;
-        flex-wrap: wrap;
-    `;
-    
-    // Add file source if there are attached files
-    if (attachedFiles && attachedFiles.length > 0) {
-        attachedFiles.forEach(file => {
-            const fileSource = createFileSource(file);
-            sourcesContainer.appendChild(fileSource);
-        });
-    } else {
-        // Default sources
-        const sourceData = [
-            { image: 'bus2.png', name: 'Nasdaq' },
-            { image: 'bus1.png', name: 'Alpha Vantage' },
-            { image: 'bus3.png', name: 'Bezinga' }
-        ];
-
-        sourceData.forEach(source => {
-            const sourceItem = createSourceItem(source);
-            sourcesContainer.appendChild(sourceItem);
-        });
-    }
-    
-    lastChatGroup.appendChild(sourcesContainer);
-
-    // Create message wrapper
-    const messageWrapper = document.createElement('div');
-    messageWrapper.style.cssText = `
-        position: relative;
-        width: 100%;
-        margin-left: 0px;
-        z-index: 1000;
-    `;
-
-    // Create message container
-    const messageContainer = document.createElement('div');
-    messageContainer.style.cssText = `
-        width: 100%;
-        box-sizing: border-box;
-        position: relative;
-        margin-top: 0px;
-    `;
-
-    // Create AI message element
-    messageElement = document.createElement('div');
-    messageElement.className = 'message ai-message';
-    
-    // Add message content with animation
-    const messageContent = document.createElement('div');
-    messageContent.className = 'ai-message-content';
-    
-    // Split text into paragraphs and animate them
-    const paragraphs = text.split('\n\n');
-    let delay = 0;
-
-    paragraphs.forEach((paragraph) => {
-        if (paragraph.trim()) {
-            const paragraphContainer = document.createElement('div');
-            paragraphContainer.className = 'ai-message-paragraph-container';
-
-            const pElement = document.createElement('p');
-            pElement.className = 'ai-message-paragraph';
-            
-            // Animate each word
-            const words = paragraph.split(' ');
-            words.forEach(word => {
-                const span = document.createElement('span');
-                span.textContent = word + ' ';
-                span.style.opacity = '0';
-                span.style.animation = `fadeIn 0.2s forwards ${delay}ms`;
-                pElement.appendChild(span);
-                delay += 10;
-            });
-            
-            paragraphContainer.appendChild(pElement);
-            messageContent.appendChild(paragraphContainer);
-            delay += 100;
-        }
-    });
-    
-    messageElement.appendChild(messageContent);
-
-    // Add interaction buttons
-    const interactions = document.createElement('div');
-    interactions.className = 'message-interactions';
-    interactions.innerHTML = `
-        <div class="message-feedback">
-            <div class="tooltip-container">
-                <button class="interaction-button" aria-label="Like message">
-                    <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                </button>
-                <div class="tooltip">
-                    <span class="tooltip-text">Like</span>
-                </div>
-            </div>
-            <div class="tooltip-container">
-                <button class="interaction-button" aria-label="Dislike message">
-                    <i data-lucide="thumbs-down" class="w-4 h-4"></i>
-                </button>
-                <div class="tooltip">
-                    <span class="tooltip-text">Dislike</span>
-                </div>
-            </div>
-        </div>
-        <div class="message-actions">
-            <div class="tooltip-container">
-                <button class="interaction-button" aria-label="Copy message">
-                    <i data-lucide="copy" class="w-4 h-4"></i>
-                </button>
-                <div class="tooltip">
-                    <span class="tooltip-text">Copy</span>
-                </div>
-            </div>
-            <div class="tooltip-container">
-                <button class="interaction-button" aria-label="Retry message">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                </button>
-                <div class="tooltip">
-                    <span class="tooltip-text">Retry</span>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Add interaction handlers
-    addMessageInteractions(interactions, messageElement);
-    messageElement.appendChild(interactions);
-    
-    messageContainer.appendChild(messageElement);
-    messageWrapper.appendChild(messageContainer);
-    lastChatGroup.appendChild(messageWrapper);
-
-    // Initialize Lucide icons
-    lucide.createIcons();
-
-    // Add related topics after a delay
-    setTimeout(() => {
-        if (relatedTopics && relatedTopics.length > 0) {
-            addRelatedTopics(relatedTopics, lastChatGroup);
-        }
         resolve(messageElement);
-    }, delay + 100);
-}
+    } else {
+        const lastChatGroup = chatContainer.lastElementChild;
+
+        // Add sources container
+        const sourcesContainer = document.createElement('div');
+        sourcesContainer.className = 'sources-container';
+        sourcesContainer.style.display = 'flex';
+        sourcesContainer.style.flexWrap = 'wrap';
+        sourcesContainer.style.gap = '8px'; // Further reduced gap between items
+        sourcesContainer.style.padding = '1px 16px'; // Further reduced padding
+        
+        if (attachedFiles && attachedFiles.length > 0) {
+            // Display attached files as sources
+            attachedFiles.forEach(file => {
+                const fileSource = createFileSource(file);
+                sourcesContainer.appendChild(fileSource);
+            });
+        } else {
+            // Default source display with images
+            const sourceData = [
+                { image: 'bus2.png', name: 'Nasdaq' },
+                { image: 'bus1.png', name: 'Alpha Vantage' },
+                { image: 'bus3.png', name: 'Bezinga' }
+            ];
+
+            sourceData.forEach(source => {
+                const sourceItem = createSourceItem(source);
+                sourcesContainer.appendChild(sourceItem);
+            });
+        }
+        
+        lastChatGroup.appendChild(sourcesContainer);
+
+        // Create an outer wrapper for proper positioning context
+        const outerWrapper = document.createElement('div');
+        outerWrapper.style.position = 'relative';
+        outerWrapper.style.width = '100%';
+        outerWrapper.style.marginLeft = '0px'; // Make space for the logo
+        outerWrapper.style.zIndex = '1000'; // Increase z-index to ensure it appears above other elements
+
+        // Create the message container
+        const messageContainer = document.createElement('div');
+        messageContainer.style.width = '100%';
+        messageContainer.style.boxSizing = 'border-box';
+        messageContainer.style.position = 'relative';
+        messageContainer.style.marginTop = '0px'; // Further reduced margin
+
+        // Add logo container with absolute positioning
+        const logoContainer = document.createElement('div');
+        logoContainer.style.position = 'absolute';
+        logoContainer.style.left = '-36px'; // Position it to the left of the user message
+        logoContainer.style.width = '40px'; // Set width for the logo container
+        logoContainer.style.height = '40px'; // Set height for the logo container
+        logoContainer.style.borderRadius = '50%'; // Make it rounded
+        logoContainer.style.display = 'none';
+        logoContainer.style.alignItems = 'center';
+        logoContainer.style.justifyContent = 'center';
+        logoContainer.style.backgroundColor = '#f9f9f9';
+        logoContainer.style.border = '1px solid #E5E7EB'; // Optional border for the logo container
+
+        // Create initials text
+        const initials = document.createElement('span');
+        initials.textContent = 'LS'; // Set initials
+        initials.style.fontSize = '16px'; // Adjust font size as needed
+        initials.style.color = '#374151'; // Set text color
+        initials.style.fontWeight = 'bold'; // Make initials bold
+
+        logoContainer.appendChild(initials); // Append initials to the logo container
+        messageContainer.appendChild(logoContainer); // Append logo container to the message container
+
+        // Create AI message
+        messageElement = document.createElement('div');
+        messageElement.className = 'message ai-message';
+        messageElement.style.width = '100%';
+        
+        // Add message content with animation
+        const messageContent = document.createElement('div');
+        messageContent.className = 'ai-message-content';
+        
+        const paragraphs = text.split('\n\n');
+        let delay = 0;
+
+        paragraphs.forEach((paragraph, index) => {
+            if (paragraph.trim() !== '') {
+                const paragraphContainer = document.createElement('div');
+                paragraphContainer.className = 'ai-message-paragraph-container';
+
+                const pElement = document.createElement('p');
+                pElement.className = 'ai-message-paragraph';
+                
+                const words = paragraph.split(' ');
+                words.forEach((word, wordIndex) => {
+                    const span = document.createElement('span');
+                    span.textContent = word + ' ';
+                    span.style.opacity = '0';
+                    span.style.animation = `fadeIn 0.2s forwards ${delay}ms`;
+                    pElement.appendChild(span);
+                    delay += 10;
+                });
+                
+                paragraphContainer.appendChild(pElement);
+                messageContent.appendChild(paragraphContainer);
+                delay += 100;
+            }
+        });
+        
+        messageElement.appendChild(messageContent);
+
+        // Add interaction buttons
+        const interactions = document.createElement('div');
+        interactions.className = 'message-interactions';
+        interactions.innerHTML = `
+            <div class="message-feedback">
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Like message">
+                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Like</span>
+                    </div>
+                </div>
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Dislike message">
+                        <i data-lucide="thumbs-down" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Dislike</span>
+                    </div>
+                </div>
+            </div>
+            <div class="message-actions">
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Copy message">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Copy</span>
+                    </div>
+                </div>
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Retry message">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Retry</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add interaction handlers
+        const likeButton = interactions.querySelector('[aria-label="Like message"]');
+        const dislikeButton = interactions.querySelector('[aria-label="Dislike message"]');
+
+        likeButton.addEventListener('click', () => {
+            likeButton.style.color = '#059669';
+            dislikeButton.style.color = '';
+            handleLike(messageElement);
+        });
+
+        dislikeButton.addEventListener('click', () => {
+            dislikeButton.style.color = '#DC2626';
+            likeButton.style.color = '';
+            handleDislike(messageElement);
+        });
+
+        const copyButton = interactions.querySelector('[aria-label="Copy message"]');
+        copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    copyButton.style.color = '#059669';
+                    setTimeout(() => {
+                        copyButton.style.color = '';
+                    }, 1000);
+                })
+                .catch(console.error);
+        });
+
+        const retryButton = interactions.querySelector('[aria-label="Retry message"]');
+        retryButton.addEventListener('click', () => {
+            const lastUserMessage = chatContainer.querySelector('.user-message:last-of-type');
+            if (lastUserMessage) {
+                const messageText = lastUserMessage.textContent;
+                sendMessage(messageText);
+            }
+        });
+
+        messageElement.appendChild(interactions);
+        messageContainer.appendChild(messageElement);
+        outerWrapper.appendChild(messageContainer);
+        lastChatGroup.appendChild(outerWrapper);
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        setTimeout(() => {
+            if (relatedTopics.length > 0) {
+                const relatedHeading = document.createElement('div');
+                relatedHeading.className = 'section-heading related-heading';
+                relatedHeading.textContent = 'Related';
+                lastChatGroup.appendChild(relatedHeading);
+
+                const relatedContainer = document.createElement('div');
+                relatedContainer.className = 'related-container';
+
+                relatedTopics.forEach(topic => {
+                    const relatedItem = document.createElement('div');
+                    relatedItem.className = 'related-item';
+
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'related-item-text';
+                    textSpan.textContent = topic;
+
+                    const iconSpan = document.createElement('span');
+                    iconSpan.className = 'related-item-icon';
+                    iconSpan.innerHTML = '<i data-lucide="plus"></i>';
+
+                    relatedItem.appendChild(textSpan);
+                    relatedItem.appendChild(iconSpan);
+                    relatedContainer.appendChild(relatedItem);
+
+                    relatedItem.addEventListener('click', () => sendRelatedTopic(topic));
+                });
+
+                lastChatGroup.appendChild(relatedContainer);
+                lucide.createIcons();
+            }
+            resolve(messageElement);
+        }, delay + 100);
+    }
 });
 }
+
 
 function addMessageInteractions(messageElement, sender) {
 if (sender === 'ai') {
@@ -2941,29 +2900,6 @@ queryChips.forEach(chip => {
 document.querySelector('[data-feedback]').addEventListener('click', () => {
 window.location.href = 'feedback.html';
 });
-
-async function handleFileSelection(file) {
-// First, validate the file
-if (!file) {
-console.error('No file selected');
-return;
-}
-
-// Read the file as an ArrayBuffer first
-const arrayBuffer = await file.arrayBuffer();
-// Convert to Base64
-const base64String = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-
-// Create the complete data URL
-const fileData = {
-data: `data:${file.type};base64,${base64String}`,
-type: file.type,
-name: file.name,
-size: file.size
-};
-
-return fileData;
-}
 
 </script>
 <div class="feedback-overlay" id="feedback-overlay">
