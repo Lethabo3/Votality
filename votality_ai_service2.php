@@ -33,72 +33,71 @@ class VotalityAIService {
 
     public function generateResponse($message, $chatId) {
         try {
-            $this->addToHistory('user', $message);
+            // First, gather all available data from every API
             
-            // Log configuration for debugging
-            error_log("API URL: " . $this->apiUrl);
-            error_log("Using model: gemini-1.5-flash-latest");
-            
-            // Extract any mentioned financial instruments
-            $instrument = $this->extractFinancialInstrument($message);
-    
-            // Gather comprehensive data
-            $marketData = [];
-            $economicData = $this->fetchEconomicData();
-            $newsData = $this->fetchTopStories(5);
-    
-            // If specific financial instrument mentioned, get detailed data
-            if ($instrument) {
-                $specificData = $this->fetchMarketData($instrument);
-                $marketData['specific_instrument'] = $specificData;
-            }
-    
-            // Get general market indicators
-            $indices = ['SPY', 'DIA', 'QQQ'];  // Major market indices
-            foreach ($indices as $index) {
-                $indexData = $this->fetchStockData($index);
-                if ($indexData) {
-                    $marketData['indices'][$index] = $indexData;
-                }
-            }
-    
-            // Get forex data for major pairs
-            $forexPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY'];
+            // 1. Get forex data for major currency pairs
+            $forexData = [];
+            $forexPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 'USD/CAD'];
             foreach ($forexPairs as $pair) {
-                $forexData = $this->fetchForexData($pair);
-                if ($forexData) {
-                    $marketData['forex'][$pair] = $forexData;
-                }
+                $forexData[$pair] = $this->fetchForexData($pair);
             }
-    
-            // Get crypto market data
-            $cryptoPairs = ['BTC-USD', 'ETH-USD'];
+
+            // 2. Get crypto market data
+            $cryptoData = [];
+            $cryptoPairs = ['BTC-USD', 'ETH-USD', 'XRP-USD', 'ADA-USD'];
             foreach ($cryptoPairs as $crypto) {
-                $cryptoData = $this->fetchCryptoData($crypto);
-                if ($cryptoData) {
-                    $marketData['crypto'][$crypto] = $cryptoData;
-                }
+                $cryptoData[$crypto] = $this->fetchCryptoData($crypto);
             }
+
+            // 3. Get stock market data
+            $stockData = [];
+            $stocks = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA'];
+            foreach ($stocks as $stock) {
+                $stockData[$stock] = $this->fetchStockData($stock);
+            }
+
+            // 4. Get economic indicators
+            $economicData = $this->fetchEconomicData();
+
+            // 5. Get news from all sources
+            $benzingaNews = $this->fetchBenzingaNews(5);
+            $finnhubNews = $this->fetchFinnhubNews(5);
+            $marketauxNews = $this->fetchMarketauxNews(5);
             
-            // Prepare the enhanced context for the AI
-            $context = [
-                'market_data' => $marketData,
+            // Combine all data for the AI model
+            $comprehensiveData = [
+                'forex_market' => $forexData,
+                'crypto_market' => $cryptoData,
+                'stock_market' => $stockData,
                 'economic_indicators' => $economicData,
-                'recent_news' => $newsData,
-                'message_context' => [
-                    'detected_entities' => $this->extractEntities($message),
-                    'sentiment' => $this->analyzeSentiment($message)
+                'news' => [
+                    'benzinga' => $benzingaNews,
+                    'finnhub' => $finnhubNews,
+                    'marketaux' => $marketauxNews
                 ]
             ];
-            
-            // Prepare the request with enhanced context
+
+            // Extract any specific instruments mentioned in the message
+            $mentionedInstrument = $this->extractFinancialInstrument($message);
+            if ($mentionedInstrument) {
+                $comprehensiveData['specific_focus'] = $this->fetchMarketData($mentionedInstrument);
+            }
+
+            // Format data for better AI consumption
+            $formattedContext = "Current Market Data:\n\n";
+            foreach ($comprehensiveData as $category => $data) {
+                $formattedContext .= strtoupper($category) . ":\n";
+                $formattedContext .= json_encode($data, JSON_PRETTY_PRINT) . "\n\n";
+            }
+
+            // Prepare the AI request with all gathered data
             $aiRequest = [
                 'contents' => [
                     [
                         'role' => 'user',
                         'parts' => [
                             [
-                                'text' => $this->prepareInstructions($context) . "\n\nUser message: " . $message
+                                'text' => $formattedContext . "\nUser Question: " . $message
                             ]
                         ]
                     ]
@@ -117,10 +116,8 @@ class VotalityAIService {
                     'stopSequences' => []
                 ]
             ];
-    
-            // Log the request payload for debugging
-            error_log("Request payload: " . json_encode($aiRequest, JSON_PRETTY_PRINT));
-    
+
+            // Make the API call to Gemini
             $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
@@ -130,73 +127,59 @@ class VotalityAIService {
                     'Content-Type: application/json',
                     'Accept: application/json'
                 ],
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_VERBOSE => true
+                CURLOPT_TIMEOUT => 30
             ]);
-    
-            // Create a temporary file handle for CURL debugging
-            $verbose = fopen('php://temp', 'w+');
-            curl_setopt($ch, CURLOPT_STDERR, $verbose);
-    
-            // Execute the request and capture response details
+
             $response = curl_exec($ch);
-            $curlError = curl_error($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            
-            // Get verbose debug information
-            rewind($verbose);
-            $verboseLog = stream_get_contents($verbose);
-            fclose($verbose);
-    
-            // Log detailed debug information
-            error_log("HTTP Code: " . $httpCode);
-            error_log("Curl Error: " . $curlError);
-            error_log("Verbose log: " . $verboseLog);
-            error_log("Raw response: " . $response);
-    
             curl_close($ch);
-    
-            if ($curlError) {
-                throw new Exception("Curl error: " . $curlError);
-            }
-    
+            
             if ($httpCode !== 200) {
-                throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
+                throw new Exception("API returned non-200 status code: " . $httpCode);
             }
-    
-            if (empty($response)) {
-                throw new Exception("Empty response received from API");
-            }
-    
+
             $result = json_decode($response, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                error_log("JSON decode error. Response received: " . substr($response, 0, 1000));
-                throw new Exception("JSON decode error: " . json_last_error_msg());
-            }
-    
-            // Log the decoded response structure
-            error_log("Decoded response structure: " . json_encode($result, JSON_PRETTY_PRINT));
-    
             if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                throw new Exception("Unexpected response structure: " . json_encode($result));
+                throw new Exception("Unexpected response structure");
             }
-    
-            $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
-            $cleanedResponse = $this->removeAsterisks($aiResponse);
-            
-            $this->addToHistory('ai', $cleanedResponse);
-            
-            // Log successful response
-            error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
-            
-            return $cleanedResponse;
-    
+
+            return $result['candidates'][0]['content']['parts'][0]['text'];
+
         } catch (Exception $e) {
             error_log("Error in generateResponse: " . $e->getMessage());
-            error_log("Stack trace: " . $e->getTraceAsString());
-            return "I apologize, but I encountered an error processing your request. Please try again in a moment. Error details: " . $e->getMessage();
+            return "I apologize, but I encountered an error processing your request. Please try again.";
         }
     }
+
+    // Essential helper functions that generateResponse depends on
+    private function makeApiRequest($url) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSL_VERIFYPEER => true
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        
+        if (curl_errno($ch)) {
+            error_log("API request failed: " . curl_error($ch));
+            curl_close($ch);
+            return null;
+        }
+        
+        curl_close($ch);
+        
+        if ($httpCode !== 200) {
+            return null;
+        }
+
+        return json_decode($response, true);
+    }
+
 
     private function extractFinancialInstrument($message) {
         $patterns = [
