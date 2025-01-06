@@ -211,6 +211,38 @@ debug_log("Final response: " . json_encode($response));
 echo json_encode($response);
 exit;
 
+// Helper function to handle the recent chats request
+function handleGetRecentChats() {
+    try {
+        // Get the user ID from the session
+        $userId = $_SESSION['user_id'] ?? null;
+        
+        if (!$userId) {
+            error_log("No user ID found in session");
+            return [
+                'success' => false,
+                'error' => 'No authenticated user found'
+            ];
+        }
+
+        // Get the chats from the database
+        $result = getRecentChatsFromDatabase($userId);
+        
+        // Log the result for debugging
+        error_log("handleGetRecentChats result: " . json_encode($result));
+        
+        return $result;
+
+    } catch (Exception $e) {
+        error_log("Error in handleGetRecentChats: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'Failed to process recent chats request',
+            'details' => $e->getMessage()
+        ];
+    }
+}
+
 function getWorldTime($timezone) {
     $url = "http://worldtimeapi.org/api/timezone/" . urlencode($timezone);
     $response = @file_get_contents($url);
@@ -564,71 +596,66 @@ function getRecentChats() {
 
 function getRecentChatsFromDatabase($userId) {
     global $conn;
-    
     try {
-        // Log the start of the function and the user ID
+        // First, let's verify the user ID we're working with
         error_log("Fetching recent chats for user ID: " . $userId);
 
+        // Modified query to get all essential chat information
         $stmt = $conn->prepare("
             SELECT 
                 c.chat_id,
                 c.topic,
+                c.summary,
                 c.created_at,
                 c.updated_at,
-                COALESCE(m.content, '') as latest_message
+                COALESCE(
+                    (SELECT content 
+                     FROM votality_messages m 
+                     WHERE m.chat_id = c.chat_id 
+                     ORDER BY timestamp DESC 
+                     LIMIT 1
+                    ), ''
+                ) as latest_message
             FROM votality_chats c
-            LEFT JOIN (
-                SELECT 
-                    chat_id,
-                    content,
-                    timestamp,
-                    ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY timestamp DESC) as rn
-                FROM votality_messages
-            ) m ON m.chat_id = c.chat_id AND m.rn = 1
             WHERE c.user_id = ?
             ORDER BY c.updated_at DESC, c.created_at DESC
             LIMIT 10
         ");
 
-        if (!$stmt) {
-            throw new Exception("Failed to prepare statement: " . $conn->error);
-        }
-
-        $stmt->bind_param("i", $userId);
-        
-        if (!$stmt->execute()) {
+        if (!$stmt->execute([$userId])) {
             throw new Exception("Failed to execute query: " . $stmt->error);
         }
 
         $result = $stmt->get_result();
         $chats = [];
 
+        // Process each chat and ensure we have all required data
         while ($row = $result->fetch_assoc()) {
-            // Log each chat as it's processed
             error_log("Processing chat: " . json_encode($row));
-            
-            // Format the topic - ensure it's never empty
-            $topic = !empty($row['topic']) ? $row['topic'] : 'New Chat';
             
             $chats[] = [
                 'chat_id' => $row['chat_id'],
-                'topic' => $topic,
-                'latest_message' => $row['latest_message'],
+                'topic' => $row['topic'],  // This will be the actual topic from the database
+                'preview' => mb_substr($row['latest_message'] ?? '', 0, 100),
                 'created_at' => $row['created_at'],
-                'updated_at' => $row['updated_at']
+                'updated_at' => $row['updated_at'],
+                'summary' => $row['summary']
             ];
         }
 
-        // Log the final result
-        error_log("Found " . count($chats) . " chats for user $userId");
-
+        error_log("Returning " . count($chats) . " chats");
+        
+        // Return both success status and the chats array
         return [
             'success' => true,
-            'chats' => $chats
+            'chats' => $chats,
+            'total' => count($chats)
         ];
 
     } catch (Exception $e) {
         error_log("Error in getRecentChatsFromDatabase: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        
         return [
             'success' => false,
             'error' => 'Failed to fetch recent chats',
