@@ -79,7 +79,7 @@ position: relative;
 }
 
 .sidebar.expanded {
-    width: 15rem; /* Width when expanded */
+    width: 17rem; /* Width when expanded */
     z-index: 200;
 }
 
