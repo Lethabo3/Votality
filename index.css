@@ -2131,7 +2131,7 @@ margin-top: 0.5rem;
     width: 100%;
     padding: 0.2rem;
     background-color: red !important; /* Light background */
-    border: 0px solid #e5e7eb; /* Border color */
+    border: 9px solid red; /* Border color */
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
