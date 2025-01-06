@@ -630,8 +630,17 @@ document.addEventListener('DOMContentLoaded', updateUsername);
 document.querySelector('.desktop-top-nav__share-button').addEventListener('click', shareChatContent);
 
 function updateChatTopicDisplay(topic) {
-if (desktopTopNavTopic) {
-    // Remove hashtags and trim whitespace
+    const desktopTopNavTopic = document.querySelector('.desktop-top-nav__topic');
+    if (!desktopTopNavTopic) return;
+
+    // Clear existing content
+    desktopTopNavTopic.innerHTML = '';
+
+    if (!topic) {
+        topic = 'New Chat';
+    }
+
+    // Clean up the topic text
     topic = topic.replace(/#/g, '').trim();
     
     // Remove "Related Topics" and everything after it
@@ -639,35 +648,29 @@ if (desktopTopNavTopic) {
     if (relatedTopicsIndex !== -1) {
         topic = topic.substring(0, relatedTopicsIndex).trim();
     }
-    
-    // Limit the topic to a reasonable length (e.g., 50 characters)
-    if (topic.length > 20) {
+
+    // Limit the topic length
+    if (topic.length > 50) {
         topic = topic.substring(0, 47) + '...';
     }
-    
-    // Clear existing content
-    desktopTopNavTopic.innerHTML = '';
-    
-    // Split the topic into words
+
+    // Split the topic into words for animation
     const words = topic.split(' ');
     
-    // Create a span for each word and apply the animation
     words.forEach((word, index) => {
         const span = document.createElement('span');
-        span.textContent = word + ' ';
+        span.textContent = word + (index < words.length - 1 ? ' ' : '');
         span.style.opacity = '0';
         span.style.animation = `fadeIn 0.5s forwards ${index * 100}ms`;
         desktopTopNavTopic.appendChild(span);
     });
-    
-    // Make the desktop top nav visible immediately if it's not already
+
+    // Ensure the desktop top nav is visible
     const desktopTopNav = document.querySelector('.desktop-top-nav');
     if (desktopTopNav && window.innerWidth > 640) {
         desktopTopNav.style.display = 'flex';
         desktopTopNav.classList.add('fade-in');
     }
-}
-console.log("Chat topic updated:", topic);
 }
 
 async function shareChatContent() {
@@ -1701,7 +1704,67 @@ chats.forEach(chat => {
     chatList.appendChild(chatItem);
 });
 }
+function updateChatListUI(chats) {
+    const chatList = document.querySelector('.chat-list');
+    if (!chatList) return;
 
+    // Clear existing chats
+    chatList.innerHTML = '';
+
+    if (!chats || chats.length === 0) {
+        chatList.innerHTML = `
+            <div class="chat-item no-chats">
+                <span class="chat-name">No recent chats</span>
+            </div>
+        `;
+        return;
+    }
+
+    chats.forEach(chat => {
+        const chatItem = document.createElement('div');
+        chatItem.className = 'chat-item';
+        if (chat.chat_id === currentChatId) {
+            chatItem.classList.add('active');
+        }
+
+        // Create the topic element
+        const topicSpan = document.createElement('span');
+        topicSpan.className = 'chat-name';
+        topicSpan.textContent = chat.topic || 'New Chat';
+
+        // Create preview element if needed
+        const previewSpan = document.createElement('span');
+        previewSpan.className = 'chat-preview';
+        previewSpan.textContent = chat.preview || '';
+
+        // Add elements to chat item
+        chatItem.appendChild(topicSpan);
+        if (chat.preview) {
+            chatItem.appendChild(previewSpan);
+        }
+
+        chatItem.addEventListener('click', async () => {
+            // Remove active class from all items
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked item
+            chatItem.classList.add('active');
+            
+            // Update current chat ID
+            currentChatId = chat.chat_id;
+            
+            // Update the topic in the top navigation
+            updateChatTopicDisplay(chat.topic);
+            
+            // Load the chat messages
+            await loadChat(chat.chat_id);
+        });
+
+        chatList.appendChild(chatItem);
+    });
+}
 
 async function loadRecentChats() {
     try {
