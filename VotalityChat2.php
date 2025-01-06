@@ -583,17 +583,87 @@ function getSharedContent($id) {
 
 function getRecentChats() {
     debug_log("getRecentChats called. Session data: " . print_r($_SESSION, true));
+    
     $userId = $_SESSION['user_id'] ?? null;
     debug_log("User ID from session: " . ($userId ?? 'null'));
 
-    if ($userId) {
-        $result = getRecentChatsFromDatabase($userId);
-    } else {
-        $result = getRecentChatsFromSession();
+    if (!$userId) {
+        debug_log("No user ID found in session");
+        return [
+            'success' => false,
+            'error' => 'Not authenticated',
+            'debug_info' => [
+                'session_active' => session_status() === PHP_SESSION_ACTIVE,
+                'session_data' => $_SESSION
+            ]
+        ];
     }
 
-    debug_log("getRecentChats result: " . print_r($result, true));
-    return $result;
+    try {
+        global $conn;
+        
+        // Verify database connection
+        if (!$conn) {
+            debug_log("Database connection failed");
+            throw new Exception("Database connection not available");
+        }
+
+        $stmt = $conn->prepare("
+            SELECT c.chat_id, c.topic, c.created_at
+            FROM votality_chats c
+            WHERE c.user_id = ?
+            ORDER BY c.created_at DESC
+            LIMIT 10
+        ");
+        
+        if (!$stmt) {
+            debug_log("Failed to prepare statement: " . $conn->error);
+            throw new Exception("Failed to prepare database statement");
+        }
+
+        $stmt->bind_param("i", $userId);
+        
+        if (!$stmt->execute()) {
+            debug_log("Failed to execute statement: " . $stmt->error);
+            throw new Exception("Failed to execute database query");
+        }
+
+        $result = $stmt->get_result();
+        $chats = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $chats[] = [
+                'chat_id' => $row['chat_id'],
+                'topic' => $row['topic'] ?? 'New Chat',
+                'created_at' => $row['created_at']
+            ];
+        }
+
+        debug_log("Found " . count($chats) . " chats for user $userId");
+        debug_log("Chats data: " . print_r($chats, true));
+
+        return [
+            'success' => true,
+            'chats' => $chats,
+            'debug_info' => [
+                'user_id' => $userId,
+                'chat_count' => count($chats)
+            ]
+        ];
+
+    } catch (Exception $e) {
+        debug_log("Error in getRecentChats: " . $e->getMessage());
+        debug_log("Stack trace: " . $e->getTraceAsString());
+        
+        return [
+            'success' => false,
+            'error' => 'Failed to fetch recent chats',
+            'debug_info' => [
+                'error_message' => $e->getMessage(),
+                'user_id' => $userId
+            ]
+        ];
+    }
 }
 
 function getRecentChatsFromDatabase($userId) {
