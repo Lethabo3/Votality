@@ -1,18 +1,28 @@
 <?php
-// At the very top of the file
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ini_set('log_errors', 1);
-ini_set('error_log', dirname(__FILE__) . '/error.log');
+// Important: This must be the very first line of the file
+// No whitespace or HTML before this opening PHP tag
 
+// Buffer all output
+ob_start();
+
+// Error handling configuration
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Don't display errors directly
+ini_set('log_errors', 1);
+ini_set('error_log', dirname(__FILE__) . '/debug.log');
+
+// Function for logging that doesn't output to browser
 function logDebug($message) {
     error_log(date('[Y-m-d H:i:s] ') . $message);
-    // Also output for immediate visibility
-    echo "<!-- Debug: $message -->\n";
 }
 
-// Start logging
-logDebug("Script started");
+// Clear any previous output buffers and headers
+if (headers_sent()) {
+    logDebug("Headers already sent!");
+}
+
+// Ensure we're starting fresh
+ob_clean();
 
 try {
     // Database connection details
@@ -23,21 +33,19 @@ try {
     
     logDebug("Attempting database connection");
     
-    // Create connection with error reporting
     $conn = new PDO(
         "mysql:host=$servername;dbname=$dbname;charset=utf8mb4",
         $username,
         $password,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
     );
     
     logDebug("Database connection successful");
     
-    // Simple test query
-    $testQuery = $conn->query("SELECT 1");
-    logDebug("Test query successful");
-    
-    // Your actual query
+    // Get user ID (using test ID for development)
     $userId = $_SESSION['user_id'] ?? '17360786907837';
     logDebug("Using user ID: " . $userId);
     
@@ -47,38 +55,43 @@ try {
               ORDER BY updated_at DESC";
     
     $stmt = $conn->prepare($query);
-    logDebug("Query prepared");
-    
     $stmt->execute(['userId' => $userId]);
-    logDebug("Query executed");
+    $chats = $stmt->fetchAll();
     
-    $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
     logDebug("Found " . count($chats) . " chats");
     
-    // Send success response
-    header('Content-Type: application/json');
-    echo json_encode([
+    // Prepare the response
+    $response = [
         'success' => true,
         'chats' => $chats,
-        'debug' => 'Query completed successfully'
-    ]);
+        'timestamp' => date('Y-m-d H:i:s')
+    ];
     
 } catch (PDOException $e) {
     logDebug("Database error: " . $e->getMessage());
-    header('Content-Type: application/json');
-    http_response_code(500);
-    echo json_encode([
+    $response = [
         'success' => false,
-        'error' => 'Database connection failed',
-        'debug_message' => $e->getMessage()
-    ]);
+        'error' => 'Database error occurred',
+        'message' => $e->getMessage()
+    ];
 } catch (Exception $e) {
     logDebug("General error: " . $e->getMessage());
-    header('Content-Type: application/json');
-    http_response_code(500);
-    echo json_encode([
+    $response = [
         'success' => false,
-        'error' => 'General error occurred',
-        'debug_message' => $e->getMessage()
-    ]);
+        'error' => 'An error occurred',
+        'message' => $e->getMessage()
+    ];
 }
+
+// Clear any output that might have been generated
+ob_clean();
+
+// Set headers - must come before any output
+header('Content-Type: application/json');
+header('Cache-Control: no-cache, must-revalidate');
+
+// Encode and output the response
+echo json_encode($response, JSON_PRETTY_PRINT);
+
+// End the script
+exit;
