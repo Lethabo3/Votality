@@ -285,7 +285,7 @@ class VotalityAIService {
         8. End with relevant follow-up question if appropriate.
         9. No direct advice. Present sophisticated analysis combining technical, fundamental, and structural factors.
         10. Include economic context with emphasis on institutional positioning, dark pool activity, and forward-looking growth metrics.
-        11. Give medium (2 paragraphs/195 chars) for regular ones.
+        11. Give medium (195 chars) for regular ones.
         You can discuss stocks, forex, crypto, and market indexes.";
         if ($marketData) {
             $instructions .= "\n\nLatest market data: " . json_encode($marketData);
