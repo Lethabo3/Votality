@@ -1,81 +1,81 @@
 <?php
-// Include only necessary dependencies
-require_once 'UsersBimo.php';
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-// Set basic headers
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+// Start session
+session_start();
 
-// Our enhanced debug logging function
-function debug_log($message, $data = null) {
-    $log_file = 'chat_debug.log';
-    $log_entry = date('[Y-m-d H:i:s] ') . $message;
-    if ($data !== null) {
-        $log_entry .= ': ' . print_r($data, true);
-    }
-    $log_entry .= "\n";
-    error_log($log_entry, 3, $log_file);
-}
+// Database connection details
+$servername = "localhost";
+$username = "votalik6n1q7_Lethabo";
+$password = "Lethabo1204";
+$dbname = "votalik6n1q7_Votality";
 
 try {
-    // Verify database connection
-    if (!isset($conn)) {
-        throw new Exception("Database connection not initialized");
-    }
-
-    if ($conn->connect_error) {
-        throw new Exception("Database connection failed: " . $conn->connect_error);
-    }
-
-    // Query to get recent chats without user filtering
-    $stmt = $conn->prepare("
+    // Create database connection
+    $conn = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Log connection success
+    error_log("Database connection established");
+    
+    // Get user ID from session (for testing, you can hardcode a user ID)
+    $userId = $_SESSION['user_id'] ?? '17360786907837'; // Replace with your test user ID
+    
+    // Prepare and execute query to get chat topics
+    $query = "
         SELECT 
-            c.chat_id,
-            c.topic,
-            c.created_at,
-            c.updated_at,
-            u.username,  -- Including username for context
-            u.email     -- Including email for context
-        FROM votality_chats c
-        LEFT JOIN users u ON c.user_id = u.user_id
-        ORDER BY c.created_at DESC
-        LIMIT 50  -- Limiting to recent chats
-    ");
-
-    if (!$stmt->execute()) {
-        throw new Exception("Failed to execute query: " . $stmt->error);
+            chat_id,
+            topic,
+            created_at,
+            updated_at
+        FROM votality_chats 
+        WHERE user_id = :userId 
+        ORDER BY updated_at DESC
+    ";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->execute(['userId' => $userId]);
+    
+    // Fetch all chats
+    $chats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Log the number of chats found
+    error_log("Found " . count($chats) . " chats for user $userId");
+    
+    // If we found chats, log some details
+    if (!empty($chats)) {
+        error_log("First chat topic: " . ($chats[0]['topic'] ?? 'No topic'));
     }
-
-    $result = $stmt->get_result();
-    $chats = [];
-
-    while ($row = $result->fetch_assoc()) {
-        $chats[] = [
-            'chat_id' => $row['chat_id'],
-            'topic' => $row['topic'],
-            'created_at' => $row['created_at'],
-            'updated_at' => $row['updated_at'],
-            'username' => $row['username'],
-            'email' => $row['email']
-        ];
-    }
-
-    // Send response
-    echo json_encode([
+    
+    // Prepare response
+    $response = [
+        'success' => true,
         'chats' => $chats,
-        'total_chats' => count($chats),
+        'userId' => $userId,
         'timestamp' => date('Y-m-d H:i:s')
-    ]);
-
+    ];
+    
+} catch (PDOException $e) {
+    error_log("Database error: " . $e->getMessage());
+    $response = [
+        'success' => false,
+        'error' => 'Database error occurred',
+        'details' => $e->getMessage()
+    ];
 } catch (Exception $e) {
-    debug_log("Error occurred", $e->getMessage());
-    http_response_code(500);
-    echo json_encode([
-        'error' => true,
-        'message' => $e->getMessage()
-    ]);
+    error_log("General error: " . $e->getMessage());
+    $response = [
+        'success' => false,
+        'error' => 'An error occurred',
+        'details' => $e->getMessage()
+    ];
 }
 
-// Clean up
-if (isset($stmt)) $stmt->close();
-if (isset($conn)) $conn->close();
+// Set proper headers
+header('Content-Type: application/json');
+header('Cache-Control: no-cache, must-revalidate');
+
+// Send response
+echo json_encode($response, JSON_PRETTY_PRINT);

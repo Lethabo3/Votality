@@ -3,137 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recent Chats</title>
+    <title>Chat Topics Test</title>
     <style>
         body {
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-
-        .container {
+            font-family: Arial, sans-serif;
             max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 24px;
+            margin: 20px auto;
+            padding: 20px;
         }
-
-        .chat-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chat-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 16px;
-            transition: all 0.2s ease;
-        }
-
-        .chat-card:hover {
-            background: #f8f9fa;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .chat-topic {
-            font-weight: 500;
-            color: #1a1a1a;
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .chat-meta {
-            color: #6b7280;
-            font-size: 14px;
-        }
-
+        
         .debug-panel {
-            margin-top: 20px;
-            padding: 16px;
-            background: #f8f9fa;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .chat-list {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        .chat-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .chat-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Recent Chats</h1>
-        <div id="content"></div>
-        <div id="debug-panel" class="debug-panel"></div>
+    <h1>Chat Topics Test Page</h1>
+    
+    <div class="debug-panel">
+        <h3>Debug Information</h3>
+        <div id="debug-info">Waiting for data...</div>
+    </div>
+
+    <div class="status" id="status"></div>
+    
+    <div class="chat-list" id="chatList">
+        <h3>User's Chat Topics</h3>
+        <!-- Chat topics will be displayed here -->
     </div>
 
     <script>
-        function debugLog(message, data = null) {
-            const debugPanel = document.getElementById('debug-panel');
-            const timestamp = new Date().toISOString();
-            let logMessage = `[${timestamp}] ${message}`;
-            if (data) {
-                logMessage += '\n' + JSON.stringify(data, null, 2);
-            }
-            debugPanel.textContent += logMessage + '\n';
-            console.log(message, data);
+        // Function to update the debug panel
+        function updateDebug(message) {
+            const debugInfo = document.getElementById('debug-info');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            console.log(`[${timestamp}] ${message}`);
         }
 
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleString();
+        // Function to show status messages
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + (isError ? 'error' : 'success');
         }
 
-        async function loadChats() {
+        // Function to load chat topics
+        async function loadChatTopics() {
             try {
-                debugLog('Fetching chats');
-
-                const response = await fetch('get_chats.php');
+                updateDebug('Starting chat topics fetch...');
+                
+                const response = await fetch('fetch_topics.php');
+                updateDebug('Received response from server');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
-
-                debugLog('Received data', data);
-
-                if (data.error) {
-                    throw new Error(data.message);
+                updateDebug(`Parsed JSON data: ${JSON.stringify(data, null, 2)}`);
+                
+                const chatList = document.getElementById('chatList');
+                
+                if (data.success && data.chats && data.chats.length > 0) {
+                    updateDebug(`Found ${data.chats.length} chats`);
+                    
+                    let html = '<h3>User\'s Chat Topics</h3>';
+                    data.chats.forEach(chat => {
+                        html += `
+                            <div class="chat-item">
+                                <strong>Topic:</strong> ${chat.topic || 'No topic'}<br>
+                                <small>ID: ${chat.chat_id}</small><br>
+                                <small>Created: ${new Date(chat.created_at).toLocaleString()}</small>
+                            </div>
+                        `;
+                    });
+                    
+                    chatList.innerHTML = html;
+                    showStatus(`Successfully loaded ${data.chats.length} chats`);
+                    
+                } else {
+                    updateDebug('No chats found or error in response');
+                    chatList.innerHTML = '<p>No chats found</p>';
+                    showStatus('No chats found', true);
                 }
-
-                if (!data.chats || data.chats.length === 0) {
-                    document.getElementById('content').innerHTML = `
-                        <div class="message">No chats found.</div>
-                    `;
-                    return;
-                }
-
-                const chatsList = data.chats.map(chat => `
-                    <div class="chat-card">
-                        <div class="chat-topic">${chat.topic || 'Untitled Chat'}</div>
-                        <div class="chat-meta">
-                            <div>By: ${chat.username || 'Anonymous'}</div>
-                            <div>Created: ${formatDate(chat.created_at)}</div>
-                            ${chat.updated_at ? `<div>Updated: ${formatDate(chat.updated_at)}</div>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-
-                document.getElementById('content').innerHTML = `
-                    <div class="chat-list">${chatsList}</div>
-                `;
-
+                
             } catch (error) {
-                debugLog('Error occurred', error);
-                document.getElementById('content').innerHTML = `
-                    <div style="color: #991b1b; background: #fee2e2; padding: 12px; border-radius: 6px;">
-                        Error loading chats: ${error.message}
-                    </div>
-                `;
+                updateDebug(`Error: ${error.message}`);
+                showStatus(`Error loading chats: ${error.message}`, true);
             }
         }
 
-        // Load chats when page loads
-        document.addEventListener('DOMContentLoaded', loadChats);
+        // Load topics when page loads
+        document.addEventListener('DOMContentLoaded', loadChatTopics);
     </script>
 </body>
 </html>
