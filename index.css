@@ -2128,8 +2128,8 @@ margin-top: 0.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 10%;
-    padding: 0.2rem;
+    width: 100%;
+    padding: 0rem;
     background-color: #f9f9f9; /* Light background */
     border: 0px solid #e5e7eb; /* Border color */
     border-radius: 8px;
