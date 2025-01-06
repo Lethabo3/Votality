@@ -1766,7 +1766,6 @@ function updateChatListUI(chats) {
     });
 }
 
-// Function to load recent chats
 async function loadRecentChats() {
     try {
         const response = await fetch('VotalityChat2.php', {
@@ -1776,18 +1775,19 @@ async function loadRecentChats() {
             },
             body: JSON.stringify({
                 action: 'getRecentChats'
-            })
+            }),
+            credentials: 'same-origin'
         });
 
         const data = await response.json();
-        console.log('Recent chats:', data.chats); // Log chats to console
+        console.log('Recent chats data:', data);
 
-        // Display chats in the container
         const chatList = document.querySelector('.chat-list');
         if (!chatList) return;
 
-        chatList.innerHTML = ''; // Clear existing chats
+        chatList.innerHTML = '';
 
+        // Display "No recent chats" if no chats exist
         if (!data.chats || data.chats.length === 0) {
             chatList.innerHTML = `
                 <div class="chat-item">
@@ -1797,13 +1797,11 @@ async function loadRecentChats() {
             return;
         }
 
+        // Create chat items with only topics
         data.chats.forEach(chat => {
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
-            chatItem.innerHTML = `
-                <span class="chat-name">${chat.topic}</span>
-                <span class="chat-date">${new Date(chat.created_at).toLocaleDateString()}</span>
-            `;
+            chatItem.innerHTML = `<span class="chat-name">${chat.topic || 'New Chat'}</span>`;
             chatList.appendChild(chatItem);
         });
 
@@ -1812,7 +1810,7 @@ async function loadRecentChats() {
     }
 }
 
-// Call this function when the page loads
+// Initialize when the page loads
 document.addEventListener('DOMContentLoaded', loadRecentChats);
 
 function updateRecentChatsUI(chats) {
