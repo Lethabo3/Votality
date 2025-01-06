@@ -2118,6 +2118,7 @@ margin-top: 0.5rem;
     margin-top: 2.9rem;
     position: absolute;
     margin-left: 1.3rem;
+    width: 90%;
 }
 
 .chat-item.active {
@@ -2130,8 +2131,8 @@ margin-top: 0.5rem;
     align-items: center;
     width: 100%;
     padding: 0.2rem;
-    background-color: red !important; /* Light background */
-    border: 9px solid red; /* Border color */
+    background-color: #f9f9f9; /* Light background */
+    border: 0px solid #e5e7eb; /* Border color */
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
