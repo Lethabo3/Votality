@@ -2130,9 +2130,9 @@ margin-top: 0.5rem;
     align-items: center;
     width: 100%;
     padding: 0.2rem;
-    background-color: #f9f9f9; /* Light background */
+    background-color: red; /* Light background */
     border: 0px solid #e5e7eb; /* Border color */
-    border-radius: 1px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
