@@ -6,6 +6,8 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', '/path/to/votality-error.log');
 
+debug_log("Session started. Session data: " . print_r($_SESSION, true));
+
 require_once 'logging.php';
 require_once 'UsersBimo.php';
 require_once 'votality_ai_service2.php';
@@ -597,10 +599,8 @@ function getRecentChats() {
 function getRecentChatsFromDatabase($userId) {
     global $conn;
     try {
-        // First, let's verify the user ID we're working with
         error_log("Fetching recent chats for user ID: " . $userId);
-
-        // Modified query to get all essential chat information
+        
         $stmt = $conn->prepare("
             SELECT 
                 c.chat_id,
@@ -621,21 +621,22 @@ function getRecentChatsFromDatabase($userId) {
             ORDER BY c.updated_at DESC, c.created_at DESC
             LIMIT 10
         ");
-
-        if (!$stmt->execute([$userId])) {
+        
+        $stmt->bind_param("i", $userId);
+        
+        if (!$stmt->execute()) {
             throw new Exception("Failed to execute query: " . $stmt->error);
         }
 
         $result = $stmt->get_result();
         $chats = [];
 
-        // Process each chat and ensure we have all required data
         while ($row = $result->fetch_assoc()) {
             error_log("Processing chat: " . json_encode($row));
             
             $chats[] = [
                 'chat_id' => $row['chat_id'],
-                'topic' => $row['topic'],  // This will be the actual topic from the database
+                'topic' => $row['topic'],
                 'preview' => mb_substr($row['latest_message'] ?? '', 0, 100),
                 'created_at' => $row['created_at'],
                 'updated_at' => $row['updated_at'],
@@ -645,7 +646,6 @@ function getRecentChatsFromDatabase($userId) {
 
         error_log("Returning " . count($chats) . " chats");
         
-        // Return both success status and the chats array
         return [
             'success' => true,
             'chats' => $chats,
