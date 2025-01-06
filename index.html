@@ -1766,11 +1766,9 @@ function updateChatListUI(chats) {
     });
 }
 
+// Function to load recent chats
 async function loadRecentChats() {
     try {
-        console.log('Initiating recent chats load...');
-        
-        // Make the API request to fetch recent chats
         const response = await fetch('VotalityChat2.php', {
             method: 'POST',
             headers: {
@@ -1778,70 +1776,44 @@ async function loadRecentChats() {
             },
             body: JSON.stringify({
                 action: 'getRecentChats'
-            }),
-            credentials: 'same-origin'  // Important for session handling
+            })
         });
 
-        // Check for HTTP errors
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const data = await response.json();
-        console.log('Recent chats data received:', data);
+        console.log('Recent chats:', data.chats); // Log chats to console
 
-        // Handle potential error in response
-        if (data.error) {
-            console.error('Server returned error:', data.error);
-            updateChatListUI([]);
+        // Display chats in the container
+        const chatList = document.querySelector('.chat-list');
+        if (!chatList) return;
+
+        chatList.innerHTML = ''; // Clear existing chats
+
+        if (!data.chats || data.chats.length === 0) {
+            chatList.innerHTML = `
+                <div class="chat-item">
+                    <span class="chat-name">No recent chats</span>
+                </div>
+            `;
             return;
         }
 
-        // Process the chats data before updating UI
-        const processedChats = data.chats.map(chat => ({
-            ...chat,
-            // Ensure topic is never null/undefined
-            topic: chat.topic || 'New Chat',
-            // Format timestamp if present
-            formattedTime: chat.updated_at ? new Date(chat.updated_at).toLocaleString() : '',
-            // Add any additional processed fields here
-        }));
-
-        // Update the UI with processed chats
-        updateChatListUI(processedChats);
-
-        // Update top navigation if there's an active chat
-        if (currentChatId) {
-            const currentChat = processedChats.find(chat => chat.chat_id === currentChatId);
-            if (currentChat) {
-                updateChatTopicDisplay(currentChat.topic);
-            }
-        }
-
-        // Update sidebar state
-        updateSidebarState(processedChats.length > 0);
-
-        return processedChats;  // Return processed chats for potential further use
+        data.chats.forEach(chat => {
+            const chatItem = document.createElement('div');
+            chatItem.className = 'chat-item';
+            chatItem.innerHTML = `
+                <span class="chat-name">${chat.topic}</span>
+                <span class="chat-date">${new Date(chat.created_at).toLocaleDateString()}</span>
+            `;
+            chatList.appendChild(chatItem);
+        });
 
     } catch (error) {
         console.error('Error loading recent chats:', error);
-        
-        // Handle the error gracefully
-        updateChatListUI([]);
-        
-        // If there's a network error, we might want to show a retry button
-        if (error instanceof TypeError && error.message.includes('network')) {
-            showRetryButton();
-        }
-        
-        return [];  // Return empty array on error
     }
 }
-// Make sure this gets called when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, fetching recent chats');
-    loadRecentChats();
-});
+
+// Call this function when the page loads
+document.addEventListener('DOMContentLoaded', loadRecentChats);
 
 function updateRecentChatsUI(chats) {
     console.log('Force updating recent chats UI');
