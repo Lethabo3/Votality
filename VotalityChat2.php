@@ -926,7 +926,6 @@ function formatChatPreview($message, $maxLength = 100) {
 function loadChat($chatId) {
     global $conn;
     try {
-        // Verify chat exists and user has access
         $userId = $_SESSION['user_id'] ?? null;
         
         if (!$userId) {
@@ -936,12 +935,24 @@ function loadChat($chatId) {
             ];
         }
 
+        // First get user information
+        $userStmt = $conn->prepare("
+            SELECT username, email
+            FROM users 
+            WHERE id = ?
+        ");
+        $userStmt->bind_param("i", $userId);
+        $userStmt->execute();
+        $userData = $userStmt->get_result()->fetch_assoc();
+
+        // Then get chat information and messages
         $stmt = $conn->prepare("
             SELECT 
                 m.content,
                 m.sender,
                 m.timestamp,
-                c.topic
+                c.topic,
+                c.chat_id
             FROM votality_messages m
             JOIN votality_chats c ON m.chat_id = c.chat_id
             WHERE m.chat_id = ? AND c.user_id = ?
@@ -949,13 +960,11 @@ function loadChat($chatId) {
         ");
         
         $stmt->bind_param("si", $chatId, $userId);
-        
-        if (!$stmt->execute()) {
-            throw new Exception("Failed to load chat messages");
-        }
-
+        $stmt->execute();
         $result = $stmt->get_result();
+        
         $messages = [];
+        $chatTopic = null;
 
         while ($row = $result->fetch_assoc()) {
             $messages[] = [
@@ -963,12 +972,24 @@ function loadChat($chatId) {
                 'sender' => $row['sender'],
                 'timestamp' => $row['timestamp']
             ];
+            // Store the chat topic (will be the same for all rows)
+            if (!$chatTopic) {
+                $chatTopic = $row['topic'];
+            }
         }
 
+        // Return all necessary data for frontend
         return [
             'success' => true,
             'messages' => $messages,
-            'topic' => $result->fetch_assoc()['topic'] ?? 'Chat'
+            'user_info' => [
+                'username' => $userData['username'],
+                'email' => $userData['email']
+            ],
+            'chat_info' => [
+                'chat_id' => $chatId,
+                'topic' => $chatTopic ?? 'New Chat'
+            ]
         ];
 
     } catch (Exception $e) {

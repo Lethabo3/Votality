@@ -1796,16 +1796,14 @@ async function loadRecentChats() {
             return;
         }
 
-        // Create chat items with click handlers
         data.chats.forEach(chat => {
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
             chatItem.innerHTML = `<span class="chat-name">${chat.topic || 'New Chat'}</span>`;
             
-            // Add click handler for each chat item
             chatItem.addEventListener('click', async () => {
                 try {
-                    // Exactly match the UI transitions from sendMessage
+                    // UI transitions
                     initialContent.classList.add('fade-out');
                     suggestedQueries.classList.add('fade-out');
                     footerLinks.classList.add('fade-out');
@@ -1813,20 +1811,22 @@ async function loadRecentChats() {
                     document.body.classList.add('white-background');
 
                     setTimeout(async () => {
+                        // Hide initial elements
                         initialContent.style.display = 'none';
                         suggestedQueries.style.display = 'none';
                         footerLinks.style.display = 'none';
+                        
+                        // Show chat elements
                         chatContainer.style.display = 'block';
                         chatContainer.classList.add('fade-in');
 
+                        // Handle desktop elements
                         if (window.innerWidth > 640) {
                             disclaimer.style.display = 'block';
                             setTimeout(() => {
                                 disclaimer.classList.add('fade-in');
                             }, 50);
-                        }
 
-                        if (window.innerWidth > 640) {
                             desktopTopNav.style.display = 'flex';
                             setTimeout(() => {
                                 desktopTopNav.classList.add('fade-in');
@@ -1839,10 +1839,10 @@ async function loadRecentChats() {
                             document.body.classList.add('chat-active');
                         }
 
-                        // Clear existing messages
+                        // Clear existing chat content
                         chatContainer.innerHTML = '';
 
-                        // Load and display chat messages
+                        // Load chat messages and data
                         const messagesResponse = await fetch('VotalityChat2.php', {
                             method: 'POST',
                             headers: {
@@ -1855,30 +1855,44 @@ async function loadRecentChats() {
                             credentials: 'same-origin'
                         });
 
-                        const messagesData = await messagesResponse.json();
-                        console.log('Chat messages:', messagesData);
+                        const chatData = await messagesResponse.json();
+                        console.log('Loaded chat data:', chatData);
 
-                        // Update chat topic in header
-                        updateChatTopicDisplay(chat.topic);
+                        if (chatData.success) {
+                            // Update user information in top nav
+                            const userFullnameElement = document.getElementById('user-fullname');
+                            if (userFullnameElement && chatData.user_info) {
+                                userFullnameElement.textContent = chatData.user_info.username;
+                            }
 
-                        // Display messages
-                        if (messagesData.messages) {
-                            for (const message of messagesData.messages) {
-                                const messageElement = await addMessage(message.content, message.sender, message.relatedTopics || []);
-                                if (messageElement) {
-                                    messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Update chat topic in top nav
+                            updateChatTopicDisplay(chatData.chat_info.topic);
+
+                            // Set current chat ID
+                            currentChatId = chatData.chat_info.chat_id;
+
+                            // Display messages
+                            if (chatData.messages && chatData.messages.length > 0) {
+                                for (const message of chatData.messages) {
+                                    const messageElement = await addMessage(
+                                        message.content,
+                                        message.sender,
+                                        message.relatedTopics || []
+                                    );
+                                    if (messageElement) {
+                                        messageElement.scrollIntoView({ 
+                                            behavior: 'smooth', 
+                                            block: 'start' 
+                                        });
+                                    }
                                 }
                             }
                         }
 
-                        // Set current chat ID
-                        currentChatId = chat.chat_id;
-
-                        // Clear textarea value
+                        // Clear textarea
                         textarea.value = '';
 
-                    }, 500); // Match the same timeout as sendMessage
-
+                    }, 500);
                 } catch (error) {
                     console.error('Error loading chat messages:', error);
                 }
@@ -1892,7 +1906,22 @@ async function loadRecentChats() {
     }
 }
 
-// Initialize when the page loads
+// Helper function to update chat topic display
+function updateChatTopicDisplay(topic) {
+    const desktopTopNavTopic = document.querySelector('.desktop-top-nav__topic');
+    const chatTopicElement = document.getElementById('chat-topic');
+    
+    const topicText = topic || 'New Chat';
+    
+    if (desktopTopNavTopic) {
+        desktopTopNavTopic.textContent = topicText;
+    }
+    if (chatTopicElement) {
+        chatTopicElement.textContent = topicText;
+    }
+}
+
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', loadRecentChats);
 
 function updateRecentChatsUI(chats) {
