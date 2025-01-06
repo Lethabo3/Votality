@@ -599,26 +599,13 @@ function getRecentChats() {
 function getRecentChatsFromDatabase($userId) {
     global $conn;
     try {
-        error_log("Fetching recent chats for user ID: " . $userId);
-        
+        // Simple query to get user's recent chats
         $stmt = $conn->prepare("
-            SELECT 
-                c.chat_id,
-                c.topic,
-                c.summary,
-                c.created_at,
-                c.updated_at,
-                COALESCE(
-                    (SELECT content 
-                     FROM votality_messages m 
-                     WHERE m.chat_id = c.chat_id 
-                     ORDER BY timestamp DESC 
-                     LIMIT 1
-                    ), ''
-                ) as latest_message
+            SELECT c.chat_id, c.topic, c.created_at
             FROM votality_chats c
+            JOIN users u ON c.user_id = u.id
             WHERE c.user_id = ?
-            ORDER BY c.updated_at DESC, c.created_at DESC
+            ORDER BY c.created_at DESC
             LIMIT 10
         ");
         
@@ -632,34 +619,23 @@ function getRecentChatsFromDatabase($userId) {
         $chats = [];
 
         while ($row = $result->fetch_assoc()) {
-            error_log("Processing chat: " . json_encode($row));
-            
             $chats[] = [
                 'chat_id' => $row['chat_id'],
-                'topic' => $row['topic'],
-                'preview' => mb_substr($row['latest_message'] ?? '', 0, 100),
-                'created_at' => $row['created_at'],
-                'updated_at' => $row['updated_at'],
-                'summary' => $row['summary']
+                'topic' => $row['topic'] ?? 'New Chat',
+                'created_at' => $row['created_at']
             ];
         }
 
-        error_log("Returning " . count($chats) . " chats");
-        
         return [
             'success' => true,
-            'chats' => $chats,
-            'total' => count($chats)
+            'chats' => $chats
         ];
 
     } catch (Exception $e) {
-        error_log("Error in getRecentChatsFromDatabase: " . $e->getMessage());
-        error_log("Stack trace: " . $e->getTraceAsString());
-        
+        error_log("Error fetching recent chats: " . $e->getMessage());
         return [
             'success' => false,
-            'error' => 'Failed to fetch recent chats',
-            'details' => $e->getMessage()
+            'error' => 'Failed to fetch recent chats'
         ];
     }
 }
