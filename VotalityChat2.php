@@ -562,10 +562,11 @@ function getRecentChats() {
     return $result;
 }
 
-function getRecentChatsFromDatabase($userId) {
+// Enhanced function to get recent chats with better topic handling
+function getRecentChatsFromDatabase($userId, $limit = 6) {
     global $conn;
     try {
-        // Updated query to use updated_at for sorting
+        // This query gets both recent chats for the sidebar and active topics for the nav bar
         $stmt = $conn->prepare("
             SELECT 
                 c.chat_id,
@@ -574,48 +575,83 @@ function getRecentChatsFromDatabase($userId) {
                 c.created_at,
                 c.updated_at,
                 m.content as latest_message,
-                m.timestamp as latest_message_time
+                m.timestamp as message_time,
+                m.sender as message_sender,
+                COUNT(DISTINCT vm.message_id) as message_count
             FROM votality_chats c
             LEFT JOIN (
-                SELECT chat_id, content, timestamp,
+                SELECT chat_id, content, timestamp, sender,
                     ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY timestamp DESC) as rn
                 FROM votality_messages
             ) m ON m.chat_id = c.chat_id AND m.rn = 1
+            LEFT JOIN votality_messages vm ON vm.chat_id = c.chat_id
             WHERE c.user_id = ?
+            GROUP BY c.chat_id
             ORDER BY c.updated_at DESC, c.created_at DESC
-            LIMIT 6
+            LIMIT ?
         ");
         
-        if (!$stmt) {
-            throw new Exception("Prepare failed: " . $conn->error);
-        }
-        
-        $stmt->bind_param("i", $userId);
+        $stmt->bind_param("ii", $userId, $limit);
         
         if (!$stmt->execute()) {
-            throw new Exception("Execute failed: " . $stmt->error);
+            throw new Exception("Failed to fetch chats: " . $stmt->error);
         }
         
         $result = $stmt->get_result();
         $chats = [];
+        $activeTopics = []; // For nav bar topics
         
         while ($row = $result->fetch_assoc()) {
+            // Format the timestamp for display
+            $timestamp = new DateTime($row['message_time'] ?? $row['updated_at']);
+            $formattedTime = $timestamp->format('M j, g:ia');
+            
+            // Prepare preview text from latest message
+            $preview = $row['latest_message'] 
+                ? (mb_strlen($row['latest_message']) > 100 
+                    ? mb_substr($row['latest_message'], 0, 97) . '...' 
+                    : $row['latest_message'])
+                : 'No messages yet';
+            
+            // Format chat data for the recent chats container
             $chats[] = [
-                'chat_id' => $row['chat_id'],
+                'id' => $row['chat_id'],
                 'topic' => $row['topic'],
-                'summary' => $row['summary'],
-                'latest_message' => $row['latest_message'],
-                'created_at' => $row['created_at'],
-                'updated_at' => $row['updated_at']
+                'preview' => $preview,
+                'time' => $formattedTime,
+                'messageCount' => $row['message_count'],
+                'lastSender' => $row['message_sender'] ?? null,
+                'isActive' => ($row['message_count'] > 0 && strtotime($row['updated_at']) > strtotime('-24 hours'))
             ];
+            
+            // Add to active topics if chat has recent activity
+            if (strtotime($row['updated_at']) > strtotime('-7 days')) {
+                $activeTopics[] = [
+                    'id' => $row['chat_id'],
+                    'topic' => $row['topic'],
+                    'lastActive' => $row['updated_at']
+                ];
+            }
         }
         
-        return ['chats' => $chats];
+        // Return both chat list and active topics
+        return [
+            'success' => true,
+            'chats' => $chats,
+            'activeTopics' => $activeTopics,
+            'totalChats' => count($chats)
+        ];
+        
     } catch (Exception $e) {
-        logMessage("Database error in getRecentChats: " . $e->getMessage());
-        return ['error' => 'Database error', 'details' => $e->getMessage()];
+        logMessage("Error fetching recent chats: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'Failed to fetch chats',
+            'details' => $e->getMessage()
+        ];
     }
 }
+
 
 function saveMessageToDatabase($chatId, $sender, $content, $fileData = null, $fileType = null) {
     global $conn;
@@ -772,4 +808,61 @@ function updateChatSummary($chatId, $message) {
     logMessage("Updated summary for chat $chatId: $summary");
 }
 
+// Function to get just the active topics for the nav bar
+function getActiveTopics($userId, $daysActive = 7) {
+    global $conn;
+    try {
+        $stmt = $conn->prepare("
+            SELECT DISTINCT
+                c.chat_id,
+                c.topic,
+                c.updated_at
+            FROM votality_chats c
+            WHERE c.user_id = ?
+                AND c.updated_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+            ORDER BY c.updated_at DESC
+            LIMIT 5
+        ");
+        
+        $stmt->bind_param("ii", $userId, $daysActive);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $topics = [];
+        while ($row = $result->fetch_assoc()) {
+            $topics[] = [
+                'id' => $row['chat_id'],
+                'topic' => $row['topic'],
+                'lastActive' => $row['updated_at']
+            ];
+        }
+        
+        return [
+            'success' => true,
+            'topics' => $topics
+        ];
+        
+    } catch (Exception $e) {
+        logMessage("Error fetching active topics: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'Failed to fetch active topics'
+        ];
+    }
+}
+
+
+// Helper function to format chat preview text
+function formatChatPreview($message, $maxLength = 100) {
+    if (empty($message)) {
+        return 'No messages yet';
+    }
+    
+    $message = strip_tags($message);
+    if (mb_strlen($message) <= $maxLength) {
+        return $message;
+    }
+    
+    return mb_substr($message, 0, $maxLength - 3) . '...';
+}
 ?>
