@@ -44,7 +44,7 @@
   
 body, html {
     font-family: 'GeneralSans-Medium';
-    background-color:red;
+    background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
     height: 100%;
@@ -54,7 +54,7 @@ width: 100%;
 }
 
 body {
-background-color: red;
+background-color: var(--background-color);
 
 background-size: 100% 100%, 40px 40px, 40px 40px; /* Increased grid size for subtlety */
 position: relative;
