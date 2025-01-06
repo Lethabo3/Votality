@@ -562,96 +562,80 @@ function getRecentChats() {
     return $result;
 }
 
-// Enhanced function to get recent chats with better topic handling
-function getRecentChatsFromDatabase($userId, $limit = 6) {
+function getRecentChatsFromDatabase($userId) {
     global $conn;
+    
     try {
-        // This query gets both recent chats for the sidebar and active topics for the nav bar
+        // Log the start of the function and the user ID
+        error_log("Fetching recent chats for user ID: " . $userId);
+
         $stmt = $conn->prepare("
             SELECT 
                 c.chat_id,
                 c.topic,
-                c.summary,
                 c.created_at,
                 c.updated_at,
-                m.content as latest_message,
-                m.timestamp as message_time,
-                m.sender as message_sender,
-                COUNT(DISTINCT vm.message_id) as message_count
+                COALESCE(m.content, '') as latest_message
             FROM votality_chats c
             LEFT JOIN (
-                SELECT chat_id, content, timestamp, sender,
+                SELECT 
+                    chat_id,
+                    content,
+                    timestamp,
                     ROW_NUMBER() OVER (PARTITION BY chat_id ORDER BY timestamp DESC) as rn
                 FROM votality_messages
             ) m ON m.chat_id = c.chat_id AND m.rn = 1
-            LEFT JOIN votality_messages vm ON vm.chat_id = c.chat_id
             WHERE c.user_id = ?
-            GROUP BY c.chat_id
             ORDER BY c.updated_at DESC, c.created_at DESC
-            LIMIT ?
+            LIMIT 10
         ");
-        
-        $stmt->bind_param("ii", $userId, $limit);
+
+        if (!$stmt) {
+            throw new Exception("Failed to prepare statement: " . $conn->error);
+        }
+
+        $stmt->bind_param("i", $userId);
         
         if (!$stmt->execute()) {
-            throw new Exception("Failed to fetch chats: " . $stmt->error);
+            throw new Exception("Failed to execute query: " . $stmt->error);
         }
-        
+
         $result = $stmt->get_result();
         $chats = [];
-        $activeTopics = []; // For nav bar topics
-        
+
         while ($row = $result->fetch_assoc()) {
-            // Format the timestamp for display
-            $timestamp = new DateTime($row['message_time'] ?? $row['updated_at']);
-            $formattedTime = $timestamp->format('M j, g:ia');
+            // Log each chat as it's processed
+            error_log("Processing chat: " . json_encode($row));
             
-            // Prepare preview text from latest message
-            $preview = $row['latest_message'] 
-                ? (mb_strlen($row['latest_message']) > 100 
-                    ? mb_substr($row['latest_message'], 0, 97) . '...' 
-                    : $row['latest_message'])
-                : 'No messages yet';
+            // Format the topic - ensure it's never empty
+            $topic = !empty($row['topic']) ? $row['topic'] : 'New Chat';
             
-            // Format chat data for the recent chats container
             $chats[] = [
-                'id' => $row['chat_id'],
-                'topic' => $row['topic'],
-                'preview' => $preview,
-                'time' => $formattedTime,
-                'messageCount' => $row['message_count'],
-                'lastSender' => $row['message_sender'] ?? null,
-                'isActive' => ($row['message_count'] > 0 && strtotime($row['updated_at']) > strtotime('-24 hours'))
+                'chat_id' => $row['chat_id'],
+                'topic' => $topic,
+                'latest_message' => $row['latest_message'],
+                'created_at' => $row['created_at'],
+                'updated_at' => $row['updated_at']
             ];
-            
-            // Add to active topics if chat has recent activity
-            if (strtotime($row['updated_at']) > strtotime('-7 days')) {
-                $activeTopics[] = [
-                    'id' => $row['chat_id'],
-                    'topic' => $row['topic'],
-                    'lastActive' => $row['updated_at']
-                ];
-            }
         }
-        
-        // Return both chat list and active topics
+
+        // Log the final result
+        error_log("Found " . count($chats) . " chats for user $userId");
+
         return [
             'success' => true,
-            'chats' => $chats,
-            'activeTopics' => $activeTopics,
-            'totalChats' => count($chats)
+            'chats' => $chats
         ];
-        
+
     } catch (Exception $e) {
-        logMessage("Error fetching recent chats: " . $e->getMessage());
+        error_log("Error in getRecentChatsFromDatabase: " . $e->getMessage());
         return [
             'success' => false,
-            'error' => 'Failed to fetch chats',
+            'error' => 'Failed to fetch recent chats',
             'details' => $e->getMessage()
         ];
     }
 }
-
 
 function saveMessageToDatabase($chatId, $sender, $content, $fileData = null, $fileType = null) {
     global $conn;
