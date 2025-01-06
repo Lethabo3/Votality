@@ -1805,66 +1805,79 @@ async function loadRecentChats() {
             // Add click handler for each chat item
             chatItem.addEventListener('click', async () => {
                 try {
-                    // Hide initial content and show chat container
-                    const initialContent = document.getElementById('initial-content');
-                    const suggestedQueries = document.getElementById('suggested-queries');
-                    const footerLinks = document.getElementById('footer-links');
-                    const chatContainer = document.getElementById('chat-container');
-                    const disclaimer = document.getElementById('disclaimer');
-                    
-                    // Hide initial elements
-                    initialContent.style.display = 'none';
-                    suggestedQueries.style.display = 'none';
-                    footerLinks.style.display = 'none';
-                    
-                    // Show chat container
-                    chatContainer.style.display = 'block';
-                    chatContainer.classList.add('fade-in');
-                    
-                    // Show disclaimer for desktop
-                    if (window.innerWidth > 640) {
-                        disclaimer.style.display = 'block';
-                        disclaimer.classList.add('fade-in');
-                    }
-                    
-                    // Show desktop top nav for larger screens
-                    const desktopTopNav = document.querySelector('.desktop-top-nav');
-                    if (window.innerWidth > 640) {
-                        desktopTopNav.style.display = 'flex';
-                        desktopTopNav.classList.add('fade-in');
-                    }
-                    
-                    // Load and display chat messages
-                    const messagesResponse = await fetch('VotalityChat2.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'loadChat',
-                            chatId: chat.chat_id
-                        }),
-                        credentials: 'same-origin'
-                    });
+                    // Exactly match the UI transitions from sendMessage
+                    initialContent.classList.add('fade-out');
+                    suggestedQueries.classList.add('fade-out');
+                    footerLinks.classList.add('fade-out');
+                    textareaContainer.classList.add('repositioned');
+                    document.body.classList.add('white-background');
 
-                    const messagesData = await messagesResponse.json();
-                    console.log('Chat messages:', messagesData);
+                    setTimeout(async () => {
+                        initialContent.style.display = 'none';
+                        suggestedQueries.style.display = 'none';
+                        footerLinks.style.display = 'none';
+                        chatContainer.style.display = 'block';
+                        chatContainer.classList.add('fade-in');
 
-                    // Clear existing messages
-                    chatContainer.innerHTML = '';
-
-                    // Update chat topic in header
-                    updateChatTopicDisplay(chat.topic);
-
-                    // Display messages
-                    if (messagesData.messages) {
-                        for (const message of messagesData.messages) {
-                            await addMessage(message.content, message.sender, message.relatedTopics || []);
+                        if (window.innerWidth > 640) {
+                            disclaimer.style.display = 'block';
+                            setTimeout(() => {
+                                disclaimer.classList.add('fade-in');
+                            }, 50);
                         }
-                    }
 
-                    // Set current chat ID
-                    currentChatId = chat.chat_id;
+                        if (window.innerWidth > 640) {
+                            desktopTopNav.style.display = 'flex';
+                            setTimeout(() => {
+                                desktopTopNav.classList.add('fade-in');
+                            }, 50);
+                        } else {
+                            const topNav = document.querySelector('.top-nav');
+                            if (topNav) {
+                                topNav.style.display = 'none';
+                            }
+                            document.body.classList.add('chat-active');
+                        }
+
+                        // Clear existing messages
+                        chatContainer.innerHTML = '';
+
+                        // Load and display chat messages
+                        const messagesResponse = await fetch('VotalityChat2.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                action: 'loadChat',
+                                chatId: chat.chat_id
+                            }),
+                            credentials: 'same-origin'
+                        });
+
+                        const messagesData = await messagesResponse.json();
+                        console.log('Chat messages:', messagesData);
+
+                        // Update chat topic in header
+                        updateChatTopicDisplay(chat.topic);
+
+                        // Display messages
+                        if (messagesData.messages) {
+                            for (const message of messagesData.messages) {
+                                const messageElement = await addMessage(message.content, message.sender, message.relatedTopics || []);
+                                if (messageElement) {
+                                    messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                            }
+                        }
+
+                        // Set current chat ID
+                        currentChatId = chat.chat_id;
+
+                        // Clear textarea value
+                        textarea.value = '';
+
+                    }, 500); // Match the same timeout as sendMessage
 
                 } catch (error) {
                     console.error('Error loading chat messages:', error);
@@ -1876,14 +1889,6 @@ async function loadRecentChats() {
 
     } catch (error) {
         console.error('Error loading recent chats:', error);
-    }
-}
-
-// Make sure the textarea is repositioned when loading a chat
-function repositionTextarea() {
-    const textareaContainer = document.getElementById('textarea-container');
-    if (textareaContainer) {
-        textareaContainer.classList.add('repositioned');
     }
 }
 
