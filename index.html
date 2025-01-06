@@ -1787,7 +1787,6 @@ async function loadRecentChats() {
 
         chatList.innerHTML = '';
 
-        // Display "No recent chats" if no chats exist
         if (!data.chats || data.chats.length === 0) {
             chatList.innerHTML = `
                 <div class="chat-item">
@@ -1797,16 +1796,94 @@ async function loadRecentChats() {
             return;
         }
 
-        // Create chat items with only topics
+        // Create chat items with click handlers
         data.chats.forEach(chat => {
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
             chatItem.innerHTML = `<span class="chat-name">${chat.topic || 'New Chat'}</span>`;
+            
+            // Add click handler for each chat item
+            chatItem.addEventListener('click', async () => {
+                try {
+                    // Hide initial content and show chat container
+                    const initialContent = document.getElementById('initial-content');
+                    const suggestedQueries = document.getElementById('suggested-queries');
+                    const footerLinks = document.getElementById('footer-links');
+                    const chatContainer = document.getElementById('chat-container');
+                    const disclaimer = document.getElementById('disclaimer');
+                    
+                    // Hide initial elements
+                    initialContent.style.display = 'none';
+                    suggestedQueries.style.display = 'none';
+                    footerLinks.style.display = 'none';
+                    
+                    // Show chat container
+                    chatContainer.style.display = 'block';
+                    chatContainer.classList.add('fade-in');
+                    
+                    // Show disclaimer for desktop
+                    if (window.innerWidth > 640) {
+                        disclaimer.style.display = 'block';
+                        disclaimer.classList.add('fade-in');
+                    }
+                    
+                    // Show desktop top nav for larger screens
+                    const desktopTopNav = document.querySelector('.desktop-top-nav');
+                    if (window.innerWidth > 640) {
+                        desktopTopNav.style.display = 'flex';
+                        desktopTopNav.classList.add('fade-in');
+                    }
+                    
+                    // Load and display chat messages
+                    const messagesResponse = await fetch('VotalityChat2.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'loadChat',
+                            chatId: chat.chat_id
+                        }),
+                        credentials: 'same-origin'
+                    });
+
+                    const messagesData = await messagesResponse.json();
+                    console.log('Chat messages:', messagesData);
+
+                    // Clear existing messages
+                    chatContainer.innerHTML = '';
+
+                    // Update chat topic in header
+                    updateChatTopicDisplay(chat.topic);
+
+                    // Display messages
+                    if (messagesData.messages) {
+                        for (const message of messagesData.messages) {
+                            await addMessage(message.content, message.sender, message.relatedTopics || []);
+                        }
+                    }
+
+                    // Set current chat ID
+                    currentChatId = chat.chat_id;
+
+                } catch (error) {
+                    console.error('Error loading chat messages:', error);
+                }
+            });
+            
             chatList.appendChild(chatItem);
         });
 
     } catch (error) {
         console.error('Error loading recent chats:', error);
+    }
+}
+
+// Make sure the textarea is repositioned when loading a chat
+function repositionTextarea() {
+    const textareaContainer = document.getElementById('textarea-container');
+    if (textareaContainer) {
+        textareaContainer.classList.add('repositioned');
     }
 }
 

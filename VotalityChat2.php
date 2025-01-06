@@ -922,4 +922,61 @@ function formatChatPreview($message, $maxLength = 100) {
     
     return mb_substr($message, 0, $maxLength - 3) . '...';
 }
+
+function loadChat($chatId) {
+    global $conn;
+    try {
+        // Verify chat exists and user has access
+        $userId = $_SESSION['user_id'] ?? null;
+        
+        if (!$userId) {
+            return [
+                'success' => false,
+                'error' => 'Not authenticated'
+            ];
+        }
+
+        $stmt = $conn->prepare("
+            SELECT 
+                m.content,
+                m.sender,
+                m.timestamp,
+                c.topic
+            FROM votality_messages m
+            JOIN votality_chats c ON m.chat_id = c.chat_id
+            WHERE m.chat_id = ? AND c.user_id = ?
+            ORDER BY m.timestamp ASC
+        ");
+        
+        $stmt->bind_param("si", $chatId, $userId);
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Failed to load chat messages");
+        }
+
+        $result = $stmt->get_result();
+        $messages = [];
+
+        while ($row = $result->fetch_assoc()) {
+            $messages[] = [
+                'content' => $row['content'],
+                'sender' => $row['sender'],
+                'timestamp' => $row['timestamp']
+            ];
+        }
+
+        return [
+            'success' => true,
+            'messages' => $messages,
+            'topic' => $result->fetch_assoc()['topic'] ?? 'Chat'
+        ];
+
+    } catch (Exception $e) {
+        error_log("Error loading chat: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'Failed to load chat messages'
+        ];
+    }
+}
 ?>
