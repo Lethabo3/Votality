@@ -2,18 +2,18 @@
   "name": "Votality AI",
   "short_name": "Votality",
   "description": "Earn more with Votality AI",
-  "start_url": "/index.html",
+  "start_url": "/Votality.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "Votality.jpg",
+      "src": "b2.png",
       "sizes": "192x192",
       "type": "image/jpeg"
     },
     {
-      "src": "Votality.jpg",
+      "src": "b2.png",
       "sizes": "512x512",
       "type": "image/jpeg"
     }
