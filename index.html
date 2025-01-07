@@ -1676,7 +1676,7 @@ function updateChatListUI(chats) {
 
     if (!chats || chats.length === 0) {
         chatList.innerHTML = `
-            <div class="chat-item no-chats">
+            <div class="chat-item no-chats" style="background: transparent !important;">
                 <span class="chat-name">No recent chats</span>
             </div>
         `;
@@ -1686,42 +1686,33 @@ function updateChatListUI(chats) {
     chats.forEach(chat => {
         const chatItem = document.createElement('div');
         chatItem.className = 'chat-item';
+        // Adding transparent background as important
+        chatItem.style.cssText = 'background: transparent !important;';
+        
         if (chat.chat_id === currentChatId) {
             chatItem.classList.add('active');
         }
 
-        // Create the topic element
         const topicSpan = document.createElement('span');
         topicSpan.className = 'chat-name';
         topicSpan.textContent = chat.topic || 'New Chat';
 
-        // Create preview element if needed
         const previewSpan = document.createElement('span');
         previewSpan.className = 'chat-preview';
         previewSpan.textContent = chat.preview || '';
 
-        // Add elements to chat item
         chatItem.appendChild(topicSpan);
         if (chat.preview) {
             chatItem.appendChild(previewSpan);
         }
 
         chatItem.addEventListener('click', async () => {
-            // Remove active class from all items
             document.querySelectorAll('.chat-item').forEach(item => {
                 item.classList.remove('active');
             });
-            
-            // Add active class to clicked item
             chatItem.classList.add('active');
-            
-            // Update current chat ID
             currentChatId = chat.chat_id;
-            
-            // Update the topic in the top navigation
             updateChatTopicDisplay(chat.topic);
-            
-            // Load the chat messages
             await loadChat(chat.chat_id);
         });
 
@@ -1752,23 +1743,22 @@ async function loadRecentChats() {
 
         if (!data.chats || data.chats.length === 0) {
             chatList.innerHTML = `
-                <div class="chat-item">
+                <div class="chat-item" style="background: transparent !important;">
                     <span class="chat-name">No recent chats</span>
                 </div>
             `;
             return;
         }
 
-        // Create chat items with click handlers
         data.chats.forEach(chat => {
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
+            // Adding transparent background as important
+            chatItem.style.cssText = 'background: transparent !important;';
             chatItem.innerHTML = `<span class="chat-name">${chat.topic || 'New Chat'}</span>`;
             
-            // Add click handler for each chat item
             chatItem.addEventListener('click', async () => {
                 try {
-                    // Exactly match the UI transitions from sendMessage
                     initialContent.classList.add('fade-out');
                     suggestedQueries.classList.add('fade-out');
                     footerLinks.classList.add('fade-out');
@@ -1802,10 +1792,8 @@ async function loadRecentChats() {
                             document.body.classList.add('chat-active');
                         }
 
-                        // Clear existing messages
                         chatContainer.innerHTML = '';
 
-                        // Load and display chat messages
                         const messagesResponse = await fetch('VotalityChat2.php', {
                             method: 'POST',
                             headers: {
@@ -1821,10 +1809,8 @@ async function loadRecentChats() {
                         const messagesData = await messagesResponse.json();
                         console.log('Chat messages:', messagesData);
 
-                        // Update chat topic in header
                         updateChatTopicDisplay(chat.topic);
 
-                        // Display messages
                         if (messagesData.messages) {
                             for (const message of messagesData.messages) {
                                 const messageElement = await addMessage(message.content, message.sender, message.relatedTopics || []);
@@ -1834,13 +1820,10 @@ async function loadRecentChats() {
                             }
                         }
 
-                        // Set current chat ID
                         currentChatId = chat.chat_id;
-
-                        // Clear textarea value
                         textarea.value = '';
 
-                    }, 500); // Match the same timeout as sendMessage
+                    }, 500);
 
                 } catch (error) {
                     console.error('Error loading chat messages:', error);
@@ -1855,7 +1838,6 @@ async function loadRecentChats() {
     }
 }
 
-// Initialize when the page loads
 document.addEventListener('DOMContentLoaded', loadRecentChats);
 
 function updateRecentChatsUI(chats) {
@@ -1867,10 +1849,8 @@ function updateRecentChatsUI(chats) {
         return;
     }
 
-    // Clear existing chats
     chatList.innerHTML = '';
 
-    // If no chats are passed, fetch them directly from the database
     if (!chats || chats.length === 0) {
         fetch('VotalityChat2.php', {
             method: 'POST',
@@ -1888,7 +1868,7 @@ function updateRecentChatsUI(chats) {
                 displayChats(data.chats);
             } else {
                 chatList.innerHTML = `
-                    <div class="chat-item no-chats">
+                    <div class="chat-item no-chats" style="background: transparent !important;">
                         <span class="chat-name">No recent chats</span>
                     </div>
                 `;
@@ -1902,13 +1882,15 @@ function updateRecentChatsUI(chats) {
         chatsToDisplay.forEach(chat => {
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
+            // Adding transparent background as important
+            chatItem.style.cssText = 'background: transparent !important;';
+            
             if (chat.chat_id === currentChatId) {
                 chatItem.classList.add('active');
             }
 
             const chatName = document.createElement('span');
             chatName.className = 'chat-name';
-            // Force display of topic or a default message
             chatName.textContent = chat.topic || 'New Chat';
             
             chatItem.addEventListener('click', () => {
