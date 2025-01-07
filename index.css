@@ -1427,7 +1427,6 @@ justify-content: flex-end;
 }
 
 .desktop-top-nav__username {
-    font-weight: 600;
     color: var(--text-color);
     font-size: 1.2rem;
     transition: margin-left 0.3s ease;
