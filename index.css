@@ -2095,7 +2095,7 @@ margin-top: 0.5rem;
     transform: translateX(-50%);
     height: calc(29rem - 10.5rem); /* Distance between the two elements */
     width: 1px; /* Line thickness */
-    background-color: red; /* Line color */
+    background-color: #e5e7eb; /* Line color */
     z-index: 1;
     border-radius: 1rem; /* Adds curvature to the ends */
 }

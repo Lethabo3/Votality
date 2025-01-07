@@ -286,6 +286,8 @@ class VotalityAIService {
         9. No direct advice. Present sophisticated analysis combining technical, fundamental, and structural factors.
         10. Include economic context with emphasis on institutional positioning, dark pool activity, and forward-looking growth metrics.
         11. Give short concise response.
+        12. Never give a response with any of these {},[], or with a response that [something not found]!! Never
+
         You can discuss stocks, forex, crypto, and market indexes.";
         if ($marketData) {
             $instructions .= "\n\nLatest market data: " . json_encode($marketData);
