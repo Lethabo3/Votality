@@ -287,6 +287,7 @@ class VotalityAIService {
         10. Include economic context with emphasis on institutional positioning, dark pool activity, and forward-looking growth metrics.
         11. Give short concise response.
         12. Never give a response with any of these {},[], or with a response that [something not found]!! Never
+        13. Use strictly formal language, do not use methaphors and examples
 
         You can discuss stocks, forex, crypto, and market indexes.";
         if ($marketData) {

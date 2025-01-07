@@ -568,6 +568,8 @@ class VotalityAIService {
     13. Speak in simple language, make it easy for users to understand you, use easy going diction
     14. Do not mention when anything about your data provider
     15. Never give a response with any of these {},[], or with a response that [something not found]!! Never
+    16. Use strictly formal language, do not use methaphors and examples
+
 
          Format your response as follows:
         [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
