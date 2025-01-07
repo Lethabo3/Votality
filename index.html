@@ -1668,6 +1668,43 @@ if (window.innerWidth <= 640) {
 window.addEventListener('resize', toggleMobileNav);
 
 function updateChatListUI(chats) {
+if (!chatList) return;
+
+chatList.innerHTML = ''; // Clear existing chats
+
+if (!chats || chats.length === 0) {
+    chatList.innerHTML = `
+        <div class="chat-item no-chats">
+            <span class="chat-name">No recent chats</span>
+        </div>
+    `;
+    return;
+}
+
+chats.forEach(chat => {
+    const chatItem = document.createElement('div');
+    chatItem.className = 'chat-item';
+    if (chat.chat_id === currentChatId) {
+        chatItem.classList.add('active');
+    }
+    
+    chatItem.innerHTML = `
+        <span class="chat-name">${chat.topic || 'New Chat'}</span>
+    `;
+    
+    chatItem.addEventListener('click', () => {
+        document.querySelectorAll('.chat-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        chatItem.classList.add('active');
+        currentChatId = chat.chat_id;
+        loadChat(chat.chat_id);
+    });
+    
+    chatList.appendChild(chatItem);
+});
+}
+function updateChatListUI(chats) {
     const chatList = document.querySelector('.chat-list');
     if (!chatList) return;
 
@@ -1676,7 +1713,7 @@ function updateChatListUI(chats) {
 
     if (!chats || chats.length === 0) {
         chatList.innerHTML = `
-            <div class="chat-item no-chats" style="background: transparent !important;">
+            <div class="chat-item no-chats">
                 <span class="chat-name">No recent chats</span>
             </div>
         `;
@@ -1686,33 +1723,42 @@ function updateChatListUI(chats) {
     chats.forEach(chat => {
         const chatItem = document.createElement('div');
         chatItem.className = 'chat-item';
-        // Adding transparent background as important
-        chatItem.style.cssText = 'background: transparent !important;';
-        
         if (chat.chat_id === currentChatId) {
             chatItem.classList.add('active');
         }
 
+        // Create the topic element
         const topicSpan = document.createElement('span');
         topicSpan.className = 'chat-name';
         topicSpan.textContent = chat.topic || 'New Chat';
 
+        // Create preview element if needed
         const previewSpan = document.createElement('span');
         previewSpan.className = 'chat-preview';
         previewSpan.textContent = chat.preview || '';
 
+        // Add elements to chat item
         chatItem.appendChild(topicSpan);
         if (chat.preview) {
             chatItem.appendChild(previewSpan);
         }
 
         chatItem.addEventListener('click', async () => {
+            // Remove active class from all items
             document.querySelectorAll('.chat-item').forEach(item => {
                 item.classList.remove('active');
             });
+            
+            // Add active class to clicked item
             chatItem.classList.add('active');
+            
+            // Update current chat ID
             currentChatId = chat.chat_id;
+            
+            // Update the topic in the top navigation
             updateChatTopicDisplay(chat.topic);
+            
+            // Load the chat messages
             await loadChat(chat.chat_id);
         });
 
@@ -1741,95 +1787,21 @@ async function loadRecentChats() {
 
         chatList.innerHTML = '';
 
+        // Display "No recent chats" if no chats exist
         if (!data.chats || data.chats.length === 0) {
             chatList.innerHTML = `
-                <div class="chat-item" style="background: transparent !important;">
+                <div class="chat-item">
                     <span class="chat-name">No recent chats</span>
                 </div>
             `;
             return;
         }
 
+        // Create chat items with only topics
         data.chats.forEach(chat => {
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
-            // Adding transparent background as important
-            chatItem.style.cssText = 'background: transparent !important;';
             chatItem.innerHTML = `<span class="chat-name">${chat.topic || 'New Chat'}</span>`;
-            
-            chatItem.addEventListener('click', async () => {
-                try {
-                    initialContent.classList.add('fade-out');
-                    suggestedQueries.classList.add('fade-out');
-                    footerLinks.classList.add('fade-out');
-                    textareaContainer.classList.add('repositioned');
-                    document.body.classList.add('white-background');
-
-                    setTimeout(async () => {
-                        initialContent.style.display = 'none';
-                        suggestedQueries.style.display = 'none';
-                        footerLinks.style.display = 'none';
-                        chatContainer.style.display = 'block';
-                        chatContainer.classList.add('fade-in');
-
-                        if (window.innerWidth > 640) {
-                            disclaimer.style.display = 'block';
-                            setTimeout(() => {
-                                disclaimer.classList.add('fade-in');
-                            }, 50);
-                        }
-
-                        if (window.innerWidth > 640) {
-                            desktopTopNav.style.display = 'flex';
-                            setTimeout(() => {
-                                desktopTopNav.classList.add('fade-in');
-                            }, 50);
-                        } else {
-                            const topNav = document.querySelector('.top-nav');
-                            if (topNav) {
-                                topNav.style.display = 'none';
-                            }
-                            document.body.classList.add('chat-active');
-                        }
-
-                        chatContainer.innerHTML = '';
-
-                        const messagesResponse = await fetch('VotalityChat2.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                action: 'loadChat',
-                                chatId: chat.chat_id
-                            }),
-                            credentials: 'same-origin'
-                        });
-
-                        const messagesData = await messagesResponse.json();
-                        console.log('Chat messages:', messagesData);
-
-                        updateChatTopicDisplay(chat.topic);
-
-                        if (messagesData.messages) {
-                            for (const message of messagesData.messages) {
-                                const messageElement = await addMessage(message.content, message.sender, message.relatedTopics || []);
-                                if (messageElement) {
-                                    messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                }
-                            }
-                        }
-
-                        currentChatId = chat.chat_id;
-                        textarea.value = '';
-
-                    }, 500);
-
-                } catch (error) {
-                    console.error('Error loading chat messages:', error);
-                }
-            });
-            
             chatList.appendChild(chatItem);
         });
 
@@ -1838,6 +1810,7 @@ async function loadRecentChats() {
     }
 }
 
+// Initialize when the page loads
 document.addEventListener('DOMContentLoaded', loadRecentChats);
 
 function updateRecentChatsUI(chats) {
@@ -1849,8 +1822,10 @@ function updateRecentChatsUI(chats) {
         return;
     }
 
+    // Clear existing chats
     chatList.innerHTML = '';
 
+    // If no chats are passed, fetch them directly from the database
     if (!chats || chats.length === 0) {
         fetch('VotalityChat2.php', {
             method: 'POST',
@@ -1868,7 +1843,7 @@ function updateRecentChatsUI(chats) {
                 displayChats(data.chats);
             } else {
                 chatList.innerHTML = `
-                    <div class="chat-item no-chats" style="background: transparent !important;">
+                    <div class="chat-item no-chats">
                         <span class="chat-name">No recent chats</span>
                     </div>
                 `;
@@ -1882,15 +1857,13 @@ function updateRecentChatsUI(chats) {
         chatsToDisplay.forEach(chat => {
             const chatItem = document.createElement('div');
             chatItem.className = 'chat-item';
-            // Adding transparent background as important
-            chatItem.style.cssText = 'background: transparent !important;';
-            
             if (chat.chat_id === currentChatId) {
                 chatItem.classList.add('active');
             }
 
             const chatName = document.createElement('span');
             chatName.className = 'chat-name';
+            // Force display of topic or a default message
             chatName.textContent = chat.topic || 'New Chat';
             
             chatItem.addEventListener('click', () => {
