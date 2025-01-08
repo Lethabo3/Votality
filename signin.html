@@ -217,9 +217,12 @@ body, html {
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
-    height: auto; /* Allow height to adapt to content */
-    overflow: auto; /* Enable scrolling if content overflows */
-    position: static; /* Default position */
+    height: 100%; /* Ensure full height */
+    margin: 0; /* Remove default margin */
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    overflow: hidden; /* Prevent scrolling */
     width: 100%;
 }
 
@@ -298,9 +301,9 @@ body, html {
         }
 
         .container {
-            max-width: 500px;
-            margin: -5rem auto 0;
-            padding: 0 2rem 2rem 2rem;
+            max-width: 500px; /* Maintain max width */
+            width: 100%; /* Allow full width */
+            padding: 0 2rem; /* Adjust padding */
         }
 
         .login-form {

@@ -216,9 +216,12 @@ body, html {
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
-    height: auto; /* Allow height to adapt to content */
-    overflow: auto; /* Enable scrolling if content overflows */
-    position: static; /* Default position */
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
     width: 100%;
 }
 
@@ -289,8 +292,8 @@ body, html {
 
         .container {
             max-width: 500px;
-            margin: -5rem auto 0;
-            padding: 0 2rem 2rem 2rem;
+            width: 100%;
+            padding: 0 2rem;
         }
 
         .signup-form {
