@@ -918,12 +918,6 @@ if (!stayLoggedOut) {
         const response = await fetch('/check_login_status.php');
         const data = await response.json();
 
-        if (!data.isLoggedIn && !window.location.pathname.includes('signup.html')) {
-            sessionStorage.setItem('returnUrl', window.location.href);
-            window.location.href = '/signup.html'; // Change this line to redirect to the sign-up page
-            return;
-        }
-
         if (data.isLoggedIn) {
             isUserLoggedIn = true;
             if (data.username) {
@@ -1148,12 +1142,6 @@ if (!stayLoggedOut) {
     try {
         const response = await fetch('/check_login_status.php');
         const data = await response.json();
-
-        if (!data.isLoggedIn && !window.location.pathname.includes('signup.html')) {
-            sessionStorage.setItem('returnUrl', window.location.href);
-            window.location.href = '/signup.html'; // Change this line to redirect to the sign-up page
-            return;
-        }
 
         if (data.isLoggedIn) {
             isUserLoggedIn = true;
