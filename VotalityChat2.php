@@ -259,7 +259,6 @@ function getWorldTime($timezone) {
     }
     return null;
 }
-
 function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     global $conn;
    
@@ -269,45 +268,52 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     }
 
     try {
-        // Start a transaction to ensure data consistency
-        $conn->begin_transaction();
-
         $userId = $_SESSION['user_id'] ?? null;
         $sessionId = $_SESSION['session_id'] ?? null;
+        $isLoggedIn = ($userId && $sessionId);
 
-        // If no chatId provided, create a new chat
+        // Only start transaction if user is logged in
+        if ($isLoggedIn) {
+            $conn->begin_transaction();
+        }
+
+        // If no chatId provided, create one
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
-            // Generate topic from initial message
-            $chatTopic = generateChatTopic($message);
             
-            // Create new chat entry with required fields
-            $stmt = $conn->prepare("
-                INSERT INTO votality_chats 
-                    (chat_id, user_id, topic, summary) 
-                VALUES (?, ?, ?, ?)
-            ");
-            $summary = null; // Optional field
-            $stmt->bind_param("siss", $chatId, $userId, $chatTopic, $summary);
-            $stmt->execute();
+            // Only create database entry if user is logged in
+            if ($isLoggedIn) {
+                $chatTopic = generateChatTopic($message);
+                
+                $stmt = $conn->prepare("
+                    INSERT INTO votality_chats 
+                        (chat_id, user_id, topic, summary) 
+                    VALUES (?, ?, ?, ?)
+                ");
+                $summary = null;
+                $stmt->bind_param("siss", $chatId, $userId, $chatTopic, $summary);
+                $stmt->execute();
 
-            if ($stmt->error) {
-                throw new Exception("Failed to create new chat: " . $stmt->error);
+                if ($stmt->error) {
+                    throw new Exception("Failed to create new chat: " . $stmt->error);
+                }
             }
         }
 
-        // Verify chat exists and user has access
-        $checkStmt = $conn->prepare("
-            SELECT 1 FROM votality_chats 
-            WHERE chat_id = ? AND user_id = ?
-        ");
-        $checkStmt->bind_param("si", $chatId, $userId);
-        $checkStmt->execute();
-        if ($checkStmt->get_result()->num_rows === 0) {
-            throw new Exception("Chat not found or access denied");
+        // Only verify database access if user is logged in
+        if ($isLoggedIn && $chatId) {
+            $checkStmt = $conn->prepare("
+                SELECT 1 FROM votality_chats 
+                WHERE chat_id = ? AND user_id = ?
+            ");
+            $checkStmt->bind_param("si", $chatId, $userId);
+            $checkStmt->execute();
+            if ($checkStmt->get_result()->num_rows === 0) {
+                throw new Exception("Chat not found or access denied");
+            }
         }
 
-        // Generate AI response
+        // Generate AI response - this happens for all users
         $aiService = new VotalityAIService();
         $formattedTime = getWorldTime($timezone) ?? 
             (new DateTime('now', new DateTimeZone($timezone)))->format('l, jS g:ia');
@@ -339,8 +345,8 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             }
         }
 
-        // Store messages in database if user is authenticated
-        if ($userId && $sessionId) {
+        // Store messages in database only if user is logged in
+        if ($isLoggedIn) {
             // Prepare statement for user message
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
@@ -379,7 +385,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             $updateTopicStmt->execute();
         }
 
-        // Maintain session state for non-authenticated users
+        // Maintain session state for all users
         if (!isset($_SESSION['chats'][$chatId])) {
             $_SESSION['chats'][$chatId] = [
                 'messages' => [],
@@ -400,8 +406,10 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             'relatedTopics' => $relatedTopics
         ];
 
-        // Commit the transaction
-        $conn->commit();
+        // Commit transaction only if user is logged in
+        if ($isLoggedIn) {
+            $conn->commit();
+        }
 
         return [
             'response' => $aiResponse,
@@ -411,8 +419,8 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         ];
 
     } catch (Exception $e) {
-        // Rollback transaction on error
-        if ($conn->inTransaction()) {
+        // Rollback transaction if one is active
+        if ($isLoggedIn && $conn->inTransaction()) {
             $conn->rollback();
         }
         logMessage("Error in handleSendMessage: " . $e->getMessage());
