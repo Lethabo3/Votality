@@ -1843,82 +1843,6 @@ margin-top: 0.5rem;
     transition: opacity 0.3s ease;
 }
 
-.feedback-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-}
-
-.feedback-modal.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.feedback-modal-content {
-    background-color: white;
-    border-radius: 10px;
-    border: 1px solid var(--border-color);
-    padding: 0.8rem;
-    max-width: 32rem;
-    width: calc(100% - 2rem);
-    margin: 0 1rem;
-    transform: translateY(20px);
-    transition: transform 0.2s ease;
-}
-
-.feedback-modal.active .feedback-modal-content {
-    transform: translateY(0);
-}
-
-.feedback-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.feedback-header h3 {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #4B5563;
-}
-
-.feedback-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.feedback-option {
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    border: 1px solid #E5E7EB;
-    background: none;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #4B5563;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.feedback-option:hover {
-    background-color: #F3F4F6;
-}
-
-.feedback-option.selected {
-    background-color: #000;
-    color: white;
-    border-color: #000;
-}
-
 /* Set the sidebar to be expanded by default */
 .sidebar {
     width: 15rem; /* Width when expanded */
@@ -2711,4 +2635,81 @@ margin-top: 0.5rem;
 #account-container{
     bottom: 10.2rem;
 
+}
+
+.feedback-modal {
+    position: absolute; /* Change from fixed to absolute */
+    display: none;
+    background-color: transparent;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    top: 100%; /* Position it below the interaction buttons */
+    left: -0.8rem;
+    width: 100%;
+}
+
+.feedback-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.feedback-modal-content {
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    padding: 0.8rem;
+    max-width: 32rem;
+    margin-top: 0.5rem; /* Add some space between buttons and modal */
+    width: calc(100% - 2rem);
+    margin: 0 1rem;
+    transform: translateY(20px);
+    transition: transform 0.2s ease;
+}
+
+.feedback-modal.active .feedback-modal-content {
+    transform: translateY(0);
+}
+
+.feedback-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.feedback-header h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #4B5563;
+}
+
+.feedback-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.feedback-option {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--description-text);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.feedback-option:hover {
+    background-color: #F3F4F6;
+}
+
+.feedback-option.selected {
+    background-color: #000;
+    color: white;
+    border-color: #000;
 }
