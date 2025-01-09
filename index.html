@@ -86,12 +86,12 @@ gtag('config', 'G-G7WREYHFF7');
                         </a>
                 </div>
                </div>
-                <div id="account-container" style="display: none;">
-                    <div class="account-container sidebar__account">
-                        <i data-lucide="user" class="h-5 w-5 text-gray-400" data-lucide="user-fill"></i>
-                        <span class="sidebar-text">Account</span>
-                    </div>
+               <div id="account-container" style="display: none;">
+                <div class="account-container sidebar__account">
+                    <i data-lucide="user" class="h-5 w-5 text-gray-400" data-lucide="user-fill"></i>
+                    <span class="sidebar-text user-name">Guest</span>
                 </div>
+            </div>  
                 <div id="guest-buttons-container">
                     <a href="signup.html" id="signup-button">
                         Sign Up
@@ -448,7 +448,6 @@ function checkLoginStatus() {
         .then(data => {
             isUserLoggedIn = data.isLoggedIn;
             
-            // Get all relevant containers
             const guestButtonsContainer = document.getElementById('guest-buttons-container');
             const accountContainer = document.getElementById('account-container');
             const tryProContainer = document.getElementById('try-pro-container');
@@ -460,12 +459,17 @@ function checkLoginStatus() {
                 }
                 if (accountContainer) {
                     accountContainer.style.display = 'block';
+                    // Update the sidebar account name
+                    const sidebarName = accountContainer.querySelector('.user-name');
+                    if (sidebarName && data.username) {
+                        sidebarName.textContent = data.username;
+                    }
                 }
                 if (tryProContainer) {
                     tryProContainer.style.display = 'block';
                 }
                 
-                // Update username if available
+                // Update top nav username
                 const userFullnameElement = document.getElementById('user-fullname');
                 if (userFullnameElement && data.username) {
                     userFullnameElement.textContent = data.username;
@@ -477,12 +481,17 @@ function checkLoginStatus() {
                 }
                 if (accountContainer) {
                     accountContainer.style.display = 'none';
+                    // Reset sidebar name to Guest
+                    const sidebarName = accountContainer.querySelector('.user-name');
+                    if (sidebarName) {
+                        sidebarName.textContent = 'Guest';
+                    }
                 }
                 if (tryProContainer) {
                     tryProContainer.style.display = 'none';
                 }
                 
-                // Reset username to Guest
+                // Reset top nav to Guest
                 const userFullnameElement = document.getElementById('user-fullname');
                 if (userFullnameElement) {
                     userFullnameElement.textContent = 'Guest';
@@ -493,7 +502,6 @@ function checkLoginStatus() {
         })
         .catch(error => console.error('Error checking login status:', error));
 }
-
 function updateSignInButtonsVisibility() {
 if (window.innerWidth <= 640) {
     if (isUserLoggedIn || textarea.value.trim() !== '') {
