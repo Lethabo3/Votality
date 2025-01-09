@@ -2664,7 +2664,7 @@ margin-top: 0.5rem;
         color: #000000;
         border-radius: 8px;
         margin-top: auto;
-        margin-bottom:6rem;
+        bottom:0rem;
         cursor: pointer;
     }
 
