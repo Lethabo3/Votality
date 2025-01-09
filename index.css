@@ -2701,6 +2701,11 @@ margin-top: 0.5rem;
 
     #sidebar-container {
 
-        margin-bottom: -20.2rem;
-        background-color: transparent;
-    }
+    margin-top: auto;
+    margin-bottom:-26rem;
+}
+
+#account-container{
+    margin-bottom: -0.2rem;
+
+}
