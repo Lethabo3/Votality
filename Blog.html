@@ -34,12 +34,15 @@
 
         /* Base styles remain the same */
         body, html {
-            font-family: 'Inter', sans-serif;
+            font-family: 'GeneralSans-Medium';
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
-            margin: 0;
-            padding: 0;
+            height: auto; /* Allow height to adapt to content */
+            overflow: auto; /* Enable scrolling if content overflows */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+            position: static; /* Default position */
+            width: 100%;
         }
 
         /* Previous styles remain unchanged until blog-content */

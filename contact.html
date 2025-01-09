@@ -148,12 +148,14 @@ body, html {
     line-height: 1.6;
     height: auto; /* Allow height to adapt to content */
     overflow: auto; /* Enable scrolling if content overflows */
+    overflow-x: hidden;
     position: static; /* Default position */
     width: 100%;
 }
 
 
         body {
+        
             background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
         }
 
@@ -182,7 +184,7 @@ body, html {
 
         .container {
             max-width: 800px;
-            margin: 2rem auto 0; /* Negative margin to pull up */
+            margin: 0rem auto 0; /* Negative margin to pull up */
             padding: 0 2rem 2rem 2rem;
         }
 
