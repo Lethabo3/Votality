@@ -2078,7 +2078,7 @@ margin-top: 0.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 20%;
+    width: 80%;
     white-space: nowrap; /* Prevent text from wrapping */
     padding: 0.2rem;
     background-color: transparent;
@@ -2664,7 +2664,7 @@ margin-top: 0.5rem;
         color: #000000;
         border-radius: 8px;
         margin-top: auto;
-        margin-bottom:26rem;
+        margin-bottom:6rem;
         cursor: pointer;
     }
 
