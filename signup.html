@@ -278,6 +278,7 @@ body, html {
             padding: 1rem 2rem;
             background-color: transparent;
             position: relative;
+            margin-bottom: -5rem;
         }
 
         .hero h1 {
@@ -302,6 +303,7 @@ body, html {
             padding: 2rem;
             width: 100%;
             box-sizing: border-box;
+            margin-top: 1rem;
         }
 
         .google-button {
@@ -453,6 +455,7 @@ body, html {
             text-align: center;
             color: #4b5563;
             margin-bottom: 3rem;
+            margin-top: -0.5rem;
             font-size: 1rem;
             max-width: 600px;
             margin-left: auto;
@@ -478,54 +481,60 @@ body, html {
 .signin-link a:hover {
     text-decoration: underline;
 }
+
+.center-container {
+    display: flex;
+    flex-direction: column; /* Stack hero and container vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+    height: 100%; /* Full height to center content */
+}
     </style>
 </head>
 <body>
-
-
-    <div class="hero">
-        <h1>Join Votality</h1>
-        <p class="subtitle">Create your account and take control of the markets</p>
-    </div>
-
-    <div class="container">
-        <div class="signup-form">
-            <div id="g_id_onload" style="display: none;"
-            data-client_id="583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com"
-            data-context="signin"
-            data-ux_mode="popup"
-            data-callback="handleCredentialResponse"
-            data-auto_prompt="false">
-       </div>
-       <div class="g_id_signin" style="display: none;"
-            data-type="standard"
-            data-shape="rectangular"
-            data-theme="outline"
-            data-text="signin_with"
-            data-size="large"
-            data-logo_alignment="left">
-       </div>
-            <button class="google-button" onclick="triggerGoogleSignIn()">
-                <img src="https://raw.githubusercontent.com/gilbarbara/logos/main/logos/google-icon.svg" alt="Google logo">
-                Continue with Google
-            </button>
-            
-            <div class="separator">OR</div>
-            
-            <form id="signup-form" action="signup_handlerBimo.php" method="POST">
-                <input type="text" name="fullname" placeholder="Full Name" class="input-field" required>
-                <input type="email" name="email" placeholder="Email" class="input-field" required>
-                <input type="password" name="password" id="password" placeholder="Password" class="input-field" required>
-                <button type="submit" class="submit-button">Create Account</button>
-            </form>
-            
-            <p class="signin-link">
-                Already have an account? <a href="signin.html">Sign in</a>
-            </p>
-
+    <div class="center-container"><!-- New wrapper for centering -->
+        <div class="hero">
+            <h1>Welcome to Votality</h1>
+            <p class="subtitle">Sign in or sign up to continue</p>
         </div>
 
-       
+        <div class="container">
+            <div class="signup-form">
+                <div id="g_id_onload" style="display: none;"
+                data-client_id="583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com"
+                data-context="signin"
+                data-ux_mode="popup"
+                data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+           </div>
+           <div class="g_id_signin" style="display: none;"
+                data-type="standard"
+                data-shape="rectangular"
+                data-theme="outline"
+                data-text="signin_with"
+                data-size="large"
+                data-logo_alignment="left">
+           </div>
+                <button class="google-button" onclick="triggerGoogleSignIn()">
+                    <img src="https://raw.githubusercontent.com/gilbarbara/logos/main/logos/google-icon.svg" alt="Google logo">
+                    Continue with Google
+                </button>
+                
+                <div class="separator">OR</div>
+                
+                <form id="signup-form" action="signup_handlerBimo.php" method="POST">
+                    <input type="text" name="fullname" placeholder="Full Name" class="input-field" required>
+                    <input type="email" name="email" placeholder="Email" class="input-field" required>
+                    <input type="password" name="password" id="password" placeholder="Password" class="input-field" required>
+                    <button type="submit" class="submit-button">Create Account</button>
+                </form>
+                
+                <p class="signin-link">
+                    Already have an account? <a href="signin.html">Sign in</a>
+                </p>
+
+            </div>
+        </div>
     </div>
 
     <script>

@@ -218,11 +218,12 @@ body, html {
     color: var(--text-color);
     line-height: 1.6;
     height: 100%; /* Ensure full height */
-    margin: 0; /* Remove default margin */
+   margin: 0; /* Remove default margin */
     display: flex; /* Use flexbox for centering */
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
     overflow: hidden; /* Prevent scrolling */
+    position: static; /* Default position */
     width: 100%;
 }
 
@@ -279,6 +280,7 @@ body, html {
             padding: 1rem 2rem;
             background-color: transparent;
             position: relative;
+            margin-bottom: 1.5rem;
         }
 
         .main-title {
@@ -293,6 +295,7 @@ body, html {
             text-align: center;
             color: #4b5563;
             margin-bottom: 3rem;
+            margin-top: 0.5rem;
             font-size: 1rem;
             font-weight: 500;
             max-width: 600px;
@@ -301,7 +304,7 @@ body, html {
         }
 
         .container {
-            max-width: 500px; /* Maintain max width */
+            max-width: 500px;
             width: 100%; /* Allow full width */
             padding: 0 2rem; /* Adjust padding */
         }
@@ -312,6 +315,7 @@ body, html {
             padding: 2rem;
             width: 100%;
             box-sizing: border-box;
+            margin-top: -6rem;
         }
 
         .google-button {
@@ -463,41 +467,51 @@ body, html {
             background-color: #000;
             border: 1px solid #e0e0e0;
         }
+
+        .center-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
+    <div class="center-container">
+        <div class="hero">
+            <h2 class="main-title">Welcome to Votality</h2>
+            <h3 class="login-title">Sign in or sign up to continue</h3>
+        </div>
 
-    <div class="hero">
-        <h2 class="main-title">Sign In</h2>
-        <h3 class="login-title">Enjoy using Votality for yourself or your team</h3>
-    </div>
+        <div class="container">
+            <div class="login-form">
+                <div id="g_id_onload" style="display: none;"
+                     data-client_id="583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com"
+                     data-context="signin"
+                     data-ux_mode="popup"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
 
-    <div class="container">
-        <div class="login-form">
-            <div id="g_id_onload" style="display: none;"
-                 data-client_id="583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com"
-                 data-context="signin"
-                 data-ux_mode="popup"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false">
+                <button class="google-button" onclick="triggerGoogleSignIn()">
+                    <img src="https://raw.githubusercontent.com/gilbarbara/logos/main/logos/google-icon.svg" alt="Google logo">
+                    Continue with Google
+                </button>
+                <div class="separator">OR</div>
+                
+                <form action="login_handlerBimo.php" method="POST">
+                    <input type="email" name="email" placeholder="Email" class="input-field" required>
+                    <input type="password" name="password" placeholder="Password" class="input-field" required>
+                    <button type="submit" class="email-button">Continue</button>
+                </form>
+
+                <div class="skip-login">
+                    <a href="#" id="stay-logged-out">Stay logged out and continue as guest</a>
+                </div>
+                
+
             </div>
-            <button class="google-button" onclick="triggerGoogleSignIn()">
-                <img src="https://raw.githubusercontent.com/gilbarbara/logos/main/logos/google-icon.svg" alt="Google logo">
-                Continue with Google
-            </button>
-            
-            <div class="separator">OR</div>
-            
-            <form action="login_handlerBimo.php" method="POST">
-                <input type="email" name="email" placeholder="Email" class="input-field" required>
-                <input type="password" name="password" placeholder="Password" class="input-field" required>
-                <button type="submit" class="email-button">Continue</button>
-            </form>
-
-            <div class="skip-login">
-                <a href="#" id="stay-logged-out">Stay logged out and continue as guest</a>
-            </div>
-
         </div>
     </div>
 
