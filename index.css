@@ -2664,24 +2664,27 @@ margin-top: 0.5rem;
     margin-left: -6.5rem;
 }
 
-#signup-button {
-    background-color: var(--text-color); /* Green background */
+#signup-button,
+#login-button {
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center text horizontally */
+    align-items: center; /* Center text vertically */
+    background-color: var(--text-color); /* Green background for Sign Up */
     color: var(--background-color); /* White text */
     border: none; /* Remove border */
     border-radius: 8px; /* Rounded corners */
     padding: 0.5rem; /* Padding for better touch area */
     cursor: pointer; /* Pointer cursor on hover */
+    text-decoration: none; /* Remove underline */
     transition: background-color 0.3s; /* Smooth background transition */
+    width: 100%; /* Full width for the button */
 }
 
+/* Specific styles for the login button */
 #login-button {
     background-color: var(--tertiary-background); /* Blue background */
-    color: var(--text-color); /* White text */
-    border: none; /* Remove border */
-    border-radius: 8px; /* Rounded corners */
-    padding: 0.5rem; /* Padding for better touch area */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s; /* Smooth background transition */
+    color: var(--icon-color); /* White text */
+
 }
 
 /* Hover effects for buttons */
