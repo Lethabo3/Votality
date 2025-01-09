@@ -111,28 +111,28 @@ position: relative;
     left: -0.7rem;
 }
 
-.account-container {
-    width: calc(100% + 20px); /* Adjust width to exceed the sidebar's width */
-    background-color: transparent;
-    border-top: 1px solid var(--border-color);
-        padding: 0 10px; /* Add horizontal padding to shift contents to the right */
-    margin: 0; /* Negative margin to offset the padding of the sidebar */
-    border-radius: 0; /* Remove border-radius to ensure it touches edges */
-    display: flex;
-    color: var(--text-color);    align-items: center;
-    justify-content: flex-start; /* Align items to the start */
-    transition: all 0.3s ease;
-    margin-top: auto;
-    margin-bottom: -0.2rem;
-}
+    .account-container {
+        width: calc(100% + 20px); /* Adjust width to exceed the sidebar's width */
+        background-color: transparent;
+        border-top: 1px solid var(--border-color);
+            padding: 0 10px; /* Add horizontal padding to shift contents to the right */
+        margin: 0; /* Negative margin to offset the padding of the sidebar */
+        border-radius: 0; /* Remove border-radius to ensure it touches edges */
+        display: flex;
+        color: var(--text-color);    align-items: center;
+        justify-content: flex-start; /* Align items to the start */
+        transition: all 0.3s ease;
+        margin-top: auto;
+        margin-bottom: -0.2rem;
+    }
 
-.sidebar.expanded .account-container {
-    width: 15rem; /* Full width minus some spacing */
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem; /* Added horizontal padding */
-    margin-left: 0.5rem; /* Added left margin */
-    margin-right: 0.5rem; /* Added right margin */
-}
+    .sidebar.expanded .account-container {
+        width: 15rem; /* Full width minus some spacing */
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem; /* Added horizontal padding */
+        margin-left: 0.5rem; /* Added left margin */
+        margin-right: 0.5rem; /* Added right margin */
+    }
 
 /* Styles for expanded state */
 .sidebar.expanded {
@@ -239,51 +239,6 @@ position: relative;
     margin-top: 0.5rem;
 }
 
-.try-pro-container {
-    display: none;
-    background-color: transparent;
-    border: 0px solid var(--border-color);
-    color: #000000;
-    border-radius: 8px;
-    margin-top: auto;
-    margin-bottom:-26rem;
-    cursor: pointer;
-}
-
-.sidebar.expanded .try-pro-container {
-    display: flex;
-    width: calc(100% - 1rem);
-    padding: 0.75rem;
-    margin-left: 0.5rem;
-    margin-right: 2.675rem;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.try-pro-title {
-    font-weight: 500;
-    font-size: 0.875rem;
-    margin-bottom: 0.25rem;
-}
-
-.try-pro-description {
-    font-size: 0.85rem;
-    color: #9ca3af;
-    margin-bottom: 0.75rem;
-    line-height: 1.4;
-}
-
-.learn-more-link {
-    font-size: 0.85rem;
-    color: #000;
-    text-decoration: none;
-    display: flex;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 1rem; /* Added padding to create space between text and border */
-}
 
 /* Keep toggle sidebar position unchanged */
 .toggle-sidebar {
@@ -2696,3 +2651,59 @@ margin-top: 0.5rem;
 #login-button:hover {
     background-color: var(--hover-color); /* Darker blue on hover */
 }
+
+
+    .try-pro-container {
+        display: none;
+        background-color: transparent;
+        border: 0px solid var(--border-color);
+        color: #000000;
+        border-radius: 8px;
+        margin-top: auto;
+        margin-bottom:-26rem;
+        cursor: pointer;
+    }
+
+    .sidebar.expanded .try-pro-container {
+        display: flex;
+        width: calc(100% - 1rem);
+        padding: 0.75rem;
+        margin-left: 0.5rem;
+        margin-right: 2.675rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .try-pro-title {
+        font-weight: 500;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .try-pro-description {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+    }
+
+    .learn-more-link {
+        font-size: 0.85rem;
+        color: #000;
+        text-decoration: none;
+        display: flex;
+        background-color: #f0f0f0;
+        border-radius: 4px;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 1rem; /* Added padding to create space between text and border */
+    }
+
+    #sidebar-container {
+        display: flex;
+        flex-direction: column;
+        width: calc(100% + 20px);
+        margin-top: auto;
+        margin-bottom: -0.2rem;
+        background-color: transparent;
+    }
