@@ -1721,7 +1721,7 @@ function updateChatListUI(chats) {
     if (!chats || chats.length === 0) {
         chatList.innerHTML = `
             <div class="chat-item no-chats" style="background: transparent !important;">
-                <span class="chat-name">No chats</span>
+                <span class="chat-name">No recent chats</span>
             </div>
         `;
         return;
@@ -1788,7 +1788,7 @@ async function loadRecentChats() {
         if (!data.chats || data.chats.length === 0) {
             chatList.innerHTML = `
                 <div class="chat-item" style="background: transparent !important;">
-                    <span class="chat-name">No chats</span>
+                    <span class="chat-name">No recent chats</span>
                 </div>
             `;
             return;
@@ -1913,7 +1913,7 @@ function updateRecentChatsUI(chats) {
             } else {
                 chatList.innerHTML = `
                     <div class="chat-item no-chats" style="background: transparent !important;">
-                        <span class="chat-name">No chats</span>
+                        <span class="chat-name">No recent chats</span>
                     </div>
                 `;
             }

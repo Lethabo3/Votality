@@ -2002,7 +2002,7 @@ margin-top: 0.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 82%;
+    width: 80%;
     white-space: nowrap; /* Prevent text from wrapping */
     padding: 0.2rem;
     background-color: transparent;
