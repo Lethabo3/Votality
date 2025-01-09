@@ -2653,3 +2653,43 @@ margin-top: 0.5rem;
 .dark .sources-container .file-source:hover {
     background-color: rgba(255, 255, 255, 0.15);
 }   
+
+#guest-buttons-container {
+    position: absolute;
+    bottom: 1rem; /* Position at the bottom of the sidebar */
+    width: 85%; /* Full width */
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 0.5rem; /* Space between buttons */
+    margin-left: -6.5rem;
+}
+
+#signup-button {
+    background-color: var(--text-color); /* Green background */
+    color: var(--background-color); /* White text */
+    border: none; /* Remove border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 0.5rem; /* Padding for better touch area */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth background transition */
+}
+
+#login-button {
+    background-color: var(--tertiary-background); /* Blue background */
+    color: var(--text-color); /* White text */
+    border: none; /* Remove border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 0.5rem; /* Padding for better touch area */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth background transition */
+}
+
+/* Hover effects for buttons */
+#signup-button:hover {
+    background-color: var(--background-color); /* Darker green on hover */
+    color: var(--icon-color);
+}
+
+#login-button:hover {
+    background-color: var(--hover-color); /* Darker blue on hover */
+}
