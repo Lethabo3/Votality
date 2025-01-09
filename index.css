@@ -2078,10 +2078,13 @@ margin-top: 0.5rem;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    white-space: nowrap; /* Prevent text from wrapping */
     padding: 0.2rem;
     background-color: transparent;
     border: 0px solid #e5e7eb; /* Border color */
     border-radius: 8px;
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Add ellipsis for overflow text */
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
