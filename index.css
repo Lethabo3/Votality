@@ -2698,3 +2698,9 @@ margin-top: 0.5rem;
         gap: 0.25rem;
         padding: 0.25rem 1rem; /* Added padding to create space between text and border */
     }
+
+    #sidebar-container {
+
+        margin-bottom: -0.2rem;
+        background-color: transparent;
+    }
