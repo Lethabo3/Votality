@@ -2719,7 +2719,7 @@ margin-top: 0.5rem;
     right: 0; /* Align to the right */
     top: 0; /* Align to the top */
     height: 100%; /* Full height */
-    width: 50px; /* Width of the fade effect */
+    width: 80%; /* Width of the fade effect */
     background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%); /* Gradient for fading */
     pointer-events: none; /* Allow clicks to pass through */
 }
