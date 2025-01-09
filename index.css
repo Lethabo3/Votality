@@ -2071,13 +2071,14 @@ margin-top: 0.5rem;
 
 .chat-item.active {
     background-color: var(--hover-color);
+
 }
 
 .chat-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 90%;
+    width: 20%;
     white-space: nowrap; /* Prevent text from wrapping */
     padding: 0.2rem;
     background-color: transparent;
