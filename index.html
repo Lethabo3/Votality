@@ -77,11 +77,21 @@ gtag('config', 'G-G7WREYHFF7');
         
             <div id="sidebar-container">
                 <div id="account-container" style="display: none;">
-                    <!-- Account container content -->
+                    <div class="account-container sidebar__account">
+                        <i data-lucide="user" class="h-5 w-5 text-gray-400" data-lucide="user-fill"></i>
+                        <span class="sidebar-text">Account</span>
+                    </div>
                 </div>
                 <div id="try-pro-container" style="display: none;">
-                    <!-- Try Pro container content -->
+                    <div class="try-pro-container">
+                        <div class="try-pro-title">Try Pro</div>
+                        <div class="try-pro-description">Upgrade for image upload, smarter AI, and more Analysis.</div>
+                        <a href="pricing.html" class="learn-more-link">
+                            Learn More
+                            <i data-lucide="arrow-up-right" class="h-3 w-3"></i>
+                        </a>
                 </div>
+               </div>
                 <div id="guest-buttons-container">
                     <a href="signup.html" id="signup-button">
                         Sign Up
@@ -433,20 +443,55 @@ if (e.key === 'Enter' && !e.shiftKey) {
 });
 
 function checkLoginStatus() {
-fetch('check_login_status.php')
-    .then(response => response.json())
-    .then(data => {
-        isUserLoggedIn = data.isLoggedIn;
-        if (isUserLoggedIn && data.username) {
-            // Update the username display if needed
-            const userFullnameElement = document.getElementById('user-fullname');
-            if (userFullnameElement) {
-                userFullnameElement.textContent = data.username;
+    fetch('check_login_status.php')
+        .then(response => response.json())
+        .then(data => {
+            isUserLoggedIn = data.isLoggedIn;
+            
+            // Get all relevant containers
+            const guestButtonsContainer = document.getElementById('guest-buttons-container');
+            const accountContainer = document.getElementById('account-container');
+            const tryProContainer = document.getElementById('try-pro-container');
+            
+            if (isUserLoggedIn) {
+                // User is logged in
+                if (guestButtonsContainer) {
+                    guestButtonsContainer.style.display = 'none';
+                }
+                if (accountContainer) {
+                    accountContainer.style.display = 'block';
+                }
+                if (tryProContainer) {
+                    tryProContainer.style.display = 'block';
+                }
+                
+                // Update username if available
+                const userFullnameElement = document.getElementById('user-fullname');
+                if (userFullnameElement && data.username) {
+                    userFullnameElement.textContent = data.username;
+                }
+            } else {
+                // User is not logged in
+                if (guestButtonsContainer) {
+                    guestButtonsContainer.style.display = 'flex';
+                }
+                if (accountContainer) {
+                    accountContainer.style.display = 'none';
+                }
+                if (tryProContainer) {
+                    tryProContainer.style.display = 'none';
+                }
+                
+                // Reset username to Guest
+                const userFullnameElement = document.getElementById('user-fullname');
+                if (userFullnameElement) {
+                    userFullnameElement.textContent = 'Guest';
+                }
             }
-        }
-        updateSignInButtonsVisibility();
-    })
-    .catch(error => console.error('Error checking login status:', error));
+            
+            updateSignInButtonsVisibility();
+        })
+        .catch(error => console.error('Error checking login status:', error));
 }
 
 function updateSignInButtonsVisibility() {
