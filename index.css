@@ -42,22 +42,47 @@
     font-style: normal;
   }
   
-body, html {
+  body, html {
     font-family: 'GeneralSans-Medium';
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
     height: 100%;
-overflow: hidden;
-position: fixed;
-width: 100%;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    
+    /* Disable hyphenation globally */
+    -webkit-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+    
+    /* Control word breaks */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: normal;
+    
+    /* Preserve whitespace */
+    white-space: pre-wrap;
 }
 
 body {
-background-color: var(--background-color);
-
-background-size: 100% 100%, 40px 40px, 40px 40px; /* Increased grid size for subtlety */
-position: relative;
+    background-color: var(--background-color);
+    background-size: 100% 100%, 40px 40px, 40px 40px; /* Increased grid size for subtlety */
+    position: relative;
+    
+    /* Disable hyphenation globally */
+    -webkit-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+    
+    /* Control word breaks */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: normal;
+    
+    /* Preserve whitespace */
+    white-space: pre-wrap;
 }
 
 .layout {
@@ -1126,6 +1151,7 @@ color: #333;
 .sources-heading, .related-heading {
 font-size: 1.25em;
 margin-bottom: 0.25rem;
+margin-top: -2rem;
 }
 
 .answer-heading {
@@ -1303,10 +1329,14 @@ margin-right: auto;
 text-align: left;
 max-width: 100%;
 position: relative;
-word-wrap: break-word;
 overflow-wrap: break-word;
-hyphens: auto;
+hyphens: none;
 line-height: 1.5;
+-webkit-hyphens: none;
+-ms-hyphens: none;
+word-wrap: break-word;
+word-break: normal;
+white-space: pre-wrap;
 margin-top: 0.5rem;
 }
 
@@ -1330,6 +1360,18 @@ margin-bottom: 1.5em;
 
 .ai-message-paragraph {
 margin-bottom: 0.5em;
+/* Disable hyphenation */
+hyphens: none;
+-webkit-hyphens: none;
+-ms-hyphens: none;
+
+/* Control word breaks */
+overflow-wrap: break-word;
+word-wrap: break-word;
+word-break: normal;
+
+/* Preserve whitespace and line breaks */
+white-space: pre-wrap;
 }
 
 .ai-message-paragraph-container:last-child .ai-message-paragraph {
