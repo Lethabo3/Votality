@@ -2510,172 +2510,221 @@ controls.querySelector('.cancel-edit-button').style.display = 'none';
 }
 
 function addMessage(text, sender, relatedTopics = []) {
-    return new Promise((resolve) => {
-        const chatContainer = document.querySelector('.chat-container');
-        let messageElement;
+return new Promise((resolve) => {
+    const chatContainer = document.querySelector('.chat-container');
+    let messageElement;
+    
+    if (sender === 'user') {
+        const chatGroup = document.createElement('div');
+        chatGroup.className = 'chat-group';
         
-        if (sender === 'user') {
-            const chatGroup = document.createElement('div');
-            chatGroup.className = 'chat-group';
-            
-            messageElement = document.createElement('div');
-            messageElement.className = 'message user-message';
-            messageElement.textContent = text;
-            
-            chatGroup.appendChild(messageElement);
-            chatContainer.appendChild(chatGroup);
-            
-            addEditControls(messageElement);
-            resolve(messageElement);
+        messageElement = document.createElement('div');
+        messageElement.className = 'message user-message';
+        messageElement.textContent = text;
+        
+        chatGroup.appendChild(messageElement);
+        chatContainer.appendChild(chatGroup);
+        
+        // Add edit controls for user messages
+        addEditControls(messageElement);
+        
+        resolve(messageElement);
+    } else {
+        const lastChatGroup = chatContainer.lastElementChild;
+
+        // Add sources container
+        const sourcesContainer = document.createElement('div');
+        sourcesContainer.className = 'sources-container';
+        sourcesContainer.style.display = 'flex';
+        sourcesContainer.style.flexWrap = 'wrap';
+        sourcesContainer.style.gap = '8px'; // Further reduced gap between items
+        sourcesContainer.style.padding = '1px 16px'; // Further reduced padding
+        
+        if (attachedFiles && attachedFiles.length > 0) {
+            // Display attached files as sources
+            attachedFiles.forEach(file => {
+                const fileSource = createFileSource(file);
+                sourcesContainer.appendChild(fileSource);
+            });
         } else {
-            const lastChatGroup = chatContainer.lastElementChild;
+            // Default source display with images
+            const sourceData = [
+                { image: 'bus2.png', name: 'Nasdaq' },
+                { image: 'bus1.png', name: 'Alpha Vantage' },
+                { image: 'bus3.png', name: 'Bezinga' }
+            ];
 
-            // Add sources container
-            const sourcesContainer = document.createElement('div');
-            sourcesContainer.className = 'sources-container';
-            sourcesContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; padding: 1px 16px;';
-            
-            if (attachedFiles && attachedFiles.length > 0) {
-                attachedFiles.forEach(file => {
-                    sourcesContainer.appendChild(createFileSource(file));
+            sourceData.forEach(source => {
+                const sourceItem = createSourceItem(source);
+                sourcesContainer.appendChild(sourceItem);
+            });
+        }
+        
+        lastChatGroup.appendChild(sourcesContainer);
+
+        // Create an outer wrapper for proper positioning context
+        const outerWrapper = document.createElement('div');
+        outerWrapper.style.position = 'relative';
+        outerWrapper.style.width = '100%';
+        outerWrapper.style.marginLeft = '0px'; // Make space for the logo
+        outerWrapper.style.zIndex = '1000'; // Increase z-index to ensure it appears above other elements
+
+        // Create the message container
+        const messageContainer = document.createElement('div');
+        messageContainer.style.width = '100%';
+        messageContainer.style.boxSizing = 'border-box';
+        messageContainer.style.position = 'relative';
+        messageContainer.style.marginTop = '0px'; // Further reduced margin
+
+        // Add logo container with absolute positioning
+        const logoContainer = document.createElement('div');
+        logoContainer.style.position = 'absolute';
+        logoContainer.style.left = '-36px'; // Position it to the left of the user message
+        logoContainer.style.width = '40px'; // Set width for the logo container
+        logoContainer.style.height = '40px'; // Set height for the logo container
+        logoContainer.style.borderRadius = '50%'; // Make it rounded
+        logoContainer.style.display = 'none';
+        logoContainer.style.alignItems = 'center';
+        logoContainer.style.justifyContent = 'center';
+        logoContainer.style.backgroundColor = '#f9f9f9';
+        logoContainer.style.border = '1px solid #E5E7EB'; // Optional border for the logo container
+
+        // Create initials text
+        const initials = document.createElement('span');
+        initials.textContent = 'LS'; // Set initials
+        initials.style.fontSize = '16px'; // Adjust font size as needed
+        initials.style.color = '#374151'; // Set text color
+        initials.style.fontWeight = 'bold'; // Make initials bold
+
+        logoContainer.appendChild(initials); // Append initials to the logo container
+        messageContainer.appendChild(logoContainer); // Append logo container to the message container
+
+        // Create AI message
+        messageElement = document.createElement('div');
+        messageElement.className = 'message ai-message';
+        messageElement.style.width = '100%';
+        
+        // Add message content with animation
+        const messageContent = document.createElement('div');
+        messageContent.className = 'ai-message-content';
+        
+        const paragraphs = text.split('\n\n');
+        let delay = 0;
+
+        paragraphs.forEach((paragraph, index) => {
+            if (paragraph.trim() !== '') {
+                const paragraphContainer = document.createElement('div');
+                paragraphContainer.className = 'ai-message-paragraph-container';
+
+                const pElement = document.createElement('p');
+                pElement.className = 'ai-message-paragraph';
+                
+                const words = paragraph.split(' ');
+                words.forEach((word, wordIndex) => {
+                    const span = document.createElement('span');
+                    span.textContent = word + ' ';
+                    span.style.opacity = '0';
+                    span.style.animation = `fadeIn 0.05s forwards ${delay}ms`;
+                    pElement.appendChild(span);
+                    delay += 5;
                 });
-            } else {
-                const sourceData = [
-                    { image: 'bus2.png', name: 'Nasdaq' },
-                    { image: 'bus1.png', name: 'Alpha Vantage' },
-                    { image: 'bus3.png', name: 'Bezinga' }
-                ];
-                sourceData.forEach(source => sourcesContainer.appendChild(createSourceItem(source)));
+                
+                paragraphContainer.appendChild(pElement);
+                messageContent.appendChild(paragraphContainer);
+                delay += 50;
             }
-            lastChatGroup.appendChild(sourcesContainer);
+        });
+        
+        messageElement.appendChild(messageContent);
 
-            // Create message structure
-            const outerWrapper = document.createElement('div');
-            outerWrapper.style.cssText = 'position: relative; width: 100%; margin-left: 0px; z-index: 1000;';
-
-            const messageContainer = document.createElement('div');
-            messageContainer.style.cssText = 'width: 100%; box-sizing: border-box; position: relative; margin-top: 0px;';
-
-            // Add logo container
-            const logoContainer = document.createElement('div');
-            logoContainer.style.cssText = 'position: absolute; left: -36px; width: 40px; height: 40px; border-radius: 50%; display: none; align-items: center; justify-content: center; background-color: #f9f9f9; border: 1px solid #E5E7EB;';
-            
-            const initials = document.createElement('span');
-            initials.textContent = 'LS';
-            initials.style.cssText = 'font-size: 16px; color: #374151; font-weight: bold;';
-            logoContainer.appendChild(initials);
-            messageContainer.appendChild(logoContainer);
-
-            // Create AI message
-            messageElement = document.createElement('div');
-            messageElement.className = 'message ai-message';
-            messageElement.style.width = '100%';
-            
-            const messageContent = document.createElement('div');
-            messageContent.className = 'ai-message-content';
-
-            // Add text content without word-by-word animation
-            text.split('\n\n').forEach(paragraph => {
-                if (paragraph.trim()) {
-                    const paragraphContainer = document.createElement('div');
-                    paragraphContainer.className = 'ai-message-paragraph-container';
-                    
-                    const pElement = document.createElement('p');
-                    pElement.className = 'ai-message-paragraph';
-                    pElement.textContent = paragraph;
-                    
-                    paragraphContainer.appendChild(pElement);
-                    messageContent.appendChild(paragraphContainer);
-                }
-            });
-
-            messageElement.appendChild(messageContent);
-
-            // Add interaction buttons
-            const interactions = document.createElement('div');
-            interactions.className = 'message-interactions';
-            interactions.innerHTML = `
-                <div class="message-feedback">
-                    <div class="tooltip-container">
-                        <button class="interaction-button" aria-label="Like message">
-                            <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                        </button>
-                        <div class="tooltip">
-                            <span class="tooltip-text">Like</span>
-                        </div>
-                    </div>
-                    <div class="tooltip-container">
-                        <button class="interaction-button" aria-label="Dislike message">
-                            <i data-lucide="thumbs-down" class="w-4 h-4"></i>
-                        </button>
-                        <div class="tooltip">
-                            <span class="tooltip-text">Dislike</span>
-                        </div>
+        // Add interaction buttons
+        const interactions = document.createElement('div');
+        interactions.className = 'message-interactions';
+        interactions.innerHTML = `
+            <div class="message-feedback">
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Like message">
+                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Like</span>
                     </div>
                 </div>
-                <div class="message-actions">
-                    <div class="tooltip-container">
-                        <button class="interaction-button" aria-label="Copy message">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
-                        </button>
-                        <div class="tooltip">
-                            <span class="tooltip-text">Copy</span>
-                        </div>
-                    </div>
-                    <div class="tooltip-container">
-                        <button class="interaction-button" aria-label="Retry message">
-                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                        </button>
-                        <div class="tooltip">
-                            <span class="tooltip-text">Retry</span>
-                        </div>
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Dislike message">
+                        <i data-lucide="thumbs-down" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Dislike</span>
                     </div>
                 </div>
-            `;
+            </div>
+            <div class="message-actions">
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Copy message">
+                        <i data-lucide="copy" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Copy</span>
+                    </div>
+                </div>
+                <div class="tooltip-container">
+                    <button class="interaction-button" aria-label="Retry message">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </button>
+                    <div class="tooltip">
+                        <span class="tooltip-text">Retry</span>
+                    </div>
+                </div>
+            </div>
+        `;
 
-            // Add interaction handlers
-            const likeButton = interactions.querySelector('[aria-label="Like message"]');
-            const dislikeButton = interactions.querySelector('[aria-label="Dislike message"]');
-            const copyButton = interactions.querySelector('[aria-label="Copy message"]');
-            const retryButton = interactions.querySelector('[aria-label="Retry message"]');
+        // Add interaction handlers
+        const likeButton = interactions.querySelector('[aria-label="Like message"]');
+        const dislikeButton = interactions.querySelector('[aria-label="Dislike message"]');
 
-            likeButton.addEventListener('click', () => {
-                likeButton.style.color = '#059669';
-                dislikeButton.style.color = '';
-                handleLike(messageElement);
-            });
+        likeButton.addEventListener('click', () => {
+            likeButton.style.color = '#059669';
+            dislikeButton.style.color = '';
+            handleLike(messageElement);
+        });
 
-            dislikeButton.addEventListener('click', () => {
-                dislikeButton.style.color = '#DC2626';
-                likeButton.style.color = '';
-                handleDislike(messageElement);
-            });
+        dislikeButton.addEventListener('click', () => {
+            dislikeButton.style.color = '#DC2626';
+            likeButton.style.color = '';
+            handleDislike(messageElement);
+        });
 
-            copyButton.addEventListener('click', () => {
-                navigator.clipboard.writeText(text)
-                    .then(() => {
-                        copyButton.style.color = '#059669';
-                        setTimeout(() => copyButton.style.color = '', 1000);
-                    })
-                    .catch(console.error);
-            });
+        const copyButton = interactions.querySelector('[aria-label="Copy message"]');
+        copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    copyButton.style.color = '#059669';
+                    setTimeout(() => {
+                        copyButton.style.color = '';
+                    }, 1000);
+                })
+                .catch(console.error);
+        });
 
-            retryButton.addEventListener('click', () => {
-                const lastUserMessage = chatContainer.querySelector('.user-message:last-of-type');
-                if (lastUserMessage) {
-                    sendMessage(lastUserMessage.textContent);
-                }
-            });
+        const retryButton = interactions.querySelector('[aria-label="Retry message"]');
+        retryButton.addEventListener('click', () => {
+            const lastUserMessage = chatContainer.querySelector('.user-message:last-of-type');
+            if (lastUserMessage) {
+                const messageText = lastUserMessage.textContent;
+                sendMessage(messageText);
+            }
+        });
 
-            messageElement.appendChild(interactions);
-            messageContainer.appendChild(messageElement);
-            outerWrapper.appendChild(messageContainer);
-            lastChatGroup.appendChild(outerWrapper);
+        messageElement.appendChild(interactions);
+        messageContainer.appendChild(messageElement);
+        outerWrapper.appendChild(messageContainer);
+        lastChatGroup.appendChild(outerWrapper);
 
-            // Initialize Lucide icons
-            lucide.createIcons();
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-            // Add related topics immediately without delay
+        setTimeout(() => {
             if (relatedTopics.length > 0) {
                 const relatedHeading = document.createElement('div');
                 relatedHeading.className = 'section-heading related-heading';
@@ -2707,11 +2756,12 @@ function addMessage(text, sender, relatedTopics = []) {
                 lastChatGroup.appendChild(relatedContainer);
                 lucide.createIcons();
             }
-
             resolve(messageElement);
-        }
-    });
+        }, delay + 100);
+    }
+});
 }
+
 
 function addMessageInteractions(messageElement, sender) {
 if (sender === 'ai') {
