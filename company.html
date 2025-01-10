@@ -326,6 +326,11 @@ body {
 <body>
     <nav class="top-nav">
         <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <button class="top-nav__hamburger" aria-label="Toggle navigation menu">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+        </button>
         <div class="top-nav__buttons">
             <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
             <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
@@ -334,7 +339,7 @@ body {
             <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
         </div>
     </nav>
-
+    
     <div class="hero">
         <h1>Empowering Financial Decisions</h1>
         <p>Revolutionizing the way you interact with financial markets through advanced AI technology.</p>
@@ -377,7 +382,39 @@ body {
     </div>
 
     <script>
-        lucide.createIcons();
+        // Get DOM elements
+        const hamburger = document.querySelector('.hamburger');
+        const mobileNav = document.querySelector('.mobile-nav');
+    
+        // Toggle mobile menu
+        hamburger.addEventListener('click', () => {
+            mobileNav.classList.toggle('active');
+        });
+    
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (event) => {
+            const isClickInside = hamburger.contains(event.target) || mobileNav.contains(event.target);
+            if (!isClickInside && mobileNav.classList.contains('active')) {
+                mobileNav.classList.remove('active');
+            }
+        });
+    
+        // Close mobile menu when window is resized above mobile breakpoint
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && mobileNav.classList.contains('active')) {
+                mobileNav.classList.remove('active');
+            }
+        });
+    
+        // Prevent body scrolling when mobile menu is open
+        const toggleBodyScroll = (disable) => {
+            document.body.style.overflow = disable ? 'hidden' : '';
+        };
+    
+        hamburger.addEventListener('click', () => {
+            const isMenuActive = mobileNav.classList.contains('active');
+            toggleBodyScroll(isMenuActive);
+        });
     </script>
 </body>
 </html>
