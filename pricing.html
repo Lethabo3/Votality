@@ -205,6 +205,7 @@ body, html {
             padding: 2rem;
             max-width: 1200px;
             margin: 2rem auto;
+            margin-top: 80px;
         }
 
         h1 {
@@ -361,16 +362,87 @@ body, html {
             }
         }
 
+        /* Responsive styles */
+@media (max-width: 768px) {
+    .top-nav__hamburger {
+        display: block;
+    }
+
+    .top-nav__buttons {
+        display: none;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background-color: var(--background-color);
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.5rem;
+        border-top: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+    }
+
+    .top-nav__buttons.active {
+        display: flex;
+    }
+
+    .top-nav__button {
+        width: 100%;
+        text-align: center;
+        padding: 0.75rem;
+    }
+
+    .pricing-container {
+        padding: 0 1rem;
+    }
+
+    .pricing-plan {
+        width: 100%;
+        margin: 0 0 1rem 0;
+        min-width: unset;
+    }
+
+    .faq-section {
+        width: 100%;
+        padding: 0 1rem;
+        margin-top: 4rem;
+    }
+
+    .faq-container {
+        padding: 1rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+        padding: 0 1rem;
+    }
+
+    .subtitle {
+        padding: 0 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+}
+
         .top-nav {
-            position: static;
-            background-color: transparent;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 60px;
-            margin-top: -18px;
-            padding: 0 1.5rem;
-        }
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--background-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    padding: 0 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 1000;
+}
 
         @font-face {
   font-family: 'GeneralSans-Regular';
@@ -382,11 +454,26 @@ body, html {
   font-style: normal;
 }
 
-        .top-nav__logo {
-            height: 120px;
-            width: 120px;
-            margin-left: -2.5rem;
-        }
+.top-nav__logo {
+    height: 45px;
+    width: 45px;
+    margin-left: 0;
+}
+
+/* Mobile Navigation */
+.top-nav__hamburger {
+    display: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0.5rem;
+}
+
+.top-nav__hamburger svg {
+    width: 24px;
+    height: 24px;
+    color: var(--text-color);
+}
 
         .top-nav__buttons {
             display: flex;
@@ -561,6 +648,11 @@ body, html {
 <body>
     <nav class="top-nav">
         <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
+        <button class="top-nav__hamburger" aria-label="Toggle navigation menu">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+        </button>
         <div class="top-nav__buttons">
             <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
             <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
@@ -730,92 +822,109 @@ body, html {
                     <a href="contact.html" class="footer-link">Contact</a>
                 </div>
             </div>
-    <script>
-        lucide.createIcons();
-
-        document.addEventListener('DOMContentLoaded', () => {
-        const buttons = document.querySelectorAll('.cta-button');
-        
-        buttons.forEach(button => {
-            button.addEventListener('click', async () => {
-                try {
-                    // Check if user is logged in
-                    const loginCheck = await fetch('/check_login_status.php');
-                    const loginStatus = await loginCheck.json();
-
-                    if (!loginStatus.isLoggedIn) {
-                        // Save intended plan
-                        sessionStorage.setItem('intended_plan', button.dataset.plan);
-                        window.location.href = '/signin.html?redirect=pricing';
-                        return;
-                    }
-
-                    // Get checkout URL from backend
-                    const response = await fetch('create-checkout.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            plan: button.dataset.plan,
-                            userId: loginStatus.userId
-                        })
-                    });
-
-                    const data = await response.json();
-                    
-                    if (data.success && data.checkoutUrl) {
-                        window.location.href = data.checkoutUrl;
-                    } else {
-                        throw new Error(data.message || 'Failed to create checkout session');
-                    }
-
-                } catch (error) {
-                    console.error('Checkout error:', error);
-                    alert('There was an error starting the checkout process. Please try again.');
-                }
-            });
-        });
-    });
-
-    document.querySelectorAll('.faq-question').forEach(button => {
-    button.addEventListener('click', () => {
-        const answer = button.nextElementSibling;
-        const toggle = button.querySelector('.faq-toggle');
-        
-        // Close all other answers with smooth animation
-        document.querySelectorAll('.faq-answer').forEach(item => {
-            if (item !== answer && item.classList.contains('active')) {
-                const otherToggle = item.previousElementSibling.querySelector('.faq-toggle');
-                
-                // Start closing animation
-                item.style.maxHeight = item.scrollHeight + 'px';
-                item.classList.remove('active');
-                otherToggle.classList.remove('active');
-                
-                // Reset after animation
-                setTimeout(() => {
-                    item.style.maxHeight = null;
-                }, 0);
-            }
-        });
-        
-        // Toggle current answer with smooth animation
-        if (!answer.classList.contains('active')) {
-            answer.style.maxHeight = answer.scrollHeight + 'px';
-            answer.classList.add('active');
-            toggle.classList.add('active');
-        } else {
-            answer.style.maxHeight = answer.scrollHeight + 'px';
-            answer.classList.remove('active');
-            toggle.classList.remove('active');
+            <script>
+                // Initialize Lucide icons
+                lucide.createIcons();
             
-            setTimeout(() => {
-                answer.style.maxHeight = null;
-            }, 0);
-        }
-    });
-});
-    </script>
+                // Mobile menu functionality
+                const hamburger = document.querySelector('.top-nav__hamburger');
+                const navButtons = document.querySelector('.top-nav__buttons');
+            
+                hamburger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    navButtons.classList.toggle('active');
+                    document.body.style.overflow = navButtons.classList.contains('active') ? 'hidden' : '';
+                });
+            
+                document.addEventListener('click', (e) => {
+                    if (!hamburger.contains(e.target) && !navButtons.contains(e.target)) {
+                        navButtons.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth > 768) {
+                        navButtons.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            
+                // Pricing button functionality
+                document.addEventListener('DOMContentLoaded', () => {
+                    const buttons = document.querySelectorAll('.cta-button');
+                    
+                    buttons.forEach(button => {
+                        button.addEventListener('click', async () => {
+                            try {
+                                // Check if user is logged in
+                                const loginCheck = await fetch('/check_login_status.php');
+                                const loginStatus = await loginCheck.json();
+            
+                                if (!loginStatus.isLoggedIn) {
+                                    sessionStorage.setItem('intended_plan', button.dataset.plan);
+                                    window.location.href = '/signin.html?redirect=pricing';
+                                    return;
+                                }
+            
+                                const response = await fetch('create-checkout.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        plan: button.dataset.plan,
+                                        userId: loginStatus.userId
+                                    })
+                                });
+            
+                                const data = await response.json();
+                                
+                                if (data.success && data.checkoutUrl) {
+                                    window.location.href = data.checkoutUrl;
+                                } else {
+                                    throw new Error(data.message || 'Failed to create checkout session');
+                                }
+                            } catch (error) {
+                                console.error('Checkout error:', error);
+                                alert('There was an error starting the checkout process. Please try again.');
+                            }
+                        });
+                    });
+                });
+            
+                // FAQ functionality
+                document.querySelectorAll('.faq-question').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const answer = button.nextElementSibling;
+                        const toggle = button.querySelector('.faq-toggle');
+                        
+                        document.querySelectorAll('.faq-answer').forEach(item => {
+                            if (item !== answer && item.classList.contains('active')) {
+                                const otherToggle = item.previousElementSibling.querySelector('.faq-toggle');
+                                item.style.maxHeight = item.scrollHeight + 'px';
+                                item.classList.remove('active');
+                                otherToggle.classList.remove('active');
+                                setTimeout(() => {
+                                    item.style.maxHeight = null;
+                                }, 0);
+                            }
+                        });
+                        
+                        if (!answer.classList.contains('active')) {
+                            answer.style.maxHeight = answer.scrollHeight + 'px';
+                            answer.classList.add('active');
+                            toggle.classList.add('active');
+                        } else {
+                            answer.style.maxHeight = answer.scrollHeight + 'px';
+                            answer.classList.remove('active');
+                            toggle.classList.remove('active');
+                            setTimeout(() => {
+                                answer.style.maxHeight = null;
+                            }, 0);
+                        }
+                    });
+                });
+            </script>
 </body>
 </html>
