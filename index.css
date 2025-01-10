@@ -1167,7 +1167,7 @@ border-top: none;
 .related-item-text {
 flex-grow: 1;
 text-align: left;
-font-weight: normal;
+font-weight: bold;
 font-family: 'GeneralSans-Medium';
 margin-left: 0.2rem;
 }
