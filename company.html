@@ -53,12 +53,16 @@ body, html {
 
 body {
     background-image: linear-gradient(to bottom right, rgba(255,255,255,0.8) 0%, transparent 50%, transparent 100%);
+    padding-top: 60px; /* Add padding for fixed navbar */
 }
 
 /* Navigation */
 .top-nav {
-    position: relative;
-    background-color: transparent;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--background-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -66,6 +70,7 @@ body {
     padding: 0 1rem;
     width: 100%;
     box-sizing: border-box;
+    z-index: 1000;
 }
 
 .top-nav__logo {
@@ -101,6 +106,52 @@ body {
     border: 1px solid #e0e0e0;
 }
 
+/* Mobile Navigation */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background-color: var(--background-color);
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+}
+
+.mobile-nav.active {
+    display: block;
+}
+
+.mobile-nav a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.mobile-nav a:hover {
+    background-color: var(--hover-color);
+}
+
+/* Hamburger Button */
+.top-nav__hamburger {
+    display: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0.5rem;
+}
+
+.top-nav__hamburger svg {
+    width: 24px;
+    height: 24px;
+    color: var(--text-color);
+}
+
 /* Hero section */
 .hero {
     text-align: center;
@@ -128,12 +179,6 @@ body {
     margin: 1rem auto;
     line-height: 1.75;
     padding: 0 1rem;
-}
-
-.hero .last-updated {
-    font-size: clamp(0.875rem, 2vw, 1.25rem);
-    color: var(--secondary-text);
-    margin-bottom: 2rem;
 }
 
 /* Container and sections */
@@ -232,21 +277,6 @@ body {
     color: var(--text-color);
 }
 
-/* Mobile navigation */
-.top-nav__hamburger {
-    display: none;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    padding: 0.5rem;
-}
-
-.top-nav__hamburger svg {
-    width: 24px;
-    height: 24px;
-    color: var(--text-color);
-}
-
 /* Responsive styles */
 @media (max-width: 768px) {
     .top-nav__hamburger {
@@ -255,7 +285,7 @@ body {
 
     .top-nav__buttons {
         display: none;
-        position: absolute;
+        position: fixed;
         top: 60px;
         left: 0;
         right: 0;
@@ -325,12 +355,17 @@ body {
 </head>
 <body>
     <nav class="top-nav">
-        <a href="index.html"><img src="v.png" alt="Votality AI Logo" class="top-nav__logo"></a>
-        <button class="top-nav__hamburger" aria-label="Toggle navigation menu">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="index.html">
+            <img src="v.png" alt="Votality AI Logo" class="top-nav__logo">
+        </a>
+        
+        <button class="top-nav__hamburger" aria-label="Toggle menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 12h18M3 6h18M3 18h18"/>
             </svg>
         </button>
+
+        <!-- Desktop Navigation -->
         <div class="top-nav__buttons">
             <a href="company.html" class="top-nav__button top-nav__button--home">Company</a>
             <a href="faq.html" class="top-nav__button top-nav__button--home">FAQ</a>
@@ -338,8 +373,17 @@ body {
             <a href="contact.html" class="top-nav__button top-nav__button--home">Contact</a>
             <a href="index.html" class="top-nav__button top-nav__button--contact">Try Votality</a>
         </div>
+
+        <!-- Mobile Navigation -->
+        <div class="mobile-nav">
+            <a href="company.html">Company</a>
+            <a href="faq.html">FAQ</a>
+            <a href="Blog.html">Blog</a>
+            <a href="contact.html">Contact</a>
+            <a href="index.html" class="top-nav__button--contact">Try Votality</a>
+        </div>
     </nav>
-    
+
     <div class="hero">
         <h1>Empowering Financial Decisions</h1>
         <p>Revolutionizing the way you interact with financial markets through advanced AI technology.</p>
@@ -383,38 +427,38 @@ body {
 
     <script>
         // Get DOM elements
-        const hamburger = document.querySelector('.hamburger');
+        const hamburger = document.querySelector('.top-nav__hamburger');
         const mobileNav = document.querySelector('.mobile-nav');
-    
+        const navButtons = document.querySelector('.top-nav__buttons');
+        
         // Toggle mobile menu
-        hamburger.addEventListener('click', () => {
+        hamburger.addEventListener('click', (e) => {
+            e.stopPropagation();
             mobileNav.classList.toggle('active');
+            navButtons.classList.toggle('active');
+            document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
         });
-    
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (event) => {
-            const isClickInside = hamburger.contains(event.target) || mobileNav.contains(event.target);
-            if (!isClickInside && mobileNav.classList.contains('active')) {
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!hamburger.contains(e.target) && !mobileNav.contains(e.target) && !navButtons.contains(e.target)) {
                 mobileNav.classList.remove('active');
+                navButtons.classList.remove('active');
+                document.body.style.overflow = '';
             }
         });
-    
-        // Close mobile menu when window is resized above mobile breakpoint
+
+        // Close menu when window is resized
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 768 && mobileNav.classList.contains('active')) {
+            if (window.innerWidth > 768) {
                 mobileNav.classList.remove('active');
+                navButtons.classList.remove('active');
+                document.body.style.overflow = '';
             }
         });
-    
-        // Prevent body scrolling when mobile menu is open
-        const toggleBodyScroll = (disable) => {
-            document.body.style.overflow = disable ? 'hidden' : '';
-        };
-    
-        hamburger.addEventListener('click', () => {
-            const isMenuActive = mobileNav.classList.contains('active');
-            toggleBodyScroll(isMenuActive);
-        });
+
+        // Create Lucide icons
+        lucide.createIcons();
     </script>
 </body>
 </html>
