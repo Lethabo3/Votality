@@ -1086,8 +1086,8 @@ background-image: none;
 display: none;
 height: calc(100vh - 200px);
 overflow-y: auto;
-padding-top: 5px;
-padding-bottom: 5px;
+padding-top: 200px;
+padding-bottom: 20px;
 scrollbar-width: none;
 -ms-overflow-style: none;
 width: 100%;
@@ -1161,6 +1161,19 @@ animation: fadeIn 0.5s ease-out forwards;
 
 @keyframes fadeIn {
 to { opacity: 1; }
+}
+
+.chat-container {
+display: none;
+height: calc(100vh - 200px);
+overflow-y: auto;
+padding-top: 20px;
+padding-bottom: 20px;
+scrollbar-width: none;
+-ms-overflow-style: none;
+width: 100%;
+max-width: 800px;
+margin: 0 auto;
 }
 
 .chat-group {
