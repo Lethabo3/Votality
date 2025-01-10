@@ -62,7 +62,7 @@ body, html {
     justify-content: space-between;
     align-items: center;
     height: 60px;
-    padding: 0 1rem;
+    padding: 0 1.5rem;
     z-index: 1000;
     width: 100%;
     box-sizing: border-box;
@@ -143,7 +143,7 @@ body, html {
     padding: 0 1rem;
     display: flex;
     justify-content: space-between;
-    align-items: left;
+    align-items: flex-start;
     box-sizing: border-box;
 }
 
@@ -153,12 +153,14 @@ body, html {
     gap: 2rem;
     color: var(--secondary-text);
     font-size: 0.875rem;
+    flex-wrap: wrap;
 }
 
 .metadata-group {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    min-width: fit-content;
 }
 
 .post-metadata__label {
@@ -279,6 +281,21 @@ body, html {
     color: var(--text-color);
 }
 
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    .top-nav__logo {
+        content: url("vdof.png");
+        height: 45px;
+        width: 45px;
+        position: static;
+    }
+
+    .top-nav__button--contact {
+        background-color: #ffffff;
+        color: #1a1a1a;
+    }
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
     .top-nav__hamburger {
@@ -315,28 +332,29 @@ body, html {
         margin-left: -1rem;
     }
 
-    .post-image {
-        width: 100%;
-        margin-left: 0;
-    }
-
-    .post-content {
-        font-size: 1rem;
-    }
-
     .post-metadata {
         flex-direction: column;
         gap: 1.5rem;
     }
 
-    .post-metadata__social {
-        display: none; /* Hide social links on mobile */
+    .post-metadata__info {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 2rem;
+        flex-wrap: nowrap;
     }
 
-    .post-metadata__info {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
+    .metadata-group {
+        flex: 0 1 auto;
+    }
+
+    .post-metadata__social {
+        display: none;
+    }
+
+    .post-content {
+        font-size: 1rem;
     }
 }
     </style>
