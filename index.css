@@ -85,6 +85,65 @@ body {
     white-space: pre-wrap;
 }
 
+/* Message container styles */
+.message, 
+.ai-message, 
+.user-message, 
+.message-content, 
+.ai-message-paragraph {
+    /* Disable hyphenation */
+    -webkit-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+
+    /* Word break control */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: normal;
+    
+    /* Ensure clean line breaks */
+    white-space: pre-wrap;
+}
+
+/* Specific styles for user messages */
+.user-message {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: normal;
+    hyphens: none;
+    line-height: 1.3;
+}
+
+/* AI message paragraph styles */
+.ai-message-paragraph {
+    margin-bottom: 0.5em;
+    /* Disable hyphenation */
+    hyphens: none;
+    -webkit-hyphens: none;
+    -ms-hyphens: none;
+
+    /* Control word breaks */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: normal;
+
+    /* Preserve whitespace and line breaks */
+    white-space: pre-wrap;
+}
+
+/* Chat container text handling */
+.chat-container {
+    /* Disable hyphenation */
+    -webkit-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+    
+    /* Word break settings */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+
 .layout {
     display: flex;
     min-height: 100vh;
