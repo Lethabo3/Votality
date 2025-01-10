@@ -1330,6 +1330,18 @@ margin-bottom: 1.5em;
 
 .ai-message-paragraph {
 margin-bottom: 0.5em;
+/* Disable hyphenation */
+hyphens: none;
+-webkit-hyphens: none;
+-ms-hyphens: none;
+
+/* Control word breaks */
+overflow-wrap: break-word;
+word-wrap: break-word;
+word-break: normal;
+
+/* Preserve whitespace and line breaks */
+white-space: pre-wrap;
 }
 
 .ai-message-paragraph-container:last-child .ai-message-paragraph {
