@@ -61,7 +61,7 @@ class VotalityAIService {
                     'temperature' => 0.2,
                     'topK' => 40,
                     'topP' => 0.95,
-                    'maxOutputTokens' => 500,
+                    'maxOutputTokens' => 300,
                     'stopSequences' => []
                 ]
             ];
