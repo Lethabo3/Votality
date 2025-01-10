@@ -35,6 +35,23 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <style>
+:root {
+    color-scheme: light dark;
+    /* base colors */
+    --background: light-dark(#ffffff, #1a1a1a);
+    --text: light-dark(#000000, #ffffff);
+    --secondaryText: light-dark(#4b5563, #9ba3af);
+    --mutedText: light-dark(#6B7280, #8c96a3);
+    --descriptionText: light-dark(#9ca3af, #666f7c);
+    --border: light-dark(#e5e7eb, #2e3138);
+    --secondaryBorder: light-dark(#e0e0e0, #2d2d2d);
+    /* components colors */
+    --gridColor: light-dark(rgba(229, 231, 235, 0.5), rgba(46, 49, 56, 0.5));
+    --secondaryBackground: light-dark(#f9f9f9, #232323);
+    --tertiaryBackground: light-dark(#f0f0f0, #2a2a2a);
+    --hoverState: light-dark(rgba(75, 85, 99, 0.1), rgba(200, 210, 224, 0.1));
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
