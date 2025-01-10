@@ -1126,6 +1126,7 @@ color: #333;
 .sources-heading, .related-heading {
 font-size: 1.25em;
 margin-bottom: 0.25rem;
+margin-top: -2rem;
 }
 
 .answer-heading {
@@ -1166,7 +1167,7 @@ border-top: none;
 .related-item-text {
 flex-grow: 1;
 text-align: left;
-font-weight: bold;
+font-weight: normal;
 font-family: 'GeneralSans-Medium';
 margin-left: 0.2rem;
 }
