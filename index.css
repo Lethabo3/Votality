@@ -85,63 +85,49 @@ body {
     white-space: pre-wrap;
 }
 
-/* Message container styles */
-.message, 
-.ai-message, 
-.user-message, 
-.message-content, 
-.ai-message-paragraph {
-    /* Disable hyphenation */
-    -webkit-hyphens: none;
-    -ms-hyphens: none;
-    hyphens: none;
-
-    /* Word break control */
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: normal;
+/* Ensure text containers prevent all hyphenation and preserve words */
+.message,
+.ai-message,
+.user-message,
+.chat-container,
+.text-container,
+.message-content,
+p,
+div {
+    /* Completely disable all hyphenation */
+    -webkit-hyphens: none !important;
+    -moz-hyphens: none !important;
+    -ms-hyphens: none !important;
+    hyphens: none !important;
     
-    /* Ensure clean line breaks */
-    white-space: pre-wrap;
-}
-
-/* Specific styles for user messages */
-.user-message {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: normal;
-    hyphens: none;
-    line-height: 1.3;
-}
-
-/* AI message paragraph styles */
-.ai-message-paragraph {
-    margin-bottom: 0.5em;
-    /* Disable hyphenation */
-    hyphens: none;
-    -webkit-hyphens: none;
-    -ms-hyphens: none;
-
-    /* Control word breaks */
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: normal;
-
-    /* Preserve whitespace and line breaks */
-    white-space: pre-wrap;
-}
-
-/* Chat container text handling */
-.chat-container {
-    /* Disable hyphenation */
-    -webkit-hyphens: none;
-    -ms-hyphens: none;
-    hyphens: none;
+    /* Force words to wrap intact */
+    word-wrap: normal !important;
+    word-break: normal !important;
+    -webkit-word-break: normal !important;
     
-    /* Word break settings */
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: normal;
+    /* Ensure words stay whole */
+    overflow-wrap: anywhere !important;
+    
+    /* Allow natural text flow */
+    white-space: pre-wrap !important;
+    
+    /* Prevent any auto text adjustments */
+    text-align-last: start !important;
+    text-justify: none !important;
+    
+    /* Ensure container allows proper text flow */
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Additional specificity for any text elements */
+.message *,
+.text-container * {
+    -webkit-hyphens: none !important;
+    -moz-hyphens: none !important;
+    -ms-hyphens: none !important;
+    hyphens: none !important;
 }
 
 .layout {
