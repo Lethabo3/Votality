@@ -205,7 +205,6 @@ body, html {
             padding: 2rem;
             max-width: 1200px;
             margin: 2rem auto;
-            margin-top: 80px;
         }
 
         h1 {
@@ -361,72 +360,6 @@ body, html {
                 font-size: 0.9rem;
             }
         }
-
-        /* Responsive styles */
-@media (max-width: 768px) {
-    .top-nav__hamburger {
-        display: block;
-    }
-
-    .top-nav__buttons {
-        display: none;
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        background-color: var(--background-color);
-        flex-direction: column;
-        padding: 1rem;
-        gap: 0.5rem;
-        border-top: 1px solid var(--border-color);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-    }
-
-    .top-nav__buttons.active {
-        display: flex;
-    }
-
-    .top-nav__button {
-        width: 100%;
-        text-align: center;
-        padding: 0.75rem;
-    }
-
-    .pricing-container {
-        padding: 0 1rem;
-    }
-
-    .pricing-plan {
-        width: 100%;
-        margin: 0 0 1rem 0;
-        min-width: unset;
-    }
-
-    .faq-section {
-        width: 100%;
-        padding: 0 1rem;
-        margin-top: 4rem;
-    }
-
-    .faq-container {
-        padding: 1rem;
-    }
-
-    .hero h1 {
-        font-size: 2rem;
-        padding: 0 1rem;
-    }
-
-    .subtitle {
-        padding: 0 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .main-content {
-        padding: 1rem;
-    }
-}
 
         .top-nav {
     position: fixed;
