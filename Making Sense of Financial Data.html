@@ -219,40 +219,6 @@ body, html {
     font-size: 1rem;
 }
 
-.post-content h2 {
-    font-size: 1.75rem;
-    margin: 3rem 0 1.5rem;
-    color: var(--text-color);
-    font-weight: 700;
-    letter-spacing: -0.025em;
-}
-
-.post-content h3 {
-    font-size: 1.5rem;
-    margin: 2.5rem 0 1.25rem;
-    color: var(--text-color);
-    font-weight: 600;
-    letter-spacing: -0.025em;
-}
-
-.post-content ul, 
-.post-content ol {
-    margin: 1.5rem 0;
-    padding-left: 1.5rem;
-}
-
-.post-content li {
-    margin-bottom: 0.75rem;
-}
-
-.post-footer {
-    margin: 4rem 0;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border-color);
-    color: var(--muted-text);
-    font-size: 0.875rem;
-}
-
 .footer-container {
     padding: 2rem 0;
     margin-top: 2rem;
@@ -279,7 +245,22 @@ body, html {
     color: var(--text-color);
 }
 
-/* Media Queries */
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+    .top-nav__logo {
+        content: url("vdof.png");
+        height: 45px;
+        width: 45px;
+        position: static;
+    }
+
+    .top-nav__button--contact {
+        background-color: #ffffff;
+        color: #1a1a1a;
+    }
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
     .top-nav__hamburger {
         display: block;
@@ -337,21 +318,6 @@ body, html {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
-    }
-}
-
-/* Dark mode styles */
-@media (prefers-color-scheme: dark) {
-    .top-nav__logo {
-        content: url("vdof.png");
-        height: 45px;
-        width: 45px;
-        position: static;
-    }
-
-    .top-nav__button--contact {
-        background-color: #ffffff;
-        color: #1a1a1a;
     }
 }
     </style>
