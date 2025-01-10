@@ -150,7 +150,7 @@ try {
 }
 
 // Add a new function to check message limits
-function checkMessageLimits($userId) {
+function checkMessageLimits($userId) {  
     global $conn;
     
     try {
