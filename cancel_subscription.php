@@ -1,6 +1,4 @@
 <?php
-// cancel_subscription.php
-<?php
 require_once 'database.php';
 session_start();
 
