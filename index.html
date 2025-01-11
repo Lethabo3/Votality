@@ -1114,6 +1114,7 @@ async function sendMessage(message, file = null) {
             chatContainer.style.display = 'block';
             chatContainer.classList.add('fade-in');
 
+            // Handle responsive UI elements
             if (window.innerWidth > 640) {
                 disclaimer.style.display = 'block';
                 setTimeout(() => disclaimer.classList.add('fade-in'), 50);
@@ -1134,44 +1135,56 @@ async function sendMessage(message, file = null) {
             }
 
             try {
-                // Create FormData for proper multipart/form-data encoding
-                const formData = new FormData();
-                formData.append('action', 'sendMessage');
-                formData.append('message', message);
-                formData.append('chatId', currentChatId);
-                formData.append('stayLoggedOut', sessionStorage.getItem('stayLoggedOut') === 'true');
+                const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
+                
+                // Create the request data object
+                let requestData = {
+                    action: 'sendMessage',
+                    message: message,
+                    chatId: currentChatId,
+                    stayLoggedOut: stayLoggedOut
+                };
 
-                // Handle file upload
+                // If there's a file, add it to the request
                 if (file) {
                     const maxSize = 5 * 1024 * 1024; // 5MB limit
                     if (file.size > maxSize) {
                         throw new Error('File size exceeds 5MB limit');
                     }
-                    formData.append('file', file); // Append actual file object
+                    const fileData = await readFileAsDataURL(file);
+                    requestData.file = {
+                        data: fileData,
+                        type: file.type,
+                        name: file.name
+                    };
                 }
 
-                // Send request without Content-Type header
+                // Send request with JSON
                 const response = await fetch('VotalityChat2.php', {
                     method: 'POST',
-                    body: formData,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData),
                     credentials: 'same-origin'
                 });
 
                 const data = await response.json();
 
-                // Handle authentication and responses
+                // Handle authentication responses
                 if (data.error) {
-                    if (data.error === 'auth_required' && !sessionStorage.getItem('stayLoggedOut')) {
+                    if (data.error === 'auth_required' && !stayLoggedOut) {
                         hideAIThinking();
                         sessionStorage.setItem('returnUrl', window.location.href);
                         window.location.href = '/signin.html';
                         return;
                     }
-                    if (data.error !== 'auth_required' || !sessionStorage.getItem('stayLoggedOut')) {
+                    if (data.error !== 'auth_required' || !stayLoggedOut) {
                         throw new Error(data.error);
                     }
                 }
 
+                // Update UI with response
                 if (data.chatTopic) {
                     updateChatTopicDisplay(data.chatTopic);
                 }
@@ -1183,7 +1196,7 @@ async function sendMessage(message, file = null) {
                     currentChatId = data.chatId;
                 }
 
-                // Clear file selection
+                // Clear file input if present
                 if (file) {
                     const fileInput = document.querySelector('input[type="file"]');
                     if (fileInput) fileInput.value = '';
