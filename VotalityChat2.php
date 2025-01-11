@@ -684,7 +684,7 @@ function getRecentChatsFromDatabase($userId) {
             JOIN users u ON c.user_id = u.id
             WHERE c.user_id = ?
             ORDER BY c.created_at DESC
-            LIMIT 10
+            LIMIT 14
         ");
         
         $stmt->bind_param("i", $userId);
