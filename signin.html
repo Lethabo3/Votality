@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+<meta name="google-signin-client_id" content="583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com">
+
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
 <script>
@@ -327,7 +330,6 @@ body, html {
             font-family: 'Inter', sans-serif;
             background-color: #fff;
             border: 1px solid var(--border-color);
-            display: none;
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
@@ -345,7 +347,7 @@ body, html {
         }
 
         .separator {
-            display: none;
+            display: flex;
             align-items: center;
             text-align: center;
             margin: 1.5rem 0;
@@ -520,15 +522,11 @@ body, html {
         lucide.createIcons();
 
         function triggerGoogleSignIn() {
-            const googleSignInButton = document.querySelector('.g_id_signin div[role=button]');
-            if (googleSignInButton) {
-                googleSignInButton.click();
-            } else {
-                console.error('Google Sign-In button not found');
-            }
+            google.accounts.id.prompt();
         }
 
         function handleCredentialResponse(response) {
+            // First decode the JWT token
             const responsePayload = decodeJwtResponse(response.credential);
             console.log("ID: " + responsePayload.sub);
             console.log('Full Name: ' + responsePayload.name);
@@ -536,6 +534,38 @@ body, html {
             console.log('Family Name: ' + responsePayload.family_name);
             console.log("Image URL: " + responsePayload.picture);
             console.log("Email: " + responsePayload.email);
+
+            // Then send to your backend
+            fetch('login_handlerBimo.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    credential: response.credential,
+                    userData: {
+                        sub: responsePayload.sub,
+                        name: responsePayload.name,
+                        given_name: responsePayload.given_name,
+                        family_name: responsePayload.family_name,
+                        picture: responsePayload.picture,
+                        email: responsePayload.email
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    console.error('Google sign-in failed:', data.error);
+                    alert('Sign in failed. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
         }
 
         function decodeJwtResponse(token) {
@@ -547,6 +577,16 @@ body, html {
             return JSON.parse(jsonPayload);
         }
 
+        // Initialize Google Sign-In when the page loads
+        window.onload = function() {
+            google.accounts.id.initialize({
+                client_id: "583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com",
+                callback: handleCredentialResponse,
+                auto_prompt: false
+            });
+        };
+
+        // Handle guest mode
         document.getElementById('stay-logged-out').addEventListener('click', async function(e) {
             e.preventDefault();
             sessionStorage.setItem('stayLoggedOut', 'true');
@@ -569,9 +609,22 @@ body, html {
             }
         });
 
-        document.querySelector('.input-field').addEventListener('focus', function() {
+        // Prevent focus stealing
+        document.querySelector('.input-field')?.addEventListener('focus', function() {
             // Ensure no other elements are stealing focus
         });
+
+        // Add error handling for Google Sign-In
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Google Sign-In Error:', {
+                message: msg,
+                url: url,
+                lineNo: lineNo,
+                columnNo: columnNo,
+                error: error
+            });
+            return false;
+        };
     </script>
 </body>
 </html>

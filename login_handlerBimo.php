@@ -1,98 +1,108 @@
+// config.php
 <?php
-// Enable error reporting
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+define('GOOGLE_CLIENT_ID', '583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com');
+define('GOOGLE_CLIENT_SECRET', 'YOUR_CLIENT_SECRET'); // Replace with your client secret
+define('GOOGLE_REDIRECT_URI', 'https://your-domain.com/google_callback.php'); // Update with your domain
 
-// Start a log file
-$log_file = 'login_debug.log';
-function log_message($message) {
-    global $log_file;
-    $timestamp = date('Y-m-d H:i:s');
-    file_put_contents($log_file, "[$timestamp] $message\n", FILE_APPEND);
+// google_auth.php
+<?php
+require_once 'config.php';
+require_once 'UsersBimo.php';
+session_start();
+
+// Initialize Google Client
+function getGoogleClient() {
+    $client = new Google_Client();
+    $client->setClientId(GOOGLE_CLIENT_ID);
+    $client->setClientSecret(GOOGLE_CLIENT_SECRET);
+    $client->setRedirectUri(GOOGLE_REDIRECT_URI);
+    $client->addScope('email');
+    $client->addScope('profile');
+    return $client;
 }
 
-log_message("Login script started");
-
-// Include database connection
-log_message("Including UsersBimo.php");
-include 'UsersBimo.php';
-if (!$conn) {
-    log_message("Database connection failed: " . mysqli_connect_error());
-    die("Database connection failed");
-}
+// google_callback.php
+<?php
+require_once 'config.php';
+require_once 'UsersBimo.php';
+require_once 'vendor/autoload.php';
 
 session_start();
-log_message("Session started");
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    log_message("POST request received");
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-
-    if (empty($email) || empty($password)) {
-        log_message("Error: Missing email or password");
-        header('Location: signin.html?login=failed');
-        exit();
-    }
-
-    // Update the query to include subscription_plan
-    $stmt = $conn->prepare("SELECT user_id, username, password, subscription_plan FROM users WHERE email = ?");
-    if (!$stmt) {
-        log_message("Prepare failed: " . $conn->error);
-        die("Prepare failed: " . $conn->error);
-    }
-
-    $stmt->bind_param("s", $email);
-    if (!$stmt->execute()) {
-        log_message("Execute failed: " . $stmt->error);
-        die("Execute failed: " . $stmt->error);
-    }
-
-    $stmt->store_result();
-    $stmt->bind_result($user_id, $username, $hashed_password, $subscription_plan);
-
-    if ($stmt->num_rows > 0) {
-        $stmt->fetch();
-        if (password_verify($password, $hashed_password)) {
-            log_message("Login successful for user: $username");
-
-            // Set all required session variables
-            $_SESSION['user_id'] = $user_id;
-            $_SESSION['username'] = $username;
+try {
+    $client = getGoogleClient();
+    
+    if (isset($_GET['code'])) {
+        $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
+        $client->setAccessToken($token);
+        
+        // Get user info
+        $google_oauth = new Google_Service_Oauth2($client);
+        $google_account_info = $google_oauth->userinfo->get();
+        
+        $email = $google_account_info->email;
+        $name = $google_account_info->name;
+        
+        // Check if user exists
+        $stmt = $conn->prepare("SELECT user_id, username, subscription_plan FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            // User exists - log them in
+            $user = $result->fetch_assoc();
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $email;
-            $_SESSION['subscription_plan'] = $subscription_plan;
-            $_SESSION['logged_in'] = true;  // Add this line
+            $_SESSION['subscription_plan'] = $user['subscription_plan'];
+            $_SESSION['logged_in'] = true;
             
-            // Generate and store session ID
+            // Generate session ID
             $session_id = bin2hex(random_bytes(16));
             $update_stmt = $conn->prepare("UPDATE users SET session_id = ? WHERE user_id = ?");
-            $update_stmt->bind_param("ss", $session_id, $user_id);
+            $update_stmt->bind_param("ss", $session_id, $user['user_id']);
             $update_stmt->execute();
-            $update_stmt->close();
-
             $_SESSION['session_id'] = $session_id;
             
-            log_message("Session variables set - User ID: $user_id, Session ID: $session_id");
-
-            // Check for return URL
-            if (isset($_SESSION['returnUrl'])) {
-                $returnUrl = $_SESSION['returnUrl'];
-                unset($_SESSION['returnUrl']);
-                header('Location: ' . $returnUrl);
-            } else {
-                header('Location: index.html');
-            }
-            exit();
         } else {
-            log_message("Invalid password for email: $email");
-            header('Location: signin.html?login=failed');
-            exit();
+            // New user - create account
+            $username = explode('@', $email)[0]; // Basic username from email
+            $stmt = $conn->prepare("INSERT INTO users (email, username, subscription_plan) VALUES (?, ?, 'free')");
+            $stmt->bind_param("ss", $email, $username);
+            $stmt->execute();
+            
+            $_SESSION['user_id'] = $conn->insert_id;
+            $_SESSION['username'] = $username;
+            $_SESSION['email'] = $email;
+            $_SESSION['subscription_plan'] = 'free';
+            $_SESSION['logged_in'] = true;
+            
+            // Generate session ID for new user
+            $session_id = bin2hex(random_bytes(16));
+            $update_stmt = $conn->prepare("UPDATE users SET session_id = ? WHERE user_id = ?");
+            $update_stmt->bind_param("ss", $session_id, $_SESSION['user_id']);
+            $update_stmt->execute();
+            $_SESSION['session_id'] = $session_id;
         }
+        
+        // Redirect to home page or return URL
+        if (isset($_SESSION['returnUrl'])) {
+            $returnUrl = $_SESSION['returnUrl'];
+            unset($_SESSION['returnUrl']);
+            header('Location: ' . $returnUrl);
+        } else {
+            header('Location: index.html');
+        }
+        exit();
+        
     } else {
-        log_message("No user found with email: $email");
-        header('Location: signin.html?login=failed');
+        header('Location: signin.html?error=google_auth_failed');
         exit();
     }
-    $stmt->close();
+    
+} catch (Exception $e) {
+    error_log('Google Auth Error: ' . $e->getMessage());
+    header('Location: signin.html?error=google_auth_failed');
+    exit();
 }
-?>
