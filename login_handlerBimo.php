@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($data['userData']['email'])) {
             $email = $data['userData']['email'];
             $name = $data['userData']['name'];
-            log_message("Processing Google Sign-In for email: $email");
+            log_message("Processing Google Sign-In for email: $email, name: $name");
             
             // Check if user exists
             $stmt = $conn->prepare("SELECT user_id, username, subscription_plan FROM users WHERE email = ?");
@@ -57,10 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 log_message("Existing user found for email: $email");
                 $user = $result->fetch_assoc();
                 $_SESSION['user_id'] = $user['user_id'];
-                $_SESSION['username'] = $user['username'];
+                $_SESSION['username'] = $name;
                 $_SESSION['email'] = $email;
                 $_SESSION['subscription_plan'] = $user['subscription_plan'];
                 $_SESSION['logged_in'] = true;
+                
+                // Update username in database with Google name
+                $update_name_stmt = $conn->prepare("UPDATE users SET username = ? WHERE user_id = ?");
+                $update_name_stmt->bind_param("si", $name, $user['user_id']);
+                $update_name_stmt->execute();
                 
                 // Generate session ID
                 $session_id = bin2hex(random_bytes(16));
@@ -69,13 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $update_stmt->execute();
                 $_SESSION['session_id'] = $session_id;
                 
-                log_message("Session created for existing user: " . $user['username']);
+                log_message("Session created for existing user: $name");
             } else {
                 // New user
                 log_message("Creating new user for email: $email");
-                $username = explode('@', $email)[0];
                 $stmt = $conn->prepare("INSERT INTO users (email, username, subscription_plan) VALUES (?, ?, 'free')");
-                $stmt->bind_param("ss", $email, $username);
+                $stmt->bind_param("ss", $email, $name);
                 
                 if (!$stmt->execute()) {
                     log_message("Error creating new user: " . $stmt->error);
@@ -84,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 $_SESSION['user_id'] = $conn->insert_id;
-                $_SESSION['username'] = $username;
+                $_SESSION['username'] = $name;
                 $_SESSION['email'] = $email;
                 $_SESSION['subscription_plan'] = 'free';
                 $_SESSION['logged_in'] = true;
@@ -96,10 +100,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $update_stmt->execute();
                 $_SESSION['session_id'] = $session_id;
                 
-                log_message("New user created and session established for: $username");
+                log_message("New user created and session established for: $name");
             }
             
-            echo json_encode(['success' => true, 'redirect' => 'index.html']);
+            echo json_encode([
+                'success' => true, 
+                'redirect' => 'index.html',
+                'username' => $name
+            ]);
             exit();
             
         } else {
@@ -178,4 +186,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
     }
 }
+
+// Handle GET requests for checking login status
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    header('Content-Type: application/json');
+    $response = [
+        'isLoggedIn' => isset($_SESSION['logged_in']) && $_SESSION['logged_in'],
+        'username' => $_SESSION['username'] ?? null,
+        'email' => $_SESSION['email'] ?? null,
+        'subscription_plan' => $_SESSION['subscription_plan'] ?? null
+    ];
+    echo json_encode($response);
+    exit();
+}
+
+// Close database connection
+$conn->close();
 ?>
