@@ -78,7 +78,6 @@
 body {
     background: var();
     min-height: 100vh;
-    overflow: hidden; /* Prevent body scrolling */
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
 }
 
@@ -887,92 +886,82 @@ footer {
 }
 
 .marquee-container {
-    position: relative;
-    width: 100%;
-    max-width: 100vw;
-    overflow: hidden;
-    background: transparent;
-    padding: 10px 0;
-    margin-top: -105px;
-    margin-bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    pointer-events: none; /* Prevent interaction */
-}
+            position: relative;
+            width: 100%;
+            max-width: 100vw;
+            background: transparent;
+            padding: 10px 0;
+            margin-top: -105px;
+            margin-bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
 
-.marquee-row {
-    margin-bottom: 10px;
-    overflow: hidden;
-    display: flex;
-    pointer-events: none; /* Prevent interaction */
-}
+        .marquee-row {
+            margin-bottom: 10px;
+            overflow: hidden;
+            display: flex;
+            pointer-events: none;
+        }
 
-.marquee-row:last-child {
-    margin-bottom: 0;
-}
+        .marquee-row:last-child {
+            margin-bottom: 0;
+        }
 
-.marquee {
-    display: flex;
-    animation: marquee 100s linear infinite;
-    pointer-events: none; /* Prevent interaction */
-}
+        .marquee {
+            display: flex;
+            animation: marquee 100s linear infinite;
+            pointer-events: none;
+        }
 
-.marquee-reverse {
-    animation-direction: reverse;
-}
+        .marquee-reverse {
+            animation-direction: reverse;
+        }
 
-@keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
 
-.marquee-content {
-    display: flex;
-    white-space: nowrap;
-    will-change: transform;
-    pointer-events: none; /* Prevent interaction */
-}
+        .marquee-content {
+            display: flex;
+            white-space: nowrap;
+            will-change: transform;
+            pointer-events: none;
+        }
 
-.marquee-item {
-    flex: 0 0 auto;
-    width: 120px;
-    margin: 0 10px;
-    padding: 8px;
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    pointer-events: none; /* Prevent interaction */
-    user-select: none; /* Prevent text selection */
-}
+        .marquee-item {
+            flex: 0 0 auto;
+            margin: 0 3px;
+            padding: 12px 16px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
 
-.marquee-item:hover {
-    transform: translateY(-3px);
-    background-color: rgba(255, 255, 255, 0.2);
-}
+        .marquee-item-icon {
+            flex-shrink: 0;
+            width: 16px;
+            height: 16px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.marquee-item-icon {
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.marquee-item-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.marquee-item-text {
-    font-size: 12px;
-    color: #333;
-    font-weight: bold;
-}
-        .dot-pattern {
+        .marquee-item-text {
+            font-size: 12px;
+            color: #333;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+                .dot-pattern {
             position: absolute;
             top: 0;
             left: 0;
@@ -2356,66 +2345,52 @@ function getCategoryFromSummary(summary) {
 }        
 
 const marqueeItems = [
-    { icon: 'https://www.xe.com/favicon.ico', text: "EUR/USD" },
-    { icon: 'https://www.apple.com/favicon.ico', text: "AAPL" },
-    { icon: 'https://www.google.com/favicon.ico', text: "GOOGL" },
-    { icon: 'https://www.spglobal.com/favicon.ico', text: "S&P 500" },
-    { icon: 'https://www.nasdaq.com/favicon.ico', text: "NASDAQ" },
-    { icon: 'https://www.oil-price.net/favicon.ico', text: "Crude Oil" },
-    { icon: 'https://www.kitco.com/favicon.ico', text: "Gold" },
-    { icon: 'https://www.bankofengland.co.uk/favicon.ico', text: "GBP/USD" },
-    { icon: 'https://www.jpmorganchase.com/favicon.ico', text: "JPM" },
-    { icon: 'https://www.tesla.com/favicon.ico', text: "TSLA" },
-    { icon: 'https://www.cboe.com/favicon.ico', text: "VIX" },
-    { icon: 'https://www.boj.or.jp/favicon.ico', text: "USD/JPY" },
-    { icon: 'https://www.microsoft.com/favicon.ico', text: "MSFT" },
-    { icon: 'https://www.amazon.com/favicon.ico', text: "AMZN" },
-    { icon: 'https://www.realtor.com/favicon.ico', text: "Real Estate" },
-    { icon: 'https://www.nyse.com/favicon.ico', text: "Bull Market" }
-];
+            { text: "What drives stock prices?", emoji: "📈" },
+            { text: "How do interest rates affect markets?", emoji: "🏦" },
+            { text: "What is market capitalization?", emoji: "💹" },
+            { text: "How does inflation impact investments?", emoji: "💸" },
+            { text: "What are bull and bear markets?", emoji: "🐂" },
+            { text: "How do ETFs work?", emoji: "🧺" },
+            { text: "What is diversification in investing?", emoji: "🌈" },
+            { text: "How do dividends benefit investors?", emoji: "💰" },
+            { text: "What is the price-to-earnings ratio?", emoji: "🔢" },
+            { text: "How do economic indicators affect markets?", emoji: "📊" }
+        ];
 
-function createMarqueeItem(item) {
-    return `
-        <div class="marquee-item" data-text="${item.text}">
-            <div class="marquee-item-icon">
-                <img src="${item.icon}" alt="${item.text} icon" onerror="this.src='https://example.com/default-favicon.ico';">
-            </div>
-            <div class="marquee-item-text">${item.text}</div>
-        </div>
-    `;
-}
-
-function populateMarquee() {
-    const marquees = document.querySelectorAll('.marquee');
-    const itemsPerRow = Math.ceil(marqueeItems.length / 3);
-    
-    marquees.forEach((marquee, index) => {
-        let startIndex = index * itemsPerRow;
-        let endIndex = startIndex + itemsPerRow;
-        let rowItems = marqueeItems.slice(startIndex, endIndex);
-        
-        // If there aren't enough items, loop back to the start
-        if (rowItems.length < itemsPerRow) {
-            rowItems = [...rowItems, ...marqueeItems.slice(0, itemsPerRow - rowItems.length)];
+        function createMarqueeItem(item) {
+            return `
+                <div class="marquee-item" data-text="${item.text}">
+                    <div class="marquee-item-icon">${item.emoji}</div>
+                    <div class="marquee-item-text">${item.text}</div>
+                </div>
+            `;
         }
-        
-        let content = rowItems.map(createMarqueeItem).join('');
-        
-        // Duplicate the content to ensure continuous scrolling
-        marquee.innerHTML = content + content;
-        
-        // Check if we need to add more items for larger screens
-        ensureEnoughItems(marquee);
-    });
 
-    // Add click event listeners to marquee items
-    document.querySelectorAll('.marquee-item').forEach(item => {
-        item.addEventListener('click', function() {
-            const text = this.getAttribute('data-text');
-            handleMarqueeItemClick(text);
+        function populateMarquee() {
+            const marqueeContents = document.querySelectorAll('.marquee-content');
+            
+            marqueeContents.forEach((content, index) => {
+                // Rotate the items for each row
+                const rotatedItems = [...marqueeItems.slice(index), ...marqueeItems.slice(0, index)];
+                
+                // Create and duplicate the content
+                const itemsHTML = rotatedItems.map(createMarqueeItem).join('');
+                content.innerHTML = itemsHTML + itemsHTML; // Duplicate for seamless loop
+            });
+
+            // Adjust animation duration based on content length
+            const marquees = document.querySelectorAll('.marquee');
+            marquees.forEach(marquee => {
+                const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
+                const duration = contentWidth / 50; // Adjust speed factor as needed
+                marquee.style.animation = `marquee ${duration}s linear infinite`;
+            });
+        }
+
+        // Initialize when the document is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            populateMarquee();
         });
-    });
-}
 
 function ensureEnoughItems(marquee) {
     const containerWidth = marquee.offsetWidth;
