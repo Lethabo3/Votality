@@ -259,53 +259,32 @@ function getWorldTime($timezone) {
     }
     return null;
 }
-function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
+function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
     global $conn;
-    
-    if (empty($message) && empty($_FILES)) {
+   
+    // Basic validation for message content
+    if (empty($message) && empty($file)) {
         return ['error' => 'No message or file provided'];
     }
 
     try {
         $userId = $_SESSION['user_id'] ?? null;
-        $sessionId = session_id();
+        $sessionId = $_SESSION['session_id'] ?? null;
         $isLoggedIn = ($userId && $sessionId);
 
+        // Only start transaction if user is logged in
         if ($isLoggedIn) {
             $conn->begin_transaction();
         }
 
-        // Process file upload
-        $fileData = null;
-        $fileType = null;
-
-        if (!empty($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-            $allowedTypes = [
-                'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-                'application/pdf', 'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'text/plain', 'text/csv',
-                'application/vnd.ms-excel',
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            ];
-
-            if (!in_array($_FILES['file']['type'], $allowedTypes)) {
-                throw new Exception("File type not allowed");
-            }
-
-            if ($_FILES['file']['size'] > 5 * 1024 * 1024) { // 5MB limit
-                throw new Exception("File size exceeds limit");
-            }
-
-            $fileData = file_get_contents($_FILES['file']['tmp_name']);
-            $fileType = $_FILES['file']['type'];
-        }
-
-        // Create or validate chat ID
+        // If no chatId provided, create one
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
+            
+            // Only create database entry if user is logged in
             if ($isLoggedIn) {
                 $chatTopic = generateChatTopic($message);
+                
                 $stmt = $conn->prepare("
                     INSERT INTO votality_chats 
                         (chat_id, user_id, topic, summary) 
@@ -314,10 +293,14 @@ function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
                 $summary = null;
                 $stmt->bind_param("siss", $chatId, $userId, $chatTopic, $summary);
                 $stmt->execute();
+
+                if ($stmt->error) {
+                    throw new Exception("Failed to create new chat: " . $stmt->error);
+                }
             }
         }
 
-        // Verify chat access
+        // Only verify database access if user is logged in
         if ($isLoggedIn && $chatId) {
             $checkStmt = $conn->prepare("
                 SELECT 1 FROM votality_chats 
@@ -330,24 +313,19 @@ function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
             }
         }
 
-        // Generate AI response
+        // Generate AI response - this happens for all users
         $aiService = new VotalityAIService();
         $formattedTime = getWorldTime($timezone) ?? 
             (new DateTime('now', new DateTimeZone($timezone)))->format('l, jS g:ia');
         
         $aiPrompt = "Current time: {$formattedTime}. User message: {$message}";
-        if ($fileType) {
-            $aiPrompt .= " [File attached: {$fileType}]";
-            
-            // Add file content to prompt for text-based files
-            if (in_array($fileType, ['text/plain', 'text/csv'])) {
-                $aiPrompt .= "\nFile content:\n" . $fileData;
-            }
+        if ($file) {
+            $aiPrompt .= " [File attached: " . $file['type'] . "]";
         }
         
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
-        // Process response and extract topics
+        // Process the response and extract related topics
         $parts = explode("\nRelated Topics:", $fullResponse, 2);
         $aiResponse = trim($parts[0]);
         $relatedTopics = [];
@@ -355,6 +333,7 @@ function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
         if (isset($parts[1])) {
             $topicsText = trim($parts[1]);
             $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
+            
             foreach ($topicsLines as $line) {
                 $line = trim($line);
                 if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
@@ -366,24 +345,20 @@ function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
             }
         }
 
-        // Store messages in database
+        // Store messages in database only if user is logged in
         if ($isLoggedIn) {
-            // Store user message with file
+            // Prepare statement for user message
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
                     (chat_id, user_id, session_id, sender, content, file_data, file_type) 
                 VALUES (?, ?, ?, 'user', ?, ?, ?)
             ");
             
-            $stmt->bind_param("sisssb", 
-                $chatId, 
-                $userId, 
-                $sessionId, 
-                $message, 
-                $fileData, 
-                $fileType
-            );
+            // Handle file data if present
+            $fileData = $file ? $file['content'] : null;
+            $fileType = $file ? $file['type'] : null;
             
+            $stmt->bind_param("sisssb", $chatId, $userId, $sessionId, $message, $fileData, $fileType);
             if (!$stmt->execute()) {
                 throw new Exception("Failed to save user message: " . $stmt->error);
             }
@@ -395,10 +370,22 @@ function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
                 VALUES (?, ?, ?, 'ai', ?)
             ");
             $stmt->bind_param("siss", $chatId, $userId, $sessionId, $aiResponse);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                throw new Exception("Failed to save AI response: " . $stmt->error);
+            }
+
+            // Update chat topic if needed
+            $updateTopicStmt = $conn->prepare("
+                UPDATE votality_chats 
+                SET topic = COALESCE(topic, ?) 
+                WHERE chat_id = ? AND (topic IS NULL OR topic = '')
+            ");
+            $chatTopic = generateChatTopic($message);
+            $updateTopicStmt->bind_param("ss", $chatTopic, $chatId);
+            $updateTopicStmt->execute();
         }
 
-        // Maintain session state
+        // Maintain session state for all users
         if (!isset($_SESSION['chats'][$chatId])) {
             $_SESSION['chats'][$chatId] = [
                 'messages' => [],
@@ -409,8 +396,7 @@ function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
         $_SESSION['chats'][$chatId]['messages'][] = [
             'sender' => 'user',
             'content' => $message,
-            'timestamp' => time(),
-            'file_type' => $fileType
+            'timestamp' => time()
         ];
 
         $_SESSION['chats'][$chatId]['messages'][] = [
@@ -420,12 +406,12 @@ function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
             'relatedTopics' => $relatedTopics
         ];
 
+        // Commit transaction only if user is logged in
         if ($isLoggedIn) {
             $conn->commit();
         }
 
         return [
-            'success' => true,
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
@@ -433,6 +419,7 @@ function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
         ];
 
     } catch (Exception $e) {
+        // Rollback transaction if one is active
         if ($isLoggedIn && $conn->inTransaction()) {
             $conn->rollback();
         }
