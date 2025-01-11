@@ -1786,7 +1786,8 @@ async function loadRecentChats() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                action: 'getRecentChats'
+                action: 'getRecentChats',
+                limit: 14  // Increased from default 10 to 14
             }),
             credentials: 'same-origin'
         });
