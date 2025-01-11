@@ -315,7 +315,6 @@ body, html {
             font-family: 'Inter', sans-serif;
             background-color: #fff;
             border: 1px solid var(--border-color);
-            display: none;
             align-items: center;
             justify-content: center;
             gap: 0.75rem;
@@ -333,7 +332,7 @@ body, html {
         }
 
         .separator {
-            display: none;
+            display: flex;
             align-items: center;
             text-align: center;
             margin: 1.5rem 0;
@@ -552,22 +551,49 @@ body, html {
         });
 
         function triggerGoogleSignIn() {
-            const googleSignInButton = document.querySelector('.g_id_signin div[role=button]');
-            if (googleSignInButton) {
-                googleSignInButton.click();
-            } else {
-                console.error('Google Sign-In button not found');
-            }
+            google.accounts.id.prompt();
         }
 
         function handleCredentialResponse(response) {
+            // First decode the JWT token
             const responsePayload = decodeJwtResponse(response.credential);
-            console.log("ID: " + responsePayload.sub);
-            console.log('Full Name: ' + responsePayload.name);
-            console.log('Given Name: ' + responsePayload.given_name);
-            console.log('Family Name: ' + responsePayload.family_name);
-            console.log("Image URL: " + responsePayload.picture);
-            console.log("Email: " + responsePayload.email);
+            console.log("Processing Google Sign-In...");
+            
+            // Then send to your backend
+            fetch('signup_handlerBimo.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    credential: response.credential,
+                    userData: {
+                        sub: responsePayload.sub,
+                        name: responsePayload.name,
+                        given_name: responsePayload.given_name,
+                        family_name: responsePayload.family_name,
+                        picture: responsePayload.picture,
+                        email: responsePayload.email
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        console.error('Google sign-in failed:', data.error);
+                        alert('Sign up failed. Please try again.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
         }
 
         function decodeJwtResponse(token) {
@@ -579,15 +605,25 @@ body, html {
             return JSON.parse(jsonPayload);
         }
 
+        // Initialize Google Sign-In when the page loads
         window.onload = function () {
             google.accounts.id.initialize({
                 client_id: "583018952126-agtpcn1qils8bi84eu1frmri66l0tq9p.apps.googleusercontent.com",
-                callback: handleCredentialResponse
+                callback: handleCredentialResponse,
+                auto_prompt: false
             });
-            google.accounts.id.renderButton(
-                document.getElementById("custom-google-button"),
-                { theme: "outline", size: "large" }
-            );
+        };
+
+        // Add error handling for Google Sign-In
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Google Sign-In Error:', {
+                message: msg,
+                url: url,
+                lineNo: lineNo,
+                columnNo: columnNo,
+                error: error
+            });
+            return false;
         };
     </script>
 </body>
