@@ -1096,113 +1096,118 @@ try {
 }
 });
 
-// Update the sendMessage function in your JavaScript
+// Frontend send message implementation
 async function sendMessage(message, file = null) {
-try {
-    // Do the UI transitions first
-    initialContent.classList.add('fade-out');
-    suggestedQueries.classList.add('fade-out');
-    footerLinks.classList.add('fade-out');
-    textareaContainer.classList.add('repositioned');
-    document.body.classList.add('white-background');
+    try {
+        // Your existing UI transitions remain unchanged
+        initialContent.classList.add('fade-out');
+        suggestedQueries.classList.add('fade-out');
+        footerLinks.classList.add('fade-out');
+        textareaContainer.classList.add('repositioned');
+        document.body.classList.add('white-background');
 
-    setTimeout(async () => {
-        initialContent.style.display = 'none';
-        suggestedQueries.style.display = 'none';
-        footerLinks.style.display = 'none';
-        chatContainer.style.display = 'block';
-        chatContainer.classList.add('fade-in');
+        setTimeout(async () => {
+            // Your existing UI handling remains unchanged
+            initialContent.style.display = 'none';
+            suggestedQueries.style.display = 'none';
+            footerLinks.style.display = 'none';
+            chatContainer.style.display = 'block';
+            chatContainer.classList.add('fade-in');
 
-        if (window.innerWidth > 640) {
-            disclaimer.style.display = 'block';
-            setTimeout(() => {
-                disclaimer.classList.add('fade-in');
-            }, 50);
-        }
-
-        if (window.innerWidth > 640) {
-            desktopTopNav.style.display = 'flex';
-            setTimeout(() => {
-                desktopTopNav.classList.add('fade-in');
-            }, 50);
-        } else {
-            const topNav = document.querySelector('.top-nav');
-            if (topNav) {
-                topNav.style.display = 'none';
+            if (window.innerWidth > 640) {
+                disclaimer.style.display = 'block';
+                setTimeout(() => disclaimer.classList.add('fade-in'), 50);
+                desktopTopNav.style.display = 'flex';
+                setTimeout(() => desktopTopNav.classList.add('fade-in'), 50);
+            } else {
+                const topNav = document.querySelector('.top-nav');
+                if (topNav) topNav.style.display = 'none';
+                document.body.classList.add('chat-active');
             }
-            document.body.classList.add('chat-active');
-        }
 
-        const userMessageElement = await addMessage(message, 'user');
-        textarea.value = '';
-        showAIThinking();
+            const userMessageElement = await addMessage(message, 'user');
+            textarea.value = '';
+            showAIThinking();
 
-        if (userMessageElement) {
-            userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+            if (userMessageElement) {
+                userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
 
-        try {
-            const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
+            try {
+                const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
+                let response;
 
-            const response = await fetch('VotalityChat2.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    action: 'sendMessage',
-                    message: message,
-                    chatId: currentChatId,
-                    stayLoggedOut: stayLoggedOut,
-                    file: file ? { data: await readFileAsDataURL(file), type: file.type } : null
-                }),
-                credentials: 'same-origin'
-            });
+                if (file) {
+                    // Use FormData when there's a file
+                    const formData = new FormData();
+                    formData.append('action', 'sendMessage');
+                    formData.append('message', message);
+                    formData.append('chatId', currentChatId);
+                    formData.append('stayLoggedOut', stayLoggedOut);
+                    formData.append('file', file);
 
-            const data = await response.json();
-
-            if (data.error) {
-                if (data.error === 'auth_required' && !stayLoggedOut) {
-                    hideAIThinking();
-                    sessionStorage.setItem('returnUrl', window.location.href);
-                    window.location.href = '/signin.html';
-                    return;
-                }
-
-                if (data.error === 'auth_required' && stayLoggedOut) {
-                    // Ignore auth error if user chose to stay logged out
+                    response = await fetch('VotalityChat2.php', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'same-origin'
+                    });
                 } else {
-                    throw new Error(data.error);
+                    // Use JSON for regular messages
+                    response = await fetch('VotalityChat2.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'sendMessage',
+                            message: message,
+                            chatId: currentChatId,
+                            stayLoggedOut: stayLoggedOut
+                        }),
+                        credentials: 'same-origin'
+                    });
                 }
+
+                const data = await response.json();
+
+                // Your existing response handling remains unchanged
+                if (data.error) {
+                    if (data.error === 'auth_required' && !stayLoggedOut) {
+                        hideAIThinking();
+                        sessionStorage.setItem('returnUrl', window.location.href);
+                        window.location.href = '/signin.html';
+                        return;
+                    }
+                    if (data.error !== 'auth_required' || !stayLoggedOut) {
+                        throw new Error(data.error);
+                    }
+                }
+
+                if (data.chatTopic) {
+                    updateChatTopicDisplay(data.chatTopic);
+                }
+
+                hideAIThinking();
+                await addMessage(data.response, 'ai', data.relatedTopics);
+                
+                if (!currentChatId) {
+                    currentChatId = data.chatId;
+                }
+
+                await loadRecentChats();
+
+            } catch (error) {
+                console.error('Error:', error);
+                hideAIThinking();
+                await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
             }
-
-            if (data.chatTopic) {
-                updateChatTopicDisplay(data.chatTopic);
-            }
-
-            hideAIThinking();
-            await addMessage(data.response, 'ai', data.relatedTopics);
-            
-            if (!currentChatId) {
-                currentChatId = data.chatId;
-            }
-
-            // Load recent chats after successful message
-            await loadRecentChats();
-
-        } catch (error) {
-            console.error('Error:', error);
-            hideAIThinking();
-            await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
-        }
-    }, 500);
-} catch (error) {
-    console.error('Error in sendMessage:', error);
-    hideAIThinking();
-    await addMessage("Error: " + error.message, 'ai');
+        }, 500);
+    } catch (error) {
+        console.error('Error in sendMessage:', error);
+        hideAIThinking();
+        await addMessage("Error: " + error.message, 'ai');
+    }
 }
-}
-
 
 // Update DOM content loaded handler
 document.addEventListener('DOMContentLoaded', async () => {
