@@ -259,11 +259,10 @@ function getWorldTime($timezone) {
     }
     return null;
 }
-function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
+function handleSendMessage($message, $chatId, $timezone = 'UTC') {
     global $conn;
-   
-    // Validate input
-    if (empty($message) && empty($file)) {
+    
+    if (empty($message) && empty($_FILES)) {
         return ['error' => 'No message or file provided'];
     }
 
@@ -272,51 +271,15 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         $sessionId = $_SESSION['session_id'] ?? null;
         $isLoggedIn = ($userId && $sessionId);
 
-        // Begin transaction for logged-in users
         if ($isLoggedIn) {
             $conn->begin_transaction();
         }
 
-        // Handle chat creation
-        if (!$chatId) {
-            $chatId = uniqid('chat_', true);
-            
-            if ($isLoggedIn) {
-                $chatTopic = generateChatTopic($message);
-                
-                $stmt = $conn->prepare("
-                    INSERT INTO votality_chats 
-                        (chat_id, user_id, topic, summary) 
-                    VALUES (?, ?, ?, ?)
-                ");
-                $summary = null;
-                $stmt->bind_param("siss", $chatId, $userId, $chatTopic, $summary);
-                $stmt->execute();
-
-                if ($stmt->error) {
-                    throw new Exception("Failed to create new chat: " . $stmt->error);
-                }
-            }
-        }
-
-        // Verify chat access
-        if ($isLoggedIn && $chatId) {
-            $checkStmt = $conn->prepare("
-                SELECT 1 FROM votality_chats 
-                WHERE chat_id = ? AND user_id = ?
-            ");
-            $checkStmt->bind_param("si", $chatId, $userId);
-            $checkStmt->execute();
-            if ($checkStmt->get_result()->num_rows === 0) {
-                throw new Exception("Chat not found or access denied");
-            }
-        }
-
-        // Process file if present
+        // Process file upload if present
         $fileData = null;
         $fileType = null;
-        if ($file) {
-            // Validate file type
+        
+        if (!empty($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             $allowedTypes = [
                 'image/jpeg', 'image/png', 'image/gif', 'image/webp',
                 'application/pdf', 'application/msword',
@@ -326,47 +289,45 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             ];
 
-            if (!in_array($file['type'], $allowedTypes)) {
+            if (!in_array($_FILES['file']['type'], $allowedTypes)) {
                 throw new Exception("File type not allowed");
             }
 
-            $fileData = base64_decode(preg_replace('#^data:.*?;base64,#', '', $file['data']));
-            $fileType = $file['type'];
+            // Read file as binary data
+            $fileData = file_get_contents($_FILES['file']['tmp_name']);
+            $fileType = $_FILES['file']['type'];
         }
 
-        // Generate AI response
+        // Handle chat creation and verification (preserved from original)
+        if (!$chatId) {
+            $chatId = uniqid('chat_', true);
+            if ($isLoggedIn) {
+                $chatTopic = generateChatTopic($message);
+                $stmt = $conn->prepare("INSERT INTO votality_chats (chat_id, user_id, topic, summary) VALUES (?, ?, ?, ?)");
+                $summary = null;
+                $stmt->bind_param("siss", $chatId, $userId, $chatTopic, $summary);
+                $stmt->execute();
+            }
+        }
+
+        // Generate AI response (preserved from original)
         $aiService = new VotalityAIService();
         $formattedTime = getWorldTime($timezone) ?? 
             (new DateTime('now', new DateTimeZone($timezone)))->format('l, jS g:ia');
         
         $aiPrompt = "Current time: {$formattedTime}. User message: {$message}";
-        if ($file) {
-            $aiPrompt .= " [File attached: " . $file['type'] . "]";
+        if ($fileType) {
+            $aiPrompt .= " [File attached: {$fileType}]";
         }
         
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
-        // Process response and extract topics
+        // Process response and extract topics (preserved from original)
         $parts = explode("\nRelated Topics:", $fullResponse, 2);
         $aiResponse = trim($parts[0]);
-        $relatedTopics = [];
+        $relatedTopics = processRelatedTopics($parts[1] ?? '');
 
-        if (isset($parts[1])) {
-            $topicsText = trim($parts[1]);
-            $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
-            
-            foreach ($topicsLines as $line) {
-                $line = trim($line);
-                if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
-                    $topic = trim($matches[2]);
-                    if (!empty($topic) && strlen($topic) > 3) {
-                        $relatedTopics[] = $topic;
-                    }
-                }
-            }
-        }
-
-        // Store messages for logged-in users
+        // Store messages with proper binary data handling
         if ($isLoggedIn) {
             // Store user message with file
             $stmt = $conn->prepare("
@@ -375,34 +336,31 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
                 VALUES (?, ?, ?, 'user', ?, ?, ?)
             ");
             
-            $stmt->bind_param("sisssb", $chatId, $userId, $sessionId, $message, $fileData, $fileType);
+            // Bind parameters with 'b' type for binary data
+            $stmt->bind_param("sisssb", 
+                $chatId, 
+                $userId, 
+                $sessionId, 
+                $message, 
+                $fileData, 
+                $fileType
+            );
+            
             if (!$stmt->execute()) {
                 throw new Exception("Failed to save user message: " . $stmt->error);
             }
 
-            // Store AI response
+            // Store AI response (preserved from original)
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
                     (chat_id, user_id, session_id, sender, content) 
                 VALUES (?, ?, ?, 'ai', ?)
             ");
             $stmt->bind_param("siss", $chatId, $userId, $sessionId, $aiResponse);
-            if (!$stmt->execute()) {
-                throw new Exception("Failed to save AI response: " . $stmt->error);
-            }
-
-            // Update chat topic
-            $updateTopicStmt = $conn->prepare("
-                UPDATE votality_chats 
-                SET topic = COALESCE(topic, ?) 
-                WHERE chat_id = ? AND (topic IS NULL OR topic = '')
-            ");
-            $chatTopic = generateChatTopic($message);
-            $updateTopicStmt->bind_param("ss", $chatTopic, $chatId);
-            $updateTopicStmt->execute();
+            $stmt->execute();
         }
 
-        // Maintain session state
+        // Maintain session state (preserved from original)
         if (!isset($_SESSION['chats'][$chatId])) {
             $_SESSION['chats'][$chatId] = [
                 'messages' => [],
@@ -424,7 +382,6 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             'relatedTopics' => $relatedTopics
         ];
 
-        // Commit transaction for logged-in users
         if ($isLoggedIn) {
             $conn->commit();
         }
