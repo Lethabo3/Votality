@@ -259,8 +259,7 @@ function getWorldTime($timezone) {
     }
     return null;
 }
-// Backend handleSendMessage implementation
-function handleSendMessage($message, $chatId, $timezone = 'UTC') {
+function handleSendMessage($message, $chatId = null, $timezone = 'UTC') {
     global $conn;
     
     if (empty($message) && empty($_FILES)) {
@@ -269,17 +268,17 @@ function handleSendMessage($message, $chatId, $timezone = 'UTC') {
 
     try {
         $userId = $_SESSION['user_id'] ?? null;
-        $sessionId = $_SESSION['session_id'] ?? null;
+        $sessionId = session_id();
         $isLoggedIn = ($userId && $sessionId);
 
         if ($isLoggedIn) {
             $conn->begin_transaction();
         }
 
-        // Process file upload if present
+        // Process file upload
         $fileData = null;
         $fileType = null;
-        
+
         if (!empty($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             $allowedTypes = [
                 'image/jpeg', 'image/png', 'image/gif', 'image/webp',
@@ -294,24 +293,44 @@ function handleSendMessage($message, $chatId, $timezone = 'UTC') {
                 throw new Exception("File type not allowed");
             }
 
-            // Read file as binary data
+            if ($_FILES['file']['size'] > 5 * 1024 * 1024) { // 5MB limit
+                throw new Exception("File size exceeds limit");
+            }
+
             $fileData = file_get_contents($_FILES['file']['tmp_name']);
             $fileType = $_FILES['file']['type'];
         }
 
-        // Handle chat creation and verification (preserved from original)
+        // Create or validate chat ID
         if (!$chatId) {
             $chatId = uniqid('chat_', true);
             if ($isLoggedIn) {
                 $chatTopic = generateChatTopic($message);
-                $stmt = $conn->prepare("INSERT INTO votality_chats (chat_id, user_id, topic, summary) VALUES (?, ?, ?, ?)");
+                $stmt = $conn->prepare("
+                    INSERT INTO votality_chats 
+                        (chat_id, user_id, topic, summary) 
+                    VALUES (?, ?, ?, ?)
+                ");
                 $summary = null;
                 $stmt->bind_param("siss", $chatId, $userId, $chatTopic, $summary);
                 $stmt->execute();
             }
         }
 
-        // Generate AI response (preserved from original)
+        // Verify chat access
+        if ($isLoggedIn && $chatId) {
+            $checkStmt = $conn->prepare("
+                SELECT 1 FROM votality_chats 
+                WHERE chat_id = ? AND user_id = ?
+            ");
+            $checkStmt->bind_param("si", $chatId, $userId);
+            $checkStmt->execute();
+            if ($checkStmt->get_result()->num_rows === 0) {
+                throw new Exception("Chat not found or access denied");
+            }
+        }
+
+        // Generate AI response
         $aiService = new VotalityAIService();
         $formattedTime = getWorldTime($timezone) ?? 
             (new DateTime('now', new DateTimeZone($timezone)))->format('l, jS g:ia');
@@ -319,16 +338,35 @@ function handleSendMessage($message, $chatId, $timezone = 'UTC') {
         $aiPrompt = "Current time: {$formattedTime}. User message: {$message}";
         if ($fileType) {
             $aiPrompt .= " [File attached: {$fileType}]";
+            
+            // Add file content to prompt for text-based files
+            if (in_array($fileType, ['text/plain', 'text/csv'])) {
+                $aiPrompt .= "\nFile content:\n" . $fileData;
+            }
         }
         
         $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
-        // Process response and extract topics (preserved from original)
+        // Process response and extract topics
         $parts = explode("\nRelated Topics:", $fullResponse, 2);
         $aiResponse = trim($parts[0]);
-        $relatedTopics = processRelatedTopics($parts[1] ?? '');
+        $relatedTopics = [];
 
-        // Store messages with proper binary data handling
+        if (isset($parts[1])) {
+            $topicsText = trim($parts[1]);
+            $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
+            foreach ($topicsLines as $line) {
+                $line = trim($line);
+                if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
+                    $topic = trim($matches[2]);
+                    if (!empty($topic) && strlen($topic) > 3) {
+                        $relatedTopics[] = $topic;
+                    }
+                }
+            }
+        }
+
+        // Store messages in database
         if ($isLoggedIn) {
             // Store user message with file
             $stmt = $conn->prepare("
@@ -337,7 +375,6 @@ function handleSendMessage($message, $chatId, $timezone = 'UTC') {
                 VALUES (?, ?, ?, 'user', ?, ?, ?)
             ");
             
-            // Bind parameters with 'b' type for binary data
             $stmt->bind_param("sisssb", 
                 $chatId, 
                 $userId, 
@@ -351,7 +388,7 @@ function handleSendMessage($message, $chatId, $timezone = 'UTC') {
                 throw new Exception("Failed to save user message: " . $stmt->error);
             }
 
-            // Store AI response (preserved from original)
+            // Store AI response
             $stmt = $conn->prepare("
                 INSERT INTO votality_messages 
                     (chat_id, user_id, session_id, sender, content) 
@@ -361,7 +398,7 @@ function handleSendMessage($message, $chatId, $timezone = 'UTC') {
             $stmt->execute();
         }
 
-        // Maintain session state (preserved from original)
+        // Maintain session state
         if (!isset($_SESSION['chats'][$chatId])) {
             $_SESSION['chats'][$chatId] = [
                 'messages' => [],
@@ -388,6 +425,7 @@ function handleSendMessage($message, $chatId, $timezone = 'UTC') {
         }
 
         return [
+            'success' => true,
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
