@@ -987,32 +987,4 @@ function loadChat($chatId) {
         ];
     }
 }
-
-function processUploadedFile($file) {
-    $uploadDir = 'uploads/';
-    $fileName = uniqid() . '_' . basename($file['name']);
-    $filePath = $uploadDir . $fileName;
-    
-    move_uploaded_file($file['tmp_name'], $filePath);
-    
-    return [
-        'name' => $fileName,
-        'type' => $file['type'],
-        'path' => $filePath
-    ];
-}
-
-function storeFileReferences($chatId, $files) {
-    global $conn;
-    
-    foreach ($files as $file) {
-        $stmt = $conn->prepare("
-            INSERT INTO message_attachments 
-                (chat_id, file_name, file_type, file_path) 
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->bind_param("ssss", $chatId, $file['name'], $file['type'], $file['path']);
-        $stmt->execute();
-    }
-}
 ?>
