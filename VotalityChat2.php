@@ -259,6 +259,7 @@ function getWorldTime($timezone) {
     }
     return null;
 }
+// Backend handleSendMessage implementation
 function handleSendMessage($message, $chatId, $timezone = 'UTC') {
     global $conn;
     
