@@ -2382,7 +2382,7 @@ const marqueeItems = [
             const marquees = document.querySelectorAll('.marquee');
             marquees.forEach(marquee => {
                 const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
-                const duration = contentWidth / 50; // Adjust speed factor as needed
+                const duration = contentWidth / 30; // Adjust speed factor as needed
                 marquee.style.animation = `marquee ${duration}s linear infinite`;
             });
         }
