@@ -2346,65 +2346,114 @@ function getCategoryFromSummary(summary) {
     return 'General';
 }        
 
+const marqueeItems = [
+    { text: "What drives stock prices?", emoji: "📈" },
+    { text: "How do interest rates affect markets?", emoji: "🏦" },
+    { text: "What is market capitalization?", emoji: "💹" },
+    { text: "How does inflation impact investments?", emoji: "💸" },
+    { text: "What are bull and bear markets?", emoji: "🐂" },
+    { text: "How do ETFs work?", emoji: "🧺" },
+    { text: "What is diversification in investing?", emoji: "🌈" },
+    { text: "How do dividends benefit investors?", emoji: "💰" },
+    { text: "What is the price-to-earnings ratio?", emoji: "🔢" },
+    { text: "How do economic indicators affect markets?", emoji: "📊" }
+];
+
 let isDragging = false;
 let startX;
 let currentTranslate = 0;
 let prevTranslate = 0;
-let animationID;
+let animationID = null;
 let velocity = 0;
-let initialAnimationSet = false;
 const friction = 0.95;
+let currentAnimations = [];
 
-function initializeMarquee() {
+function createMarqueeItem(item) {
+    return `
+        <div class="marquee-item" data-text="${item.text}">
+            <div class="marquee-item-icon">${item.emoji}</div>
+            <div class="marquee-item-text">${item.text}</div>
+        </div>
+    `;
+}
+
+function startMarqueeAnimation(marquee, duration) {
+    const animation = marquee.animate(
+        [
+            { transform: 'translateX(0)' },
+            { transform: `translateX(-50%)` }
+        ],
+        {
+            duration: duration,
+            iterations: Infinity,
+            easing: 'linear'
+        }
+    );
+    currentAnimations.push(animation);
+    return animation;
+}
+
+function populateMarquee() {
+    const marqueeContents = document.querySelectorAll('.marquee-content');
+    
+    // Clear existing animations
+    currentAnimations.forEach(animation => animation.cancel());
+    currentAnimations = [];
+    
+    marqueeContents.forEach((content, index) => {
+        const rotatedItems = [...marqueeItems.slice(index), ...marqueeItems.slice(0, index)];
+        const itemsHTML = rotatedItems.map(createMarqueeItem).join('');
+        content.innerHTML = itemsHTML + itemsHTML;
+    });
+
     const marqueeRows = document.querySelectorAll('.marquee-row');
     marqueeRows.forEach(row => {
         const marquee = row.querySelector('.marquee');
         const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
-        const duration = contentWidth / 30;
-        
-        // Set up initial animation
-        const keyframes = [
-            { transform: 'translateX(0)' },
-            { transform: `translateX(${-contentWidth}px)` }
-        ];
-        
-        const animation = marquee.animate(keyframes, {
-            duration: duration * 1000,
-            iterations: Infinity,
-            easing: 'linear'
-        });
-        
-        marquee.currentAnimation = animation;
+        startMarqueeAnimation(marquee, contentWidth * 20);
     });
-    initialAnimationSet = true;
+
+    const container = document.querySelector('.marquee-container');
+    setupEventListeners(container);
+}
+
+function setupEventListeners(container) {
+    container.addEventListener('mousedown', startDragging);
+    container.addEventListener('touchstart', startDragging, { passive: false });
+    container.addEventListener('mousemove', drag);
+    container.addEventListener('touchmove', drag, { passive: false });
+    container.addEventListener('mouseup', stopDragging);
+    container.addEventListener('touchend', stopDragging);
+    container.addEventListener('mouseleave', stopDragging);
+
+    container.querySelectorAll('.marquee-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (!isDragging) {
+                handleMarqueeItemClick(item.dataset.text);
+            }
+        });
+    });
 }
 
 function startDragging(e) {
     isDragging = true;
     startX = e.type === 'mousedown' ? e.pageX : e.touches[0].pageX;
-    
-    const marqueeRows = document.querySelectorAll('.marquee-row');
-    marqueeRows.forEach(row => {
-        const marquee = row.querySelector('.marquee');
-        
-        if (marquee.currentAnimation) {
-            // Get the current time of the animation
-            const currentTime = marquee.currentAnimation.currentTime;
-            const duration = marquee.currentAnimation.effect.getTiming().duration;
-            
-            // Calculate current position based on animation progress
-            const progress = (currentTime % duration) / duration;
-            const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
-            currentTranslate = -progress * contentWidth;
-            
-            // Pause and cleanup current animation
-            marquee.currentAnimation.cancel();
+
+    // Pause all current animations
+    currentAnimations.forEach(animation => {
+        if (animation.playState !== 'paused') {
+            animation.pause();
         }
-        
-        // Set the current position
+    });
+
+    const marquees = document.querySelectorAll('.marquee');
+    marquees.forEach(marquee => {
+        const computedStyle = window.getComputedStyle(marquee);
+        const matrix = new DOMMatrixReadOnly(computedStyle.transform);
+        currentTranslate = matrix.m41;
         marquee.style.transform = `translateX(${currentTranslate}px)`;
     });
-    
+
     prevTranslate = currentTranslate;
     cancelAnimationFrame(animationID);
 }
@@ -2419,98 +2468,105 @@ function drag(e) {
     
     velocity = (currentTranslate - prevTranslate) * 0.1;
     
-    const marqueeRows = document.querySelectorAll('.marquee-row');
-    marqueeRows.forEach(row => {
-        const marquee = row.querySelector('.marquee');
+    const marquees = document.querySelectorAll('.marquee');
+    marquees.forEach(marquee => {
         marquee.style.transform = `translateX(${currentTranslate}px)`;
     });
 }
 
-function continueAnimation() {
-    const marqueeRows = document.querySelectorAll('.marquee-row');
-    const contentWidth = marqueeRows[0].querySelector('.marquee-content').scrollWidth;
-    
-    marqueeRows.forEach(row => {
-        const marquee = row.querySelector('.marquee');
-        
-        // Create new animation from current position
-        const keyframes = [
-            { transform: `translateX(${currentTranslate}px)` },
-            { transform: `translateX(${currentTranslate - contentWidth}px)` }
-        ];
-        
-        const duration = contentWidth / 30;
-        const animation = marquee.animate(keyframes, {
-            duration: duration * 1000,
-            iterations: Infinity,
-            easing: 'linear'
-        });
-        
-        marquee.currentAnimation = animation;
+function resumeAnimation() {
+    const marquees = document.querySelectorAll('.marquee');
+    currentAnimations = [];
+
+    marquees.forEach(marquee => {
+        const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
+        const newAnimation = marquee.animate(
+            [
+                { transform: `translateX(${currentTranslate}px)` },
+                { transform: `translateX(${currentTranslate - contentWidth/2}px)` }
+            ],
+            {
+                duration: contentWidth * 20,
+                iterations: Infinity,
+                easing: 'linear'
+            }
+        );
+        currentAnimations.push(newAnimation);
     });
 }
 
 function stopDragging() {
     if (!isDragging) return;
     isDragging = false;
-    prevTranslate = currentTranslate;
 
     if (Math.abs(velocity) > 0.1) {
-        function momentumScroll() {
-            velocity *= friction;
-            currentTranslate += velocity;
-            prevTranslate = currentTranslate;
-
-            const marqueeRows = document.querySelectorAll('.marquee-row');
-            const contentWidth = marqueeRows[0].querySelector('.marquee-content').scrollWidth;
-
-            if (currentTranslate <= -contentWidth) {
-                currentTranslate += contentWidth;
-                prevTranslate = currentTranslate;
-            } else if (currentTranslate >= 0) {
-                currentTranslate -= contentWidth;
-                prevTranslate = currentTranslate;
-            }
-
-            marqueeRows.forEach(row => {
-                const marquee = row.querySelector('.marquee');
-                marquee.style.transform = `translateX(${currentTranslate}px)`;
-            });
-
-            if (Math.abs(velocity) > 0.1) {
-                animationID = requestAnimationFrame(momentumScroll);
-            } else {
-                continueAnimation();
-            }
-        }
-        momentumScroll();
+        applyMomentum();
     } else {
-        continueAnimation();
+        resumeAnimation();
     }
 }
 
-function populateMarquee() {
-    const marqueeContents = document.querySelectorAll('.marquee-content');
-    
-    marqueeContents.forEach((content, index) => {
-        const rotatedItems = [...marqueeItems.slice(index), ...marqueeItems.slice(0, index)];
-        const itemsHTML = rotatedItems.map(createMarqueeItem).join('');
-        content.innerHTML = itemsHTML + itemsHTML;
+function applyMomentum() {
+    velocity *= friction;
+    currentTranslate += velocity;
+    prevTranslate = currentTranslate;
+
+    const marquees = document.querySelectorAll('.marquee');
+    const contentWidth = marquees[0].querySelector('.marquee-content').scrollWidth;
+
+    if (currentTranslate <= -contentWidth/2) {
+        currentTranslate += contentWidth/2;
+        prevTranslate = currentTranslate;
+    } else if (currentTranslate >= 0) {
+        currentTranslate -= contentWidth/2;
+        prevTranslate = currentTranslate;
+    }
+
+    marquees.forEach(marquee => {
+        marquee.style.transform = `translateX(${currentTranslate}px)`;
     });
 
-    const container = document.querySelector('.marquee-container');
-    container.addEventListener('mousedown', startDragging);
-    container.addEventListener('touchstart', startDragging, { passive: false });
-    container.addEventListener('mousemove', drag);
-    container.addEventListener('touchmove', drag, { passive: false });
-    container.addEventListener('mouseup', stopDragging);
-    container.addEventListener('touchend', stopDragging);
-    container.addEventListener('mouseleave', stopDragging);
-
-    if (!initialAnimationSet) {
-        initializeMarquee();
+    if (Math.abs(velocity) > 0.1) {
+        animationID = requestAnimationFrame(applyMomentum);
+    } else {
+        resumeAnimation();
     }
 }
+
+function handleMarqueeItemClick(text) {
+    if (!currentChatId) {
+        createNewChat().then(() => {
+            sendMarqueeMessage(text);
+        });
+    } else {
+        sendMarqueeMessage(text);
+    }
+}
+
+function sendMarqueeMessage(text) {
+    hideMarqueeContainer();
+    resetBackgroundAndUI();
+    if (chatContainer) {
+        chatContainer.style.display = 'flex';
+    }
+    sendMessage(text);
+}
+
+function hideMarqueeContainer() {
+    const marqueeContainer = document.querySelector('.marquee-container');
+    if (marqueeContainer) {
+        marqueeContainer.style.display = 'none';
+    }
+}
+
+// Initialize and handle window resize
+document.addEventListener('DOMContentLoaded', () => {
+    populateMarquee();
+});
+
+window.addEventListener('resize', () => {
+    populateMarquee();
+});
         document.addEventListener('DOMContentLoaded', function() {
     const navCloseButton = document.getElementById('nav-close');
     const newChatButtonNav = document.getElementById('new-chat-button-nav');
