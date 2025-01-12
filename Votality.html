@@ -2421,11 +2421,24 @@ function startDragging(e) {
     // Cancel any ongoing animations
     cancelAnimationFrame(animationID);
     
-    // Get all marquee rows
     const marqueeRows = document.querySelectorAll('.marquee-row');
     marqueeRows.forEach(row => {
         const marquee = row.querySelector('.marquee');
+        
+        // Get the computed transform value
+        const style = window.getComputedStyle(marquee);
+        const matrix = new WebKitCSSMatrix(style.transform);
+        currentTranslate = matrix.m41;
+        prevTranslate = currentTranslate;
+        
+        // Clear existing animations
         marquee.style.animation = 'none';
+        marquee.style.transform = `translateX(${currentTranslate}px)`;
+        
+        // Cancel any existing Web Animations
+        if (marquee.currentAnimation) {
+            marquee.currentAnimation.cancel();
+        }
     });
 }
 
