@@ -2345,7 +2345,6 @@ function getCategoryFromSummary(summary) {
     return 'General';
 }        
 
-// Marquee items and state management
 const marqueeItems = [
     { text: "What drives stock prices?", emoji: "📈" },
     { text: "How do interest rates affect markets?", emoji: "🏦" },
@@ -2359,11 +2358,11 @@ const marqueeItems = [
     { text: "How do economic indicators affect markets?", emoji: "📊" }
 ];
 
-// Dragging state variables
 let isDragging = false;
 let startX;
-let scrollLeft;
-let animationFrameId;
+let currentTranslate = 0;
+let prevTranslate = 0;
+let animationID;
 let velocity = 0;
 const friction = 0.95;
 
@@ -2385,88 +2384,130 @@ function populateMarquee() {
         content.innerHTML = itemsHTML + itemsHTML;
     });
 
-    const marquees = document.querySelectorAll('.marquee');
-    marquees.forEach(marquee => {
-        const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
-        const duration = contentWidth / 30;
-        
-        // Set initial animation
-        marquee.style.animation = `marquee ${duration}s linear infinite`;
-        
-        // Add interactive event listeners
-        marquee.addEventListener('mousedown', startDragging);
-        marquee.addEventListener('touchstart', startDragging, { passive: false });
-        marquee.addEventListener('mousemove', drag);
-        marquee.addEventListener('touchmove', drag, { passive: false });
-        marquee.addEventListener('mouseup', stopDragging);
-        marquee.addEventListener('touchend', stopDragging);
-        marquee.addEventListener('mouseleave', stopDragging);
-        
-        // Add click handler to marquee items
-        marquee.querySelectorAll('.marquee-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                if (!isDragging) {
-                    handleMarqueeItemClick(item.dataset.text);
-                }
-            });
+    // Add event listeners to the container instead of individual marquees
+    const container = document.querySelector('.marquee-container');
+    container.addEventListener('mousedown', startDragging);
+    container.addEventListener('touchstart', startDragging, { passive: false });
+    container.addEventListener('mousemove', drag);
+    container.addEventListener('touchmove', drag, { passive: false });
+    container.addEventListener('mouseup', stopDragging);
+    container.addEventListener('touchend', stopDragging);
+    container.addEventListener('mouseleave', stopDragging);
+
+    // Add click handlers to all marquee items
+    container.querySelectorAll('.marquee-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (!isDragging) {
+                handleMarqueeItemClick(item.dataset.text);
+            }
         });
     });
 }
 
 function startDragging(e) {
     isDragging = true;
-    const marquee = e.currentTarget;
     startX = e.type === 'mousedown' ? e.pageX : e.touches[0].pageX;
-    scrollLeft = marquee.scrollLeft;
     
-    // Pause the animation
-    marquee.style.animation = 'none';
-    marquee.style.transform = `translateX(${scrollLeft}px)`;
+    // Cancel any ongoing animations
+    cancelAnimationFrame(animationID);
+    
+    // Get all marquee rows
+    const marqueeRows = document.querySelectorAll('.marquee-row');
+    marqueeRows.forEach(row => {
+        const marquee = row.querySelector('.marquee');
+        marquee.style.animation = 'none';
+    });
 }
 
 function drag(e) {
     if (!isDragging) return;
     e.preventDefault();
     
-    const marquee = e.currentTarget;
-    const x = e.type === 'mousemove' ? e.pageX : e.touches[0].pageX;
-    const walk = (x - startX) * 2;
+    const currentX = e.type === 'mousemove' ? e.pageX : e.touches[0].pageX;
+    const diff = currentX - startX;
+    currentTranslate = prevTranslate + diff;
     
     // Update velocity for momentum scrolling
-    velocity = walk * 0.1;
+    velocity = (currentTranslate - prevTranslate) * 0.1;
     
-    marquee.style.transform = `translateX(${scrollLeft + walk}px)`;
+    // Apply movement to all marquee rows
+    const marqueeRows = document.querySelectorAll('.marquee-row');
+    marqueeRows.forEach(row => {
+        const marquee = row.querySelector('.marquee');
+        marquee.style.transform = `translateX(${currentTranslate}px)`;
+    });
 }
 
-function stopDragging(e) {
+function stopDragging() {
     if (!isDragging) return;
     isDragging = false;
-    
-    const marquee = e.currentTarget;
-    const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
-    
-    function momentumScroll() {
-        if (Math.abs(velocity) > 0.1) {
-            velocity *= friction;
-            scrollLeft += velocity;
+    prevTranslate = currentTranslate;
+
+    function continueAnimation() {
+        const marqueeRows = document.querySelectorAll('.marquee-row');
+        const contentWidth = marqueeRows[0].querySelector('.marquee-content').scrollWidth;
+        
+        // Calculate time remaining based on position
+        const progress = Math.abs(currentTranslate) / contentWidth;
+        const duration = contentWidth / 30; // Base duration
+        const remainingTime = duration * (1 - progress);
+
+        // Apply custom animation to all rows from current position
+        marqueeRows.forEach(row => {
+            const marquee = row.querySelector('.marquee');
+            marquee.style.transform = `translateX(${currentTranslate}px)`;
             
-            // Handle continuous scrolling
-            if (scrollLeft <= -contentWidth/2) {
-                scrollLeft += contentWidth;
-            } else if (scrollLeft >= 0) {
-                scrollLeft -= contentWidth/2;
-            }
+            // Create and apply custom animation
+            const keyframes = [
+                { transform: `translateX(${currentTranslate}px)` },
+                { transform: `translateX(${-contentWidth}px)` }
+            ];
             
-            marquee.style.transform = `translateX(${scrollLeft}px)`;
-            animationFrameId = requestAnimationFrame(momentumScroll);
-        } else {
-            // Resume original animation
-            marquee.style.transform = '';
-            marquee.style.animation = `marquee ${contentWidth/30}s linear infinite`;
-        }
+            const animation = marquee.animate(keyframes, {
+                duration: remainingTime * 1000, // Convert to milliseconds
+                iterations: Infinity,
+                easing: 'linear'
+            });
+
+            // Store animation reference for future use
+            marquee.currentAnimation = animation;
+        });
     }
-    
-    momentumScroll();
+
+    if (Math.abs(velocity) > 0.1) {
+        function momentumScroll() {
+            velocity *= friction;
+            currentTranslate += velocity;
+            prevTranslate = currentTranslate;
+
+            const marqueeRows = document.querySelectorAll('.marquee-row');
+            const contentWidth = marqueeRows[0].querySelector('.marquee-content').scrollWidth;
+
+            // Handle bounds
+            if (currentTranslate <= -contentWidth) {
+                currentTranslate += contentWidth;
+                prevTranslate = currentTranslate;
+            } else if (currentTranslate >= 0) {
+                currentTranslate -= contentWidth;
+                prevTranslate = currentTranslate;
+            }
+
+            // Apply movement to all rows
+            marqueeRows.forEach(row => {
+                const marquee = row.querySelector('.marquee');
+                marquee.style.transform = `translateX(${currentTranslate}px)`;
+            });
+
+            if (Math.abs(velocity) > 0.1) {
+                animationID = requestAnimationFrame(momentumScroll);
+            } else {
+                continueAnimation();
+            }
+        }
+        momentumScroll();
+    } else {
+        continueAnimation();
+    }
 }
 
 function ensureEnoughItems(marquee) {
@@ -2511,7 +2552,6 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('resize', () => {
     populateMarquee();
 });
-
         document.addEventListener('DOMContentLoaded', function() {
     const navCloseButton = document.getElementById('nav-close');
     const newChatButtonNav = document.getElementById('new-chat-button-nav');
