@@ -288,7 +288,8 @@ class VotalityAIService {
         11. Give short concise response.
         12. Never give a response with any of these {},[], or with a response that [something not found]!! Never
         13. Use strictly formal language, do not use methaphors and examples
-        14. Never give a response that's too long 
+        14. Never give a response that's too long
+        15. Give short to medium response!!! Very Important
         
         You can discuss stocks, forex, crypto, and market indexes.";
         if ($marketData) {
