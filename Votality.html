@@ -896,6 +896,11 @@ footer {
     left: 50%;
     transform: translateX(-50%);
     overflow: hidden;
+    cursor: grab;
+}
+
+.marquee-container:active {
+    cursor: grabbing;
 }
 
 .marquee-row {
@@ -904,33 +909,14 @@ footer {
     display: flex;
 }
 
-        .marquee-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .marquee {
+.marquee {
     display: flex;
-    cursor: grab;
-    user-select: none;
     position: relative;
     transform: translateX(0);
     transition: transform 0.1s ease-out;
 }
 
-.marquee:active {
-    cursor: grabbing;
-}
-
-        .marquee-reverse {
-            animation-direction: reverse;
-        }
-
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        .marquee-content {
+.marquee-content {
     display: flex;
     white-space: nowrap;
     will-change: transform;
