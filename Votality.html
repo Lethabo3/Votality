@@ -914,6 +914,7 @@ footer {
     position: relative;
     transform: translateX(0);
     transition: transform 0.1s ease-out;
+    animation: marquee 30s linear infinite;
 }
 
 .marquee-content {
@@ -2384,7 +2385,16 @@ function populateMarquee() {
         content.innerHTML = itemsHTML + itemsHTML;
     });
 
-    // Add event listeners to the container instead of individual marquees
+    // Start the initial animation for all rows
+    const marqueeRows = document.querySelectorAll('.marquee-row');
+    marqueeRows.forEach(row => {
+        const marquee = row.querySelector('.marquee');
+        const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
+        const duration = contentWidth / 30;
+        marquee.style.animation = `marquee ${duration}s linear infinite`;
+    });
+
+    // Add event listeners to the container for user interaction
     const container = document.querySelector('.marquee-container');
     container.addEventListener('mousedown', startDragging);
     container.addEventListener('touchstart', startDragging, { passive: false });
