@@ -887,33 +887,39 @@ footer {
 }
 
 .marquee-container {
-            position: relative;
-            width: 100vw;
-            background: transparent;
-            padding: 10px 0;
-            margin-top: -105px;
-            margin-bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            pointer-events: none;
-        }
+    position: relative;
+    width: 100vw;
+    background: transparent;
+    padding: 10px 0;
+    margin-top: -105px;
+    margin-bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    overflow: hidden;
+}
 
-        .marquee-row {
-            margin-bottom: 10px;
-            overflow: hidden;
-            display: flex;
-            pointer-events: none;
-        }
+.marquee-row {
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: flex;
+}
 
         .marquee-row:last-child {
             margin-bottom: 0;
         }
 
         .marquee {
-            display: flex;
-            animation: marquee 100s linear infinite;
-            pointer-events: none;
-        }
+    display: flex;
+    cursor: grab;
+    user-select: none;
+    position: relative;
+    transform: translateX(0);
+    transition: transform 0.1s ease-out;
+}
+
+.marquee:active {
+    cursor: grabbing;
+}
 
         .marquee-reverse {
             animation-direction: reverse;
@@ -925,42 +931,51 @@ footer {
         }
 
         .marquee-content {
-            display: flex;
-            white-space: nowrap;
-            will-change: transform;
-            pointer-events: none;
-        }
+    display: flex;
+    white-space: nowrap;
+    will-change: transform;
+}
 
-        .marquee-item {
-            flex: 0 0 auto;
-            margin: 0 3px;
-            padding: 6px 8px;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            pointer-events: none;
-            user-select: none;
-            white-space: nowrap;
-        }
+.marquee-item {
+    flex: 0 0 auto;
+    margin: 0 3px;
+    padding: 6px 8px;
+    background-color: #f0f0f0;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
 
-        .marquee-item-icon {
-            flex-shrink: 0;
-            width: 16px;
-            height: 16px;
-            margin-right: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.marquee-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-        .marquee-item-text {
-            font-size: 12px;
-            color: #333;
-            font-weight: bold;
-            white-space: nowrap;
-        }
+.marquee-item-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.marquee-item-text {
+    font-size: 12px;
+    color: #333;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+@keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
                 .dot-pattern {
             position: absolute;
             top: 0;
@@ -2344,73 +2359,141 @@ function getCategoryFromSummary(summary) {
     return 'General';
 }        
 
+// Marquee items and state management
 const marqueeItems = [
-            { text: "What drives stock prices?", emoji: "📈" },
-            { text: "How do interest rates affect markets?", emoji: "🏦" },
-            { text: "What is market capitalization?", emoji: "💹" },
-            { text: "How does inflation impact investments?", emoji: "💸" },
-            { text: "What are bull and bear markets?", emoji: "🐂" },
-            { text: "How do ETFs work?", emoji: "🧺" },
-            { text: "What is diversification in investing?", emoji: "🌈" },
-            { text: "How do dividends benefit investors?", emoji: "💰" },
-            { text: "What is the price-to-earnings ratio?", emoji: "🔢" },
-            { text: "How do economic indicators affect markets?", emoji: "📊" }
-        ];
+    { text: "What drives stock prices?", emoji: "📈" },
+    { text: "How do interest rates affect markets?", emoji: "🏦" },
+    { text: "What is market capitalization?", emoji: "💹" },
+    { text: "How does inflation impact investments?", emoji: "💸" },
+    { text: "What are bull and bear markets?", emoji: "🐂" },
+    { text: "How do ETFs work?", emoji: "🧺" },
+    { text: "What is diversification in investing?", emoji: "🌈" },
+    { text: "How do dividends benefit investors?", emoji: "💰" },
+    { text: "What is the price-to-earnings ratio?", emoji: "🔢" },
+    { text: "How do economic indicators affect markets?", emoji: "📊" }
+];
 
-        function createMarqueeItem(item) {
-            return `
-                <div class="marquee-item" data-text="${item.text}">
-                    <div class="marquee-item-icon">${item.emoji}</div>
-                    <div class="marquee-item-text">${item.text}</div>
-                </div>
-            `;
-        }
+// Dragging state variables
+let isDragging = false;
+let startX;
+let scrollLeft;
+let animationFrameId;
+let velocity = 0;
+const friction = 0.95;
 
-        function populateMarquee() {
-            const marqueeContents = document.querySelectorAll('.marquee-content');
-            
-            marqueeContents.forEach((content, index) => {
-                // Rotate the items for each row
-                const rotatedItems = [...marqueeItems.slice(index), ...marqueeItems.slice(0, index)];
-                
-                // Create and duplicate the content
-                const itemsHTML = rotatedItems.map(createMarqueeItem).join('');
-                content.innerHTML = itemsHTML + itemsHTML; // Duplicate for seamless loop
+function createMarqueeItem(item) {
+    return `
+        <div class="marquee-item" data-text="${item.text}">
+            <div class="marquee-item-icon">${item.emoji}</div>
+            <div class="marquee-item-text">${item.text}</div>
+        </div>
+    `;
+}
+
+function populateMarquee() {
+    const marqueeContents = document.querySelectorAll('.marquee-content');
+    
+    marqueeContents.forEach((content, index) => {
+        const rotatedItems = [...marqueeItems.slice(index), ...marqueeItems.slice(0, index)];
+        const itemsHTML = rotatedItems.map(createMarqueeItem).join('');
+        content.innerHTML = itemsHTML + itemsHTML;
+    });
+
+    const marquees = document.querySelectorAll('.marquee');
+    marquees.forEach(marquee => {
+        const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
+        const duration = contentWidth / 30;
+        
+        // Set initial animation
+        marquee.style.animation = `marquee ${duration}s linear infinite`;
+        
+        // Add interactive event listeners
+        marquee.addEventListener('mousedown', startDragging);
+        marquee.addEventListener('touchstart', startDragging, { passive: false });
+        marquee.addEventListener('mousemove', drag);
+        marquee.addEventListener('touchmove', drag, { passive: false });
+        marquee.addEventListener('mouseup', stopDragging);
+        marquee.addEventListener('touchend', stopDragging);
+        marquee.addEventListener('mouseleave', stopDragging);
+        
+        // Add click handler to marquee items
+        marquee.querySelectorAll('.marquee-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (!isDragging) {
+                    handleMarqueeItemClick(item.dataset.text);
+                }
             });
-
-            // Adjust animation duration based on content length
-            const marquees = document.querySelectorAll('.marquee');
-            marquees.forEach(marquee => {
-                const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
-                const duration = contentWidth / 30; // Adjust speed factor as needed
-                marquee.style.animation = `marquee ${duration}s linear infinite`;
-            });
-        }
-
-        // Initialize when the document is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            populateMarquee();
         });
+    });
+}
+
+function startDragging(e) {
+    isDragging = true;
+    const marquee = e.currentTarget;
+    startX = e.type === 'mousedown' ? e.pageX : e.touches[0].pageX;
+    scrollLeft = marquee.scrollLeft;
+    
+    // Pause the animation
+    marquee.style.animation = 'none';
+    marquee.style.transform = `translateX(${scrollLeft}px)`;
+}
+
+function drag(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const marquee = e.currentTarget;
+    const x = e.type === 'mousemove' ? e.pageX : e.touches[0].pageX;
+    const walk = (x - startX) * 2;
+    
+    // Update velocity for momentum scrolling
+    velocity = walk * 0.1;
+    
+    marquee.style.transform = `translateX(${scrollLeft + walk}px)`;
+}
+
+function stopDragging(e) {
+    if (!isDragging) return;
+    isDragging = false;
+    
+    const marquee = e.currentTarget;
+    const contentWidth = marquee.querySelector('.marquee-content').scrollWidth;
+    
+    function momentumScroll() {
+        if (Math.abs(velocity) > 0.1) {
+            velocity *= friction;
+            scrollLeft += velocity;
+            
+            // Handle continuous scrolling
+            if (scrollLeft <= -contentWidth/2) {
+                scrollLeft += contentWidth;
+            } else if (scrollLeft >= 0) {
+                scrollLeft -= contentWidth/2;
+            }
+            
+            marquee.style.transform = `translateX(${scrollLeft}px)`;
+            animationFrameId = requestAnimationFrame(momentumScroll);
+        } else {
+            // Resume original animation
+            marquee.style.transform = '';
+            marquee.style.animation = `marquee ${contentWidth/30}s linear infinite`;
+        }
+    }
+    
+    momentumScroll();
+}
 
 function ensureEnoughItems(marquee) {
     const containerWidth = marquee.offsetWidth;
-    const itemsWidth = marquee.scrollWidth / 2; // Divide by 2 because we duplicated the content
+    const itemsWidth = marquee.scrollWidth / 2;
     
     if (itemsWidth < containerWidth * 2) {
-        // If the items don't fill twice the container width, add more
         const repetitions = Math.ceil((containerWidth * 2) / itemsWidth);
         marquee.innerHTML = marquee.innerHTML.repeat(repetitions);
     }
 }
 
-// Call this function when the window is resized
-window.addEventListener('resize', populateMarquee);
-
-// Initial population
-document.addEventListener('DOMContentLoaded', populateMarquee);
-
 function handleMarqueeItemClick(text) {
-    // Create a new chat if one doesn't exist
     if (!currentChatId) {
         createNewChat().then(() => {
             sendMarqueeMessage(text);
@@ -2427,12 +2510,21 @@ function sendMarqueeMessage(text) {
     sendMessage(text);
 }
 
-        function hideMarqueeContainer() {
-            const marqueeContainer = document.querySelector('.marquee-container');
-            if (marqueeContainer) {
-                marqueeContainer.style.display = 'none';
-            }
-        }
+function hideMarqueeContainer() {
+    const marqueeContainer = document.querySelector('.marquee-container');
+    if (marqueeContainer) {
+        marqueeContainer.style.display = 'none';
+    }
+}
+
+// Initialize and handle window resize
+document.addEventListener('DOMContentLoaded', () => {
+    populateMarquee();
+});
+
+window.addEventListener('resize', () => {
+    populateMarquee();
+});
 
         document.addEventListener('DOMContentLoaded', function() {
     const navCloseButton = document.getElementById('nav-close');
