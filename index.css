@@ -42,92 +42,22 @@
     font-style: normal;
   }
   
-  body, html {
+body, html {
     font-family: 'GeneralSans-Medium';
     background-color: var(--background-color);
     color: var(--text-color);
     line-height: 1.6;
     height: 100%;
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-    
-    /* Disable hyphenation globally */
-    -webkit-hyphens: none;
-    -ms-hyphens: none;
-    hyphens: none;
-    
-    /* Control word breaks */
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: normal;
-    
-    /* Preserve whitespace */
-    white-space: pre-wrap;
+overflow: hidden;
+position: fixed;
+width: 100%;
 }
 
 body {
-    background-color: var(--background-color);
-    background-size: 100% 100%, 40px 40px, 40px 40px; /* Increased grid size for subtlety */
-    position: relative;
-    
-    /* Disable hyphenation globally */
-    -webkit-hyphens: none;
-    -ms-hyphens: none;
-    hyphens: none;
-    
-    /* Control word breaks */
-    overflow-wrap: break-word;
-    word-wrap: break-word;
-    word-break: normal;
-    
-    /* Preserve whitespace */
-    white-space: pre-wrap;
-}
+background-color: var(--background-color);
 
-/* Ensure text containers prevent all hyphenation and preserve words */
-.message,
-.ai-message,
-.user-message,
-.chat-container,
-.text-container,
-.message-content,
-p,
-div {
-    /* Completely disable all hyphenation */
-    -webkit-hyphens: none !important;
-    -moz-hyphens: none !important;
-    -ms-hyphens: none !important;
-    hyphens: none !important;
-    
-    /* Force words to wrap intact */
-    word-wrap: normal !important;
-    word-break: normal !important;
-    -webkit-word-break: normal !important;
-    
-    /* Ensure words stay whole */
-    overflow-wrap: anywhere !important;
-    
-    /* Allow natural text flow */
-    white-space: pre-wrap !important;
-    
-    /* Prevent any auto text adjustments */
-    text-align-last: start !important;
-    text-justify: none !important;
-    
-    /* Ensure container allows proper text flow */
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* Additional specificity for any text elements */
-.message *,
-.text-container * {
-    -webkit-hyphens: none !important;
-    -moz-hyphens: none !important;
-    -ms-hyphens: none !important;
-    hyphens: none !important;
+background-size: 100% 100%, 40px 40px, 40px 40px; /* Increased grid size for subtlety */
+position: relative;
 }
 
 .layout {
@@ -1086,7 +1016,7 @@ background-image: none;
 display: none;
 height: calc(100vh - 200px);
 overflow-y: auto;
-padding-top: 200px;
+padding-top: 20px;
 padding-bottom: 20px;
 scrollbar-width: none;
 -ms-overflow-style: none;
