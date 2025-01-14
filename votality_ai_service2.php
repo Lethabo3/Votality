@@ -150,47 +150,80 @@ class VotalityAIService {
             // Log the request payload for debugging
             error_log("Request payload: " . json_encode($aiRequest, JSON_PRETTY_PRINT));
     
-            $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => json_encode($aiRequest),
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Accept: application/json'
-                ],
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_VERBOSE => true
-            ]);
-    
-            // Create a temporary file handle for CURL debugging
-            $verbose = fopen('php://temp', 'w+');
-            curl_setopt($ch, CURLOPT_STDERR, $verbose);
-    
-            // Execute the request and capture response details
-            $response = curl_exec($ch);
-            $curlError = curl_error($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            
-            // Get verbose debug information
-            rewind($verbose);
-            $verboseLog = stream_get_contents($verbose);
-            fclose($verbose);
-    
-            // Log detailed debug information
-            error_log("HTTP Code: " . $httpCode);
-            error_log("Curl Error: " . $curlError);
-            error_log("Verbose log: " . $verboseLog);
-            error_log("Raw response: " . $response);
-    
-            curl_close($ch);
-    
-            if ($curlError) {
-                throw new Exception("Curl error: " . $curlError);
-            }
-    
-            if ($httpCode !== 200) {
-                throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
+            // Initialize retry variables
+            $maxRetries = 3;
+            $attempt = 0;
+            $response = null;
+            $lastError = null;
+
+            while ($attempt < $maxRetries) {
+                try {
+                    $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
+                    curl_setopt_array($ch, [
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_POST => true,
+                        CURLOPT_POSTFIELDS => json_encode($aiRequest),
+                        CURLOPT_HTTPHEADER => [
+                            'Content-Type: application/json',
+                            'Accept: application/json'
+                        ],
+                        CURLOPT_TIMEOUT => 30,
+                        CURLOPT_VERBOSE => true
+                    ]);
+        
+                    // Create a temporary file handle for CURL debugging
+                    $verbose = fopen('php://temp', 'w+');
+                    curl_setopt($ch, CURLOPT_STDERR, $verbose);
+        
+                    // Execute the request and capture response details
+                    $response = curl_exec($ch);
+                    $curlError = curl_error($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    
+                    // Get verbose debug information
+                    rewind($verbose);
+                    $verboseLog = stream_get_contents($verbose);
+                    fclose($verbose);
+        
+                    // Log detailed debug information
+                    error_log("Attempt " . ($attempt + 1) . " - HTTP Code: " . $httpCode);
+                    error_log("Curl Error: " . $curlError);
+                    error_log("Verbose log: " . $verboseLog);
+                    error_log("Raw response: " . $response);
+        
+                    curl_close($ch);
+        
+                    if ($curlError) {
+                        throw new Exception("Curl error: " . $curlError);
+                    }
+        
+                    // Handle rate limiting
+                    if ($httpCode === 429) {
+                        $attempt++;
+                        if ($attempt < $maxRetries) {
+                            $waitTime = pow(2, $attempt); // Exponential backoff: 2, 4, 8 seconds
+                            error_log("Rate limit hit. Waiting {$waitTime} seconds before retry...");
+                            sleep($waitTime);
+                            continue;
+                        }
+                    }
+        
+                    if ($httpCode !== 200) {
+                        throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
+                    }
+        
+                    // If we get here, the request was successful
+                    break;
+                } catch (Exception $e) {
+                    $lastError = $e;
+                    $attempt++;
+                    if ($attempt >= $maxRetries) {
+                        throw $lastError;
+                    }
+                    $waitTime = pow(2, $attempt);
+                    error_log("Request failed. Waiting {$waitTime} seconds before retry...");
+                    sleep($waitTime);
+                }
             }
     
             if (empty($response)) {
@@ -243,6 +276,71 @@ class VotalityAIService {
         }
 
         return null;
+    }
+
+    private function makeGeminiRequest($aiRequest, $maxRetries = 3) {
+        $attempt = 0;
+        while ($attempt < $maxRetries) {
+            try {
+                $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST => true,
+                    CURLOPT_POSTFIELDS => json_encode($aiRequest),
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type: application/json',
+                        'Accept: application/json'
+                    ],
+                    CURLOPT_TIMEOUT => 30,
+                    CURLOPT_VERBOSE => true
+                ]);
+
+                $verbose = fopen('php://temp', 'w+');
+                curl_setopt($ch, CURLOPT_STDERR, $verbose);
+
+                $response = curl_exec($ch);
+                $curlError = curl_error($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                rewind($verbose);
+                $verboseLog = stream_get_contents($verbose);
+                fclose($verbose);
+
+                error_log("Attempt " . ($attempt + 1) . " - HTTP Code: " . $httpCode);
+                error_log("Verbose log: " . $verboseLog);
+
+                curl_close($ch);
+
+                if ($httpCode === 429) {
+                    $attempt++;
+                    if ($attempt < $maxRetries) {
+                        $waitTime = pow(2, $attempt); // Exponential backoff: 2, 4, 8 seconds
+                        error_log("Rate limit hit. Waiting {$waitTime} seconds before retry...");
+                        sleep($waitTime);
+                        continue;
+                    }
+                }
+
+                if ($curlError) {
+                    throw new Exception("Curl error: " . $curlError);
+                }
+
+                if ($httpCode !== 200) {
+                    throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
+                }
+
+                return $response;
+            } catch (Exception $e) {
+                if ($attempt >= $maxRetries - 1) {
+                    throw $e;
+                }
+                $attempt++;
+                $waitTime = pow(2, $attempt);
+                error_log("Request failed. Waiting {$waitTime} seconds before retry...");
+                sleep($waitTime);
+            }
+        }
+        throw new Exception("Max retries exceeded");
     }
 
     private function fetchMarketData($instrument) {
