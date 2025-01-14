@@ -11,3 +11,7 @@ define('ALPHA_VANTAGE_API_KEY', 'U1JW9YY2S4VTQMOD');
 
 // Add this line for the Polygon API key
 define('POLYGON_API_KEY', '7Tnq0ULTT0Ih6mK9Xep0fxAf8PnTc9Vr');
+
+// Add Tavility API configuration
+define('TAVILITY_API_KEY', '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');
+define('TAVILITY_API_URL', 'https://api.tavility.com/v1');

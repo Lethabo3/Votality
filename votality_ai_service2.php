@@ -9,6 +9,8 @@ class VotalityAIService {
     private $finnhubApiKey;
     private $marketauxApiKey;
     private $nasdaqDataLinkApiKey;
+    private $tavilityApiKey;
+    private $tavilityApiUrl;
     
     // API URLs
     private $openExchangeRatesApiUrl = 'https://openexchangerates.org/api';
@@ -29,6 +31,69 @@ class VotalityAIService {
         $this->finnhubApiKey = 'crnm7tpr01qt44di3q5gcrnm7tpr01qt44di3q60';
         $this->marketauxApiKey = 'o4VnvcRmaBZeK4eBHPJr8KP3xN8gMBTedxHGkCNz';
         $this->nasdaqDataLinkApiKey = 'VGV68j1nV9w9Zn3vwbsG';
+        $this->tavilityApiKey = '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';
+        $this->tavilityApiUrl = 'https://api.tavility.com/v1';
+    }
+
+    private function performTavilitySearch($query) {
+        try {
+            if (empty($this->tavilityApiKey) || empty($this->tavilityApiUrl)) {
+                error_log("Tavility configuration missing");
+                return null;
+            }
+    
+            $url = $this->tavilityApiUrl . '/search';
+            error_log("Tavility search URL: " . $url);
+            
+            $data = [
+                'query' => $query,
+                'limit' => 5
+            ];
+            error_log("Search request data: " . json_encode($data));
+    
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($data),
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $this->tavilityApiKey,
+                    'Content-Type: application/json'
+                ],
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_VERBOSE => true
+            ]);
+    
+            $response = curl_exec($ch);
+            $curlError = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            
+            error_log("Tavility response code: " . $httpCode);
+            error_log("Tavility response: " . $response);
+            if ($curlError) {
+                error_log("Curl error: " . $curlError);
+            }
+    
+            curl_close($ch);
+    
+            if ($httpCode !== 200) {
+                error_log("Tavility API request failed with status code: " . $httpCode);
+                return null;
+            }
+    
+            $decoded = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("JSON decode error: " . json_last_error_msg());
+                return null;
+            }
+    
+            return $decoded;
+        } catch (Exception $e) {
+            error_log("Error in Tavility search: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return null;
+        }
     }
 
     public function generateResponse($message, $chatId) {
@@ -39,6 +104,22 @@ class VotalityAIService {
             error_log("API URL: " . $this->apiUrl);
             error_log("Using model: gemini-1.5-flash-latest");
             
+            // Perform Tavility search and get relevant information
+            error_log("Performing Tavility search for: " . $message);
+            $searchResults = $this->performTavilitySearch($message);
+            
+            // Prepare search context
+            $searchContext = '';
+            if ($searchResults && !empty($searchResults['results'])) {
+                error_log("Found " . count($searchResults['results']) . " search results");
+                $searchContext = "\n\nRelevant information from web search:\n";
+                foreach ($searchResults['results'] as $result) {
+                    $searchContext .= "- {$result['title']}: {$result['snippet']}\n";
+                }
+            } else {
+                error_log("No search results found or search failed");
+            }
+            
             // Prepare the request - Note the structure for Gemini 1.5
             $aiRequest = [
                 'contents' => [
@@ -46,7 +127,7 @@ class VotalityAIService {
                         'role' => 'user',
                         'parts' => [
                             [
-                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
+                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message . $searchContext
                             ]
                         ]
                     ]
@@ -649,5 +730,6 @@ class VotalityAIService {
         $this->cacheDuration = max(60, min(3600, $seconds)); // Limit between 1 minute and 1 hour
     }
 }
+
 
 ?>
