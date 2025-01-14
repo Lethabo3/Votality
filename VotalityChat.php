@@ -18,6 +18,16 @@ session_start();
 
 $response = ['error' => 'Invalid action'];
 
+$cache = new CacheImplementation();
+$logger = new LoggerImplementation();
+$api = new APIHandler($cache, $logger);
+
+try {
+    $stockData = $api->makeRequest('/stocks/quote', ['symbol' => 'AAPL']);
+} catch (AllProvidersFailedException $e) {
+    // Handle complete failure scenario
+    $errors = $e->getProviderErrors();
+}
 try {
     global $conn;
     if (!$conn) {
@@ -439,5 +449,176 @@ function updateChatSummary($chatId, $message) {
     $_SESSION['chats'][$chatId]['summary'] = $summary;
     
     logMessage("Updated summary for chat $chatId: $summary");
+}
+
+class APIHandler {
+    private $providers = [];
+    private $cache;
+    private $logger;
+    
+    private const MAX_RETRIES = 3;
+    private const RATE_LIMIT_CODES = [429, 403];
+    private const RETRY_CODES = [500, 502, 503, 504];
+    
+    public function __construct($cache, $logger) {
+        $this->cache = $cache;
+        $this->logger = $logger;
+        
+        // Register API providers with their priorities
+        $this->registerProvider('alphavantage', [
+            'key' => getenv('ALPHA_VANTAGE_API_KEY'),
+            'baseUrl' => 'https://www.alphavantage.co/query',
+            'priority' => 1,
+            'rateLimit' => 5 // requests per minute
+        ]);
+        
+        $this->registerProvider('nasdaq', [
+            'key' => getenv('NASDAQ_API_KEY'),
+            'baseUrl' => 'https://api.nasdaq.com/api/v1',
+            'priority' => 2,
+            'rateLimit' => 30
+        ]);
+        
+        $this->registerProvider('benzinga', [
+            'key' => getenv('BENZINGA_API_KEY'),
+            'baseUrl' => 'https://api.benzinga.com/api/v2',
+            'priority' => 3,
+            'rateLimit' => 60
+        ]);
+    }
+    
+    public function makeRequest($endpoint, $params = [], $method = 'GET') {
+        $attempts = 0;
+        $errors = [];
+        
+        foreach ($this->getProvidersByPriority() as $provider) {
+            while ($attempts < self::MAX_RETRIES) {
+                try {
+                    if (!$this->checkRateLimit($provider)) {
+                        throw new RateLimitException("Rate limit exceeded for {$provider['name']}");
+                    }
+                    
+                    $response = $this->executeRequest($provider, $endpoint, $params, $method);
+                    $this->updateRateLimit($provider);
+                    
+                    if ($response) {
+                        return $response;
+                    }
+                    
+                } catch (RateLimitException $e) {
+                    $this->logger->warning("Rate limit hit for provider {$provider['name']}", [
+                        'exception' => $e,
+                        'attempt' => $attempts + 1
+                    ]);
+                    break; // Try next provider
+                    
+                } catch (APIException $e) {
+                    $errors[] = [
+                        'provider' => $provider['name'],
+                        'error' => $e->getMessage()
+                    ];
+                    
+                    if (in_array($e->getCode(), self::RETRY_CODES)) {
+                        $attempts++;
+                        $backoff = min(pow(2, $attempts), 32);
+                        sleep($backoff);
+                        continue;
+                    }
+                    break; // Try next provider
+                }
+            }
+        }
+        
+        throw new AllProvidersFailedException("All API providers failed", 0, null, $errors);
+    }
+    
+    private function executeRequest($provider, $endpoint, $params, $method) {
+        $url = $provider['baseUrl'] . $endpoint;
+        $params['apikey'] = $provider['key'];
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $method === 'GET' ? $url . '?' . http_build_query($params) : $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 10,
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_POSTFIELDS => $method !== 'GET' ? json_encode($params) : null,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Accept: application/json'
+            ]
+        ]);
+        
+        $response = curl_exec($ch);
+        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+        
+        if ($error) {
+            throw new APIException("CURL Error: $error", 0);
+        }
+        
+        if (in_array($statusCode, self::RATE_LIMIT_CODES)) {
+            throw new RateLimitException("Rate limit exceeded", $statusCode);
+        }
+        
+        if ($statusCode >= 400) {
+            throw new APIException("API Error: HTTP $statusCode", $statusCode);
+        }
+        
+        $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new APIException("Invalid JSON response", 0);
+        }
+        
+        return $data;
+    }
+    
+    private function registerProvider($name, $config) {
+        $this->providers[$name] = array_merge(['name' => $name], $config);
+    }
+    
+    private function getProvidersByPriority() {
+        $providers = $this->providers;
+        usort($providers, function($a, $b) {
+            return $a['priority'] <=> $b['priority'];
+        });
+        return $providers;
+    }
+    
+    private function checkRateLimit($provider) {
+        $cacheKey = "rate_limit_{$provider['name']}";
+        $requests = $this->cache->get($cacheKey) ?? [];
+        $currentTime = time();
+        
+        // Remove requests older than 1 minute
+        $requests = array_filter($requests, function($timestamp) use ($currentTime) {
+            return $currentTime - $timestamp < 60;
+        });
+        
+        return count($requests) < $provider['rateLimit'];
+    }
+    
+    private function updateRateLimit($provider) {
+        $cacheKey = "rate_limit_{$provider['name']}";
+        $requests = $this->cache->get($cacheKey) ?? [];
+        $requests[] = time();
+        $this->cache->set($cacheKey, $requests, 60);
+    }
+}
+
+class APIException extends Exception {}
+class RateLimitException extends APIException {}
+class AllProvidersFailedException extends APIException {
+    private $providerErrors;
+    
+    public function __construct($message, $code = 0, $previous = null, $errors = []) {
+        parent::__construct($message, $code, $previous);
+        $this->providerErrors = $errors;
+    }
+    
+    public function getProviderErrors() {
+        return $this->providerErrors;
+    }
 }
 ?>
