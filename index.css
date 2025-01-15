@@ -988,11 +988,33 @@ padding-top: 3px;
 }
 
 .textarea-container.repositioned {
-position: fixed;
-bottom: 20px;
-width: 90%;
-max-width: 800px;
-z-index: 10;
+    position: fixed;
+    bottom: 20px;
+    width: 90%;
+    max-width: 800px;
+    height: 120px; /* Added fixed height */
+    z-index: 10;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjusting the textarea within the container */
+.textarea-container.repositioned .textarea-input {
+    height: 100%;
+    resize: none;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+/* Ensure buttons stay properly positioned */
+.textarea-container.repositioned #submit-button,
+.textarea-container.repositioned #attachment-button,
+.textarea-container.repositioned #research-button {
+    bottom: 15px;
 }
 
 .fade-out {
