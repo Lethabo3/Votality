@@ -973,7 +973,7 @@ z-index: 0;
 }
 
 .disclaimer {
-font-size: 0.875rem;
+font-size: 0rem;
 color: #4b5563;
 text-align: center;
 margin-bottom: 0.5rem;
@@ -989,16 +989,14 @@ padding-top: 3px;
 
 .textarea-container.repositioned {
     position: fixed;
-    bottom: 20px;
-    width: 90%;
+    bottom: -0.8rem;
+    width: 55%;
     max-width: 800px;
-    height: 10px; /* Added fixed height */
+    height: 90px;
     z-index: 10;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
+    left: 48%; /* Adjusted from 50% to 35% to move it more to the left */
+    transform: translateX(-50%); /* This keeps it anchored relative to the left position */
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Adjusting the textarea within the container */
@@ -1007,14 +1005,66 @@ padding-top: 3px;
     resize: none;
     padding: 16px;
     border-radius: 12px;
-    border: 1px solid #e5e7eb;
 }
 
-/* Ensure buttons stay properly positioned */
-.textarea-container.repositioned #submit-button,
-.textarea-container.repositioned #attachment-button,
+.textarea-container.repositioned #submit-button {
+    position: absolute !important;
+    right: 10px !important;
+    bottom: 8px !important;
+    transform: none !important;
+}
+
+.textarea-container.repositioned #attachment-button {
+    position: absolute !important;
+    left: 10px !important;
+    bottom: 8px !important;
+    transform: none !important;
+}
+
 .textarea-container.repositioned #research-button {
-    bottom: 15px;
+    position: absolute !important;
+    left: 55px !important;
+    bottom: 8px !important;
+    transform: none !important;
+}
+
+.chat-container.fade-in ~ .scroll-to-bottom-button {
+    position: fixed;
+    bottom: 7rem;
+    right: 10%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+}
+
+/* Add this new style for when chat is repositioned */
+.chat-container.fade-in + .scroll-to-bottom-button {
+    position: relative;
+    bottom: 2.4rem;
+    right: 15%; /* Move it to match the chat container position */
+    margin-left: 0;
+}
+
+.chat-container.fade-in ~ .scroll-to-bottom-button.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* When sidebar is collapsed */
+.sidebar.collapsed ~ .main-content .chat-container.fade-in {
+    left: 30%; /* Move it to match the chat container position */
+    transform: translateX(-50%);
+}
+
+.chat-container.fade-in {
+    display: block;
+    position: relative;
+    left: 26%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 800px;
+    transition: all 0.3s ease;
 }
 
 .fade-out {
