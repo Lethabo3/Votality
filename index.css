@@ -549,7 +549,6 @@ position: relative;
     margin-bottom: 2rem;
     position: relative;
     outline: none;
-    transition: all 0.5s ease; /* Add transition for smooth movement */
 }
 
 .textarea-input {
@@ -994,8 +993,7 @@ padding-top: 3px;
     max-width: 800px;
     height: 90px;
     z-index: 10;
-    left: 48%; /* Adjusted from 50% to 35% to move it more to the left */
-    transform: translateX(-50%); /* This keeps it anchored relative to the left position */
+    left: 20%; /* Adjusted from 50% to 35% to move it more to the left */
     border-radius: 12px;
 }
 
