@@ -9,6 +9,8 @@ class VotalityAIService {
     private $finnhubApiKey;
     private $marketauxApiKey;
     private $nasdaqDataLinkApiKey;
+    private $tavilityApiKey;
+    private $tavilityApiUrl;
     
     // API URLs
     private $openExchangeRatesApiUrl = 'https://openexchangerates.org/api';
@@ -29,24 +31,117 @@ class VotalityAIService {
         $this->finnhubApiKey = 'crnm7tpr01qt44di3q5gcrnm7tpr01qt44di3q60';
         $this->marketauxApiKey = 'o4VnvcRmaBZeK4eBHPJr8KP3xN8gMBTedxHGkCNz';
         $this->nasdaqDataLinkApiKey = 'VGV68j1nV9w9Zn3vwbsG';
+        $this->tavilityApiKey = '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';
+        $this->tavilityApiUrl = 'https://api.tavility.com/v1';
+    }
+
+    private function performTavilitySearch($query) {
+        try {
+            if (empty($this->tavilityApiKey) || empty($this->tavilityApiUrl)) {
+                error_log("Tavility configuration missing");
+                return null;
+            }
+    
+            $url = $this->tavilityApiUrl . '/search';
+            error_log("Tavility search URL: " . $url);
+            
+            $data = [
+                'query' => $query,
+                'limit' => 5
+            ];
+            error_log("Search request data: " . json_encode($data));
+    
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($data),
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $this->tavilityApiKey,
+                    'Content-Type: application/json'
+                ],
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_VERBOSE => true
+            ]);
+    
+            $response = curl_exec($ch);
+            $curlError = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            
+            error_log("Tavility response code: " . $httpCode);
+            error_log("Tavility response: " . $response);
+            if ($curlError) {
+                error_log("Curl error: " . $curlError);
+            }
+    
+            curl_close($ch);
+    
+            if ($httpCode !== 200) {
+                error_log("Tavility API request failed with status code: " . $httpCode);
+                return null;
+            }
+    
+            $decoded = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("JSON decode error: " . json_last_error_msg());
+                return null;
+            }
+    
+            return $decoded;
+        } catch (Exception $e) {
+            error_log("Error in Tavility search: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return null;
+        }
+    }
+
+    private function handleRateLimitResponse($response) {
+        try {
+            $error = json_decode($response, true);
+            if (isset($error['error']['details'][0]['metadata']['quota_location'])) {
+                $location = $error['error']['details'][0]['metadata']['quota_location'];
+                // Try switching to a different region
+                $regions = ['us-east4', 'us-central1', 'europe-west4'];
+                $currentRegion = array_search($location, $regions);
+                if ($currentRegion !== false && isset($regions[$currentRegion + 1])) {
+                    return $regions[$currentRegion + 1];
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error parsing rate limit response: " . $e->getMessage());
+        }
+        return null;
     }
 
     public function generateResponse($message, $chatId) {
         try {
             $this->addToHistory('user', $message);
             
-            // Log configuration for debugging
             error_log("API URL: " . $this->apiUrl);
             error_log("Using model: gemini-1.5-flash-latest");
             
-            // Prepare the request - Note the structure for Gemini 1.5
+            error_log("Performing Tavility search for: " . $message);
+            $searchResults = $this->performTavilitySearch($message);
+            
+            $searchContext = '';
+            if ($searchResults && !empty($searchResults['results'])) {
+                error_log("Found " . count($searchResults['results']) . " search results");
+                $searchContext = "\n\nRelevant information from web search:\n";
+                foreach ($searchResults['results'] as $result) {
+                    $searchContext .= "- {$result['title']}: {$result['snippet']}\n";
+                }
+            } else {
+                error_log("No search results found or search failed");
+            }
+            
             $aiRequest = [
                 'contents' => [
                     [
                         'role' => 'user',
                         'parts' => [
                             [
-                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
+                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message . $searchContext
                             ]
                         ]
                     ]
@@ -66,83 +161,113 @@ class VotalityAIService {
                 ]
             ];
     
-            // Log the request payload for debugging
             error_log("Request payload: " . json_encode($aiRequest, JSON_PRETTY_PRINT));
     
-            $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => json_encode($aiRequest),
-                CURLOPT_HTTPHEADER => [
-                    'Content-Type: application/json',
-                    'Accept: application/json'
-                ],
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_VERBOSE => true
-            ]);
-    
-            // Create a temporary file handle for CURL debugging
-            $verbose = fopen('php://temp', 'w+');
-            curl_setopt($ch, CURLOPT_STDERR, $verbose);
-    
-            // Execute the request and capture response details
-            $response = curl_exec($ch);
-            $curlError = curl_error($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            
-            // Get verbose debug information
-            rewind($verbose);
-            $verboseLog = stream_get_contents($verbose);
-            fclose($verbose);
-    
-            // Log detailed debug information
-            error_log("HTTP Code: " . $httpCode);
-            error_log("Curl Error: " . $curlError);
-            error_log("Verbose log: " . $verboseLog);
-            error_log("Raw response: " . $response);
-    
-            curl_close($ch);
-    
-            if ($curlError) {
-                throw new Exception("Curl error: " . $curlError);
+            $maxRetries = 3;
+            $attempt = 0;
+            $lastError = null;
+            $currentRegion = 'us-east4';
+
+            while ($attempt < $maxRetries) {
+                try {
+                    $apiUrlWithRegion = str_replace('generativelanguage.googleapis.com', 
+                                                  $currentRegion . '-generativelanguage.googleapis.com', 
+                                                  $this->apiUrl);
+                    
+                    $ch = curl_init($apiUrlWithRegion . '?key=' . $this->apiKey);
+                    curl_setopt_array($ch, [
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_POST => true,
+                        CURLOPT_POSTFIELDS => json_encode($aiRequest),
+                        CURLOPT_HTTPHEADER => [
+                            'Content-Type: application/json',
+                            'Accept: application/json'
+                        ],
+                        CURLOPT_TIMEOUT => 30,
+                        CURLOPT_VERBOSE => true
+                    ]);
+        
+                    $verbose = fopen('php://temp', 'w+');
+                    curl_setopt($ch, CURLOPT_STDERR, $verbose);
+        
+                    $response = curl_exec($ch);
+                    $curlError = curl_error($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    
+                    rewind($verbose);
+                    $verboseLog = stream_get_contents($verbose);
+                    fclose($verbose);
+        
+                    error_log("Attempt " . ($attempt + 1) . " - HTTP Code: " . $httpCode);
+                    error_log("Using region: " . $currentRegion);
+                    error_log("Curl Error: " . $curlError);
+                    error_log("Verbose log: " . $verboseLog);
+                    error_log("Raw response: " . $response);
+        
+                    curl_close($ch);
+        
+                    if ($curlError) {
+                        throw new Exception("Curl error: " . $curlError);
+                    }
+        
+                    if ($httpCode === 429) {
+                        $nextRegion = $this->handleRateLimitResponse($response);
+                        if ($nextRegion) {
+                            $currentRegion = $nextRegion;
+                            error_log("Switching to region: " . $currentRegion);
+                            continue;
+                        }
+                        
+                        $attempt++;
+                        if ($attempt < $maxRetries) {
+                            $waitTime = pow(2, $attempt + 2); // Longer wait: 8, 16, 32 seconds
+                            error_log("Rate limit hit. Waiting {$waitTime} seconds before retry...");
+                            sleep($waitTime);
+                            continue;
+                        }
+                    }
+        
+                    if ($httpCode !== 200) {
+                        throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
+                    }
+        
+                    $result = json_decode($response, true);
+                    if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                        throw new Exception("Unexpected response structure: " . json_encode($result));
+                    }
+        
+                    $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
+                    $cleanedResponse = $this->removeAsterisks($aiResponse);
+                    
+                    $this->addToHistory('ai', $cleanedResponse);
+                    
+                    error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
+                    
+                    return $cleanedResponse;
+                    
+                } catch (Exception $e) {
+                    $lastError = $e;
+                    $attempt++;
+                    if ($attempt >= $maxRetries) {
+                        throw $lastError;
+                    }
+                    $waitTime = pow(2, $attempt + 2);
+                    error_log("Request failed. Waiting {$waitTime} seconds before retry...");
+                    sleep($waitTime);
+                }
             }
     
-            if ($httpCode !== 200) {
-                throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
-            }
-    
-            if (empty($response)) {
-                throw new Exception("Empty response received from API");
-            }
-    
-            $result = json_decode($response, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                error_log("JSON decode error. Response received: " . substr($response, 0, 1000));
-                throw new Exception("JSON decode error: " . json_last_error_msg());
-            }
-    
-            // Log the decoded response structure
-            error_log("Decoded response structure: " . json_encode($result, JSON_PRETTY_PRINT));
-    
-            // Updated path for response content in Gemini 1.5
-            if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                throw new Exception("Unexpected response structure: " . json_encode($result));
-            }
-    
-            $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
-            $cleanedResponse = $this->removeAsterisks($aiResponse);
-            
-            $this->addToHistory('ai', $cleanedResponse);
-            
-            // Log successful response
-            error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
-            
-            return $cleanedResponse;
+            throw new Exception("Max retries exceeded");
     
         } catch (Exception $e) {
             error_log("Error in generateResponse: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
+            
+            // Check if it's a rate limit error and add more helpful information
+            if (strpos($e->getMessage(), '429') !== false) {
+                return "I apologize, but I'm receiving too many requests at the moment. Please try again in 30-60 seconds. Details: Rate limit exceeded.";
+            }
+            
             return "I apologize, but I encountered an error processing your request. Please try again in a moment. Error details: " . $e->getMessage();
         }
     }
@@ -162,6 +287,71 @@ class VotalityAIService {
         }
 
         return null;
+    }
+
+    private function makeGeminiRequest($aiRequest, $maxRetries = 3) {
+        $attempt = 0;
+        while ($attempt < $maxRetries) {
+            try {
+                $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST => true,
+                    CURLOPT_POSTFIELDS => json_encode($aiRequest),
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type: application/json',
+                        'Accept: application/json'
+                    ],
+                    CURLOPT_TIMEOUT => 30,
+                    CURLOPT_VERBOSE => true
+                ]);
+
+                $verbose = fopen('php://temp', 'w+');
+                curl_setopt($ch, CURLOPT_STDERR, $verbose);
+
+                $response = curl_exec($ch);
+                $curlError = curl_error($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                rewind($verbose);
+                $verboseLog = stream_get_contents($verbose);
+                fclose($verbose);
+
+                error_log("Attempt " . ($attempt + 1) . " - HTTP Code: " . $httpCode);
+                error_log("Verbose log: " . $verboseLog);
+
+                curl_close($ch);
+
+                if ($httpCode === 429) {
+                    $attempt++;
+                    if ($attempt < $maxRetries) {
+                        $waitTime = pow(2, $attempt); // Exponential backoff: 2, 4, 8 seconds
+                        error_log("Rate limit hit. Waiting {$waitTime} seconds before retry...");
+                        sleep($waitTime);
+                        continue;
+                    }
+                }
+
+                if ($curlError) {
+                    throw new Exception("Curl error: " . $curlError);
+                }
+
+                if ($httpCode !== 200) {
+                    throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
+                }
+
+                return $response;
+            } catch (Exception $e) {
+                if ($attempt >= $maxRetries - 1) {
+                    throw $e;
+                }
+                $attempt++;
+                $waitTime = pow(2, $attempt);
+                error_log("Request failed. Waiting {$waitTime} seconds before retry...");
+                sleep($waitTime);
+            }
+        }
+        throw new Exception("Max retries exceeded");
     }
 
     private function fetchMarketData($instrument) {
@@ -649,5 +839,6 @@ class VotalityAIService {
         $this->cacheDuration = max(60, min(3600, $seconds)); // Limit between 1 minute and 1 hour
     }
 }
+
 
 ?>
