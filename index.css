@@ -992,7 +992,7 @@ padding-top: 3px;
     bottom: 20px;
     width: 90%;
     max-width: 800px;
-    height: 120px; /* Added fixed height */
+    height: 10px; /* Added fixed height */
     z-index: 10;
     left: 50%;
     transform: translateX(-50%);
