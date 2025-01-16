@@ -1233,6 +1233,7 @@ margin-bottom: -1rem;
 
 .related-container {
 margin-top: -1.5rem;
+top: 12rem;
 width: 100%; /* Ensure full width within the chat group */
 }
 
