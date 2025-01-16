@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Information</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+    <style>
+        :root {
+            color-scheme: dark;
+            --background-color: #1a1a1a;
+            --text-color: #ffffff;
+            --border-color: #2e3138;
+            --hover-color: #2a2d33;
+            --secondary-text: #9ba3af;
+            --muted-text: #8c96a3;
+            --secondary-background: #232323;
+            --chart-line: #ef4444;
+            --chart-grid: #374151;
+            --chart-height: 140px;
+            --success-color: #22c55e;
+        }
+
+        @font-face {
+            font-family: 'GeneralSans-Medium';
+            src: url('../fonts/GeneralSans-Medium.woff2') format('woff2'),
+                 url('../fonts/GeneralSans-Medium.woff') format('woff'),
+                 url('../fonts/GeneralSans-Medium.ttf') format('truetype');
+            font-weight: 500;
+            font-display: swap;
+            font-style: normal;
+        }
+
+        body, html {
+            font-family: 'GeneralSans-Medium';
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .stock-container {
+            width: 250px;
+            height: 80%;
+            margin: 20px;
+            padding: 16px;
+            margin-left: 65rem;
+            margin-top: 5rem;
+            border-radius: 12px;
+        }
+
+        .stock-header {
+            margin-bottom: 12px;
+        }
+
+        .stock-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stock-symbol {
+            color: var(--secondary-text);
+            font-size: 11px;
+        }
+
+        .stock-price {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .price-change {
+            color: var(--chart-line);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .price-change.positive {
+            color: var(--success-color);
+        }
+
+        .change-dot {
+            height: 4px;
+            width: 4px;
+            border-radius: 50%;
+            background-color: currentColor;
+            display: inline-block;
+        }
+
+        .timestamp {
+            color: var(--muted-text);
+            font-size: 11px;
+        }
+
+        .time-range {
+            display: flex;
+            font-family: 'GeneralSans-Medium';
+            gap: 8px;
+            margin: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            width: 100%;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .time-range::-webkit-scrollbar {
+            display: none;
+        }
+
+        .time-button {
+            padding: 4px 8px;
+            font-size: 11px;
+            background: transparent;
+            border: 0;
+            color: var(--secondary-text);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .time-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -9px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--text-color);
+        }
+
+        .time-button:hover {
+            background-color: var(--hover-color);
+        }
+
+        .time-button.active {
+            color: var(--text-color);
+        }
+
+        .chart-container {
+            width: 100%;
+            height: var(--chart-height);
+            border-radius: 6px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+        
+        .trading-info,
+        .chart-container,
+        .time-range {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        /* Rest of your existing styles remain the same */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+
+        .stat-card {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-label {
+            color: var(--secondary-text);
+            font-size: 12px;
+        }
+
+        .stat-value {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 13px;
+            color: var(--secondary-text);
+            margin: 12px 0 6px 0;
+            font-weight: 500;
+        }
+
+        .trading-info {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+
+        .trading-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .trading-item:last-child {
+            border-bottom: none;
+        }
+
+        .chart-grid {
+            stroke: var(--chart-grid);
+            stroke-width: 1;
+            stroke-dasharray: 3 6;
+            opacity: 0.8;
+        }
+
+        .price-line {
+            stroke: var(--chart-line);
+            stroke-width: 1.5;
+            fill: none;
+            z-index: 2;
+            position: relative;
+        }
+
+        .change-arrow{
+            transform: rotate(-45deg);
+
+        }
+    </style>
+</head>
+<body>
+    <div class="stock-container">
+        <div class="stock-header">
+            <div class="stock-title">
+                Apple Inc.
+                <span class="stock-symbol">AAPL:NASDAQ</span>
+            </div>
+            <div class="stock-price">
+                $229.97
+                <span class="price-change">
+                    <svg class="change-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 19V5M12 19L5 12M12 19L19 12"/>
+                    </svg>
+                    3.32% <span class="change-dot"></span> 
+                    <span class="price-change">
+                        <svg class="change-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 19V5M12 19L5 12M12 19L19 12"/>
+                        </svg>
+                        $7,90
+                    </span>
+                </span>
+            </div>
+            <div class="timestamp">
+                Updated: Jan 16, 28:17 SAST
+            </div>
+        </div>
+
+        <div class="time-range">
+            <button class="time-button">1D</button>
+            <button class="time-button">5D</button>
+            <button class="time-button">1M</button>
+            <button class="time-button">3M</button>
+            <button class="time-button">6M</button>
+            <button class="time-button active">1Y</button>
+            <button class="time-button">5Y</button>
+            <button class="time-button">MAX</button>
+        </div>
+
+        <div class="chart-container">
+            <svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="none">
+                <g class="chart-grid">
+                    <line x1="0" y1="40" x2="400" y2="40" />
+                    <line x1="0" y1="80" x2="400" y2="80" />
+                    <line x1="0" y1="120" x2="400" y2="120" />
+                    <line x1="0" y1="160" x2="400" y2="160" />
+                    <line x1="80" y1="0" x2="80" y2="200" />
+                    <line x1="160" y1="0" x2="160" y2="200" />
+                    <line x1="240" y1="0" x2="240" y2="200" />
+                    <line x1="320" y1="0" x2="320" y2="200" />
+                </g>
+                <path 
+                    class="price-line" 
+                    d="M0,80 C50,85 100,90 150,100 S250,120 300,130 S350,140 400,150"
+                />
+            </svg>
+        </div>
+
+        <div class="section-title">Key Statistics</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Market Cap</div>
+                <div class="stat-value">$193.44B</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">P/E Ratio</div>
+                <div class="stat-value">105.94</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Revenue (FY)</div>
+                <div class="stat-value">$24.30B</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">EPS</div>
+                <div class="stat-value">$1.13</div>
+            </div>
+        </div>
+
+        <div class="section-title">Trading Information</div>
+        <div class="trading-info">
+            <div class="trading-item">
+                <div class="stat-label">Day Range</div>
+                <div>$230.00 - $238.00</div>
+            </div>
+            <div class="trading-item">
+                <div class="stat-label">52 Week Range</div>
+                <div>$164.00 - $260.00</div>
+            </div>
+            <div class="trading-item">
+                <div class="stat-label">Volume</div>
+                <div>34M</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
