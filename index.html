@@ -164,21 +164,22 @@ gtag('config', 'G-G7WREYHFF7');
                     </div>
                 </button>
                 
-                <button type="button" id="attachment-button" class="focus:outline-none" style="position: absolute; left: 10px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;">
+                <button type="button" id="attachment-button" class="focus:outline-none" style="position: absolute; left: 5px; bottom: 13px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;">
                     <div class="attachment-container" style="padding: 0.5rem;">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4" style="color: #666;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4" style="color: #666; transform: rotate(-45deg);">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                         </svg>
+                        <span class="text-sm" style="color: #666;">Attach</span>
                     </div>
                     <div class="tooltip">
                         <span class="tooltip-text">Attach Files </span>
                     </div>
                 </button>
                 
-                <button type="button" id="research-button" class="attachment-button focus:outline-none" style="position: absolute; left: 55px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;" data-tooltip="Add Research">
+                <button type="button" id="research-button" class="attachment-button focus:outline-none" style="position: absolute; left: 85px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;" data-tooltip="Add Research">
                     <div class="attachment-container" style="display: flex; align-items: center; gap: 4px; padding: 6px 10px;">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4" style="color: #666;">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <span class="text-sm" style="color: #666;">Analyse</span>
                     </div>
@@ -194,26 +195,26 @@ gtag('config', 'G-G7WREYHFF7');
                 </div>
             </button>
             <div id="suggested-queries" class="suggested-queries">
-                <button class="query-chip" data-query="Market trends">
-                    Market trends
+                <button class="query-chip" data-query="NVDA earnings">
+                    NVDA earnings
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                 </button>
-                <button class="query-chip" data-query="Investment strategies">
-                    Investment strategies
+                <button class="query-chip" data-query="TSLA news today">
+                    TSLA news today
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                 </button>
-                <button class="query-chip" data-query="Economic indicators">
-                    Economic indicators
+                <button class="query-chip" data-query="AAPL stock price">
+                    AAPL stock price
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
                 </button>
-                <button class="query-chip" data-query="Risk analysis">
-                    Risk analysis
+                <button class="query-chip" data-query="META forecast">
+                    META forecast
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-400">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                     </svg>
@@ -1358,59 +1359,76 @@ return fileSource;
 
 // Helper function to create source item element
 function createSourceItem(source) {
-const sourceItem = document.createElement('div');
-sourceItem.style.display = 'flex';
-sourceItem.style.alignItems = 'center';
-sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
-sourceItem.style.borderRadius = '8px';
-sourceItem.style.padding = '8px 12px';
-sourceItem.style.width = '200px';
-sourceItem.style.flexShrink = '0';
-sourceItem.style.cursor = 'pointer';
-sourceItem.style.transition = 'background-color 0.2s ease';
-sourceItem.style.position = 'relative';
-
-sourceItem.addEventListener('mouseover', () => {
-    sourceItem.style.backgroundColor = isDarkMode() ? '#2a2d33' : '#e5e7eb';
-});
-
-sourceItem.addEventListener('mouseout', () => {
+    const sourceItem = document.createElement('div');
+    sourceItem.style.display = 'flex';
+    sourceItem.style.flexDirection = 'column';
     sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
-});
+    sourceItem.style.borderRadius = '6px';
+    sourceItem.style.padding = '8px 12px';
+    sourceItem.style.width = '190px'; // Increased width to accommodate the link icon
+    sourceItem.style.flexShrink = '0';
+    sourceItem.style.cursor = 'pointer';
+    sourceItem.style.transition = 'background-color 0.2s ease';
+    sourceItem.style.position = 'relative';
 
-const imageContainer = document.createElement('div');
-imageContainer.style.width = '24px';
-imageContainer.style.height = '24px';
-imageContainer.style.flexShrink = '0';
-imageContainer.style.marginLeft = '-8px';
-imageContainer.style.marginRight = '8px';
-imageContainer.style.display = 'flex';
-imageContainer.style.alignItems = 'center';
+    sourceItem.addEventListener('mouseover', () => {
+        sourceItem.style.backgroundColor = isDarkMode() ? '#2a2d33' : '#e5e7eb';
+    });
+    sourceItem.addEventListener('mouseout', () => {
+        sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
+    });
 
-const sourceImg = document.createElement('img');
-sourceImg.src = source.image;
-sourceImg.alt = source.name;
-sourceImg.style.width = '44px';
-sourceImg.style.height = '44px';
-sourceImg.style.borderRadius = '4px';
-sourceImg.style.objectFit = 'cover';
+    // Container for title and link icon
+    const titleContainer = document.createElement('div');
+    titleContainer.style.display = 'flex';
+    titleContainer.style.justifyContent = 'space-between';
+    titleContainer.style.alignItems = 'center';
+    titleContainer.style.width = '100%';
+    titleContainer.style.marginBottom = '2px';
 
-const sourceName = document.createElement('span');
-sourceName.style.fontSize = '0.875rem';
-sourceName.style.color = isDarkMode() ? '#ffffff' : '#374151';
-sourceName.style.whiteSpace = 'nowrap';
-sourceName.style.overflow = 'hidden';
-sourceName.style.textOverflow = 'ellipsis';
-sourceName.style.flex = '1';
-sourceName.style.marginLeft = source.name === 'Alpha Vantage' ? '-60px' : '-98px';
-sourceName.textContent = source.name;
+    // Create title element
+    const titleElement = document.createElement('div');
+    titleElement.style.fontSize = '0.875rem';
+    titleElement.style.color = isDarkMode() ? '#ffffff' : '#374151';
+    titleElement.style.whiteSpace = 'nowrap';
+    titleElement.style.overflow = 'hidden';
+    titleElement.style.textOverflow = 'ellipsis';
+    titleElement.style.flex = '1';
+    titleElement.textContent = source.name;
 
-imageContainer.appendChild(sourceImg);
-sourceItem.appendChild(imageContainer);
-sourceItem.appendChild(sourceName);
-return sourceItem;
+    // Create link icon
+    const linkIcon = document.createElement('span');
+    linkIcon.innerHTML = '<i data-lucide="external-link" class="w-3 h-3"></i>';
+    linkIcon.style.marginLeft = '8px';
+    linkIcon.style.color = isDarkMode() ? '#9CA3AF' : '#6B7280';
+
+    titleContainer.appendChild(titleElement);
+    titleContainer.appendChild(linkIcon);
+
+    // Create metric element
+    const metricElement = document.createElement('div');
+    metricElement.style.fontSize = '0.75rem';
+    metricElement.style.color = isDarkMode() ? '#9CA3AF' : '#6B7280';
+    metricElement.style.whiteSpace = 'nowrap';
+    metricElement.style.display = 'flex';
+    metricElement.style.alignItems = 'center';
+    metricElement.style.gap = '4px';
+    
+    const metricText = document.createElement('span');
+    metricText.textContent = source.metric;
+    
+    // Create copy icon
+    const copyIcon = document.createElement('span');
+    copyIcon.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i>';
+    
+    metricElement.appendChild(metricText);
+    metricElement.appendChild(copyIcon);
+
+    sourceItem.appendChild(titleContainer);
+    sourceItem.appendChild(metricElement);
+    
+    return sourceItem;
 }
-
 // Add event listener for system dark mode changes
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
 const fileSourceElements = document.querySelectorAll('.file-source');
@@ -2509,258 +2527,366 @@ controls.querySelector('.submit-edit-button').style.display = 'none';
 controls.querySelector('.cancel-edit-button').style.display = 'none';
 }
 
-function addMessage(text, sender, relatedTopics = []) {
-return new Promise((resolve) => {
-    const chatContainer = document.querySelector('.chat-container');
-    let messageElement;
-    
-    if (sender === 'user') {
-        const chatGroup = document.createElement('div');
-        chatGroup.className = 'chat-group';
-        
-        messageElement = document.createElement('div');
-        messageElement.className = 'message user-message';
-        messageElement.textContent = text;
-        
-        chatGroup.appendChild(messageElement);
-        chatContainer.appendChild(chatGroup);
-        
-        // Add edit controls for user messages
-        addEditControls(messageElement);
-        
-        resolve(messageElement);
-    } else {
-        const lastChatGroup = chatContainer.lastElementChild;
+// Helper function to create source item element
+function createSourceItem(source) {
+    const sourceItem = document.createElement('div');
+    sourceItem.style.display = 'flex';
+    sourceItem.style.flexDirection = 'column';
+    sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
+    sourceItem.style.borderRadius = '6px';
+    sourceItem.style.padding = '8px 12px';
+    sourceItem.style.width = '150px';
+    sourceItem.style.flexShrink = '0';
+    sourceItem.style.cursor = 'pointer';
+    sourceItem.style.transition = 'background-color 0.2s ease';
+    sourceItem.style.position = 'relative';
 
-        // Add sources container
-        const sourcesContainer = document.createElement('div');
-        sourcesContainer.className = 'sources-container';
-        sourcesContainer.style.display = 'flex';
-        sourcesContainer.style.flexWrap = 'wrap';
-        sourcesContainer.style.gap = '8px'; // Further reduced gap between items
-        sourcesContainer.style.padding = '1px 16px'; // Further reduced padding
+    sourceItem.addEventListener('mouseover', () => {
+        sourceItem.style.backgroundColor = isDarkMode() ? '#2a2d33' : '#e5e7eb';
+    });
+    sourceItem.addEventListener('mouseout', () => {
+        sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
+    });
+
+    // Create title element
+    const titleElement = document.createElement('div');
+    titleElement.style.fontSize = '0.875rem';
+    titleElement.style.color = isDarkMode() ? '#ffffff' : '#374151';
+    titleElement.style.whiteSpace = 'nowrap';
+    titleElement.style.overflow = 'hidden';
+    titleElement.style.textOverflow = 'ellipsis';
+    titleElement.style.marginBottom = '2px';
+    titleElement.textContent = source.name;
+
+    // Create subtitle/metric element
+    const metricElement = document.createElement('div');
+    metricElement.style.fontSize = '0.75rem';
+    metricElement.style.color = isDarkMode() ? '#9CA3AF' : '#6B7280';
+    metricElement.style.whiteSpace = 'nowrap';
+    metricElement.style.display = 'flex';
+    metricElement.style.alignItems = 'center';
+    metricElement.style.gap = '4px';
+    
+    const metricText = document.createElement('span');
+    metricText.textContent = source.metric;
+    
+    const copyIcon = document.createElement('span');
+    copyIcon.innerHTML = '<i data-lucide="copy" class="w-3 h-3"></i>';
+    
+    metricElement.appendChild(metricText);
+    metricElement.appendChild(copyIcon);
+
+    sourceItem.appendChild(titleElement);
+    sourceItem.appendChild(metricElement);
+    
+    return sourceItem;
+}
+
+function addMessage(text, sender, relatedTopics = []) {
+    return new Promise((resolve) => {
+        const chatContainer = document.querySelector('.chat-container');
+        let messageElement;
         
-        if (attachedFiles && attachedFiles.length > 0) {
-            // Display attached files as sources
-            attachedFiles.forEach(file => {
-                const fileSource = createFileSource(file);
-                sourcesContainer.appendChild(fileSource);
-            });
+        if (sender === 'user') {
+            const chatGroup = document.createElement('div');
+            chatGroup.className = 'chat-group';
+            
+            messageElement = document.createElement('div');
+            messageElement.className = 'message user-message';
+            messageElement.textContent = text;
+            
+            chatGroup.appendChild(messageElement);
+            chatContainer.appendChild(chatGroup);
+            
+            addEditControls(messageElement);
+            resolve(messageElement);
         } else {
-            // Default source display with images
+            const lastChatGroup = chatContainer.lastElementChild;
+
+            // Create source container with horizontal layout
+            const sourcesContainer = document.createElement('div');
+            sourcesContainer.className = 'sources-container';
+            sourcesContainer.style.display = 'flex';
+            sourcesContainer.style.flexDirection = 'row';
+            sourcesContainer.style.gap = '8px';
+            sourcesContainer.style.padding = '1px 16px';
+            sourcesContainer.style.marginBottom = '12px';
+            sourcesContainer.style.flexWrap = 'nowrap';
+            sourcesContainer.style.alignItems = 'stretch';
+
             const sourceData = [
-                { image: 'bus2.png', name: 'Nasdaq' },
-                { image: 'bus1.png', name: 'Alpha Vantage' },
-                { image: 'bus3.png', name: 'Bezinga' }
+                { name: 'Annual & Interim Reports', metric: '16 quarters' },
+                { name: 'News Releases', metric: '342 releases' },
+                { name: 'SEC Filings', metric: '53K words' },
+                { name: 'Corporate Governance', metric: '18 documents' }
             ];
 
             sourceData.forEach(source => {
-                const sourceItem = createSourceItem(source);
+                const sourceItem = document.createElement('div');
+                sourceItem.style.display = 'flex';
+                sourceItem.style.flexDirection = 'column';
+                sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
+                sourceItem.style.borderRadius = '6px';
+                sourceItem.style.padding = '8px 12px';
+                sourceItem.style.width = '170px';
+                sourceItem.style.flexShrink = '0';
+                sourceItem.style.cursor = 'pointer';
+                sourceItem.style.transition = 'background-color 0.2s ease';
+                sourceItem.style.justifyContent = 'flex-start'; // Ensure content starts from the top
+
+                sourceItem.addEventListener('mouseover', () => {
+                    sourceItem.style.backgroundColor = isDarkMode() ? '#2a2d33' : '#e5e7eb';
+                });
+                sourceItem.addEventListener('mouseout', () => {
+                    sourceItem.style.backgroundColor = isDarkMode() ? '#232323' : '#f3f4f6';
+                });
+
+                // Title container
+                const titleContainer = document.createElement('div');
+                titleContainer.style.display = 'flex';
+                titleContainer.style.flexDirection = 'column';
+                titleContainer.style.width = '100%';
+                titleContainer.style.alignItems = 'flex-start'; // Align content to the left
+
+                // Title text
+                const titleText = document.createElement('div');
+                titleText.style.fontSize = '0.875rem';
+                titleText.style.color = isDarkMode() ? '#ffffff' : '#374151';
+                titleText.style.whiteSpace = 'nowrap';
+                titleText.style.overflow = 'hidden';
+                titleText.style.textOverflow = 'ellipsis';
+                titleText.style.marginBottom = '2px';
+                titleText.style.width = '100%';
+                titleText.style.textAlign = 'left';
+                titleText.textContent = source.name;
+
+                // Metric container with external link icon
+                const metricContainer = document.createElement('div');
+                metricContainer.style.display = 'flex';
+                metricContainer.style.alignItems = 'center';
+                metricContainer.style.gap = '4px';
+                metricContainer.style.width = '100%';
+                metricContainer.style.justifyContent = 'flex-start'; // Align to the left
+
+                const metricText = document.createElement('span');
+                metricText.style.fontSize = '0.75rem';
+                metricText.style.color = isDarkMode() ? '#9CA3AF' : '#6B7280';
+                metricText.textContent = source.metric;
+
+                const linkIcon = document.createElement('span');
+                linkIcon.innerHTML = '<i data-lucide="external-link" class="w-3 h-3"></i>';
+                linkIcon.style.color = isDarkMode() ? '#9CA3AF' : '#6B7280';
+
+                metricContainer.appendChild(metricText);
+                metricContainer.appendChild(linkIcon);
+
+                titleContainer.appendChild(titleText);
+                titleContainer.appendChild(metricContainer);
+                sourceItem.appendChild(titleContainer);
                 sourcesContainer.appendChild(sourceItem);
             });
+
+            lastChatGroup.appendChild(sourcesContainer);
+
+            // Create an outer wrapper for proper positioning context
+            const outerWrapper = document.createElement('div');
+            outerWrapper.style.position = 'relative';
+            outerWrapper.style.width = '100%';
+            outerWrapper.style.marginLeft = '0px';
+            outerWrapper.style.zIndex = '1000';
+
+            // Create the message container
+            const messageContainer = document.createElement('div');
+            messageContainer.style.width = '100%';
+            messageContainer.style.boxSizing = 'border-box';
+            messageContainer.style.position = 'relative';
+            messageContainer.style.marginTop = '0px';
+
+            // Add logo container with absolute positioning
+            const logoContainer = document.createElement('div');
+            logoContainer.style.position = 'absolute';
+            logoContainer.style.left = '-36px';
+            logoContainer.style.width = '40px';
+            logoContainer.style.height = '40px';
+            logoContainer.style.borderRadius = '50%';
+            logoContainer.style.display = 'none';
+            logoContainer.style.alignItems = 'center';
+            logoContainer.style.justifyContent = 'center';
+            logoContainer.style.backgroundColor = '#f9f9f9';
+            logoContainer.style.border = '1px solid #E5E7EB';
+
+            const initials = document.createElement('span');
+            initials.textContent = 'LS';
+            initials.style.fontSize = '16px';
+            initials.style.color = '#374151';
+            initials.style.fontWeight = 'bold';
+
+            logoContainer.appendChild(initials);
+            messageContainer.appendChild(logoContainer);
+
+            // Create AI message
+            messageElement = document.createElement('div');
+            messageElement.className = 'message ai-message';
+            messageElement.style.width = '100%';
+            
+            // Add message content with animation
+            const messageContent = document.createElement('div');
+            messageContent.className = 'ai-message-content';
+            
+            const paragraphs = text.split('\n\n');
+            let delay = 0;
+
+            paragraphs.forEach((paragraph, index) => {
+                if (paragraph.trim() !== '') {
+                    const paragraphContainer = document.createElement('div');
+                    paragraphContainer.className = 'ai-message-paragraph-container';
+
+                    const pElement = document.createElement('p');
+                    pElement.className = 'ai-message-paragraph';
+                    
+                    const words = paragraph.split(' ');
+                    words.forEach((word, wordIndex) => {
+                        const span = document.createElement('span');
+                        span.textContent = word + ' ';
+                        span.style.opacity = '0';
+                        span.style.animation = `fadeIn 0.02s forwards ${delay}ms`;
+                        pElement.appendChild(span);
+                        delay += 2;
+                    });
+                    
+                    paragraphContainer.appendChild(pElement);
+                    messageContent.appendChild(paragraphContainer);
+                    delay += 20;
+                }
+            });
+            
+            messageElement.appendChild(messageContent);
+
+            // Add interaction buttons
+            const interactions = document.createElement('div');
+            interactions.className = 'message-interactions';
+            interactions.innerHTML = `
+                <div class="message-feedback">
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Like message">
+                            <i data-lucide="thumbs-up" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Like</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Dislike message">
+                            <i data-lucide="thumbs-down" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Dislike</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-actions">
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Copy message">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Copy</span>
+                        </div>
+                    </div>
+                    <div class="tooltip-container">
+                        <button class="interaction-button" aria-label="Retry message">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        </button>
+                        <div class="tooltip">
+                            <span class="tooltip-text">Retry</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add interaction handlers
+            const likeButton = interactions.querySelector('[aria-label="Like message"]');
+            const dislikeButton = interactions.querySelector('[aria-label="Dislike message"]');
+
+            likeButton.addEventListener('click', () => {
+                likeButton.style.color = '#059669';
+                dislikeButton.style.color = '';
+                handleLike(messageElement);
+            });
+
+            dislikeButton.addEventListener('click', () => {
+                dislikeButton.style.color = '#DC2626';
+                likeButton.style.color = '';
+                handleDislike(messageElement);
+            });
+
+            const copyButton = interactions.querySelector('[aria-label="Copy message"]');
+            copyButton.addEventListener('click', () => {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        copyButton.style.color = '#059669';
+                        setTimeout(() => {
+                            copyButton.style.color = '';
+                        }, 1000);
+                    })
+                    .catch(console.error);
+            });
+
+            const retryButton = interactions.querySelector('[aria-label="Retry message"]');
+            retryButton.addEventListener('click', () => {
+                const lastUserMessage = chatContainer.querySelector('.user-message:last-of-type');
+                if (lastUserMessage) {
+                    const messageText = lastUserMessage.textContent;
+                    sendMessage(messageText);
+                }
+            });
+
+            messageElement.appendChild(interactions);
+            messageContainer.appendChild(messageElement);
+            outerWrapper.appendChild(messageContainer);
+            lastChatGroup.appendChild(outerWrapper);
+
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            setTimeout(() => {
+                if (relatedTopics.length > 0) {
+                    const relatedHeading = document.createElement('div');
+                    relatedHeading.className = 'section-heading related-heading';
+                    relatedHeading.textContent = 'Related';
+                    lastChatGroup.appendChild(relatedHeading);
+
+                    const relatedContainer = document.createElement('div');
+                    relatedContainer.className = 'related-container';
+
+                    relatedTopics.forEach(topic => {
+                        const relatedItem = document.createElement('div');
+                        relatedItem.className = 'related-item';
+
+                        const textSpan = document.createElement('span');
+                        textSpan.className = 'related-item-text';
+                        textSpan.textContent = topic;
+
+                        const iconSpan = document.createElement('span');
+                        iconSpan.className = 'related-item-icon';
+                        iconSpan.innerHTML = '<i data-lucide="plus"></i>';
+
+                        relatedItem.appendChild(textSpan);
+                        relatedItem.appendChild(iconSpan);
+                        relatedContainer.appendChild(relatedItem);
+
+                        relatedItem.addEventListener('click', () => sendRelatedTopic(topic));
+                    });
+
+                    lastChatGroup.appendChild(relatedContainer);
+                    lucide.createIcons();
+                }
+                resolve(messageElement);
+            }, delay + 100);
         }
-        
-        lastChatGroup.appendChild(sourcesContainer);
-
-        // Create an outer wrapper for proper positioning context
-        const outerWrapper = document.createElement('div');
-        outerWrapper.style.position = 'relative';
-        outerWrapper.style.width = '100%';
-        outerWrapper.style.marginLeft = '0px'; // Make space for the logo
-        outerWrapper.style.zIndex = '1000'; // Increase z-index to ensure it appears above other elements
-
-        // Create the message container
-        const messageContainer = document.createElement('div');
-        messageContainer.style.width = '100%';
-        messageContainer.style.boxSizing = 'border-box';
-        messageContainer.style.position = 'relative';
-        messageContainer.style.marginTop = '0px'; // Further reduced margin
-
-        // Add logo container with absolute positioning
-        const logoContainer = document.createElement('div');
-        logoContainer.style.position = 'absolute';
-        logoContainer.style.left = '-36px'; // Position it to the left of the user message
-        logoContainer.style.width = '40px'; // Set width for the logo container
-        logoContainer.style.height = '40px'; // Set height for the logo container
-        logoContainer.style.borderRadius = '50%'; // Make it rounded
-        logoContainer.style.display = 'none';
-        logoContainer.style.alignItems = 'center';
-        logoContainer.style.justifyContent = 'center';
-        logoContainer.style.backgroundColor = '#f9f9f9';
-        logoContainer.style.border = '1px solid #E5E7EB'; // Optional border for the logo container
-
-        // Create initials text
-        const initials = document.createElement('span');
-        initials.textContent = 'LS'; // Set initials
-        initials.style.fontSize = '16px'; // Adjust font size as needed
-        initials.style.color = '#374151'; // Set text color
-        initials.style.fontWeight = 'bold'; // Make initials bold
-
-        logoContainer.appendChild(initials); // Append initials to the logo container
-        messageContainer.appendChild(logoContainer); // Append logo container to the message container
-
-        // Create AI message
-        messageElement = document.createElement('div');
-        messageElement.className = 'message ai-message';
-        messageElement.style.width = '100%';
-        
-        // Add message content with animation
-        const messageContent = document.createElement('div');
-        messageContent.className = 'ai-message-content';
-        
-        const paragraphs = text.split('\n\n');
-        let delay = 0;
-
-        paragraphs.forEach((paragraph, index) => {
-            if (paragraph.trim() !== '') {
-                const paragraphContainer = document.createElement('div');
-                paragraphContainer.className = 'ai-message-paragraph-container';
-
-                const pElement = document.createElement('p');
-                pElement.className = 'ai-message-paragraph';
-                
-                const words = paragraph.split(' ');
-                words.forEach((word, wordIndex) => {
-                    const span = document.createElement('span');
-                    span.textContent = word + ' ';
-                    span.style.opacity = '0';
-                    span.style.animation = `fadeIn 0.02s forwards ${delay}ms`;
-                    pElement.appendChild(span);
-                    delay += 2;
-                });
-                
-                paragraphContainer.appendChild(pElement);
-                messageContent.appendChild(paragraphContainer);
-                delay += 20;
-            }
-        });
-        
-        messageElement.appendChild(messageContent);
-
-        // Add interaction buttons
-        const interactions = document.createElement('div');
-        interactions.className = 'message-interactions';
-        interactions.innerHTML = `
-            <div class="message-feedback">
-                <div class="tooltip-container">
-                    <button class="interaction-button" aria-label="Like message">
-                        <i data-lucide="thumbs-up" class="w-4 h-4"></i>
-                    </button>
-                    <div class="tooltip">
-                        <span class="tooltip-text">Like</span>
-                    </div>
-                </div>
-                <div class="tooltip-container">
-                    <button class="interaction-button" aria-label="Dislike message">
-                        <i data-lucide="thumbs-down" class="w-4 h-4"></i>
-                    </button>
-                    <div class="tooltip">
-                        <span class="tooltip-text">Dislike</span>
-                    </div>
-                </div>
-            </div>
-            <div class="message-actions">
-                <div class="tooltip-container">
-                    <button class="interaction-button" aria-label="Copy message">
-                        <i data-lucide="copy" class="w-4 h-4"></i>
-                    </button>
-                    <div class="tooltip">
-                        <span class="tooltip-text">Copy</span>
-                    </div>
-                </div>
-                <div class="tooltip-container">
-                    <button class="interaction-button" aria-label="Retry message">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
-                    </button>
-                    <div class="tooltip">
-                        <span class="tooltip-text">Retry</span>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Add interaction handlers
-        const likeButton = interactions.querySelector('[aria-label="Like message"]');
-        const dislikeButton = interactions.querySelector('[aria-label="Dislike message"]');
-
-        likeButton.addEventListener('click', () => {
-            likeButton.style.color = '#059669';
-            dislikeButton.style.color = '';
-            handleLike(messageElement);
-        });
-
-        dislikeButton.addEventListener('click', () => {
-            dislikeButton.style.color = '#DC2626';
-            likeButton.style.color = '';
-            handleDislike(messageElement);
-        });
-
-        const copyButton = interactions.querySelector('[aria-label="Copy message"]');
-        copyButton.addEventListener('click', () => {
-            navigator.clipboard.writeText(text)
-                .then(() => {
-                    copyButton.style.color = '#059669';
-                    setTimeout(() => {
-                        copyButton.style.color = '';
-                    }, 1000);
-                })
-                .catch(console.error);
-        });
-
-        const retryButton = interactions.querySelector('[aria-label="Retry message"]');
-        retryButton.addEventListener('click', () => {
-            const lastUserMessage = chatContainer.querySelector('.user-message:last-of-type');
-            if (lastUserMessage) {
-                const messageText = lastUserMessage.textContent;
-                sendMessage(messageText);
-            }
-        });
-
-        messageElement.appendChild(interactions);
-        messageContainer.appendChild(messageElement);
-        outerWrapper.appendChild(messageContainer);
-        lastChatGroup.appendChild(outerWrapper);
-
-        // Initialize Lucide icons
-        lucide.createIcons();
-
-        setTimeout(() => {
-            if (relatedTopics.length > 0) {
-                const relatedHeading = document.createElement('div');
-                relatedHeading.className = 'section-heading related-heading';
-                relatedHeading.textContent = 'Related';
-                lastChatGroup.appendChild(relatedHeading);
-
-                const relatedContainer = document.createElement('div');
-                relatedContainer.className = 'related-container';
-
-                relatedTopics.forEach(topic => {
-                    const relatedItem = document.createElement('div');
-                    relatedItem.className = 'related-item';
-
-                    const textSpan = document.createElement('span');
-                    textSpan.className = 'related-item-text';
-                    textSpan.textContent = topic;
-
-                    const iconSpan = document.createElement('span');
-                    iconSpan.className = 'related-item-icon';
-                    iconSpan.innerHTML = '<i data-lucide="plus"></i>';
-
-                    relatedItem.appendChild(textSpan);
-                    relatedItem.appendChild(iconSpan);
-                    relatedContainer.appendChild(relatedItem);
-
-                    relatedItem.addEventListener('click', () => sendRelatedTopic(topic));
-                });
-
-                lastChatGroup.appendChild(relatedContainer);
-                lucide.createIcons();
-            }
-            resolve(messageElement);
-        }, delay + 100);
-    }
-});
+    });
 }
+
 
 function addMessageInteractions(messageElement, sender) {
 if (sender === 'ai') {
