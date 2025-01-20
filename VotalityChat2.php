@@ -110,9 +110,17 @@ try {
             $response = getRecentPosts();
             break;
             
-        case 'getMarketData':
-            $response = getMarketData();
-            break;
+            case 'getMarketData':
+                if (!isset($data['symbol'])) {
+                    $response = ['error' => 'No symbol provided'];
+                    break;
+                }
+                $symbol = strtoupper($data['symbol']);
+                $marketDataService = new VotalityAIService();
+                $response = [
+                    'marketData' => $marketDataService->fetchStockData($symbol)
+                ];
+                break;
             
         case 'getMarketDataByCategory':
             $response = getMarketDataByCategory($data['category']);
@@ -987,4 +995,5 @@ function loadChat($chatId) {
         ];
     }
 }
+
 ?>
