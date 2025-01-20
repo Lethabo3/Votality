@@ -3398,25 +3398,6 @@ function updateChart(period) {
     console.log(`Updating chart for period: ${period}`);
 }
 
-function detectStockSymbol(text) {
-    // Match standard stock symbols (1-5 capital letters, typically preceded by $ or surrounded by spaces)
-    const symbolRegex = /(?:\$|^|\s)([A-Z]{1,5})(?=\s|$|\.|,)/g;
-    const matches = [...text.matchAll(symbolRegex)];
-    
-    if (matches.length > 0) {
-        // Filter out common words that might be in all caps
-        const commonWords = ['AI', 'CEO', 'CFO', 'IPO', 'GDP', 'USD', 'THE', 'AND', 'OR', 'BY'];
-        for (const match of matches) {
-            const symbol = match[1]; // Get the captured group
-            if (!commonWords.includes(symbol)) {
-                console.log('Detected stock symbol:', symbol); // Debug log
-                return symbol;
-            }
-        }
-    }
-    return null;
-}
-
 // Inside addMessage function, update this section:
 const stockSymbol = detectStockSymbol(text);
 if (stockSymbol) {
