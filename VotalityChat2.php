@@ -116,13 +116,43 @@ try {
                     break;
                 }
                 $symbol = strtoupper($data['symbol']);
-                $marketDataService = new VotalityAIService();
-                $response = [
-                    'marketData' => $marketDataService->fetchStockData($symbol)
+                $aiService = new VotalityAIService();
+                $marketData = $aiService->fetchStockData($symbol);
+                
+                if (!$marketData || !isset($marketData[$symbol])) {
+                    $response = ['error' => 'Failed to fetch market data'];
+                    break;
+                }
+                
+                // Log the data for debugging
+                error_log("Market data response for $symbol: " . json_encode($marketData));
+                
+                // Ensure the data follows the expected structure
+                if (!isset($marketData[$symbol]['data'])) {
+                    $marketData[$symbol] = [
+                        'data' => $marketData[$symbol]
+                    ];
+                }
+                
+                // Ensure all required fields are present
+                $defaultData = [
+                    'current_price' => 0,
+                    'change' => 0,
+                    'percent_change' => 0,
+                    'high' => 0,
+                    'low' => 0,
+                    'open' => 0,
+                    'previous_close' => 0
                 ];
+                
+                if (isset($marketData[$symbol]['data'])) {
+                    $marketData[$symbol]['data'] = array_merge($defaultData, $marketData[$symbol]['data']);
+                }
+                
+                $response = ['marketData' => $marketData];
                 break;
-            
-        case 'getMarketDataByCategory':
+        
+                case 'getMarketDataByCategory':
             $response = getMarketDataByCategory($data['category']);
             break;
             
