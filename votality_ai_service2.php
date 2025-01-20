@@ -364,48 +364,34 @@ class VotalityAIService {
     }
 
     private function fetchStockData($symbol) {
-        error_log("Fetching stock data for symbol: " . $symbol);
-        
         $url = "{$this->finnhubApiUrl}/quote?symbol={$symbol}&token={$this->finnhubApiKey}";
-        error_log("Making request to: " . $url);
-        
         $response = $this->makeApiRequest($url);
-        error_log("Raw API response: " . json_encode($response));
-    
-        if (!$response) {
-            error_log("No response received for symbol: " . $symbol);
+
+        if (!$response || !isset($response['c'])) {
             return null;
         }
-        
-        if (!isset($response['c'])) {
-            error_log("Missing current price in response for symbol: " . $symbol);
-            return null;
-        }
-    
+
         $result = [
             $symbol => [
                 'source' => 'Finnhub',
                 'data' => [
-                    'current_price' => (float)$response['c'],
-                    'change' => (float)$response['d'],
-                    'percent_change' => (float)$response['dp'],
-                    'high' => (float)$response['h'],
-                    'low' => (float)$response['l'],
-                    'open' => (float)$response['o'],
-                    'previous_close' => (float)$response['pc'],
+                    'current_price' => $response['c'],
+                    'change' => $response['d'],
+                    'percent_change' => $response['dp'],
+                    'high' => $response['h'],
+                    'low' => $response['l'],
+                    'open' => $response['o'],
+                    'previous_close' => $response['pc'],
                     'timestamp' => time()
                 ]
             ]
         ];
-    
-        error_log("Processed stock data: " . json_encode($result));
-    
-        // Cache the result
+
         $this->cache[$symbol] = [
             'time' => time(),
             'data' => $result
         ];
-    
+
         return $result;
     }
 
@@ -504,8 +490,6 @@ class VotalityAIService {
     }
 
     private function makeApiRequest($url) {
-        error_log("Making API request to: " . $url);
-        
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
@@ -514,7 +498,7 @@ class VotalityAIService {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_SSL_VERIFYPEER => true
         ]);
-    
+
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         
@@ -528,18 +512,15 @@ class VotalityAIService {
         
         if ($httpCode !== 200) {
             error_log("API request failed with HTTP code: " . $httpCode);
-            error_log("Response body: " . $response);
             return null;
         }
-    
+
         $data = json_decode($response, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             error_log("Failed to parse API response: " . json_last_error_msg());
-            error_log("Raw response: " . $response);
             return null;
         }
-    
-        error_log("API request successful. Response: " . json_encode($data));
+
         return $data;
     }
 
