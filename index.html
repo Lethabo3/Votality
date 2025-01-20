@@ -3261,32 +3261,34 @@ function createMarketDataSection(stockData) {
 }
 
 function initializeChart(canvas, stockData) {
+    console.log('Initializing chart with data:', stockData); // Debug log
     const ctx = canvas.getContext('2d');
     
     // Create price points from open to current price
     const openPrice = stockData.open;
     const currentPrice = stockData.currentPrice;
-    const numPoints = 10; // Number of points to plot
+    const previousClose = stockData.previousClose;
     
+    // Generate 9 points for a smooth chart
     const marketData = [];
-    const timeIncrement = Math.floor(390 / (numPoints - 1)); // 390 minutes in trading day
+    const times = [
+        '9:30', '10:00', '10:30', '11:00', 
+        '11:30', '12:00', '12:30', '13:00', 
+        '13:30', '14:00', '14:30', '15:00'
+    ];
     
-    for (let i = 0; i < numPoints; i++) {
-        const minutesFromOpen = i * timeIncrement;
-        const hour = Math.floor((9 * 60 + 30 + minutesFromOpen) / 60);
-        const minute = (9 * 60 + 30 + minutesFromOpen) % 60;
-        const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-        
-        // Calculate a price point between open and current
-        const progress = i / (numPoints - 1);
-        const price = openPrice + (currentPrice - openPrice) * progress;
-        
-        marketData.push({ time: timeStr, price: price });
-    }
+    times.forEach((time, i) => {
+        const progress = i / (times.length - 1);
+        // Create a slight curve from previous close to current price
+        const price = previousClose + (currentPrice - previousClose) * 
+            (1 - Math.cos(progress * Math.PI)) / 2;
+        marketData.push({ time, price });
+    });
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 250);
     const isPositive = stockData.priceChange >= 0;
     const color = isPositive ? '#10B981' : '#EF4444';
+    
+    const gradient = ctx.createLinearGradient(0, 0, 0, 250);
     gradient.addColorStop(0, isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)');
     gradient.addColorStop(1, isPositive ? 'rgba(16, 185, 129, 0.0)' : 'rgba(239, 68, 68, 0.0)');
 
@@ -3357,8 +3359,7 @@ function initializeChart(canvas, stockData) {
                         },
                         maxRotation: 0,
                         autoSkip: true,
-                        maxTicksLimit: 5,
-                        padding: 8
+                        maxTicksLimit: 6
                     },
                     border: {
                         display: false
@@ -3377,12 +3378,10 @@ function initializeChart(canvas, stockData) {
                             size: 11,
                             family: "'GeneralSans-Medium', sans-serif"
                         },
-                        padding: 8,
                         callback: function(value) {
-                            return value.toFixed(2);
+                            return '$' + value.toFixed(2);
                         },
-                        maxTicksLimit: 5,
-                        align: 'center'
+                        maxTicksLimit: 6
                     },
                     border: {
                         display: false
@@ -3410,11 +3409,60 @@ function detectStockSymbol(text) {
         for (const match of matches) {
             const symbol = match[1]; // Get the captured group
             if (!commonWords.includes(symbol)) {
+                console.log('Detected stock symbol:', symbol); // Debug log
                 return symbol;
             }
         }
     }
     return null;
+}
+
+// Inside addMessage function, update this section:
+const stockSymbol = detectStockSymbol(text);
+if (stockSymbol) {
+    console.log('Fetching market data for:', stockSymbol); // Debug log
+    fetch('VotalityChat2.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'getMarketData',
+            symbol: stockSymbol
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Received market data:', data); // Debug log
+        if (data.marketData && data.marketData[stockSymbol]) {
+            const marketData = data.marketData[stockSymbol].data;
+            console.log('Processed market data:', marketData); // Debug log
+            
+            // Create the market data object in the expected format
+            const formattedData = {
+                symbol: stockSymbol,
+                companyName: `${stockSymbol}`,
+                currentPrice: marketData.current_price,
+                priceChange: marketData.change,
+                priceChangePercent: marketData.percent_change,
+                tradingStatus: 'Regular Hours',
+                lastUpdated: new Date().toLocaleTimeString(),
+                high: marketData.high,
+                low: marketData.low,
+                open: marketData.open,
+                previousClose: marketData.previous_close
+            };
+            
+            console.log('Formatted market data:', formattedData); // Debug log
+            const marketDataSection = createMarketDataSection(formattedData);
+            lastChatGroup.appendChild(marketDataSection);
+        } else {
+            console.error('Invalid market data format:', data); // Debug log
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching market data:', error);
+    });
 }
 </script>
 
