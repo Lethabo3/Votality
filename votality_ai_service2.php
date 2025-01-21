@@ -588,8 +588,8 @@ class VotalityAIService {
         [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
     
         Market Info:
-        CompanyName|Symbol|CurrentPrice|PriceChange
-
+    Company Name|Symbol
+    
         Related Topics:
         1. [First related topic or question]
         2. [Second related topic or question]
