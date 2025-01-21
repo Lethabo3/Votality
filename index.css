@@ -1119,7 +1119,7 @@ background-color: #ffffff;
 background-image: none;
 }
 .skeleton-loader {
-width: 100%;
+width: 96%;
 padding: 20px 0 0 0; /* Add top padding to lower the position of lines */
 }
 
