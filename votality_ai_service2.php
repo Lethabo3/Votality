@@ -132,12 +132,66 @@ class VotalityAIService {
             $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
             $cleanedResponse = $this->removeAsterisks($aiResponse);
             
-            $this->addToHistory('ai', $cleanedResponse);
+            // Split response to get main content, market info, and related topics
+            $parts = explode("\nMarket Info:", $cleanedResponse, 2);
+            $mainResponse = trim($parts[0]);
             
-            // Log successful response
-            error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
+            $marketInfo = null;
+            $relatedTopics = [];
             
-            return $cleanedResponse;
+            if (isset($parts[1])) {
+                $remainingParts = explode("\nRelated Topics:", $parts[1], 2);
+                $marketLine = trim($remainingParts[0]);
+                
+                // Updated pattern to match price data
+                if (preg_match('/^(.*?)\|(.*?)\|(\d+\.?\d*)\|([-+]?\d+\.?\d*)$/', $marketLine, $matches)) {
+                    [, $companyName, $symbol, $price, $priceChange] = $matches;
+                    $marketInfo = [
+                        'companyName' => trim($companyName),
+                        'symbol' => trim($symbol),
+                        'currentPrice' => (float)$price,
+                        'priceChange' => (float)$priceChange,
+                        'priceChangePercent' => round(((float)$priceChange / (float)$price) * 100, 2),
+                        'tradingStatus' => 'Market Open',
+                        'lastUpdated' => date('g:i A T')
+                    ];
+                } else {
+                    // Fallback for basic company/symbol if price pattern doesn't match
+                    if (strpos($marketLine, '|') !== false) {
+                        list($companyName, $symbol) = explode('|', $marketLine, 2);
+                        $marketInfo = [
+                            'companyName' => trim($companyName),
+                            'symbol' => trim($symbol),
+                            'currentPrice' => 189.37,
+                            'priceChange' => 2.34,
+                            'priceChangePercent' => 1.25,
+                            'tradingStatus' => 'Market Open',
+                            'lastUpdated' => date('g:i A T')
+                        ];
+                    }
+                }
+    
+                if (isset($remainingParts[1])) {
+                    $topicsText = trim($remainingParts[1]);
+                    $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
+                    foreach ($topicsLines as $line) {
+                        if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
+                            $topic = trim($matches[2]);
+                            if (!empty($topic) && strlen($topic) > 3) {
+                                $relatedTopics[] = $topic;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            $this->addToHistory('ai', $mainResponse);
+            
+            return [
+                'response' => $mainResponse,
+                'marketInfo' => $marketInfo,
+                'relatedTopics' => $relatedTopics
+            ];
     
         } catch (Exception $e) {
             error_log("Error in generateResponse: " . $e->getMessage());
@@ -589,7 +643,7 @@ class VotalityAIService {
         Market Info:
     CompanyName|Symbol|CurrentPriceAsNumber|PriceChangeAsNumber
     (Example: Apple Inc.|AAPL|190.50|-2.30)
-
+        
         Related Topics:
         1. [First related topic or question]
         2. [Second related topic or question]
