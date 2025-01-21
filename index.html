@@ -2698,24 +2698,25 @@ function addMessage(text, sender, relatedTopics = []) {
 
             lastChatGroup.appendChild(sourcesContainer);
 
-            // Add market data section if message contains stock information
-            if (text.includes('$') || /[A-Z]{1,5}/.test(text)) {
-                const stockData = {
-                    symbol: 'AAPL',
-                    companyName: 'Apple Inc(AAPL)',
-                    currentPrice: 189.37,
-                    priceChange: 2.34,
-                    priceChangePercent: 1.25,
-                    tradingStatus: 'Regular Hours',
-                    lastUpdated: '2:30 PM EST',
-                    marketCap: '2.98T',
-                    peRatio: '31.45',
-                    weekRange: '140.68 - 198.23',
-                    volume: '55.84M'
-                };
-                
-                const marketDataSection = createMarketDataSection(stockData);
-                lastChatGroup.appendChild(marketDataSection);
+            // Parse market info if present in the text
+            if (text.includes('Market Info:')) {
+                const marketInfoMatch = text.match(/Market Info:\s*(.*?)\|(.*?)(?=\n|$)/);
+                if (marketInfoMatch) {
+                    const [, companyName, symbol] = marketInfoMatch;
+                    const stockData = {
+                        companyName: companyName.trim(),
+                        symbol: symbol.trim(),
+                        currentPrice: 189.37,
+                        priceChange: 2.34,
+                        priceChangePercent: 1.25,
+                        tradingStatus: 'Regular Hours',
+                        lastUpdated: '2:30 PM EST'
+                    };
+                    
+                    // Create and append market data section
+                    const marketDataSection = createMarketDataSection(stockData);
+                    lastChatGroup.appendChild(marketDataSection);
+                }
             }
 
             // Create an outer wrapper for proper positioning context
@@ -2754,6 +2755,12 @@ function addMessage(text, sender, relatedTopics = []) {
             logoContainer.appendChild(initials);
             messageContainer.appendChild(logoContainer);
 
+            // Remove the Market Info section from displayed text
+            let displayText = text;
+            if (text.includes('Market Info:')) {
+                displayText = text.split('Market Info:')[0].trim();
+            }
+
             // Create AI message
             messageElement = document.createElement('div');
             messageElement.className = 'message ai-message';
@@ -2763,7 +2770,7 @@ function addMessage(text, sender, relatedTopics = []) {
             const messageContent = document.createElement('div');
             messageContent.className = 'ai-message-content';
             
-            const paragraphs = text.split('\n\n');
+            const paragraphs = displayText.split('\n\n');
             let delay = 0;
 
             paragraphs.forEach((paragraph, index) => {
@@ -2852,7 +2859,7 @@ function addMessage(text, sender, relatedTopics = []) {
 
             const copyButton = interactions.querySelector('[aria-label="Copy message"]');
             copyButton.addEventListener('click', () => {
-                navigator.clipboard.writeText(text)
+                navigator.clipboard.writeText(displayText)
                     .then(() => {
                         copyButton.style.color = '#059669';
                         setTimeout(() => {
@@ -2916,6 +2923,7 @@ function addMessage(text, sender, relatedTopics = []) {
         }
     });
 }
+
 
 function addMessageInteractions(messageElement, sender) {
 if (sender === 'ai') {
@@ -3474,6 +3482,7 @@ function createMarketDataSection(stockData) {
 
     return marketDataSection;
 }
+
 </script>
 
 </body>
