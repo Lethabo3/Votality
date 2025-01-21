@@ -33,6 +33,18 @@ class VotalityAIService {
 
     public function generateResponse($message, $chatId) {
         try {
+            // Extract any financial instruments from message
+            $instrument = $this->extractFinancialInstrument($message);
+            $marketData = null;
+    
+            // If message is market-related, fetch relevant data
+            if ($instrument) {
+                $marketData = $this->fetchMarketData($instrument);
+                if ($marketData) {
+                    $messageWithMarketData = $message . "\n\nLatest market data: " . json_encode($marketData);
+                }
+            }
+    
             $this->addToHistory('user', $message);
             
             // Log configuration for debugging
@@ -46,7 +58,8 @@ class VotalityAIService {
                         'role' => 'user',
                         'parts' => [
                             [
-                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
+                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . 
+                                        ($messageWithMarketData ?? $message)
                             ]
                         ]
                     ]
@@ -133,6 +146,25 @@ class VotalityAIService {
             $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
             $cleanedResponse = $this->removeAsterisks($aiResponse);
             
+            // If we have market data, append it in a structured format
+            if ($marketData && $instrument) {
+                $firstInstrument = array_key_first($marketData);
+                $data = $marketData[$firstInstrument]['data'];
+                
+                // Format data directly from user message and fetched data
+                $formattedData = [
+                    'companyName' => $instrument['company_name'] ?? $firstInstrument,
+                    'symbol' => $firstInstrument,
+                    'currentPrice' => $data['current_price'] ?? $data['price'] ?? $data['rate'] ?? 0,
+                    'priceChange' => $data['change'] ?? 0,
+                    'priceChangePercent' => $data['percent_change'] ?? $data['change_percent'] ?? 0,
+                    'tradingStatus' => 'Market Open',
+                    'lastUpdated' => date('g:i A T')
+                ];
+                
+                $cleanedResponse .= "\nMarket Data: " . json_encode($formattedData);
+            }
+            
             $this->addToHistory('ai', $cleanedResponse);
             
             // Log successful response
@@ -145,6 +177,46 @@ class VotalityAIService {
             error_log("Stack trace: " . $e->getTraceAsString());
             return "I apologize, but I encountered an error processing your request. Please try again in a moment. Error details: " . $e->getMessage();
         }
+    }
+
+    private function formatMarketDataForFrontend($marketData) {
+        if (!$marketData || empty($marketData)) return '';
+        
+        // Get the first instrument's data (we usually only have one)
+        $firstInstrument = array_key_first($marketData);
+        $data = $marketData[$firstInstrument]['data'];
+        
+        // Format data for frontend consumption
+        $formattedData = [
+            'companyName' => $this->getCompanyName($firstInstrument),
+            'symbol' => $firstInstrument,
+            'currentPrice' => $data['current_price'] ?? $data['price'] ?? $data['rate'] ?? 0,
+            'priceChange' => $data['change'] ?? 0,
+            'priceChangePercent' => $data['percent_change'] ?? $data['change_percent'] ?? 0,
+            'tradingStatus' => 'Market ' . ($this->isMarketOpen() ? 'Open' : 'Closed'),
+            'lastUpdated' => date('g:i A T')
+        ];
+    
+        return json_encode($formattedData);
+    }
+
+    private function isMarketOpen() {
+        $now = new DateTime('now', new DateTimeZone('America/New_York'));
+        $hour = (int)$now->format('G');
+        $minute = (int)$now->format('i');
+        $weekday = (int)$now->format('N');
+    
+        // Check if it's a weekday
+        if ($weekday <= 5) {
+            // Convert to minutes since midnight
+            $currentTime = $hour * 60 + $minute;
+            $marketOpen = 9 * 60 + 30;  // 9:30 AM
+            $marketClose = 16 * 60;     // 4:00 PM
+    
+            return $currentTime >= $marketOpen && $currentTime < $marketClose;
+        }
+    
+        return false;
     }
 
     private function extractFinancialInstrument($message) {
@@ -649,5 +721,6 @@ class VotalityAIService {
         $this->cacheDuration = max(60, min(3600, $seconds)); // Limit between 1 minute and 1 hour
     }
 }
+
 
 ?>
