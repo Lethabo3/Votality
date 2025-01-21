@@ -2706,9 +2706,9 @@ function addMessage(text, sender, relatedTopics = []) {
                     const stockData = {
                         companyName: companyName.trim(),
                         symbol: symbol.trim(),
-                        currentPrice: 189.37,
-                        priceChange: 2.34,
-                        priceChangePercent: 1.25,
+                        currentPrice: parseFloat(price),
+                        priceChange: parseFloat(priceChange),
+                        priceChangePercent: ((parseFloat(priceChange) / parseFloat(price)) * 100).toFixed(2),
                         tradingStatus: 'Regular Hours',
                         lastUpdated: '2:30 PM EST'
                     };
