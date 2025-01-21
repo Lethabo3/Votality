@@ -30,7 +30,6 @@ class VotalityAIService {
         $this->marketauxApiKey = 'o4VnvcRmaBZeK4eBHPJr8KP3xN8gMBTedxHGkCNz';
         $this->nasdaqDataLinkApiKey = 'VGV68j1nV9w9Zn3vwbsG';
     }
-
     public function generateResponse($message, $chatId) {
         try {
             $this->addToHistory('user', $message);
@@ -588,8 +587,9 @@ class VotalityAIService {
         [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
     
         Market Info:
-    Company Name|Symbol
-    
+    CompanyName|Symbol|CurrentPriceAsNumber|PriceChangeAsNumber
+    (Example: Apple Inc.|AAPL|190.50|-2.30)
+
         Related Topics:
         1. [First related topic or question]
         2. [Second related topic or question]
