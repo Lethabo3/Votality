@@ -30,6 +30,7 @@ class VotalityAIService {
         $this->marketauxApiKey = 'o4VnvcRmaBZeK4eBHPJr8KP3xN8gMBTedxHGkCNz';
         $this->nasdaqDataLinkApiKey = 'VGV68j1nV9w9Zn3vwbsG';
     }
+
     public function generateResponse($message, $chatId) {
         try {
             $this->addToHistory('user', $message);
@@ -132,66 +133,12 @@ class VotalityAIService {
             $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
             $cleanedResponse = $this->removeAsterisks($aiResponse);
             
-            // Split response to get main content, market info, and related topics
-            $parts = explode("\nMarket Info:", $cleanedResponse, 2);
-            $mainResponse = trim($parts[0]);
+            $this->addToHistory('ai', $cleanedResponse);
             
-            $marketInfo = null;
-            $relatedTopics = [];
+            // Log successful response
+            error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
             
-            if (isset($parts[1])) {
-                $remainingParts = explode("\nRelated Topics:", $parts[1], 2);
-                $marketLine = trim($remainingParts[0]);
-                
-                // Updated pattern to match price data
-                if (preg_match('/^(.*?)\|(.*?)\|(\d+\.?\d*)\|([-+]?\d+\.?\d*)$/', $marketLine, $matches)) {
-                    [, $companyName, $symbol, $price, $priceChange] = $matches;
-                    $marketInfo = [
-                        'companyName' => trim($companyName),
-                        'symbol' => trim($symbol),
-                        'currentPrice' => (float)$price,
-                        'priceChange' => (float)$priceChange,
-                        'priceChangePercent' => round(((float)$priceChange / (float)$price) * 100, 2),
-                        'tradingStatus' => 'Market Open',
-                        'lastUpdated' => date('g:i A T')
-                    ];
-                } else {
-                    // Fallback for basic company/symbol if price pattern doesn't match
-                    if (strpos($marketLine, '|') !== false) {
-                        list($companyName, $symbol) = explode('|', $marketLine, 2);
-                        $marketInfo = [
-                            'companyName' => trim($companyName),
-                            'symbol' => trim($symbol),
-                            'currentPrice' => 189.37,
-                            'priceChange' => 2.34,
-                            'priceChangePercent' => 1.25,
-                            'tradingStatus' => 'Market Open',
-                            'lastUpdated' => date('g:i A T')
-                        ];
-                    }
-                }
-    
-                if (isset($remainingParts[1])) {
-                    $topicsText = trim($remainingParts[1]);
-                    $topicsLines = preg_split('/\r\n|\r|\n/', $topicsText);
-                    foreach ($topicsLines as $line) {
-                        if (preg_match('/^(\d+[\.\)]|\*|\-)\s*(.+)$/', $line, $matches)) {
-                            $topic = trim($matches[2]);
-                            if (!empty($topic) && strlen($topic) > 3) {
-                                $relatedTopics[] = $topic;
-                            }
-                        }
-                    }
-                }
-            }
-            
-            $this->addToHistory('ai', $mainResponse);
-            
-            return [
-                'response' => $mainResponse,
-                'marketInfo' => $marketInfo,
-                'relatedTopics' => $relatedTopics
-            ];
+            return $cleanedResponse;
     
         } catch (Exception $e) {
             error_log("Error in generateResponse: " . $e->getMessage());

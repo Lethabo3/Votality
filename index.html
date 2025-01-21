@@ -2702,11 +2702,11 @@ function addMessage(text, sender, relatedTopics = []) {
             if (text.includes('Market Info:')) {
                 const marketInfoMatch = text.match(/Market Info:\s*(.*?)\|(.*?)(?=\n|$)/);
                 if (marketInfoMatch) {
-                    const [, companyName, symbol] = marketInfoMatch;
+                    const [, companyName, currentPrice, symbol] = marketInfoMatch;
                     const stockData = {
                         companyName: companyName.trim(),
                         symbol: symbol.trim(),
-                        currentPrice: 189.37,
+                        currentPrice: currentPrice.trim(),
                         priceChange: 2.34,
                         priceChangePercent: 1.25,
                         tradingStatus: 'Regular Hours',
