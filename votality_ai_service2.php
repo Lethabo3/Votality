@@ -587,8 +587,8 @@ class VotalityAIService {
          Format your response as follows:
         [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
     
-Market Info:
-Company Name|Symbol|CurrentPrice|PriceChange|PercentChange
+        Market Info:
+    Company Name|Symbol
     
         Related Topics:
         1. [First related topic or question]
