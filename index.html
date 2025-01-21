@@ -1084,125 +1084,125 @@ try {
 });
 
 // Update the sendMessage function in your JavaScript
-async function sendMessage(message, file = null) {
-    try {
-        // Do the UI transitions first
-        initialContent.classList.add('fade-out');
-        suggestedQueries.classList.add('fade-out');
-        footerLinks.classList.add('fade-out');
-        textareaContainer.classList.add('repositioned');
-        document.body.classList.add('white-background');
-        
-        setTimeout(async () => {
-            // Hide initial elements
-            initialContent.style.display = 'none';
-            suggestedQueries.style.display = 'none';
-            footerLinks.style.display = 'none';
-            chatContainer.style.display = 'block';
-            chatContainer.classList.add('fade-in');
-
-            // Handle desktop/mobile specific UI
-            if (window.innerWidth > 640) {
-                disclaimer.style.display = 'block';
-                setTimeout(() => {
-                    disclaimer.classList.add('fade-in');
-                }, 50);
-                
-                desktopTopNav.style.display = 'flex';
-                setTimeout(() => {
-                    desktopTopNav.classList.add('fade-in');
-                }, 50);
-            } else {
-                const topNav = document.querySelector('.top-nav');
-                if (topNav) {
-                    topNav.style.display = 'none';
-                }
-                document.body.classList.add('chat-active');
-            }
-
-            // Add user message and show thinking indicator
-            const userMessageElement = await addMessage(message, 'user');
-            textarea.value = '';
-            showAIThinking();
+    async function sendMessage(message, file = null) {
+        try {
+            // Do the UI transitions first
+            initialContent.classList.add('fade-out');
+            suggestedQueries.classList.add('fade-out');
+            footerLinks.classList.add('fade-out');
+            textareaContainer.classList.add('repositioned');
+            document.body.classList.add('white-background');
             
-            if (userMessageElement) {
-                userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            setTimeout(async () => {
+                // Hide initial elements
+                initialContent.style.display = 'none';
+                suggestedQueries.style.display = 'none';
+                footerLinks.style.display = 'none';
+                chatContainer.style.display = 'block';
+                chatContainer.classList.add('fade-in');
 
-            try {
-                const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
-                const response = await fetch('VotalityChat2.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'sendMessage',
-                        message: message,
-                        chatId: currentChatId,
-                        stayLoggedOut: stayLoggedOut,
-                        file: file ? { data: await readFileAsDataURL(file), type: file.type } : null
-                    }),
-                    credentials: 'same-origin'
-                });
-
-                const data = await response.json();
-
-                // Handle authentication errors
-                if (data.error) {
-                    if (data.error === 'auth_required' && !stayLoggedOut) {
-                        hideAIThinking();
-                        sessionStorage.setItem('returnUrl', window.location.href);
-                        window.location.href = '/signin.html';
-                        return;
+                // Handle desktop/mobile specific UI
+                if (window.innerWidth > 640) {
+                    disclaimer.style.display = 'block';
+                    setTimeout(() => {
+                        disclaimer.classList.add('fade-in');
+                    }, 50);
+                    
+                    desktopTopNav.style.display = 'flex';
+                    setTimeout(() => {
+                        desktopTopNav.classList.add('fade-in');
+                    }, 50);
+                } else {
+                    const topNav = document.querySelector('.top-nav');
+                    if (topNav) {
+                        topNav.style.display = 'none';
                     }
-                    if (data.error === 'auth_required' && stayLoggedOut) {
-                        // Ignore auth error if user chose to stay logged out
-                    } else {
-                        throw new Error(data.error);
-                    }
+                    document.body.classList.add('chat-active');
                 }
 
-                // Update chat topic if provided
-                if (data.chatTopic) {
-                    updateChatTopicDisplay(data.chatTopic);
-                }
-
-                hideAIThinking();
+                // Add user message and show thinking indicator
+                const userMessageElement = await addMessage(message, 'user');
+                textarea.value = '';
+                showAIThinking();
                 
-                // Add AI response
-                await addMessage(data.response, 'ai', data.relatedTopics);
+                if (userMessageElement) {
+                    userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
 
-                // Handle market data if present
-                if (data.marketData) {
-                    const marketSection = createMarketDataSection(data.marketData);
-                    const aiMessage = document.querySelector('.message.ai:last-child');
-                    if (aiMessage) {
-                        aiMessage.insertBefore(marketSection, aiMessage.firstChild);
+                try {
+                    const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
+                    const response = await fetch('VotalityChat2.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'sendMessage',
+                            message: message,
+                            chatId: currentChatId,
+                            stayLoggedOut: stayLoggedOut,
+                            file: file ? { data: await readFileAsDataURL(file), type: file.type } : null
+                        }),
+                        credentials: 'same-origin'
+                    });
+
+                    const data = await response.json();
+
+                    // Handle authentication errors
+                    if (data.error) {
+                        if (data.error === 'auth_required' && !stayLoggedOut) {
+                            hideAIThinking();
+                            sessionStorage.setItem('returnUrl', window.location.href);
+                            window.location.href = '/signin.html';
+                            return;
+                        }
+                        if (data.error === 'auth_required' && stayLoggedOut) {
+                            // Ignore auth error if user chose to stay logged out
+                        } else {
+                            throw new Error(data.error);
+                        }
                     }
+
+                    // Update chat topic if provided
+                    if (data.chatTopic) {
+                        updateChatTopicDisplay(data.chatTopic);
+                    }
+
+                    hideAIThinking();
+                    
+                    // Add AI response
+                    await addMessage(data.response, 'ai', data.relatedTopics);
+
+                    // Handle market data if present
+                    if (data.marketData) {
+                        const marketSection = createMarketDataSection(data.marketData);
+                        const aiMessage = document.querySelector('.message.ai:last-child');
+                        if (aiMessage) {
+                            aiMessage.insertBefore(marketSection, aiMessage.firstChild);
+                        }
+                    }
+
+                    // Set chat ID if not already set
+                    if (!currentChatId) {
+                        currentChatId = data.chatId;
+                    }
+
+                    // Load recent chats after successful message
+                    await loadRecentChats();
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    hideAIThinking();
+                    await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
                 }
+            }, 500);
 
-                // Set chat ID if not already set
-                if (!currentChatId) {
-                    currentChatId = data.chatId;
-                }
-
-                // Load recent chats after successful message
-                await loadRecentChats();
-
-            } catch (error) {
-                console.error('Error:', error);
-                hideAIThinking();
-                await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
-            }
-        }, 500);
-
-    } catch (error) {
-        console.error('Error in sendMessage:', error);
-        hideAIThinking();
-        await addMessage("Error: " + error.message, 'ai');
+        } catch (error) {
+            console.error('Error in sendMessage:', error);
+            hideAIThinking();
+            await addMessage("Error: " + error.message, 'ai');
+        }
     }
-}
 
 // Update DOM content loaded handler
 document.addEventListener('DOMContentLoaded', async () => {

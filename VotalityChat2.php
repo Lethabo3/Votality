@@ -418,6 +418,14 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             'chatTopic' => $_SESSION['chats'][$chatId]['topic'] ?? null
         ];
 
+        return [
+            'response' => $aiResponse,
+            'chatId' => $chatId,
+            'relatedTopics' => $relatedTopics,
+            'chatTopic' => $_SESSION['chats'][$chatId]['topic'] ?? null,
+            'marketData' => $marketInfo  // Add this line
+        ];
+        
     } catch (Exception $e) {
         // Rollback transaction if one is active
         if ($isLoggedIn && $conn->inTransaction()) {
