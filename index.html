@@ -2700,15 +2700,21 @@ function addMessage(text, sender, relatedTopics = []) {
 
 // Parse market info if present in the text
 if (text.includes('Market Info:')) {
-    const marketInfoMatch = text.match(/Market Info:\s*(.*?)\|(.*?)\|(.*?)\|(.*?)\|(.*?)(?=\n|$)/);
+    const marketInfoMatch = text.match(/Market Info:\s*(.*?)\|(.*?)(?=\n|$)/);
     if (marketInfoMatch) {
-        const [, companyName, symbol, currentPrice, priceChange, percentChange] = marketInfoMatch;
+        const [, companyName, symbol] = marketInfoMatch;
+        
+        // Extract price from AI response text
+        const priceMatch = text.match(/\$(\d+\.?\d*)/);
+        const priceChangeMatch = text.match(/\$?(\d+\.?\d*)\s*increase|decrease/i);
+        const percentMatch = text.match(/\((\d+\.?\d*)%\)/);
+
         const stockData = {
             companyName: companyName.trim(),
             symbol: symbol.trim(),
-            currentPrice: parseFloat(currentPrice.trim()),
-            priceChange: parseFloat(priceChange.trim()),
-            priceChangePercent: parseFloat(percentChange.trim()),
+            currentPrice: priceMatch ? parseFloat(priceMatch[1]) : 0,
+            priceChange: priceChangeMatch ? parseFloat(priceChangeMatch[1]) : 0,
+            priceChangePercent: percentMatch ? parseFloat(percentMatch[1]) : 0,
             tradingStatus: 'Regular Hours',
             lastUpdated: new Date().toLocaleTimeString('en-US', { 
                 hour: 'numeric', 
