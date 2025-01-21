@@ -2697,27 +2697,26 @@ function addMessage(text, sender, relatedTopics = []) {
             });
 
             lastChatGroup.appendChild(sourcesContainer);
-
-            // Parse market info if present in the text
-            if (text.includes('Market Info:')) {
-                const marketInfoMatch = text.match(/Market Info:\s*(.*?)\|(.*?)(?=\n|$)/);
-                if (marketInfoMatch) {
-                    const [, companyName, symbol] = marketInfoMatch;
-                    const stockData = {
-                        companyName: companyName.trim(),
-                        symbol: symbol.trim(),
-                        currentPrice: 189.37,
-                        priceChange: 2.34,
-                        priceChangePercent: 1.25,
-                        tradingStatus: 'Regular Hours',
-                        lastUpdated: '2:30 PM EST'
-                    };
-                    
-                    // Create and append market data section
-                    const marketDataSection = createMarketDataSection(stockData);
-                    lastChatGroup.appendChild(marketDataSection);
-                }
-            }
+// Parse market info if present in the text
+if (text.includes('Market Info:')) {
+    const marketInfoMatch = text.match(/Market Info:\s*(.*?)\|(.*?)\|(\d+\.?\d*)\|([-+]?\d+\.?\d*)(?=\n|$)/);
+    if (marketInfoMatch) {
+        const [, companyName, symbol, currentPrice, priceChange] = marketInfoMatch;
+        const stockData = {
+            companyName: companyName.trim(),
+            symbol: symbol.trim(),
+            currentPrice: currentPrice,  // No conversion, use directly
+            priceChange: priceChange,    // No conversion, use directly
+            priceChangePercent: ((parseFloat(priceChange) / parseFloat(currentPrice)) * 100).toFixed(2),
+            tradingStatus: 'Regular Hours',
+            lastUpdated: '2:30 PM EST'
+        };
+        
+        // Create and append market data section
+        const marketDataSection = createMarketDataSection(stockData);
+        lastChatGroup.appendChild(marketDataSection);
+    }
+}
 
             // Create an outer wrapper for proper positioning context
             const outerWrapper = document.createElement('div');
