@@ -43,29 +43,14 @@ class VotalityAIService {
             error_log("API URL: " . $this->apiUrl);
             error_log("Using model: gemini-1.5-flash-latest");
             
-            // Extract financial instrument and fetch market data
-            $instrument = $this->extractFinancialInstrument($message);
-            $marketData = $instrument ? $this->fetchMarketData($instrument) : null;
-            
-            // Get economic data
-            $economicData = $this->fetchEconomicData();
-            
-            // Get Tavily search data
-            try {
-                $searchData = $this->performTavilySearch($message, $instrument);
-            } catch (TavilyException $e) {
-                error_log("Tavily search failed: " . $e->getMessage());
-                $searchData = null;
-            }
-            
-            // Prepare the request with enhanced context
+            // Prepare the request - Note the structure for Gemini 1.5
             $aiRequest = [
                 'contents' => [
                     [
                         'role' => 'user',
                         'parts' => [
                             [
-                                'text' => $this->prepareInstructions($marketData, $economicData, $searchData) . "\n\nUser message: " . $message
+                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
                             ]
                         ]
                     ]
@@ -88,10 +73,7 @@ class VotalityAIService {
             // Log the request payload for debugging
             error_log("Request payload: " . json_encode($aiRequest, JSON_PRETTY_PRINT));
     
-            // Create curl handle with verbose debugging
             $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
-            $verbose = fopen('php://temp', 'w+');
-            
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST => true,
@@ -101,11 +83,14 @@ class VotalityAIService {
                     'Accept: application/json'
                 ],
                 CURLOPT_TIMEOUT => 30,
-                CURLOPT_VERBOSE => true,
-                CURLOPT_STDERR => $verbose
+                CURLOPT_VERBOSE => true
             ]);
     
-            // Execute request and capture details
+            // Create a temporary file handle for CURL debugging
+            $verbose = fopen('php://temp', 'w+');
+            curl_setopt($ch, CURLOPT_STDERR, $verbose);
+    
+            // Execute the request and capture response details
             $response = curl_exec($ch);
             $curlError = curl_error($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -123,26 +108,28 @@ class VotalityAIService {
     
             curl_close($ch);
     
-            // Error handling
             if ($curlError) {
                 throw new Exception("Curl error: " . $curlError);
             }
+    
             if ($httpCode !== 200) {
                 throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
             }
+    
             if (empty($response)) {
                 throw new Exception("Empty response received from API");
             }
     
-            // Parse and validate response
             $result = json_decode($response, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 error_log("JSON decode error. Response received: " . substr($response, 0, 1000));
                 throw new Exception("JSON decode error: " . json_last_error_msg());
             }
     
+            // Log the decoded response structure
             error_log("Decoded response structure: " . json_encode($result, JSON_PRETTY_PRINT));
     
+            // Updated path for response content in Gemini 1.5
             if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
                 throw new Exception("Unexpected response structure: " . json_encode($result));
             }
@@ -151,6 +138,8 @@ class VotalityAIService {
             $cleanedResponse = $this->removeAsterisks($aiResponse);
             
             $this->addToHistory('ai', $cleanedResponse);
+            
+            // Log successful response
             error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
             
             return $cleanedResponse;
