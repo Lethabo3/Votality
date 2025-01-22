@@ -123,22 +123,24 @@
             try {
                 error_log("Starting Tavily API request for query: " . $userQuery);
                 
-                // Prepare search parameters for financial data
+                // First, let's analyze the query to determine what financial data we're looking for
+                $searchQuery = $this->buildFinancialSearchQuery($userQuery);
+                
+                // Prepare search parameters with the enhanced query
                 $searchParams = [
                     'api_key' => TAVILY_API_KEY,
-                    'query' => $userQuery,
-                    'search_depth' => 'advanced',  // Get more detailed results
-                    'include_answer' => true,      // Get AI-generated summary
-                    'max_results' => 5,            // Get top 5 most relevant results
-                    'topic' => 'news',            // Focus on news content
-                    'time_range' => 'day',        // Get very recent information
+                    'query' => $searchQuery,
+                    'search_depth' => 'advanced',
+                    'include_answer' => true,
+                    'max_results' => 5,
+                    // We're focusing on financial data sources
                     'include_domains' => [
                         'finance.yahoo.com',
                         'bloomberg.com',
                         'reuters.com',
-                        'ft.com',
-                        'wsj.com',
                         'marketwatch.com',
+                        'investing.com',
+                        'fool.com',
                         'cnbc.com'
                     ]
                 ];
@@ -158,40 +160,16 @@
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
         
-                if ($httpCode !== 200) {
-                    throw new Exception("Tavily API returned status code: " . $httpCode);
-                }
-        
+                // Process and extract market data from the search results
                 $searchResults = json_decode($response, true);
-                
-                // Log the structure of results for debugging
-                error_log("Tavily Response Structure: " . json_encode([
-                    'has_answer' => isset($searchResults['answer']),
-                    'result_count' => count($searchResults['results'] ?? []),
-                    'response_time' => $searchResults['response_time'] ?? null
-                ]));
-        
-                // Validate and return results
                 if ($searchResults && isset($searchResults['results'])) {
-                    return [
-                        'answer' => $searchResults['answer'] ?? null,
-                        'results' => array_map(function($result) {
-                            return [
-                                'title' => $result['title'],
-                                'content' => $result['content'],
-                                'url' => $result['url'],
-                                'score' => $result['score'],
-                                'published_date' => $result['published_date'] ?? null
-                            ];
-                        }, $searchResults['results'])
-                    ];
+                    return $this->extractMarketDataFromResults($searchResults['results'], $userQuery);
                 }
         
                 return null;
         
             } catch (Exception $e) {
                 error_log("Tavily fetch error: " . $e->getMessage());
-                error_log("Stack trace: " . $e->getTraceAsString());
                 return null;
             }
         }
@@ -749,7 +727,6 @@
         
             return $instructions;
         }
-        
         public function clearCache() {
             $this->cache = [];
         }
