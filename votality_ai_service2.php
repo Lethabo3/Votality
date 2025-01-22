@@ -153,18 +153,21 @@ class VotalityAIService {
 
     private function getRelevantTavilyData() {
         try {
+            error_log("Starting Tavily API request...");
+            
             $cacheKey = 'tavily_latest';
             
             // Check cache first
             if (isset($this->cache[$cacheKey]) && 
-                (time() - $this->cache[$cacheKey]['time'] < 300)) { // 5 minute cache
+                (time() - $this->cache[$cacheKey]['time'] < 300)) {
+                error_log("Using cached Tavily data");
                 return $this->cache[$cacheKey]['data'];
             }
 
-            // Make the Tavily API request
+            // Prepare search parameters
             $searchParams = [
                 'api_key' => $this->tavilyApiKey,
-                'query' => 'latest financial market developments major economic news',
+                'query' => 'latest financial news AAPL Apple stock market developments last 24 hours',
                 'search_depth' => 'advanced',
                 'max_results' => 3,
                 'include_domains' => [
@@ -175,6 +178,8 @@ class VotalityAIService {
                     'wsj.com'
                 ]
             ];
+
+            error_log("Tavily Search Parameters: " . json_encode($searchParams));
 
             $ch = curl_init(TAVILY_API_URL . '/search');
             curl_setopt_array($ch, [
@@ -189,6 +194,10 @@ class VotalityAIService {
 
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            
+            error_log("Tavily API Response Code: " . $httpCode);
+            error_log("Tavily API Raw Response: " . substr($response, 0, 500));
+
             curl_close($ch);
 
             if ($httpCode !== 200) {
@@ -198,6 +207,7 @@ class VotalityAIService {
 
             $data = json_decode($response, true);
             if (!$data || !isset($data['results'])) {
+                error_log("Tavily API invalid response structure");
                 return null;
             }
 
@@ -207,10 +217,12 @@ class VotalityAIService {
                 'data' => $data
             ];
 
+            error_log("Successfully retrieved and cached Tavily data");
             return $data;
 
         } catch (Exception $e) {
             error_log("Tavily fetch error: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             return null;
         }
     }
@@ -652,8 +664,16 @@ class VotalityAIService {
 
     private function prepareInstructions($marketData, $economicData) {
         // Get real-time search results
+        // Get real-time search results and log them
         $searchResults = $this->getRelevantTavilyData();
         
+        // Add detailed logging
+        error_log("Tavily Search Results Status: " . ($searchResults ? "RECEIVED" : "NOT RECEIVED"));
+        if ($searchResults && !empty($searchResults['results'])) {
+            error_log("Tavily Results Found: " . count($searchResults['results']));
+            error_log("Tavily Results Content: " . json_encode($searchResults['results']));
+        }
+                
         $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data.";
 
         // Make search results mandatory to reference
