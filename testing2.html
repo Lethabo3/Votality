@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Company Data Retrieval</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <title>Company SEC Data Retrieval</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 2rem auto;
             padding: 0 1rem;
+            line-height: 1.6;
         }
 
         .container {
@@ -22,12 +22,13 @@
 
         .input-group {
             margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
         }
 
         input {
             padding: 0.5rem;
-            width: 100%;
-            margin-bottom: 1rem;
+            flex-grow: 1;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
@@ -39,6 +40,7 @@
             padding: 0.5rem 1rem;
             border-radius: 4px;
             cursor: pointer;
+            min-width: 100px;
         }
 
         button:hover {
@@ -49,14 +51,23 @@
             margin-top: 2rem;
         }
 
-        .section {
-            margin-bottom: 1.5rem;
+        .filing-item {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border: 1px solid #ddd;
         }
 
-        .section h3 {
-            color: #333;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 0.5rem;
+        .filing-item h4 {
+            margin: 0 0 0.5rem 0;
+            color: #007bff;
+        }
+
+        .filing-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
         }
 
         .loading {
@@ -69,56 +80,36 @@
             color: #dc3545;
             margin-top: 1rem;
             display: none;
+            padding: 1rem;
+            background-color: #ffe6e6;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Company Data Retrieval</h1>
+        <h1>Company SEC Data Retrieval</h1>
         
         <div class="input-group">
-            <input type="text" id="companyInput" placeholder="Enter company name or ticker symbol">
-            <button onclick="fetchCompanyData()">Get Data</button>
+            <input type="text" id="companyInput" placeholder="Enter company name (e.g., AAPL for Apple Inc)">
+            <button onclick="fetchCompanyData()">Search</button>
         </div>
 
         <div id="loading" class="loading">
-            Fetching company data...
+            Fetching company filings...
         </div>
 
-        <div id="error" class="error">
-        </div>
+        <div id="error" class="error"></div>
 
-        <div id="results" class="results">
-            <div class="section">
-                <h3>Annual & Interim Reports</h3>
-                <div id="reports"></div>
-            </div>
-
-            <div class="section">
-                <h3>News Releases</h3>
-                <div id="news"></div>
-            </div>
-
-            <div class="section">
-                <h3>SEC Filings</h3>
-                <div id="filings"></div>
-            </div>
-
-            <div class="section">
-                <h3>Corporate Governances</h3>
-                <div id="governance"></div>
-            </div>
-        </div>
+        <div id="results" class="results"></div>
     </div>
 
     <script>
-        // Store API key securely (in a production environment, this should be handled server-side)
-        const API_KEY = 'sk-9947ef44c91148c4a79f1ad009d9fc86';
-
+        // We'll use the SEC's EDGAR API to fetch real company filing data
         async function fetchCompanyData() {
-            const companyName = document.getElementById('companyInput').value.trim();
-            if (!companyName) {
-                showError('Please enter a company name or ticker symbol');
+            const ticker = document.getElementById('companyInput').value.trim().toUpperCase();
+            if (!ticker) {
+                showError('Please enter a company ticker symbol');
                 return;
             }
 
@@ -126,57 +117,68 @@
             showError('');
 
             try {
-                // Initialize headers with API key
-                const headers = {
-                    'Authorization': `Bearer ${API_KEY}`,
-                    'Content-Type': 'application/json'
-                };
+                // First, fetch the company's CIK number
+                const companyResponse = await fetch(`https://data.sec.gov/submissions/CIK${ticker}.json`, {
+                    headers: {
+                        'User-Agent': 'CompanyResearchTool test@example.com' // Required by SEC API
+                    }
+                });
 
-                // Fetch company data
-                const response = await axios.post('https://api.langchain.com/v1/company-data', {
-                    company: companyName
-                }, { headers });
+                if (!companyResponse.ok) {
+                    throw new Error('Company not found. Please check the ticker symbol.');
+                }
 
-                displayResults(response.data);
+                const companyData = await companyResponse.json();
+                
+                // Now fetch the company's filings
+                const filingsResponse = await fetch(`https://data.sec.gov/submissions/CIK${companyData.cik}.json`, {
+                    headers: {
+                        'User-Agent': 'CompanyResearchTool test@example.com'
+                    }
+                });
+
+                if (!filingsResponse.ok) {
+                    throw new Error('Error fetching company filings.');
+                }
+
+                const filingsData = await filingsResponse.json();
+                displayResults(filingsData);
             } catch (error) {
-                showError(error.response?.data?.message || 'Error fetching company data. Please try again.');
+                showError(error.message || 'Error fetching company data. Please try again.');
             } finally {
                 showLoading(false);
             }
         }
 
         function displayResults(data) {
-            // Display Annual & Interim Reports
-            const reportsDiv = document.getElementById('reports');
-            reportsDiv.innerHTML = formatDataList(data.reports || []);
+            const resultsDiv = document.getElementById('results');
+            
+            // Display company information
+            resultsDiv.innerHTML = `
+                <h2>${data.name}</h2>
+                <p>CIK: ${data.cik}</p>
+                <h3>Recent Filings</h3>
+            `;
 
-            // Display News Releases
-            const newsDiv = document.getElementById('news');
-            newsDiv.innerHTML = formatDataList(data.news || []);
-
-            // Display SEC Filings
-            const filingsDiv = document.getElementById('filings');
-            filingsDiv.innerHTML = formatDataList(data.filings || []);
-
-            // Display Corporate Governance
-            const governanceDiv = document.getElementById('governance');
-            governanceDiv.innerHTML = formatDataList(data.governance || []);
-        }
-
-        function formatDataList(items) {
-            if (!items.length) {
-                return '<p>No data available</p>';
-            }
-
-            return items
-                .map(item => `
-                    <div class="data-item">
-                        <h4>${item.title}</h4>
-                        <p>${item.date}</p>
-                        <a href="${item.url}" target="_blank">View Document</a>
+            // Display recent filings
+            if (data.filings && data.filings.recent) {
+                const filings = data.filings.recent;
+                const filingsHtml = filings.form.map((form, index) => `
+                    <div class="filing-item">
+                        <h4>${form}</h4>
+                        <div class="filing-meta">
+                            <div>Filed: ${filings.filingDate[index]}</div>
+                            <div>Description: ${filings.description[index] || 'No description available'}</div>
+                        </div>
+                        <a href="https://www.sec.gov/Archives/edgar/data/${data.cik}/${filings.accessionNumber[index].replace(/-/g, '')}" 
+                           target="_blank">View Filing</a>
                     </div>
-                `)
-                .join('');
+                `).join('');
+
+                resultsDiv.innerHTML += filingsHtml;
+            } else {
+                resultsDiv.innerHTML += '<p>No recent filings found.</p>';
+            }
         }
 
         function showLoading(show) {
