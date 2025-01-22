@@ -658,17 +658,13 @@ class VotalityAIService {
 
         // Add real-time market context section if available
         if ($searchResults && !empty($searchResults['results'])) {
-            $instructions .= "\n\nREAL-TIME MARKET CONTEXT FROM LATEST SOURCES:";
+            $instructions .= "\n\n[TAVILY_SEARCH_BEGIN]";
             foreach ($searchResults['results'] as $index => $result) {
-                $instructions .= "\nSource " . ($index + 1) . " (" . (isset($result['published_date']) ? $result['published_date'] : 'Recent') . "): " 
-                    . $result['title'] . " - " . substr($result['content'], 0, 200) . "...";
+                $instructions .= "\n[SEARCH_RESULT_" . ($index + 1) . "] " 
+                    . (isset($result['published_date']) ? "(" . $result['published_date'] . ") " : "")
+                    . $result['title'] . " - " . substr($result['content'], 0, 200);
             }
-            
-            if (isset($searchResults['answer']) && !empty($searchResults['answer'])) {
-                $instructions .= "\n\nMARKET SUMMARY: " . $searchResults['answer'];
-            }
-            
-            $instructions .= "\n\nIncorporate these latest market developments into your analysis when relevant.";
+            $instructions .= "\n[TAVILY_SEARCH_END]\n";
         }
 
         $instructions .= "\n\nGUIDELINES:
