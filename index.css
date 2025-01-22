@@ -1489,9 +1489,8 @@ justify-content: flex-end;
 }
 
 .desktop-top-nav__topic span {
-display: inline-block;
-position: relative;
-margin-right: 2rem; /* Adds space between words */
+    display: inline-block;
+    margin-right: 0.25em; /* Adds space between words */
 }
 
 .sidebar.expanded ~ .main-content .desktop-top-nav .desktop-top-nav__left {
