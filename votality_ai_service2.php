@@ -37,28 +37,20 @@
 
         public function generateResponse($message, $chatId) {
             try {
-                // Step 1: Initialize conversation tracking
                 $this->addToHistory('user', $message);
-                error_log("Starting response generation for chatId: " . $chatId);
-        
-                // Step 2: Gather context from Tavily
-                $searchResults = $this->getRelevantTavilyData();
-                error_log("Tavily data status: " . ($searchResults ? "Retrieved" : "Not available"));
                 
-                // Step 3: Prepare the Gemini request with enhanced context
-                $enhancedPrompt = $this->prepareInstructions(null, null);
-                if ($searchResults && !empty($searchResults['results'])) {
-                    error_log("Including " . count($searchResults['results']) . " Tavily results in prompt");
-                }
-        
-                // Step 4: Construct the full Gemini request
+                // Log configuration for debugging
+                error_log("API URL: " . $this->apiUrl);
+                error_log("Using model: gemini-1.5-flash-latest");
+                
+                // Prepare the request - Note the structure for Gemini 1.5
                 $aiRequest = [
                     'contents' => [
                         [
                             'role' => 'user',
                             'parts' => [
                                 [
-                                    'text' => $enhancedPrompt . "\n\nUser message: " . $message
+                                    'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
                                 ]
                             ]
                         ]
@@ -78,9 +70,11 @@
                     ]
                 ];
         
-                // Step 5: Prepare and execute the API request
-                $apiEndpoint = $this->apiUrl . '?key=' . $this->apiKey;
-                $requestOptions = [
+                // Log the request payload for debugging
+                error_log("Request payload: " . json_encode($aiRequest, JSON_PRETTY_PRINT));
+        
+                $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
+                curl_setopt_array($ch, [
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS => json_encode($aiRequest),
@@ -90,89 +84,70 @@
                     ],
                     CURLOPT_TIMEOUT => 30,
                     CURLOPT_VERBOSE => true
-                ];
+                ]);
         
-                // Step 6: Execute request with detailed logging
-                $ch = curl_init($apiEndpoint);
-                curl_setopt_array($ch, $requestOptions);
+                // Create a temporary file handle for CURL debugging
+                $verbose = fopen('php://temp', 'w+');
+                curl_setopt($ch, CURLOPT_STDERR, $verbose);
         
-                // Create debug logging channel
-                $debugLog = fopen('php://temp', 'w+');
-                curl_setopt($ch, CURLOPT_STDERR, $debugLog);
-        
-                // Execute the request
+                // Execute the request and capture response details
                 $response = curl_exec($ch);
-                $requestInfo = [
-                    'error' => curl_error($ch),
-                    'httpCode' => curl_getinfo($ch, CURLINFO_HTTP_CODE),
-                    'totalTime' => curl_getinfo($ch, CURLINFO_TOTAL_TIME)
-                ];
-        
-                // Capture debug information
-                rewind($debugLog);
-                $debugOutput = stream_get_contents($debugLog);
-                fclose($debugLog);
+                $curlError = curl_error($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 
-                // Log comprehensive request details
-                error_log("Request execution details:" . json_encode([
-                    'endpoint' => $apiEndpoint,
-                    'httpCode' => $requestInfo['httpCode'],
-                    'executionTime' => $requestInfo['totalTime'],
-                    'errorIfAny' => $requestInfo['error'],
-                    'debugOutput' => $debugOutput
-                ], JSON_PRETTY_PRINT));
+                // Get verbose debug information
+                rewind($verbose);
+                $verboseLog = stream_get_contents($verbose);
+                fclose($verbose);
+        
+                // Log detailed debug information
+                error_log("HTTP Code: " . $httpCode);
+                error_log("Curl Error: " . $curlError);
+                error_log("Verbose log: " . $verboseLog);
+                error_log("Raw response: " . $response);
         
                 curl_close($ch);
         
-                // Step 7: Handle potential request failures
-                if ($requestInfo['error']) {
-                    throw new Exception("API request failed: " . $requestInfo['error']);
+                if ($curlError) {
+                    throw new Exception("Curl error: " . $curlError);
                 }
         
-                if ($requestInfo['httpCode'] !== 200) {
-                    throw new Exception("Unexpected HTTP status: " . $requestInfo['httpCode'] . 
-                                      "\nResponse: " . substr($response, 0, 1000));
+                if ($httpCode !== 200) {
+                    throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
                 }
         
-                // Step 8: Process the response
                 if (empty($response)) {
                     throw new Exception("Empty response received from API");
                 }
         
-                $decodedResponse = json_decode($response, true);
+                $result = json_decode($response, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new Exception("JSON decode error: " . json_last_error_msg() . 
-                                      "\nResponse received: " . substr($response, 0, 1000));
+                    error_log("JSON decode error. Response received: " . substr($response, 0, 1000));
+                    throw new Exception("JSON decode error: " . json_last_error_msg());
                 }
         
-                // Step 9: Extract and validate the AI response
-                if (!isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
-                    error_log("Unexpected response structure: " . json_encode($decodedResponse));
-                    throw new Exception("Invalid response structure from API");
+                // Log the decoded response structure
+                error_log("Decoded response structure: " . json_encode($result, JSON_PRETTY_PRINT));
+        
+                // Updated path for response content in Gemini 1.5
+                if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
+                    throw new Exception("Unexpected response structure: " . json_encode($result));
                 }
         
-                // Step 10: Clean and prepare the final response
-                $rawResponse = $decodedResponse['candidates'][0]['content']['parts'][0]['text'];
-                $cleanedResponse = $this->removeAsterisks($rawResponse);
+                $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
+                $cleanedResponse = $this->removeAsterisks($aiResponse);
                 
-                // Step 11: Update conversation history and log success
                 $this->addToHistory('ai', $cleanedResponse);
-                error_log("Successfully generated response [" . strlen($cleanedResponse) . " chars]");
-        
+                
+                // Log successful response
+                error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
+                
                 return $cleanedResponse;
         
             } catch (Exception $e) {
-                // Step 12: Enhanced error handling
-                $errorContext = [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString()
-                ];
-                error_log("Response generation failed: " . json_encode($errorContext, JSON_PRETTY_PRINT));
-                
-                return "I apologize, but I encountered an error processing your request. " .
-                       "Please try again in a moment. Technical details: " . $e->getMessage();
+                error_log("Error in generateResponse: " . $e->getMessage());
+                error_log("Stack trace: " . $e->getTraceAsString());
+                return "I apologize, but I encountered an error processing your request. Please try again in a moment. Error details: " . $e->getMessage();
             }
         }
 
