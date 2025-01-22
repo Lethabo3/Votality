@@ -37,19 +37,21 @@
 
         public function generateResponse($message, $chatId) {
             try {
-                // Step 1: Start conversation tracking and logging
+                // Step 1: Initialize conversation tracking
                 $this->addToHistory('user', $message);
-                error_log("Starting response generation for chatId: " . $chatId . " with message: " . $message);
+                error_log("Starting response generation for chatId: " . $chatId);
         
-                // Step 2: Get market and news data through Tavily search
-                $contextData = $this->getRelevantTavilyData($message);
-                error_log("Tavily context data retrieved: " . json_encode($contextData));
+                // Step 2: Gather context from Tavily
+                $searchResults = $this->getRelevantTavilyData();
+                error_log("Tavily data status: " . ($searchResults ? "Retrieved" : "Not available"));
+                
+                // Step 3: Prepare the Gemini request with enhanced context
+                $enhancedPrompt = $this->prepareInstructions(null, null);
+                if ($searchResults && !empty($searchResults['results'])) {
+                    error_log("Including " . count($searchResults['results']) . " Tavily results in prompt");
+                }
         
-                // Step 3: Prepare enhanced instructions with the gathered data
-                $enhancedPrompt = $this->prepareInstructions($contextData, $message);
-                error_log("Enhanced prompt prepared with length: " . strlen($enhancedPrompt));
-        
-                // Step 4: Construct the Gemini API request
+                // Step 4: Construct the full Gemini request
                 $aiRequest = [
                     'contents' => [
                         [
@@ -76,9 +78,9 @@
                     ]
                 ];
         
-                // Step 5: Make the API call to Gemini
-                $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
-                curl_setopt_array($ch, [
+                // Step 5: Prepare and execute the API request
+                $apiEndpoint = $this->apiUrl . '?key=' . $this->apiKey;
+                $requestOptions = [
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS => json_encode($aiRequest),
@@ -86,36 +88,91 @@
                         'Content-Type: application/json',
                         'Accept: application/json'
                     ],
-                    CURLOPT_TIMEOUT => 30
-                ]);
+                    CURLOPT_TIMEOUT => 30,
+                    CURLOPT_VERBOSE => true
+                ];
         
-                // Step 6: Handle the API response
+                // Step 6: Execute request with detailed logging
+                $ch = curl_init($apiEndpoint);
+                curl_setopt_array($ch, $requestOptions);
+        
+                // Create debug logging channel
+                $debugLog = fopen('php://temp', 'w+');
+                curl_setopt($ch, CURLOPT_STDERR, $debugLog);
+        
+                // Execute the request
                 $response = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $curlError = curl_error($ch);
+                $requestInfo = [
+                    'error' => curl_error($ch),
+                    'httpCode' => curl_getinfo($ch, CURLINFO_HTTP_CODE),
+                    'totalTime' => curl_getinfo($ch, CURLINFO_TOTAL_TIME)
+                ];
+        
+                // Capture debug information
+                rewind($debugLog);
+                $debugOutput = stream_get_contents($debugLog);
+                fclose($debugLog);
+                
+                // Log comprehensive request details
+                error_log("Request execution details:" . json_encode([
+                    'endpoint' => $apiEndpoint,
+                    'httpCode' => $requestInfo['httpCode'],
+                    'executionTime' => $requestInfo['totalTime'],
+                    'errorIfAny' => $requestInfo['error'],
+                    'debugOutput' => $debugOutput
+                ], JSON_PRETTY_PRINT));
+        
                 curl_close($ch);
         
-                // Step 7: Validate and process the response
-                if ($curlError || $httpCode !== 200 || empty($response)) {
-                    throw new Exception("API call failed: " . ($curlError ?: "HTTP $httpCode"));
+                // Step 7: Handle potential request failures
+                if ($requestInfo['error']) {
+                    throw new Exception("API request failed: " . $requestInfo['error']);
                 }
         
-                $result = json_decode($response, true);
-                if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                    throw new Exception("Invalid response structure from Gemini API");
+                if ($requestInfo['httpCode'] !== 200) {
+                    throw new Exception("Unexpected HTTP status: " . $requestInfo['httpCode'] . 
+                                      "\nResponse: " . substr($response, 0, 1000));
                 }
         
-                // Step 8: Clean and format the response
-                $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
-                $cleanedResponse = $this->removeAsterisks($aiResponse);
+                // Step 8: Process the response
+                if (empty($response)) {
+                    throw new Exception("Empty response received from API");
+                }
+        
+                $decodedResponse = json_decode($response, true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new Exception("JSON decode error: " . json_last_error_msg() . 
+                                      "\nResponse received: " . substr($response, 0, 1000));
+                }
+        
+                // Step 9: Extract and validate the AI response
+                if (!isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
+                    error_log("Unexpected response structure: " . json_encode($decodedResponse));
+                    throw new Exception("Invalid response structure from API");
+                }
+        
+                // Step 10: Clean and prepare the final response
+                $rawResponse = $decodedResponse['candidates'][0]['content']['parts'][0]['text'];
+                $cleanedResponse = $this->removeAsterisks($rawResponse);
                 
-                // Step 9: Update conversation history and return
+                // Step 11: Update conversation history and log success
                 $this->addToHistory('ai', $cleanedResponse);
+                error_log("Successfully generated response [" . strlen($cleanedResponse) . " chars]");
+        
                 return $cleanedResponse;
         
             } catch (Exception $e) {
-                error_log("Error in generateResponse: " . $e->getMessage());
-                return "I apologize, but I encountered an error processing your request. Please try again in a moment.";
+                // Step 12: Enhanced error handling
+                $errorContext = [
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString()
+                ];
+                error_log("Response generation failed: " . json_encode($errorContext, JSON_PRETTY_PRINT));
+                
+                return "I apologize, but I encountered an error processing your request. " .
+                       "Please try again in a moment. Technical details: " . $e->getMessage();
             }
         }
 
@@ -661,72 +718,129 @@
             return $aiHistory;
         }
 
-        private function prepareInstructions($contextData, $userMessage) {
-            // Step 1: Initialize base instructions
-            $instructions = "You are Votality, a knowledgeable and detailed AI assistant for financial analysis. ";
-            $instructions .= "Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data.\n\n";
-        
-            // Step 2: Add market context from Tavily search results
-            if ($contextData && !empty($contextData['results'])) {
-                $instructions .= "LATEST MARKET DEVELOPMENTS (You MUST reference at least one in your response):\n";
-                
-                foreach ($contextData['results'] as $index => $result) {
-                    $timestamp = isset($result['published_date']) ? 
-                                date('Y-m-d H:i', strtotime($result['published_date'])) : 
-                                'Recent';
-                    
-                    $instructions .= "\nDEVELOPMENT " . ($index + 1) . " (" . $timestamp . "):\n";
-                    $instructions .= "Title: " . $result['title'] . "\n";
-                    $instructions .= "Source: " . parse_url($result['url'], PHP_URL_HOST) . "\n";
-                    $instructions .= "Key Details: " . substr($result['content'], 0, 250) . "...\n";
-                    
-                    // Extract and add any market data found
-                    if (isset($result['extracted_data'])) {
-                        $instructions .= "Market Data: " . json_encode($result['extracted_data']) . "\n";
-                    }
+        private function prepareInstructions($marketData, $economicData) {
+            // Get real-time search results and log them
+            $searchResults = $this->getRelevantTavilyData();
+            
+            // Add detailed logging
+            error_log("Tavily Search Results Status: " . ($searchResults ? "RECEIVED" : "NOT RECEIVED"));
+            if ($searchResults && !empty($searchResults['results'])) {
+                error_log("Tavily Results Found: " . count($searchResults['results']));
+                error_log("Tavily Results Content: " . json_encode($searchResults['results']));
+            }
+
+            $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data.";
+
+            // Make search results mandatory to reference
+            if ($searchResults && !empty($searchResults['results'])) {
+                $instructions .= "\n\nCRITICAL RECENT DEVELOPMENTS (You MUST include at least one in your response):";
+                foreach ($searchResults['results'] as $index => $result) {
+                    $date = isset($result['published_date']) ? $result['published_date'] : 'Recent';
+                    $instructions .= "\nDEVELOPMENT " . ($index + 1) . " (" . $date . "): "
+                        . $result['title'] . "\nKey Details: " . substr($result['content'], 0, 200);
                 }
+                
+                $instructions .= "\n\nYOUR RESPONSE MUST START WITH AND REFERENCE AT LEAST ONE OF THE ABOVE RECENT DEVELOPMENTS.";
             }
+
+            $instructions .= "\n\nGUIDELINES:
+    1. Uncover hidden market narratives that connect seemingly unrelated events.  
+    2. No basic greetings - start with your most compelling insight.  
+    3. Reveal institutional trading patterns that retail traders rarely see.  
+    4. Instead of surface-level price analysis, expose in-depth data.  
+    5. Provide detailed information about financial instruments, organized into the following sections(only when necessary and user asks generally):  
+    - **General Information**: Name, ticker symbol, market/exchange, and type of instrument.  
+    - **Pricing Information**: Current price, bid/ask prices, open price, previous close, high/low for the day, and 52-week high/low.  
+    - **Performance Metrics**: Price change (absolute and percentage), year-to-date (YTD) performance, daily volume, average volume, and market capitalization.  
+    - **Fundamental Data**: Earnings per share (EPS), price-to-earnings (P/E) ratio, dividend yield, ex-dividend date, and sector/industry classification.  
+    - **Technical Data**: Relative Strength Index (RSI), moving averages, volatility, beta, and significant technical indicators.  
+    - **Risk Metrics**: Volatility level, Sharpe Ratio, beta, and maximum drawdown.  
+    - **Financials**: Key financial statements and notable financial health indicators.  
+    - **News and Sentiment**: Recent news, analyst ratings, and sentiment analysis.  
+    - **Historical Data**: Historical price trends and performance over specified periods.  
+    - **Specialized Information**: Include unique details relevant to the instrument.  
+    6. Highlight divergences between public narratives and actual market behavior.  
+    7. No emojis or basic analysis. Reply in 1301 or fewer characters in all responses (never more).  
+    8. Expose intermarket relationships that mainstream analysis misses.  
+    9. Rather than generic advice, reveal institutional positioning and liquidity flows.  
+    10. Every response must include at least one non-obvious market insight.  
+    11. Match your depth to the user's knowledge level.  
+    12. Focus on forward-looking catalysts rather than backward-looking data.  
+    13. Speak in simple language, simple diction; make it easy for users to understand.  
+    14. Do not mention anything about your data provider.  
+    15. Never give a response with any of these {},[], or with a response that [something not found]! Never.  
+    16. Use strictly formal language; do not use metaphors or examples.  
+    17. You only have 300 tokens for each response, so make the content you output enough.  
+
+            Format your response as follows:
+            [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
         
-            // Step 3: Add response format requirements
-            $instructions .= "\n\nRESPONSE REQUIREMENTS:
-        1. Begin with the most relevant market development from above
-        2. Keep your total response under 1301 characters
-        3. Use this format for any specific market data:
-           CompanyName|Symbol|CurrentPrice|PriceChange
-        4. Focus on forward-looking implications rather than just historical data
-        5. Provide specific numbers and statistics when available
-        6. Use formal language and avoid metaphors or examples
-        7. Highlight any unusual market patterns or divergences\n\n";
-        
-            // Step 4: Add user context guidelines
-            $instructions .= "USER CONTEXT GUIDELINES:
-        1. Match technical depth to the user's apparent knowledge level
-        2. Reveal institutional trading patterns when relevant
-        3. Connect seemingly unrelated market events
-        4. Focus on data-driven insights rather than general observations\n\n";
-        
-            // Step 5: Add any special handling based on user message
-            if (stripos($userMessage, 'price') !== false || 
-                stripos($userMessage, 'stock') !== false || 
-                stripos($userMessage, 'market') !== false) {
-                $instructions .= "IMPORTANT: User is specifically asking about market prices or stock information. ";
-                $instructions .= "Prioritize current price data and recent price movements in your response.\n\n";
+            Market Info:
+        CompanyName|Symbol|CurrentPriceAsNumber|PriceChangeAsNumber
+        (Example: Apple Inc.|AAPL|190.50|-2.30)
+            
+            Related Topics:
+            1. [First related topic or question]
+            2. [Second related topic or question]
+            3. [Third related topic or question]";
+
+            // Add market data if available
+            if ($marketData) {
+                $instructions .= "\n\nCURRENT MARKET DATA: " . json_encode($marketData);
             }
-        
-            // Step 6: Add response structure requirements
-            $instructions .= "FORMAT YOUR RESPONSE AS:
-        [Main analysis with specific data points]
-        
-        Market Info: (if applicable)
-        CompanyName|Symbol|Price|Change
-        
-        Related Topics:
-        1. [Relevant topic]
-        2. [Relevant topic]
-        3. [Relevant topic]";
-        
+
+            // Add economic data if available
+            if ($economicData) {
+                $instructions .= "\n\nECONOMIC INDICATORS: " . json_encode($economicData);
+            }
+
+            // Final reminder about using recent developments
+            $instructions .= "\n\nRESPONSE STRUCTURE REQUIREMENTS:
+    1. BEGIN with a specific recent development from the Critical Recent Developments section above
+    2. CONNECT this development to current market data and trends
+    3. EXPLAIN the implications and potential future impact
+    4. MAINTAIN response format and character limit (1301 max)";
+
             return $instructions;
         }
+        
+        private function fetchEconomicData() {
+            $indicators = [
+                'GDP' => 'FRED/GDP',
+                'Unemployment Rate' => 'FRED/UNRATE',
+                'Inflation Rate' => 'FRED/CPIAUCSL',
+                'Federal Funds Rate' => 'FRED/FEDFUNDS'
+            ];
+
+            $economicData = [];
+            
+            foreach ($indicators as $name => $code) {
+                $cacheKey = "economic_{$code}";
+                
+                // Check cache first
+                if (isset($this->cache[$cacheKey]) && 
+                    (time() - $this->cache[$cacheKey]['time'] < $this->cacheDuration)) {
+                    $economicData[$name] = $this->cache[$cacheKey]['data'];
+                    continue;
+                }
+
+                $url = "{$this->nasdaqDataLinkApiUrl}datasets/{$code}.json?api_key={$this->nasdaqDataLinkApiKey}&rows=1";
+                $data = $this->makeApiRequest($url);
+                
+                if ($data && isset($data['dataset']['data'][0][1])) {
+                    $economicData[$name] = $data['dataset']['data'][0][1];
+                    
+                    // Cache the result
+                    $this->cache[$cacheKey] = [
+                        'time' => time(),
+                        'data' => $data['dataset']['data'][0][1]
+                    ];
+                }
+            }
+
+            return $economicData;
+        }
+
         public function clearCache() {
             $this->cache = [];
         }
