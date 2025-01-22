@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Data Retrieval</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .container {
+            background-color: #f5f5f5;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        input {
+            padding: 0.5rem;
+            width: 100%;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .results {
+            margin-top: 2rem;
+        }
+
+        .section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section h3 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 0.5rem;
+        }
+
+        .loading {
+            display: none;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        .error {
+            color: #dc3545;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Company Data Retrieval</h1>
+        
+        <div class="input-group">
+            <input type="text" id="companyInput" placeholder="Enter company name or ticker symbol">
+            <button onclick="fetchCompanyData()">Get Data</button>
+        </div>
+
+        <div id="loading" class="loading">
+            Fetching company data...
+        </div>
+
+        <div id="error" class="error">
+        </div>
+
+        <div id="results" class="results">
+            <div class="section">
+                <h3>Annual & Interim Reports</h3>
+                <div id="reports"></div>
+            </div>
+
+            <div class="section">
+                <h3>News Releases</h3>
+                <div id="news"></div>
+            </div>
+
+            <div class="section">
+                <h3>SEC Filings</h3>
+                <div id="filings"></div>
+            </div>
+
+            <div class="section">
+                <h3>Corporate Governance</h3>
+                <div id="governance"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store API key securely (in a production environment, this should be handled server-side)
+        const API_KEY = 'sk-9947ef44c91148c4a79f1ad009d9fc86';
+
+        async function fetchCompanyData() {
+            const companyName = document.getElementById('companyInput').value.trim();
+            if (!companyName) {
+                showError('Please enter a company name or ticker symbol');
+                return;
+            }
+
+            showLoading(true);
+            showError('');
+
+            try {
+                // Initialize headers with API key
+                const headers = {
+                    'Authorization': `Bearer ${API_KEY}`,
+                    'Content-Type': 'application/json'
+                };
+
+                // Fetch company data
+                const response = await axios.post('https://api.langchain.com/v1/company-data', {
+                    company: companyName
+                }, { headers });
+
+                displayResults(response.data);
+            } catch (error) {
+                showError(error.response?.data?.message || 'Error fetching company data. Please try again.');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayResults(data) {
+            // Display Annual & Interim Reports
+            const reportsDiv = document.getElementById('reports');
+            reportsDiv.innerHTML = formatDataList(data.reports || []);
+
+            // Display News Releases
+            const newsDiv = document.getElementById('news');
+            newsDiv.innerHTML = formatDataList(data.news || []);
+
+            // Display SEC Filings
+            const filingsDiv = document.getElementById('filings');
+            filingsDiv.innerHTML = formatDataList(data.filings || []);
+
+            // Display Corporate Governance
+            const governanceDiv = document.getElementById('governance');
+            governanceDiv.innerHTML = formatDataList(data.governance || []);
+        }
+
+        function formatDataList(items) {
+            if (!items.length) {
+                return '<p>No data available</p>';
+            }
+
+            return items
+                .map(item => `
+                    <div class="data-item">
+                        <h4>${item.title}</h4>
+                        <p>${item.date}</p>
+                        <a href="${item.url}" target="_blank">View Document</a>
+                    </div>
+                `)
+                .join('');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = message ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
