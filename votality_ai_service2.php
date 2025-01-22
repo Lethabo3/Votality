@@ -176,28 +176,33 @@
             }
         }
 
-        private function getRelevantTavilyData($userQuery) {
+        private function getRelevantTavilyData() {
             try {
-                error_log("Starting Tavily API request for query: " . $userQuery);
+                error_log("Starting Tavily API request...");
                 
-                // First, let's analyze the query to determine what financial data we're looking for
-                $searchQuery = $this->buildFinancialSearchQuery($userQuery);
+                $cacheKey = 'tavily_latest';
                 
-                // Prepare search parameters with the enhanced query
+                // Check cache first
+                if (isset($this->cache[$cacheKey]) && 
+                    (time() - $this->cache[$cacheKey]['time'] < 300)) {
+                    error_log("Using cached Tavily data");
+                    return $this->cache[$cacheKey]['data'];
+                }
+        
+                // Prepare search parameters with more focused query
                 $searchParams = [
                     'api_key' => TAVILY_API_KEY,
-                    'query' => $searchQuery,
+                    'query' => 'breaking financial news market developments stocks trading last 12 hours',
                     'search_depth' => 'advanced',
                     'include_answer' => true,
                     'max_results' => 5,
-                    // We're focusing on financial data sources
                     'include_domains' => [
                         'finance.yahoo.com',
                         'bloomberg.com',
                         'reuters.com',
+                        'ft.com',
+                        'wsj.com',
                         'marketwatch.com',
-                        'investing.com',
-                        'fool.com',
                         'cnbc.com'
                     ]
                 ];
@@ -215,72 +220,41 @@
         
                 $response = curl_exec($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $error = curl_error($ch);
+                
                 curl_close($ch);
         
-                // Process and extract market data from the search results
-                $searchResults = json_decode($response, true);
-                if ($searchResults && isset($searchResults['results'])) {
-                    return $this->extractMarketDataFromResults($searchResults['results'], $userQuery);
+                error_log("Tavily API Response Code: " . $httpCode);
+                error_log("Tavily API Error (if any): " . $error);
+                error_log("Tavily API Raw Response: " . substr($response, 0, 1000));
+        
+                if ($httpCode !== 200) {
+                    throw new Exception("Tavily API returned non-200 status code: " . $httpCode);
                 }
         
-                return null;
+                if (!$response) {
+                    throw new Exception("Empty response from Tavily API");
+                }
+        
+                $data = json_decode($response, true);
+                if (!$data || !isset($data['results'])) {
+                    throw new Exception("Invalid response structure from Tavily API");
+                }
+        
+                // Cache the results
+                $this->cache[$cacheKey] = [
+                    'time' => time(),
+                    'data' => $data
+                ];
+        
+                error_log("Successfully retrieved Tavily data with " . count($data['results']) . " results");
+                return $data;
         
             } catch (Exception $e) {
                 error_log("Tavily fetch error: " . $e->getMessage());
+                error_log("Stack trace: " . $e->getTraceAsString());
                 return null;
             }
-        }
-        
-        // This function builds an optimized search query to find market data
-        private function buildFinancialSearchQuery($userQuery) {
-            // Extract potential stock symbols or company names
-            $symbols = $this->extractFinancialInstrument($userQuery);
-            
-            if ($symbols) {
-                // If we found a symbol, create a targeted search
-                return "latest stock price market data " . $symbols['symbol'] . 
-                       " current price change percentage " . 
-                       date('Y-m-d') . " trading information";
-            }
-            
-            // If no specific symbol, create a general market search
-            return $userQuery . " latest market price trading data " . date('Y-m-d');
-        }
-        
-        // This function extracts market data from Tavily search results
-        private function extractMarketDataFromResults($results, $userQuery) {
-            $marketData = [
-                'price' => null,
-                'change' => null,
-                'change_percentage' => null,
-                'company_name' => null,
-                'symbol' => null,
-                'timestamp' => null,
-                'source_url' => null
-            ];
-        
-            foreach ($results as $result) {
-                $content = $result['content'];
-                
-                // Look for price patterns like "$123.45" or "123.45 USD"
-                if (preg_match('/\$(\d+(\.\d{2})?)|(\d+(\.\d{2})?)\s*(USD|dollars)/i', $content, $matches)) {
-                    $marketData['price'] = floatval($matches[1]);
-                }
-                
-                // Look for percentage changes like "+2.34%" or "-1.23%"
-                if (preg_match('/([+-]?\d+(\.\d{2})?%)/i', $content, $matches)) {
-                    $marketData['change_percentage'] = floatval($matches[1]);
-                }
-                
-                // If we found both price and change, we can consider this data valid
-                if ($marketData['price'] !== null && $marketData['change_percentage'] !== null) {
-                    $marketData['timestamp'] = time();
-                    $marketData['source_url'] = $result['url'];
-                    break;
-                }
-            }
-        
-            return $marketData;
         }
 
         private function processTavilyResults($response) {
