@@ -1153,7 +1153,7 @@ try {
                         if (data.error === 'auth_required' && !stayLoggedOut) {
                             hideAIThinking();
                             sessionStorage.setItem('returnUrl', window.location.href);
-                            window.location.href = '/signup.html';
+                            window.location.href = '/signin.html';
                             return;
                         }
                         if (data.error === 'auth_required' && stayLoggedOut) {
@@ -2705,19 +2705,30 @@ if (text.includes('Market Info:')) {
         const stockData = {
             companyName: companyName.trim(),
             symbol: symbol.trim(),
-            currentPrice: currentPrice,  // No conversion, use directly
-            priceChange: priceChange,    // No conversion, use directly
+            currentPrice: currentPrice,
+            priceChange: priceChange,
             priceChangePercent: ((parseFloat(priceChange) / parseFloat(currentPrice)) * 100).toFixed(2),
             tradingStatus: 'Regular Hours',
-            lastUpdated: '2:30 PM EST'
+            lastUpdated: getNYSETime()
         };
-        
-        // Create and append market data section
+
+        // Create market section
         const marketDataSection = createMarketDataSection(stockData);
+
+        // Update time every 5 minutes
+        const timeUpdateInterval = setInterval(() => {
+            const timeElement = marketDataSection.querySelector('.trading-status span:last-child');
+            if (timeElement) {
+                timeElement.textContent = getNYSETime();
+            }
+        }, 5 * 60 * 1000); // 5 minutes in milliseconds
+
+        // Store interval for cleanup
+        marketDataSection.dataset.timeInterval = timeUpdateInterval;
+        
         lastChatGroup.appendChild(marketDataSection);
     }
 }
-
             // Create an outer wrapper for proper positioning context
             const outerWrapper = document.createElement('div');
             outerWrapper.style.position = 'relative';
@@ -3402,12 +3413,23 @@ function cleanupMarketData() {
         clearInterval(window.marketDataInterval);
         window.marketDataInterval = null;
     }
-    
-    // Clear time update interval
+
+    // Clear time update interval if it exists
     const marketSection = document.querySelector('.market-data-section');
     if (marketSection && marketSection.dataset.timeInterval) {
         clearInterval(parseInt(marketSection.dataset.timeInterval));
+        delete marketSection.dataset.timeInterval;
     }
+}
+
+function getNYSETime() {
+    const nyTime = new Date().toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+    return nyTime + " EST";
 }
 
 function createMarketDataSection(stockData) {
