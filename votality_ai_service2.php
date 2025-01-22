@@ -651,23 +651,28 @@ class VotalityAIService {
     }
 
     private function prepareInstructions($marketData, $economicData) {
-        // Get the latest market insights from Tavily
+        // Retrieve real-time market insights from Tavily
         $searchResults = $this->getRelevantTavilyData();
         
-        $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data. Guidelines:";
+        $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data.";
 
-        // Insert real-time market developments if available
-        if ($searchResults) {
-            $instructions .= "\n\nLatest market developments from trusted sources:";
-            foreach ($searchResults['results'] as $result) {
-                $instructions .= "\n- " . $result['title'] . ": " . substr($result['content'], 0, 200);
+        // Add real-time market context section if available
+        if ($searchResults && !empty($searchResults['results'])) {
+            $instructions .= "\n\nREAL-TIME MARKET CONTEXT FROM LATEST SOURCES:";
+            foreach ($searchResults['results'] as $index => $result) {
+                $instructions .= "\nSource " . ($index + 1) . " (" . (isset($result['published_date']) ? $result['published_date'] : 'Recent') . "): " 
+                    . $result['title'] . " - " . substr($result['content'], 0, 200) . "...";
             }
-            if (isset($searchResults['answer'])) {
-                $instructions .= "\n\nMarket summary: " . $searchResults['answer'];
+            
+            if (isset($searchResults['answer']) && !empty($searchResults['answer'])) {
+                $instructions .= "\n\nMARKET SUMMARY: " . $searchResults['answer'];
             }
+            
+            $instructions .= "\n\nIncorporate these latest market developments into your analysis when relevant.";
         }
 
-        $instructions .= "\n\n1. Uncover hidden market narratives that connect seemingly unrelated events.  
+        $instructions .= "\n\nGUIDELINES:
+1. Uncover hidden market narratives that connect seemingly unrelated events.  
 2. No basic greetings - start with your most compelling insight.  
 3. Reveal institutional trading patterns that retail traders rarely see.  
 4. Instead of surface-level price analysis, expose in-depth data.  
@@ -707,22 +712,31 @@ class VotalityAIService {
         2. [Second related topic or question]
         3. [Third related topic or question]";
 
-        // Add market data if available
+        // Add quantitative market data if available
         if ($marketData) {
-            $instructions .= "\n\nLatest market data: " . json_encode($marketData);
+            $instructions .= "\n\nQUANTITATIVE MARKET DATA: " . json_encode($marketData);
         }
 
-        // Add economic indicators if available
+        // Add economic indicator data if available
         if ($economicData) {
-            $instructions .= "\n\nEconomic indicators: " . json_encode($economicData);
+            $instructions .= "\n\nECONOMIC INDICATORS: " . json_encode($economicData);
         }
 
-        // Final instruction to ensure all data is used effectively
-        $instructions .= "\n\nRemember to incorporate all provided market data, economic indicators, and latest developments into your response, using exact figures when relevant. If recent market developments are provided, consider their impact on your analysis.";
+        // Final guidance on data usage
+        $instructions .= "\n\nINTEGRATION INSTRUCTIONS: Your response should synthesize:";
+        if ($searchResults && !empty($searchResults['results'])) {
+            $instructions .= "\n- The real-time market developments provided at the start";
+        }
+        if ($marketData) {
+            $instructions .= "\n- The quantitative market data provided";
+        }
+        if ($economicData) {
+            $instructions .= "\n- The economic indicators provided";
+        }
+        $instructions .= "\nWeave these elements together to provide a comprehensive, forward-looking analysis while maintaining the response format and character limit.";
 
         return $instructions;
     }
-    
     private function fetchEconomicData() {
         $indicators = [
             'GDP' => 'FRED/GDP',
