@@ -78,10 +78,12 @@
     <div id="results"></div>
 
     <script>
+// Main function to handle searching for company documents
 async function searchCompanyDocs() {
     const stock = document.getElementById('stockInput').value.trim().toUpperCase();
     const resultsDiv = document.getElementById('results');
     
+    // Input validation
     if (!stock) {
         resultsDiv.innerHTML = '<div class="error">Please enter a company symbol</div>';
         return;
@@ -90,10 +92,10 @@ async function searchCompanyDocs() {
     resultsDiv.innerHTML = `<div class="loading">Searching for ${stock}'s official documents and filings...</div>`;
 
     try {
-        // First, let's get an overview of the company
+        // First, get a company overview to provide context
         const companyOverview = await searchCategory(stock, 'company overview business description');
         
-        // Then get our document categories
+        // Fetch all document categories in parallel for efficiency
         const [annualResults, secResults, newsResults, governanceResults] = await Promise.all([
             searchCategory(stock, 'annual report financial statements'),
             searchCategory(stock, 'SEC filings 10-K 10-Q 8-K'),
@@ -101,6 +103,7 @@ async function searchCompanyDocs() {
             searchCategory(stock, 'corporate governance leadership board directors')
         ]);
 
+        // Organize results into categories for structured display
         const categories = {
             'Annual & Interim Reports': annualResults,
             'SEC Filings': secResults,
@@ -108,9 +111,10 @@ async function searchCompanyDocs() {
             'Corporate Governance': governanceResults
         };
 
+        // Build the complete HTML output
         let html = '';
         
-        // Add company overview at the top
+        // Add company overview section if available
         if (companyOverview && companyOverview.length > 0) {
             html += `
                 <div class="category-section">
@@ -119,12 +123,12 @@ async function searchCompanyDocs() {
                 </div>`;
         }
 
-        // Generate HTML for each category
+        // Add each category's results
         for (const [category, results] of Object.entries(categories)) {
             html += generateCategoryHTML(category, results);
         }
 
-        // Generate and add summary section
+        // Add the comprehensive summary section
         html += generateSummarySection(stock, categories, companyOverview);
 
         resultsDiv.innerHTML = html;
@@ -134,44 +138,103 @@ async function searchCompanyDocs() {
     }
 }
 
-function generateSummarySection(stock, categories, overview) {
-    // Add style for summary section
-    const style = document.createElement('style');
-    style.textContent = `
-        .summary-section {
-            margin-top: 40px;
-            padding: 25px;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 2px solid #e2e8f0;
-        }
-        .summary-title {
-            font-size: 1.5em;
-            color: #2d3748;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #cbd5e0;
-            padding-bottom: 10px;
-        }
-        .summary-content {
-            line-height: 1.8;
-        }
-        .category-summary {
-            margin: 15px 0;
-        }
-        .category-summary-title {
-            font-weight: 600;
-            color: #4a5568;
-        }
-    `;
-    document.head.appendChild(style);
+// Function to search Tavily API for a specific category of information
+async function searchCategory(stock, category) {
+    const response = await fetch('https://api.tavily.com/search', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            api_key: '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',
+            query: `${stock} ${category} site:*.${stock.toLowerCase()}.com OR site:investors.${stock.toLowerCase()}.com`,
+            search_depth: 'advanced',
+            max_results: 5,
+            include_domains: [
+                `${stock.toLowerCase()}.com`,
+                `investors.${stock.toLowerCase()}.com`,
+                'sec.gov',
+                'edgar-online.com'
+            ]
+        })
+    });
 
-    // Create summary content
+    const data = await response.json();
+    return data.results;
+}
+
+// Function to generate HTML for each category of documents
+function generateCategoryHTML(category, results) {
+    if (!results || results.length === 0) {
+        return '';
+    }
+
+    let html = `
+        <div class="category-section">
+            <div class="category-title">${category}</div>`;
+
+    results.forEach(result => {
+        // Extract any dates from the content or title
+        const dateMatch = result.content.match(/\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/) || 
+                         result.title.match(/\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/);
+        const dateStr = dateMatch ? `(${dateMatch[0]})` : '';
+
+        html += `
+            <div class="document-item">
+                <div class="document-title">
+                    <a href="${result.url}" target="_blank">${result.title}</a>
+                    <span class="document-date">${dateStr}</span>
+                </div>
+                <div class="document-content">${result.content.substring(0, 200)}...</div>
+            </div>`;
+    });
+
+    html += '</div>';
+    return html;
+}
+
+// Function to generate the comprehensive summary section
+function generateSummarySection(stock, categories, overview) {
+    // Add styles for summary section
+    if (!document.getElementById('summary-styles')) {
+        const style = document.createElement('style');
+        style.id = 'summary-styles';
+        style.textContent = `
+            .summary-section {
+                margin-top: 40px;
+                padding: 25px;
+                background: #f8fafc;
+                border-radius: 12px;
+                border: 2px solid #e2e8f0;
+            }
+            .summary-title {
+                font-size: 1.5em;
+                color: #2d3748;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #cbd5e0;
+                padding-bottom: 10px;
+            }
+            .summary-content {
+                line-height: 1.8;
+            }
+            .category-summary {
+                margin: 15px 0;
+            }
+            .category-summary-title {
+                font-weight: 600;
+                color: #4a5568;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Generate summary content
     let summaryHtml = `
         <div class="summary-section">
             <div class="summary-title">Document Analysis Summary for ${stock}</div>
             <div class="summary-content">`;
 
-    // Add overview summary
+    // Add overview summary if available
     if (overview && overview.length > 0) {
         summaryHtml += `
             <div class="category-summary">
@@ -180,7 +243,7 @@ function generateSummarySection(stock, categories, overview) {
             </div>`;
     }
 
-    // Summarize each category
+    // Add summary for each category
     for (const [category, results] of Object.entries(categories)) {
         if (results && results.length > 0) {
             const latestDate = findLatestDate(results);
@@ -197,6 +260,7 @@ function generateSummarySection(stock, categories, overview) {
     return summaryHtml;
 }
 
+// Helper function to find the most recent date in a set of results
 function findLatestDate(results) {
     let latestDate = null;
     for (const result of results) {
@@ -212,8 +276,8 @@ function findLatestDate(results) {
     return latestDate ? latestDate.toLocaleDateString() : null;
 }
 
+// Helper function to extract key highlights from results
 function extractKeyHighlights(results) {
-    // Extract important keywords and phrases from the results
     const highlights = [];
     const keywords = ['financial', 'report', 'announcement', 'filing', 'earnings', 'quarter', 'annual'];
     
@@ -228,6 +292,14 @@ function extractKeyHighlights(results) {
     }
     
     return highlights.join('; ');
+}
+
+// Auto-search if stock symbol is provided in URL
+const urlParams = new URLSearchParams(window.location.search);
+const stockParam = urlParams.get('stock');
+if (stockParam) {
+    document.getElementById('stockInput').value = stockParam;
+    searchCompanyDocs();
 }
     </script>
 </body>
