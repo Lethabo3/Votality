@@ -7,6 +7,8 @@ class VotalityAIService {
     private $openExchangeRatesApiKey;
     private $benzingaApiKey;
     private $finnhubApiKey;
+    private $tavilyApiKey;
+    private $tavilyApiUrl;
     private $marketauxApiKey;
     private $nasdaqDataLinkApiKey;
     
@@ -24,6 +26,8 @@ class VotalityAIService {
     public function __construct() {
         $this->apiKey = GEMINI_API_KEY;
         $this->apiUrl = GEMINI_API_URL;
+        $this->tavilyApiKey = TAVILY_API_KEY;
+        $this->tavilyApiUrl = TAVILY_API_URL;
         $this->openExchangeRatesApiKey = '269df838ea8c4de68315c97baf07c7b6';
         $this->benzingaApiKey = '685f0ad2fe3f4facb3da0aeacb27b76b';
         $this->finnhubApiKey = 'crnm7tpr01qt44di3q5gcrnm7tpr01qt44di3q60';
@@ -39,14 +43,29 @@ class VotalityAIService {
             error_log("API URL: " . $this->apiUrl);
             error_log("Using model: gemini-1.5-flash-latest");
             
-            // Prepare the request - Note the structure for Gemini 1.5
+            // Extract financial instrument and fetch market data
+            $instrument = $this->extractFinancialInstrument($message);
+            $marketData = $instrument ? $this->fetchMarketData($instrument) : null;
+            
+            // Get economic data
+            $economicData = $this->fetchEconomicData();
+            
+            // Get Tavily search data
+            try {
+                $searchData = $this->performTavilySearch($message, $instrument);
+            } catch (TavilyException $e) {
+                error_log("Tavily search failed: " . $e->getMessage());
+                $searchData = null;
+            }
+            
+            // Prepare the request with enhanced context
             $aiRequest = [
                 'contents' => [
                     [
                         'role' => 'user',
                         'parts' => [
                             [
-                                'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
+                                'text' => $this->prepareInstructions($marketData, $economicData, $searchData) . "\n\nUser message: " . $message
                             ]
                         ]
                     ]
@@ -69,7 +88,10 @@ class VotalityAIService {
             // Log the request payload for debugging
             error_log("Request payload: " . json_encode($aiRequest, JSON_PRETTY_PRINT));
     
+            // Create curl handle with verbose debugging
             $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
+            $verbose = fopen('php://temp', 'w+');
+            
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST => true,
@@ -79,14 +101,11 @@ class VotalityAIService {
                     'Accept: application/json'
                 ],
                 CURLOPT_TIMEOUT => 30,
-                CURLOPT_VERBOSE => true
+                CURLOPT_VERBOSE => true,
+                CURLOPT_STDERR => $verbose
             ]);
     
-            // Create a temporary file handle for CURL debugging
-            $verbose = fopen('php://temp', 'w+');
-            curl_setopt($ch, CURLOPT_STDERR, $verbose);
-    
-            // Execute the request and capture response details
+            // Execute request and capture details
             $response = curl_exec($ch);
             $curlError = curl_error($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -104,28 +123,26 @@ class VotalityAIService {
     
             curl_close($ch);
     
+            // Error handling
             if ($curlError) {
                 throw new Exception("Curl error: " . $curlError);
             }
-    
             if ($httpCode !== 200) {
                 throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
             }
-    
             if (empty($response)) {
                 throw new Exception("Empty response received from API");
             }
     
+            // Parse and validate response
             $result = json_decode($response, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 error_log("JSON decode error. Response received: " . substr($response, 0, 1000));
                 throw new Exception("JSON decode error: " . json_last_error_msg());
             }
     
-            // Log the decoded response structure
             error_log("Decoded response structure: " . json_encode($result, JSON_PRETTY_PRINT));
     
-            // Updated path for response content in Gemini 1.5
             if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
                 throw new Exception("Unexpected response structure: " . json_encode($result));
             }
@@ -134,8 +151,6 @@ class VotalityAIService {
             $cleanedResponse = $this->removeAsterisks($aiResponse);
             
             $this->addToHistory('ai', $cleanedResponse);
-            
-            // Log successful response
             error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
             
             return $cleanedResponse;
@@ -145,6 +160,36 @@ class VotalityAIService {
             error_log("Stack trace: " . $e->getTraceAsString());
             return "I apologize, but I encountered an error processing your request. Please try again in a moment. Error details: " . $e->getMessage();
         }
+    }
+
+    private function processTavilyResults($response) {
+        $processedResults = [];
+        
+        foreach ($response['results'] as $result) {
+            $processedResults[] = [
+                'title' => $result['title'],
+                'content' => $result['content'],
+                'url' => $result['url'],
+                'score' => $result['score'],
+                'published_date' => $result['published_date'] ?? null
+            ];
+        }
+
+        return [
+            'results' => $processedResults,
+            'answer' => $response['answer'] ?? null,
+            'response_time' => $response['response_time']
+        ];
+    }
+
+    private function prepareEnhancedContext($message, $marketData, $economicData, $searchData) {
+        return [
+            'query' => $message,
+            'market_data' => $marketData,
+            'economic_data' => $economicData,
+            'search_results' => $searchData ? $searchData['results'] : [],
+            'tavily_answer' => $searchData ? $searchData['answer'] : null
+        ];
     }
 
     private function extractFinancialInstrument($message) {
@@ -552,7 +597,7 @@ class VotalityAIService {
         return $aiHistory;
     }
 
-    private function prepareInstructions($marketData, $economicData) {
+    private function prepareInstructions($marketData, $economicData, $searchData = null) {
         $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data. Guidelines:
 1. Uncover hidden market narratives that connect seemingly unrelated events.  
 2. No basic greetings - start with your most compelling insight.  
@@ -582,8 +627,6 @@ class VotalityAIService {
 16. Use strictly formal language; do not use metaphors or examples.  
 17. You only have 300 tokens for each response, so make the content you output enough.  
 
-
-
          Format your response as follows:
         [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
     
@@ -595,16 +638,34 @@ class VotalityAIService {
         1. [First related topic or question]
         2. [Second related topic or question]
         3. [Third related topic or question]";
-    
+
+        // Add market data if available
         if ($marketData) {
             $instructions .= "\n\nLatest market data: " . json_encode($marketData);
         }
+
+        // Add economic indicators if available
         if ($economicData) {
             $instructions .= "\n\nEconomic indicators: " . json_encode($economicData);
         }
-    
-        $instructions .= "\n\nRemember to incorporate the provided market data and economic indicators into your main response, using the exact figures when relevant.";
-    
+
+        // Add Tavily search results if available
+        if ($searchData && isset($searchData['results'])) {
+            $instructions .= "\n\nRecent market developments:";
+            foreach ($searchData['results'] as $result) {
+                if (isset($result['title']) && isset($result['content'])) {
+                    $instructions .= "\n- " . $result['title'] . ": " . substr($result['content'], 0, 200) . "...";
+                }
+            }
+        }
+
+        // Add Tavily's generated answer if available
+        if ($searchData && isset($searchData['answer'])) {
+            $instructions .= "\n\nMarket context: " . $searchData['answer'];
+        }
+
+        $instructions .= "\n\nRemember to incorporate all provided data (market, economic, and news) into your response, using exact figures when relevant.";
+
         return $instructions;
     }
 
