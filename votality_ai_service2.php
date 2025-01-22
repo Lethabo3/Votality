@@ -151,6 +151,70 @@ class VotalityAIService {
         }
     }
 
+    private function getRelevantTavilyData() {
+        try {
+            $cacheKey = 'tavily_latest';
+            
+            // Check cache first
+            if (isset($this->cache[$cacheKey]) && 
+                (time() - $this->cache[$cacheKey]['time'] < 300)) { // 5 minute cache
+                return $this->cache[$cacheKey]['data'];
+            }
+
+            // Make the Tavily API request
+            $searchParams = [
+                'api_key' => $this->tavilyApiKey,
+                'query' => 'latest financial market developments major economic news',
+                'search_depth' => 'advanced',
+                'max_results' => 3,
+                'include_domains' => [
+                    'finance.yahoo.com',
+                    'bloomberg.com',
+                    'reuters.com',
+                    'ft.com',
+                    'wsj.com'
+                ]
+            ];
+
+            $ch = curl_init(TAVILY_API_URL . '/search');
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($searchParams),
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'X-API-Key: ' . $this->tavilyApiKey
+                ]
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode !== 200) {
+                error_log("Tavily API error: HTTP " . $httpCode);
+                return null;
+            }
+
+            $data = json_decode($response, true);
+            if (!$data || !isset($data['results'])) {
+                return null;
+            }
+
+            // Cache the results
+            $this->cache[$cacheKey] = [
+                'time' => time(),
+                'data' => $data
+            ];
+
+            return $data;
+
+        } catch (Exception $e) {
+            error_log("Tavily fetch error: " . $e->getMessage());
+            return null;
+        }
+    }
+
     private function processTavilyResults($response) {
         $processedResults = [];
         
@@ -586,9 +650,24 @@ class VotalityAIService {
         return $aiHistory;
     }
 
-    private function prepareInstructions($marketData, $economicData, $searchData = null) {
-        $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data. Guidelines:
-1. Uncover hidden market narratives that connect seemingly unrelated events.  
+    private function prepareInstructions($marketData, $economicData) {
+        // Get the latest market insights from Tavily
+        $searchResults = $this->getRelevantTavilyData();
+        
+        $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data. Guidelines:";
+
+        // Insert real-time market developments if available
+        if ($searchResults) {
+            $instructions .= "\n\nLatest market developments from trusted sources:";
+            foreach ($searchResults['results'] as $result) {
+                $instructions .= "\n- " . $result['title'] . ": " . substr($result['content'], 0, 200);
+            }
+            if (isset($searchResults['answer'])) {
+                $instructions .= "\n\nMarket summary: " . $searchResults['answer'];
+            }
+        }
+
+        $instructions .= "\n\n1. Uncover hidden market narratives that connect seemingly unrelated events.  
 2. No basic greetings - start with your most compelling insight.  
 3. Reveal institutional trading patterns that retail traders rarely see.  
 4. Instead of surface-level price analysis, expose in-depth data.  
@@ -638,26 +717,12 @@ class VotalityAIService {
             $instructions .= "\n\nEconomic indicators: " . json_encode($economicData);
         }
 
-        // Add Tavily search results if available
-        if ($searchData && isset($searchData['results'])) {
-            $instructions .= "\n\nRecent market developments:";
-            foreach ($searchData['results'] as $result) {
-                if (isset($result['title']) && isset($result['content'])) {
-                    $instructions .= "\n- " . $result['title'] . ": " . substr($result['content'], 0, 200) . "...";
-                }
-            }
-        }
-
-        // Add Tavily's generated answer if available
-        if ($searchData && isset($searchData['answer'])) {
-            $instructions .= "\n\nMarket context: " . $searchData['answer'];
-        }
-
-        $instructions .= "\n\nRemember to incorporate all provided data (market, economic, and news) into your response, using exact figures when relevant.";
+        // Final instruction to ensure all data is used effectively
+        $instructions .= "\n\nRemember to incorporate all provided market data, economic indicators, and latest developments into your response, using exact figures when relevant. If recent market developments are provided, consider their impact on your analysis.";
 
         return $instructions;
     }
-
+    
     private function fetchEconomicData() {
         $indicators = [
             'GDP' => 'FRED/GDP',
