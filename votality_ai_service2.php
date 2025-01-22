@@ -37,21 +37,29 @@
 
         public function generateResponse($message, $chatId) {
             try {
-                // Step 1: Initialize conversation tracking
+                // Step 1: Initialize conversation and logging
                 $this->addToHistory('user', $message);
-                error_log("Starting response generation for chatId: " . $chatId);
+                error_log("Starting response generation for chatId: " . $chatId . " with message: " . $message);
         
-                // Step 2: Gather context from Tavily
-                $searchResults = $this->getRelevantTavilyData();
-                error_log("Tavily data status: " . ($searchResults ? "Retrieved" : "Not available"));
+                // Step 2: Get real-time context from Tavily
+                // We pass the user's message directly to Tavily to get relevant financial information
+                $searchContext = $this->getRelevantTavilyData($message);
                 
-                // Step 3: Prepare the Gemini request with enhanced context
-                $enhancedPrompt = $this->prepareInstructions(null, null);
-                if ($searchResults && !empty($searchResults['results'])) {
-                    error_log("Including " . count($searchResults['results']) . " Tavily results in prompt");
+                // Log what we received from Tavily for debugging
+                if ($searchContext) {
+                    error_log("Tavily search successful. Found " . 
+                             count($searchContext['results']) . " results. " .
+                             "Answer provided: " . ($searchContext['answer'] ? 'Yes' : 'No'));
+                } else {
+                    error_log("No results returned from Tavily search");
                 }
         
-                // Step 4: Construct the full Gemini request
+                // Step 3: Prepare enhanced instructions using Tavily data
+                // We combine the search results and AI-generated answer into our prompt
+                $enhancedPrompt = $this->prepareInstructions($searchContext, $message);
+                error_log("Generated enhanced prompt with length: " . strlen($enhancedPrompt));
+        
+                // Step 4: Construct the Gemini API request
                 $aiRequest = [
                     'contents' => [
                         [
@@ -70,17 +78,25 @@
                         ]
                     ],
                     'generationConfig' => [
-                        'temperature' => 0.2,
+                        'temperature' => 0.2,        // Lower temperature for more factual responses
                         'topK' => 40,
                         'topP' => 0.95,
-                        'maxOutputTokens' => 400,
+                        'maxOutputTokens' => 400,    // Limit response length
                         'stopSequences' => []
                     ]
                 ];
         
-                // Step 5: Prepare and execute the API request
+                // Step 5: Execute Gemini API request
                 $apiEndpoint = $this->apiUrl . '?key=' . $this->apiKey;
-                $requestOptions = [
+                
+                // Set up curl with proper error handling
+                $ch = curl_init($apiEndpoint);
+                if ($ch === false) {
+                    throw new Exception("Failed to initialize CURL");
+                }
+        
+                // Configure the curl request
+                curl_setopt_array($ch, [
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS => json_encode($aiRequest),
@@ -90,79 +106,77 @@
                     ],
                     CURLOPT_TIMEOUT => 30,
                     CURLOPT_VERBOSE => true
-                ];
-        
-                // Step 6: Execute request with detailed logging
-                $ch = curl_init($apiEndpoint);
-                curl_setopt_array($ch, $requestOptions);
+                ]);
         
                 // Create debug logging channel
                 $debugLog = fopen('php://temp', 'w+');
+                if ($debugLog === false) {
+                    throw new Exception("Failed to create debug log");
+                }
                 curl_setopt($ch, CURLOPT_STDERR, $debugLog);
         
-                // Execute the request
+                // Step 6: Execute request and capture all possible outcomes
                 $response = curl_exec($ch);
-                $requestInfo = [
-                    'error' => curl_error($ch),
-                    'httpCode' => curl_getinfo($ch, CURLINFO_HTTP_CODE),
-                    'totalTime' => curl_getinfo($ch, CURLINFO_TOTAL_TIME)
-                ];
+                $curlError = curl_error($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $executionTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
         
                 // Capture debug information
                 rewind($debugLog);
                 $debugOutput = stream_get_contents($debugLog);
                 fclose($debugLog);
-                
+        
                 // Log comprehensive request details
-                error_log("Request execution details:" . json_encode([
+                error_log("Gemini API request details: " . json_encode([
                     'endpoint' => $apiEndpoint,
-                    'httpCode' => $requestInfo['httpCode'],
-                    'executionTime' => $requestInfo['totalTime'],
-                    'errorIfAny' => $requestInfo['error'],
+                    'httpCode' => $httpCode,
+                    'executionTime' => $executionTime,
+                    'errorIfAny' => $curlError,
                     'debugOutput' => $debugOutput
                 ], JSON_PRETTY_PRINT));
         
                 curl_close($ch);
         
-                // Step 7: Handle potential request failures
-                if ($requestInfo['error']) {
-                    throw new Exception("API request failed: " . $requestInfo['error']);
+                // Step 7: Handle any request failures
+                if ($curlError) {
+                    throw new Exception("Gemini API request failed: " . $curlError);
                 }
         
-                if ($requestInfo['httpCode'] !== 200) {
-                    throw new Exception("Unexpected HTTP status: " . $requestInfo['httpCode'] . 
+                if ($httpCode !== 200) {
+                    throw new Exception("Gemini API returned unexpected status code: " . $httpCode . 
                                       "\nResponse: " . substr($response, 0, 1000));
                 }
         
-                // Step 8: Process the response
                 if (empty($response)) {
-                    throw new Exception("Empty response received from API");
+                    throw new Exception("Empty response received from Gemini API");
                 }
         
+                // Step 8: Process and validate the response
                 $decodedResponse = json_decode($response, true);
                 if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new Exception("JSON decode error: " . json_last_error_msg() . 
+                    throw new Exception("Failed to decode Gemini API response: " . json_last_error_msg() . 
                                       "\nResponse received: " . substr($response, 0, 1000));
                 }
         
-                // Step 9: Extract and validate the AI response
+                // Validate response structure
                 if (!isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
-                    error_log("Unexpected response structure: " . json_encode($decodedResponse));
-                    throw new Exception("Invalid response structure from API");
+                    error_log("Unexpected Gemini response structure: " . json_encode($decodedResponse));
+                    throw new Exception("Invalid response structure from Gemini API");
                 }
         
-                // Step 10: Clean and prepare the final response
+                // Step 9: Clean and format the response
                 $rawResponse = $decodedResponse['candidates'][0]['content']['parts'][0]['text'];
                 $cleanedResponse = $this->removeAsterisks($rawResponse);
-                
-                // Step 11: Update conversation history and log success
+        
+                // Step 10: Update conversation history and log success
                 $this->addToHistory('ai', $cleanedResponse);
                 error_log("Successfully generated response [" . strlen($cleanedResponse) . " chars]");
         
+                // Return the final response to the user
                 return $cleanedResponse;
         
             } catch (Exception $e) {
-                // Step 12: Enhanced error handling
+                // Step 11: Enhanced error handling
                 $errorContext = [
                     'message' => $e->getMessage(),
                     'file' => $e->getFile(),
@@ -171,31 +185,25 @@
                 ];
                 error_log("Response generation failed: " . json_encode($errorContext, JSON_PRETTY_PRINT));
                 
+                // Provide a user-friendly error message
                 return "I apologize, but I encountered an error processing your request. " .
                        "Please try again in a moment. Technical details: " . $e->getMessage();
             }
         }
 
-        private function getRelevantTavilyData() {
+        private function getRelevantTavilyData($userQuery) {
             try {
-                error_log("Starting Tavily API request...");
+                error_log("Starting Tavily API request for query: " . $userQuery);
                 
-                $cacheKey = 'tavily_latest';
-                
-                // Check cache first
-                if (isset($this->cache[$cacheKey]) && 
-                    (time() - $this->cache[$cacheKey]['time'] < 300)) {
-                    error_log("Using cached Tavily data");
-                    return $this->cache[$cacheKey]['data'];
-                }
-        
-                // Prepare search parameters with more focused query
+                // Prepare search parameters for financial data
                 $searchParams = [
                     'api_key' => TAVILY_API_KEY,
-                    'query' => 'breaking financial news market developments stocks trading last 12 hours',
-                    'search_depth' => 'advanced',
-                    'include_answer' => true,
-                    'max_results' => 5,
+                    'query' => $userQuery,
+                    'search_depth' => 'advanced',  // Get more detailed results
+                    'include_answer' => true,      // Get AI-generated summary
+                    'max_results' => 5,            // Get top 5 most relevant results
+                    'topic' => 'news',            // Focus on news content
+                    'time_range' => 'day',        // Get very recent information
                     'include_domains' => [
                         'finance.yahoo.com',
                         'bloomberg.com',
@@ -220,41 +228,96 @@
         
                 $response = curl_exec($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $error = curl_error($ch);
-                
                 curl_close($ch);
         
-                error_log("Tavily API Response Code: " . $httpCode);
-                error_log("Tavily API Error (if any): " . $error);
-                error_log("Tavily API Raw Response: " . substr($response, 0, 1000));
-        
                 if ($httpCode !== 200) {
-                    throw new Exception("Tavily API returned non-200 status code: " . $httpCode);
+                    throw new Exception("Tavily API returned status code: " . $httpCode);
                 }
         
-                if (!$response) {
-                    throw new Exception("Empty response from Tavily API");
+                $searchResults = json_decode($response, true);
+                
+                // Log the structure of results for debugging
+                error_log("Tavily Response Structure: " . json_encode([
+                    'has_answer' => isset($searchResults['answer']),
+                    'result_count' => count($searchResults['results'] ?? []),
+                    'response_time' => $searchResults['response_time'] ?? null
+                ]));
+        
+                // Validate and return results
+                if ($searchResults && isset($searchResults['results'])) {
+                    return [
+                        'answer' => $searchResults['answer'] ?? null,
+                        'results' => array_map(function($result) {
+                            return [
+                                'title' => $result['title'],
+                                'content' => $result['content'],
+                                'url' => $result['url'],
+                                'score' => $result['score'],
+                                'published_date' => $result['published_date'] ?? null
+                            ];
+                        }, $searchResults['results'])
+                    ];
                 }
         
-                $data = json_decode($response, true);
-                if (!$data || !isset($data['results'])) {
-                    throw new Exception("Invalid response structure from Tavily API");
-                }
-        
-                // Cache the results
-                $this->cache[$cacheKey] = [
-                    'time' => time(),
-                    'data' => $data
-                ];
-        
-                error_log("Successfully retrieved Tavily data with " . count($data['results']) . " results");
-                return $data;
+                return null;
         
             } catch (Exception $e) {
                 error_log("Tavily fetch error: " . $e->getMessage());
                 error_log("Stack trace: " . $e->getTraceAsString());
                 return null;
             }
+        }
+        
+        // This function builds an optimized search query to find market data
+        private function buildFinancialSearchQuery($userQuery) {
+            // Extract potential stock symbols or company names
+            $symbols = $this->extractFinancialInstrument($userQuery);
+            
+            if ($symbols) {
+                // If we found a symbol, create a targeted search
+                return "latest stock price market data " . $symbols['symbol'] . 
+                       " current price change percentage " . 
+                       date('Y-m-d') . " trading information";
+            }
+            
+            // If no specific symbol, create a general market search
+            return $userQuery . " latest market price trading data " . date('Y-m-d');
+        }
+        
+        // This function extracts market data from Tavily search results
+        private function extractMarketDataFromResults($results, $userQuery) {
+            $marketData = [
+                'price' => null,
+                'change' => null,
+                'change_percentage' => null,
+                'company_name' => null,
+                'symbol' => null,
+                'timestamp' => null,
+                'source_url' => null
+            ];
+        
+            foreach ($results as $result) {
+                $content = $result['content'];
+                
+                // Look for price patterns like "$123.45" or "123.45 USD"
+                if (preg_match('/\$(\d+(\.\d{2})?)|(\d+(\.\d{2})?)\s*(USD|dollars)/i', $content, $matches)) {
+                    $marketData['price'] = floatval($matches[1]);
+                }
+                
+                // Look for percentage changes like "+2.34%" or "-1.23%"
+                if (preg_match('/([+-]?\d+(\.\d{2})?%)/i', $content, $matches)) {
+                    $marketData['change_percentage'] = floatval($matches[1]);
+                }
+                
+                // If we found both price and change, we can consider this data valid
+                if ($marketData['price'] !== null && $marketData['change_percentage'] !== null) {
+                    $marketData['timestamp'] = time();
+                    $marketData['source_url'] = $result['url'];
+                    break;
+                }
+            }
+        
+            return $marketData;
         }
 
         private function processTavilyResults($response) {
@@ -692,129 +755,73 @@
             return $aiHistory;
         }
 
-        private function prepareInstructions($marketData, $economicData) {
-            // Get real-time search results and log them
-            $searchResults = $this->getRelevantTavilyData();
-            
-            // Add detailed logging
-            error_log("Tavily Search Results Status: " . ($searchResults ? "RECEIVED" : "NOT RECEIVED"));
-            if ($searchResults && !empty($searchResults['results'])) {
-                error_log("Tavily Results Found: " . count($searchResults['results']));
-                error_log("Tavily Results Content: " . json_encode($searchResults['results']));
-            }
-
-            $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data.";
-
-            // Make search results mandatory to reference
-            if ($searchResults && !empty($searchResults['results'])) {
-                $instructions .= "\n\nCRITICAL RECENT DEVELOPMENTS (You MUST include at least one in your response):";
-                foreach ($searchResults['results'] as $index => $result) {
-                    $date = isset($result['published_date']) ? $result['published_date'] : 'Recent';
-                    $instructions .= "\nDEVELOPMENT " . ($index + 1) . " (" . $date . "): "
-                        . $result['title'] . "\nKey Details: " . substr($result['content'], 0, 200);
-                }
-                
-                $instructions .= "\n\nYOUR RESPONSE MUST START WITH AND REFERENCE AT LEAST ONE OF THE ABOVE RECENT DEVELOPMENTS.";
-            }
-
-            $instructions .= "\n\nGUIDELINES:
-    1. Uncover hidden market narratives that connect seemingly unrelated events.  
-    2. No basic greetings - start with your most compelling insight.  
-    3. Reveal institutional trading patterns that retail traders rarely see.  
-    4. Instead of surface-level price analysis, expose in-depth data.  
-    5. Provide detailed information about financial instruments, organized into the following sections(only when necessary and user asks generally):  
-    - **General Information**: Name, ticker symbol, market/exchange, and type of instrument.  
-    - **Pricing Information**: Current price, bid/ask prices, open price, previous close, high/low for the day, and 52-week high/low.  
-    - **Performance Metrics**: Price change (absolute and percentage), year-to-date (YTD) performance, daily volume, average volume, and market capitalization.  
-    - **Fundamental Data**: Earnings per share (EPS), price-to-earnings (P/E) ratio, dividend yield, ex-dividend date, and sector/industry classification.  
-    - **Technical Data**: Relative Strength Index (RSI), moving averages, volatility, beta, and significant technical indicators.  
-    - **Risk Metrics**: Volatility level, Sharpe Ratio, beta, and maximum drawdown.  
-    - **Financials**: Key financial statements and notable financial health indicators.  
-    - **News and Sentiment**: Recent news, analyst ratings, and sentiment analysis.  
-    - **Historical Data**: Historical price trends and performance over specified periods.  
-    - **Specialized Information**: Include unique details relevant to the instrument.  
-    6. Highlight divergences between public narratives and actual market behavior.  
-    7. No emojis or basic analysis. Reply in 1301 or fewer characters in all responses (never more).  
-    8. Expose intermarket relationships that mainstream analysis misses.  
-    9. Rather than generic advice, reveal institutional positioning and liquidity flows.  
-    10. Every response must include at least one non-obvious market insight.  
-    11. Match your depth to the user's knowledge level.  
-    12. Focus on forward-looking catalysts rather than backward-looking data.  
-    13. Speak in simple language, simple diction; make it easy for users to understand.  
-    14. Do not mention anything about your data provider.  
-    15. Never give a response with any of these {},[], or with a response that [something not found]! Never.  
-    16. Use strictly formal language; do not use metaphors or examples.  
-    17. You only have 300 tokens for each response, so make the content you output enough.  
-
-            Format your response as follows:
-            [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
+        private function prepareInstructions($contextData, $userMessage) {
+            // Step 1: Initialize base instructions
+            $instructions = "You are Votality, a knowledgeable and detailed AI assistant for financial analysis. ";
+            $instructions .= "Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data.\n\n";
         
-            Market Info:
-        CompanyName|Symbol|CurrentPriceAsNumber|PriceChangeAsNumber
-        (Example: Apple Inc.|AAPL|190.50|-2.30)
-            
-            Related Topics:
-            1. [First related topic or question]
-            2. [Second related topic or question]
-            3. [Third related topic or question]";
-
-            // Add market data if available
-            if ($marketData) {
-                $instructions .= "\n\nCURRENT MARKET DATA: " . json_encode($marketData);
+            // Step 2: Add market context from Tavily search results
+            if ($contextData && !empty($contextData['results'])) {
+                $instructions .= "LATEST MARKET DEVELOPMENTS (You MUST reference at least one in your response):\n";
+                
+                foreach ($contextData['results'] as $index => $result) {
+                    $timestamp = isset($result['published_date']) ? 
+                                date('Y-m-d H:i', strtotime($result['published_date'])) : 
+                                'Recent';
+                    
+                    $instructions .= "\nDEVELOPMENT " . ($index + 1) . " (" . $timestamp . "):\n";
+                    $instructions .= "Title: " . $result['title'] . "\n";
+                    $instructions .= "Source: " . parse_url($result['url'], PHP_URL_HOST) . "\n";
+                    $instructions .= "Key Details: " . substr($result['content'], 0, 250) . "...\n";
+                    
+                    // Extract and add any market data found
+                    if (isset($result['extracted_data'])) {
+                        $instructions .= "Market Data: " . json_encode($result['extracted_data']) . "\n";
+                    }
+                }
             }
-
-            // Add economic data if available
-            if ($economicData) {
-                $instructions .= "\n\nECONOMIC INDICATORS: " . json_encode($economicData);
+        
+            // Step 3: Add response format requirements
+            $instructions .= "\n\nRESPONSE REQUIREMENTS:
+        1. Begin with the most relevant market development from above
+        2. Keep your total response under 1301 characters
+        3. Use this format for any specific market data:
+           CompanyName|Symbol|CurrentPrice|PriceChange
+        4. Focus on forward-looking implications rather than just historical data
+        5. Provide specific numbers and statistics when available
+        6. Use formal language and avoid metaphors or examples
+        7. Highlight any unusual market patterns or divergences\n\n";
+        
+            // Step 4: Add user context guidelines
+            $instructions .= "USER CONTEXT GUIDELINES:
+        1. Match technical depth to the user's apparent knowledge level
+        2. Reveal institutional trading patterns when relevant
+        3. Connect seemingly unrelated market events
+        4. Focus on data-driven insights rather than general observations\n\n";
+        
+            // Step 5: Add any special handling based on user message
+            if (stripos($userMessage, 'price') !== false || 
+                stripos($userMessage, 'stock') !== false || 
+                stripos($userMessage, 'market') !== false) {
+                $instructions .= "IMPORTANT: User is specifically asking about market prices or stock information. ";
+                $instructions .= "Prioritize current price data and recent price movements in your response.\n\n";
             }
-
-            // Final reminder about using recent developments
-            $instructions .= "\n\nRESPONSE STRUCTURE REQUIREMENTS:
-    1. BEGIN with a specific recent development from the Critical Recent Developments section above
-    2. CONNECT this development to current market data and trends
-    3. EXPLAIN the implications and potential future impact
-    4. MAINTAIN response format and character limit (1301 max)";
-
+        
+            // Step 6: Add response structure requirements
+            $instructions .= "FORMAT YOUR RESPONSE AS:
+        [Main analysis with specific data points]
+        
+        Market Info: (if applicable)
+        CompanyName|Symbol|Price|Change
+        
+        Related Topics:
+        1. [Relevant topic]
+        2. [Relevant topic]
+        3. [Relevant topic]";
+        
             return $instructions;
         }
         
-        private function fetchEconomicData() {
-            $indicators = [
-                'GDP' => 'FRED/GDP',
-                'Unemployment Rate' => 'FRED/UNRATE',
-                'Inflation Rate' => 'FRED/CPIAUCSL',
-                'Federal Funds Rate' => 'FRED/FEDFUNDS'
-            ];
-
-            $economicData = [];
-            
-            foreach ($indicators as $name => $code) {
-                $cacheKey = "economic_{$code}";
-                
-                // Check cache first
-                if (isset($this->cache[$cacheKey]) && 
-                    (time() - $this->cache[$cacheKey]['time'] < $this->cacheDuration)) {
-                    $economicData[$name] = $this->cache[$cacheKey]['data'];
-                    continue;
-                }
-
-                $url = "{$this->nasdaqDataLinkApiUrl}datasets/{$code}.json?api_key={$this->nasdaqDataLinkApiKey}&rows=1";
-                $data = $this->makeApiRequest($url);
-                
-                if ($data && isset($data['dataset']['data'][0][1])) {
-                    $economicData[$name] = $data['dataset']['data'][0][1];
-                    
-                    // Cache the result
-                    $this->cache[$cacheKey] = [
-                        'time' => time(),
-                        'data' => $data['dataset']['data'][0][1]
-                    ];
-                }
-            }
-
-            return $economicData;
-        }
-
         public function clearCache() {
             $this->cache = [];
         }
