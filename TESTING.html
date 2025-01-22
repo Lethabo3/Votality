@@ -193,9 +193,40 @@ function generateCategoryHTML(category, results) {
     return html;
 }
 
+// Calculate specific metrics for each category of documents
+function calculateCategoryMetrics(category, results) {
+    switch(category) {
+        case 'Annual & Interim Reports':
+            // Count quarters mentioned in the results
+            const quarterMatches = results.reduce((count, result) => {
+                const quarterMentions = (result.content + result.title).match(/Q[1-4]|quarter/gi) || [];
+                return count + quarterMentions.length;
+            }, 0);
+            return `${quarterMatches} quarters found`;
+            
+        case 'SEC Filings':
+            // Calculate total word count across all documents
+            const totalWords = results.reduce((count, result) => {
+                return count + (result.content.split(/\s+/).length || 0);
+            }, 0);
+            return `${Math.round(totalWords/1000)}k words`;
+            
+        case 'News Releases':
+            // Count number of releases
+            return `${results.length} releases`;
+            
+        case 'Corporate Governance':
+            // Count number of documents
+            return `${results.length} documents`;
+            
+        default:
+            return `${results.length} items`;
+    }
+}
+
 // Function to generate the comprehensive summary section
 function generateSummarySection(stock, categories, overview) {
-    // Add styles for summary section
+    // Add styles for summary section if not already present
     if (!document.getElementById('summary-styles')) {
         const style = document.createElement('style');
         style.id = 'summary-styles';
@@ -243,15 +274,15 @@ function generateSummarySection(stock, categories, overview) {
             </div>`;
     }
 
-    // Add summary for each category
+    // Add summary for each category with specific metrics
     for (const [category, results] of Object.entries(categories)) {
         if (results && results.length > 0) {
             const latestDate = findLatestDate(results);
+            const metrics = calculateCategoryMetrics(category, results);
             summaryHtml += `
                 <div class="category-summary">
                     <div class="category-summary-title">${category}:</div>
-                    <p>Found ${results.length} documents${latestDate ? `, most recent from ${latestDate}` : ''}. 
-                    Key highlights include: ${extractKeyHighlights(results)}</p>
+                    <p>${metrics}${latestDate ? `, most recent from ${latestDate}` : ''}</p>
                 </div>`;
         }
     }
@@ -274,24 +305,6 @@ function findLatestDate(results) {
         }
     }
     return latestDate ? latestDate.toLocaleDateString() : null;
-}
-
-// Helper function to extract key highlights from results
-function extractKeyHighlights(results) {
-    const highlights = [];
-    const keywords = ['financial', 'report', 'announcement', 'filing', 'earnings', 'quarter', 'annual'];
-    
-    for (const result of results) {
-        for (const keyword of keywords) {
-            if (result.title.toLowerCase().includes(keyword)) {
-                highlights.push(result.title.split(' ').slice(0, 5).join(' ') + '...');
-                break;
-            }
-        }
-        if (highlights.length >= 2) break;
-    }
-    
-    return highlights.join('; ');
 }
 
 // Auto-search if stock symbol is provided in URL
