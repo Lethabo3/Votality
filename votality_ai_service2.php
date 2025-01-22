@@ -651,20 +651,21 @@ class VotalityAIService {
     }
 
     private function prepareInstructions($marketData, $economicData) {
-        // Retrieve real-time market insights from Tavily
+        // Get real-time search results
         $searchResults = $this->getRelevantTavilyData();
         
         $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data.";
 
-        // Add real-time market context section if available
+        // Make search results mandatory to reference
         if ($searchResults && !empty($searchResults['results'])) {
-            $instructions .= "\n\n[TAVILY_SEARCH_BEGIN]";
+            $instructions .= "\n\nCRITICAL RECENT DEVELOPMENTS (You MUST include at least one in your response):";
             foreach ($searchResults['results'] as $index => $result) {
-                $instructions .= "\n[SEARCH_RESULT_" . ($index + 1) . "] " 
-                    . (isset($result['published_date']) ? "(" . $result['published_date'] . ") " : "")
-                    . $result['title'] . " - " . substr($result['content'], 0, 200);
+                $date = isset($result['published_date']) ? $result['published_date'] : 'Recent';
+                $instructions .= "\nDEVELOPMENT " . ($index + 1) . " (" . $date . "): "
+                    . $result['title'] . "\nKey Details: " . substr($result['content'], 0, 200);
             }
-            $instructions .= "\n[TAVILY_SEARCH_END]\n";
+            
+            $instructions .= "\n\nYOUR RESPONSE MUST START WITH AND REFERENCE AT LEAST ONE OF THE ABOVE RECENT DEVELOPMENTS.";
         }
 
         $instructions .= "\n\nGUIDELINES:
@@ -708,31 +709,26 @@ class VotalityAIService {
         2. [Second related topic or question]
         3. [Third related topic or question]";
 
-        // Add quantitative market data if available
+        // Add market data if available
         if ($marketData) {
-            $instructions .= "\n\nQUANTITATIVE MARKET DATA: " . json_encode($marketData);
+            $instructions .= "\n\nCURRENT MARKET DATA: " . json_encode($marketData);
         }
 
-        // Add economic indicator data if available
+        // Add economic data if available
         if ($economicData) {
             $instructions .= "\n\nECONOMIC INDICATORS: " . json_encode($economicData);
         }
 
-        // Final guidance on data usage
-        $instructions .= "\n\nINTEGRATION INSTRUCTIONS: Your response should synthesize:";
-        if ($searchResults && !empty($searchResults['results'])) {
-            $instructions .= "\n- The real-time market developments provided at the start";
-        }
-        if ($marketData) {
-            $instructions .= "\n- The quantitative market data provided";
-        }
-        if ($economicData) {
-            $instructions .= "\n- The economic indicators provided";
-        }
-        $instructions .= "\nWeave these elements together to provide a comprehensive, forward-looking analysis while maintaining the response format and character limit.";
+        // Final reminder about using recent developments
+        $instructions .= "\n\nRESPONSE STRUCTURE REQUIREMENTS:
+1. BEGIN with a specific recent development from the Critical Recent Developments section above
+2. CONNECT this development to current market data and trends
+3. EXPLAIN the implications and potential future impact
+4. MAINTAIN response format and character limit (1301 max)";
 
         return $instructions;
     }
+    
     private function fetchEconomicData() {
         $indicators = [
             'GDP' => 'FRED/GDP',
