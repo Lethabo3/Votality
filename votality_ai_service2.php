@@ -37,27 +37,17 @@
 
         public function generateResponse($message, $chatId) {
             try {
-                // Step 1: Initialize conversation and logging
+                // Step 1: Start conversation tracking and logging
                 $this->addToHistory('user', $message);
                 error_log("Starting response generation for chatId: " . $chatId . " with message: " . $message);
         
-                // Step 2: Get real-time context from Tavily
-                // We pass the user's message directly to Tavily to get relevant financial information
-                $searchContext = $this->getRelevantTavilyData($message);
-                
-                // Log what we received from Tavily for debugging
-                if ($searchContext) {
-                    error_log("Tavily search successful. Found " . 
-                             count($searchContext['results']) . " results. " .
-                             "Answer provided: " . ($searchContext['answer'] ? 'Yes' : 'No'));
-                } else {
-                    error_log("No results returned from Tavily search");
-                }
+                // Step 2: Get market and news data through Tavily search
+                $contextData = $this->getRelevantTavilyData($message);
+                error_log("Tavily context data retrieved: " . json_encode($contextData));
         
-                // Step 3: Prepare enhanced instructions using Tavily data
-                // We combine the search results and AI-generated answer into our prompt
-                $enhancedPrompt = $this->prepareInstructions($searchContext, $message);
-                error_log("Generated enhanced prompt with length: " . strlen($enhancedPrompt));
+                // Step 3: Prepare enhanced instructions with the gathered data
+                $enhancedPrompt = $this->prepareInstructions($contextData, $message);
+                error_log("Enhanced prompt prepared with length: " . strlen($enhancedPrompt));
         
                 // Step 4: Construct the Gemini API request
                 $aiRequest = [
@@ -78,24 +68,16 @@
                         ]
                     ],
                     'generationConfig' => [
-                        'temperature' => 0.2,        // Lower temperature for more factual responses
+                        'temperature' => 0.2,
                         'topK' => 40,
                         'topP' => 0.95,
-                        'maxOutputTokens' => 400,    // Limit response length
+                        'maxOutputTokens' => 400,
                         'stopSequences' => []
                     ]
                 ];
         
-                // Step 5: Execute Gemini API request
-                $apiEndpoint = $this->apiUrl . '?key=' . $this->apiKey;
-                
-                // Set up curl with proper error handling
-                $ch = curl_init($apiEndpoint);
-                if ($ch === false) {
-                    throw new Exception("Failed to initialize CURL");
-                }
-        
-                // Configure the curl request
+                // Step 5: Make the API call to Gemini
+                $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
                 curl_setopt_array($ch, [
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST => true,
@@ -104,90 +86,36 @@
                         'Content-Type: application/json',
                         'Accept: application/json'
                     ],
-                    CURLOPT_TIMEOUT => 30,
-                    CURLOPT_VERBOSE => true
+                    CURLOPT_TIMEOUT => 30
                 ]);
         
-                // Create debug logging channel
-                $debugLog = fopen('php://temp', 'w+');
-                if ($debugLog === false) {
-                    throw new Exception("Failed to create debug log");
-                }
-                curl_setopt($ch, CURLOPT_STDERR, $debugLog);
-        
-                // Step 6: Execute request and capture all possible outcomes
+                // Step 6: Handle the API response
                 $response = curl_exec($ch);
-                $curlError = curl_error($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                $executionTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
-        
-                // Capture debug information
-                rewind($debugLog);
-                $debugOutput = stream_get_contents($debugLog);
-                fclose($debugLog);
-        
-                // Log comprehensive request details
-                error_log("Gemini API request details: " . json_encode([
-                    'endpoint' => $apiEndpoint,
-                    'httpCode' => $httpCode,
-                    'executionTime' => $executionTime,
-                    'errorIfAny' => $curlError,
-                    'debugOutput' => $debugOutput
-                ], JSON_PRETTY_PRINT));
-        
+                $curlError = curl_error($ch);
                 curl_close($ch);
         
-                // Step 7: Handle any request failures
-                if ($curlError) {
-                    throw new Exception("Gemini API request failed: " . $curlError);
+                // Step 7: Validate and process the response
+                if ($curlError || $httpCode !== 200 || empty($response)) {
+                    throw new Exception("API call failed: " . ($curlError ?: "HTTP $httpCode"));
                 }
         
-                if ($httpCode !== 200) {
-                    throw new Exception("Gemini API returned unexpected status code: " . $httpCode . 
-                                      "\nResponse: " . substr($response, 0, 1000));
-                }
-        
-                if (empty($response)) {
-                    throw new Exception("Empty response received from Gemini API");
-                }
-        
-                // Step 8: Process and validate the response
-                $decodedResponse = json_decode($response, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    throw new Exception("Failed to decode Gemini API response: " . json_last_error_msg() . 
-                                      "\nResponse received: " . substr($response, 0, 1000));
-                }
-        
-                // Validate response structure
-                if (!isset($decodedResponse['candidates'][0]['content']['parts'][0]['text'])) {
-                    error_log("Unexpected Gemini response structure: " . json_encode($decodedResponse));
+                $result = json_decode($response, true);
+                if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
                     throw new Exception("Invalid response structure from Gemini API");
                 }
         
-                // Step 9: Clean and format the response
-                $rawResponse = $decodedResponse['candidates'][0]['content']['parts'][0]['text'];
-                $cleanedResponse = $this->removeAsterisks($rawResponse);
-        
-                // Step 10: Update conversation history and log success
+                // Step 8: Clean and format the response
+                $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
+                $cleanedResponse = $this->removeAsterisks($aiResponse);
+                
+                // Step 9: Update conversation history and return
                 $this->addToHistory('ai', $cleanedResponse);
-                error_log("Successfully generated response [" . strlen($cleanedResponse) . " chars]");
-        
-                // Return the final response to the user
                 return $cleanedResponse;
         
             } catch (Exception $e) {
-                // Step 11: Enhanced error handling
-                $errorContext = [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString()
-                ];
-                error_log("Response generation failed: " . json_encode($errorContext, JSON_PRETTY_PRINT));
-                
-                // Provide a user-friendly error message
-                return "I apologize, but I encountered an error processing your request. " .
-                       "Please try again in a moment. Technical details: " . $e->getMessage();
+                error_log("Error in generateResponse: " . $e->getMessage());
+                return "I apologize, but I encountered an error processing your request. Please try again in a moment.";
             }
         }
 
