@@ -156,6 +156,24 @@ gtag('config', 'G-G7WREYHFF7');
             </div>
             <div id="textarea-container" class="textarea-container">
                 <textarea id="query-input" class="textarea-input" placeholder="Ask Votality anything..."></textarea>
+                
+    <div class="relative">
+        <button type="button" class="type-button" class="focus:outline-none">
+            <div class="custom-rounded bg-gray-100 p-1.5 hover:bg-gray-200 transition-colors duration-200">
+                <span id="selected-type" class="text-sm text-gray-500">Overview</span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-500">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </button>
+        <div class="dropdown-content">
+            <div class="dropdown-item">Overview</div>
+            <div class="dropdown-item">Financials</div>
+            <div class="dropdown-item">Technicals</div>
+            <div class="dropdown-item">News</div>
+        </div>
+    </div>
+            
                 <button id="submit-button" class="focus:outline-none" style="position: absolute; right: 10px; bottom: 15px; transform: none; background-color: transparent; border: none; cursor: pointer; z-index: 10;">
                     <div class="custom-rounded bg-gray-100 p-1.5 hover:bg-gray-200 transition-colors duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-4 w-4 text-gray-300">
@@ -3510,7 +3528,33 @@ function createMarketDataSection(stockData) {
     return marketDataSection;
 }
 
-</script>
+const typeButton = document.querySelector('.type-button'); // Changed from getElementById
+const selectedType = document.querySelector('#selected-type');
+const dropdownContent = document.querySelector('.dropdown-content');
+const dropdownItems = document.querySelectorAll('.dropdown-item');
+
+// Toggle dropdown on button click
+typeButton.addEventListener('click', function(e) {
+    e.preventDefault(); // Prevent any default button behavior
+    e.stopPropagation(); // Prevent event bubbling
+    dropdownContent.classList.toggle('show'); // Changed from add to toggle
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    if (!typeButton.contains(e.target)) {
+        dropdownContent.classList.remove('show');
+    }
+});
+
+// Handle item selection
+dropdownItems.forEach(item => {
+    item.addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent event bubbling
+        selectedType.textContent = this.textContent;
+        dropdownContent.classList.remove('show');
+    });
+});</script>
 
 </body>
 </html>

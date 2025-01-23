@@ -317,13 +317,18 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         $aiService = new VotalityAIService();
         $formattedTime = getWorldTime($timezone) ?? 
             (new DateTime('now', new DateTimeZone($timezone)))->format('l, jS g:ia');
-        
+
         $aiPrompt = "Current time: {$formattedTime}. User message: {$message}";
+
+        // Handle file attachment
         if ($file) {
-            $aiPrompt .= " [File attached: " . $file['type'] . "]";
+            $imageData = $file['data'];
+            $imageType = $file['type'];
+            $fullResponse = $aiService->generateResponseWithImage($aiPrompt, $imageData, $imageType, $chatId);
+        } else {
+            $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
         }
         
-        $fullResponse = $aiService->generateResponse($aiPrompt, $chatId);
 
         // Process the response and extract related topics
         $parts = explode("\nRelated Topics:", $fullResponse, 2);
@@ -355,7 +360,7 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             ");
             
             // Handle file data if present
-            $fileData = $file ? $file['content'] : null;
+            $fileData = $file ? $file['data'] : null;
             $fileType = $file ? $file['type'] : null;
             
             $stmt->bind_param("sisssb", $chatId, $userId, $sessionId, $message, $fileData, $fileType);
@@ -415,15 +420,8 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
             'response' => $aiResponse,
             'chatId' => $chatId,
             'relatedTopics' => $relatedTopics,
-            'chatTopic' => $_SESSION['chats'][$chatId]['topic'] ?? null
-        ];
-
-        return [
-            'response' => $aiResponse,
-            'chatId' => $chatId,
-            'relatedTopics' => $relatedTopics,
             'chatTopic' => $_SESSION['chats'][$chatId]['topic'] ?? null,
-            'marketData' => $marketInfo  // Add this line
+            'imageDescription' => $fullResponse['imageDescription'] ?? null
         ];
         
     } catch (Exception $e) {
@@ -435,6 +433,16 @@ function handleSendMessage($message, $chatId, $file = null, $timezone = 'UTC') {
         return ['error' => $e->getMessage()];
     }
 }
+
+// Helper function to get image description
+function getImageDescription($imageData) {
+    // Implement image description logic here
+    // This could involve calling an external API or using a local image processing library
+    // For now, we'll return a placeholder description
+    return "Image uploaded by user";
+}
+
+
 
 function createNewChat() {
     $userId = $_SESSION['user_id'] ?? null;

@@ -1,244 +1,408 @@
 <!DOCTYPE html>
+<!--
+    Stock Market Research & Company Documents Portal
+    
+    This is a comprehensive stock market research tool that combines real-time stock data 
+    with company documentation searches. The application features:
+    
+    1. Stock Information:
+       - Real-time stock prices and statistics
+       - Financial analysis
+       - Latest news and updates
+       - Multi-API fallback system for reliable data fetching
+    
+    2. Company Documents:
+       - Annual and interim reports
+       - SEC filings
+       - Press releases
+       - Corporate governance documents
+    
+    APIs Used:
+    - Finnhub: Primary source for real-time stock data
+    - Marketaux: Financial news and analysis
+    - Benzinga: News and market updates
+    - Nasdaq Data Link: Additional market data
+    - Tavily: Document search and news aggregation
+    
+    Created: January 2025
+    Last Updated: January 23, 2025
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Search</title>
+    <title>Stock Info Search</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            background-color: #f5f5f5;
+        body { 
+            max-width: 800px; 
+            margin: 20px auto; 
             padding: 20px;
+            font-family: Arial;
         }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-container {
+        .input-group {
+            margin-bottom: 20px;
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
         }
-
+        input, button, select {
+            padding: 8px;
+            font-size: 16px;
+        }
         input {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
         }
-
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .error {
-            color: red;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #ffebee;
-            border-radius: 4px;
-            display: none;
-        }
-
-        .stock-data {
-            display: none;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .data-card {
-            background-color: #f8f9fa;
+        #results {
+            white-space: pre-wrap;
+            line-height: 1.5;
+            background: #f5f5f5;
             padding: 15px;
+            border-radius: 5px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        /* Added styles for company documents section */
+        .category-section {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .category-title {
+            font-size: 1.2em;
+            color: #2c5282;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #edf2f7;
+        }
+        .document-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8fafc;
             border-radius: 4px;
         }
-
-        .data-label {
-            color: #666;
-            font-size: 14px;
+        .document-title {
+            color: #2b6cb0;
+            font-weight: 500;
             margin-bottom: 5px;
         }
-
-        .data-value {
-            font-size: 18px;
-            font-weight: bold;
+        .document-date {
+            color: #718096;
+            font-size: 0.9em;
         }
-
         .loading {
-            display: none;
-            text-align: center;
-            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
         }
-
-        .positive {
-            color: green;
-        }
-
-        .negative {
-            color: red;
+        #companyDocs {
+            margin-top: 30px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 style="margin-bottom: 20px;">Stock Search</h1>
-        
-        <div class="search-container">
-            <input type="text" id="symbolInput" placeholder="Enter stock symbol (e.g., AAPL)" />
-            <button id="searchButton">Search</button>
-        </div>
-
-        <div id="errorMessage" class="error"></div>
-        <div id="loading" class="loading">Searching...</div>
-
-        <div id="stockData" class="stock-data">
-            <div class="data-card">
-                <div class="data-label">Symbol</div>
-                <div id="symbolValue" class="data-value"></div>
-            </div>
-            <div class="data-card">
-                <div class="data-label">Company Name</div>
-                <div id="companyValue" class="data-value"></div>
-            </div>
-            <div class="data-card">
-                <div class="data-label">Price</div>
-                <div id="priceValue" class="data-value"></div>
-            </div>
-            <div class="data-card">
-                <div class="data-label">Change</div>
-                <div id="changeValue" class="data-value"></div>
-            </div>
-            <div class="data-card">
-                <div class="data-label">Volume</div>
-                <div id="volumeValue" class="data-value"></div>
-            </div>
-            <div class="data-card">
-                <div class="data-label">Market Cap</div>
-                <div id="marketCapValue" class="data-value"></div>
-            </div>
-        </div>
+    <div class="input-group">
+        <input type="text" id="stockInput" placeholder="Enter stock symbol (e.g. AAPL)">
+        <select id="dataType">
+            <option value="current">Current Price & Stats</option>
+            <option value="analysis">Financial Analysis</option>
+            <option value="news">Latest News</option>
+        </select>
+        <button onclick="searchStock()">Search</button>
     </div>
+    <div id="results"></div>
+    
+    <!-- Added company documents section -->
+    <div id="companyDocs"></div>
 
     <script>
-        const apiKey = 'sk-9947ef44c91148c4a79f1ad009d9fc86'; // Replace with your API key
-        
-        // Get DOM elements
-        const symbolInput = document.getElementById('symbolInput');
-        const searchButton = document.getElementById('searchButton');
-        const errorMessage = document.getElementById('errorMessage');
-        const loadingIndicator = document.getElementById('loading');
-        const stockData = document.getElementById('stockData');
+        // Existing API keys
+        const apiKeys = {
+            finnhub: 'crnm7tpr01qt44di3q5gcrnm7tpr01qt44di3q60',
+            marketaux: 'o4VnvcRmaBZeK4eBHPJr8KP3xN8gMBTedxHGkCNz',
+            benzinga: '685f0ad2fe3f4facb3da0aeacb27b76b',
+            nasdaq: 'VGV68j1nV9w9Zn3vwbsG',
+            openExchangeRates: '269df838ea8c4de68315c97baf07c7b6',
+            tavily: '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'
+        };
 
-        // Add event listeners
-        symbolInput.addEventListener('input', () => {
-            symbolInput.value = symbolInput.value.toUpperCase();
-        });
-
-        searchButton.addEventListener('click', searchStock);
-        symbolInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchStock();
+        // Existing fetchWithFallback function
+        async function fetchWithFallback(url, params, fallbackApis, apiName) {
+            try {
+                console.log(`Fetching data from ${apiName}...`);
+                const response = await fetch(`${url}?${new URLSearchParams(params)}`);
+                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                const data = await response.json();
+                console.log(`Data successfully fetched from ${apiName}.`);
+                return data;
+            } catch (error) {
+                console.error(`Error with ${apiName}:`, error.message);
+                if (fallbackApis.length > 0) {
+                    const nextApi = fallbackApis.shift();
+                    console.log(`Falling back to ${nextApi.name}...`);
+                    return fetchWithFallback(nextApi.url, nextApi.params, fallbackApis, nextApi.name);
+                } else {
+                    throw new Error('All APIs failed');
+                }
             }
-        });
+        }
 
+        // Existing performTavilySearch function
+        async function performTavilySearch(query, domains) {
+            try {
+                console.log('Performing Tavily search...');
+                const response = await fetch('https://api.tavily.com/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_key: apiKeys.tavily,
+                        query: query,
+                        search_depth: 'advanced',
+                        include_answer: true,
+                        max_results: 5,
+                        include_domains: domains
+                    })
+                });
+                const data = await response.json();
+                console.log('Tavily search successful.');
+                return data;
+            } catch (error) {
+                throw new Error('Tavily search failed: ' + error.message);
+            }
+        }
+
+        // Existing searchStock function
         async function searchStock() {
-            const symbol = symbolInput.value.trim();
-            
-            if (!symbol) {
-                showError('Please enter a stock symbol');
+            const stock = document.getElementById('stockInput').value.trim();
+            const dataType = document.getElementById('dataType').value;
+            const results = document.getElementById('results');
+
+            if (!stock) {
+                results.textContent = 'Please enter a stock symbol';
                 return;
             }
 
-            // Reset UI state
-            errorMessage.style.display = 'none';
-            stockData.style.display = 'none';
-            loadingIndicator.style.display = 'block';
-            searchButton.disabled = true;
+            results.textContent = 'Searching...';
 
             try {
-                const response = await fetch(`https://your-api-endpoint/stocks/${symbol}`, {
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`
-                    }
-                });
+                let output = `Search Results for ${stock.toUpperCase()} (${dataType}):\n\n`;
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch stock data');
+                // Define API endpoints and fallback logic based on data type
+                let apiUrl, params, fallbackApis;
+                switch (dataType) {
+                    case 'current':
+                        apiUrl = 'https://finnhub.io/api/v1/quote';
+                        params = { symbol: stock, token: apiKeys.finnhub };
+                        fallbackApis = [
+                            { 
+                                url: 'https://api.marketaux.com/v1/entity/quote', 
+                                params: { symbols: stock, api_token: apiKeys.marketaux },
+                                name: 'Marketaux'
+                            },
+                            { 
+                                url: 'https://data.nasdaq.com/api/v3/datasets/WIKI/' + stock + '/data.json', 
+                                params: { api_key: apiKeys.nasdaq },
+                                name: 'Nasdaq Data Link'
+                            }
+                        ];
+                        break;
+                    case 'analysis':
+                        apiUrl = 'https://api.marketaux.com/v1/news/all';
+                        params = { symbols: stock, api_token: apiKeys.marketaux };
+                        fallbackApis = [
+                            { 
+                                url: 'https://api.benzinga.com/api/v2/news', 
+                                params: { token: apiKeys.benzinga, tickers: stock },
+                                name: 'Benzinga'
+                            },
+                            { 
+                                url: 'https://data.nasdaq.com/api/v3/datasets/WIKI/' + stock + '/data.json', 
+                                params: { api_key: apiKeys.nasdaq },
+                                name: 'Nasdaq Data Link'
+                            }
+                        ];
+                        break;
+                    case 'news':
+                        apiUrl = 'https://api.benzinga.com/api/v2/news';
+                        params = { token: apiKeys.benzinga, tickers: stock };
+                        fallbackApis = [
+                            { 
+                                url: 'https://api.marketaux.com/v1/news/all', 
+                                params: { symbols: stock, api_token: apiKeys.marketaux },
+                                name: 'Marketaux'
+                            },
+                            { 
+                                url: 'https://data.nasdaq.com/api/v3/datasets/WIKI/' + stock + '/data.json', 
+                                params: { api_key: apiKeys.nasdaq },
+                                name: 'Nasdaq Data Link'
+                            }
+                        ];
+                        break;
                 }
 
-                const data = await response.json();
-                displayStockData(data);
+                // Fetch data from primary API with fallback logic
+                const apiData = await fetchWithFallback(apiUrl, params, fallbackApis, dataType === 'current' ? 'Finnhub' : dataType === 'analysis' ? 'Marketaux' : 'Benzinga');
+
+                // Format output based on data type
+                switch (dataType) {
+                    case 'current':
+                        output += `Current Price: $${apiData.c}\n`;
+                        output += `High: $${apiData.h}\n`;
+                        output += `Low: $${apiData.l}\n`;
+                        output += `Open: $${apiData.o}\n`;
+                        output += `Previous Close: $${apiData.pc}\n`;
+                        break;
+                    case 'analysis':
+                    case 'news':
+                        output += `Latest News:\n`;
+                        apiData.data.forEach((item, index) => {
+                            output += `${index + 1}. ${item.title}\n`;
+                            output += `Source: ${item.source}\n`;
+                            output += `${item.description}\n\n`;
+                        });
+                        break;
+                }
+
+                // Perform Tavily search for additional data
+                let tavilyQuery, tavilyDomains;
+                switch (dataType) {
+                    case 'current':
+                        tavilyQuery = `${stock} stock current price market cap volume real-time data`;
+                        tavilyDomains = ['finance.yahoo.com', 'marketwatch.com', 'bloomberg.com'];
+                        break;
+                    case 'analysis':
+                        tavilyQuery = `${stock} stock financial analysis earnings estimates institutional holdings`;
+                        tavilyDomains = ['seekingalpha.com', 'morningstar.com', 'zacks.com'];
+                        break;
+                    case 'news':
+                        tavilyQuery = `${stock} stock latest news market updates press releases`;
+                        tavilyDomains = ['reuters.com', 'cnbc.com', 'barrons.com'];
+                        break;
+                }
+
+                const tavilyData = await performTavilySearch(tavilyQuery, tavilyDomains);
+                output += `\nAdditional Results from Tavily:\n\n`;
+                if (tavilyData.answer) {
+                    output += `Summary:\n${tavilyData.answer}\n\n`;
+                }
+                tavilyData.results.forEach((result, index) => {
+                    output += `${index + 1}. ${result.title}\n`;
+                    output += `Source: ${result.url}\n`;
+                    output += `${result.content}\n\n`;
+                });
+
+                results.textContent = output;
+
+                // After showing stock results, also search for company documents
+                searchCompanyDocs(stock);
             } catch (error) {
-                showError('Error fetching stock data. Please try again.');
-            } finally {
-                loadingIndicator.style.display = 'none';
-                searchButton.disabled = false;
+                results.textContent = 'Error fetching data: ' + error.message;
             }
         }
 
-        function displayStockData(data) {
-            // Update DOM elements with stock data
-            document.getElementById('symbolValue').textContent = data.symbol;
-            document.getElementById('companyValue').textContent = data.companyName;
-            document.getElementById('priceValue').textContent = `$${data.price?.toFixed(2)}`;
-            
-            const changeElement = document.getElementById('changeValue');
-            const change = data.change?.toFixed(2);
-            changeElement.textContent = `${change > 0 ? '+' : ''}${change}%`;
-            changeElement.className = `data-value ${change >= 0 ? 'positive' : 'negative'}`;
-            
-            document.getElementById('volumeValue').textContent = data.volume?.toLocaleString();
-            document.getElementById('marketCapValue').textContent = formatMarketCap(data.marketCap);
-
-            stockData.style.display = 'grid';
-        }
-
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.style.display = 'block';
-            stockData.style.display = 'none';
-        }
-
-        function formatMarketCap(marketCap) {
-            if (!marketCap) return 'N/A';
-            
-            const billion = 1000000000;
-            const million = 1000000;
-            
-            if (marketCap >= billion) {
-                return `$${(marketCap / billion).toFixed(2)}B`;
-            } else if (marketCap >= million) {
-                return `$${(marketCap / million).toFixed(2)}M`;
-            } else {
-                return `$${marketCap.toLocaleString()}`;
+        // Added company documents functions
+        async function searchCompanyDocs(stock = null) {
+            if (!stock) {
+                stock = document.getElementById('stockInput').value.trim().toUpperCase();
             }
+            const companyDocsDiv = document.getElementById('companyDocs');
+            
+            if (!stock) {
+                companyDocsDiv.innerHTML = '<div class="error">Please enter a company symbol</div>';
+                return;
+            }
+
+            companyDocsDiv.innerHTML = `<div class="loading">Searching for ${stock}'s official documents and filings...</div>`;
+
+            try {
+                const [annualResults, secResults, newsResults, governanceResults] = await Promise.all([
+                    searchCategory(stock, 'annual report financial statements'),
+                    searchCategory(stock, 'SEC filings 10-K 10-Q 8-K'),
+                    searchCategory(stock, 'press releases news announcements'),
+                    searchCategory(stock, 'corporate governance leadership board directors')
+                ]);
+
+                const categories = {
+                    'Annual & Interim Reports': annualResults,
+                    'SEC Filings': secResults,
+                    'News Releases': newsResults,
+                    'Corporate Governance': governanceResults
+                };
+
+                let html = '';
+                for (const [category, results] of Object.entries(categories)) {
+                    html += generateCategoryHTML(category, results);
+                }
+
+                companyDocsDiv.innerHTML = html;
+
+            } catch (error) {
+                companyDocsDiv.innerHTML = `<div class="error">Error fetching documents: ${error.message}</div>`;
+            }
+        }
+
+        async function searchCategory(stock, category) {
+            const response = await fetch('https://api.tavily.com/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    api_key: apiKeys.tavily,
+                    query: `${stock} ${category} site:*.${stock.toLowerCase()}.com OR site:investors.${stock.toLowerCase()}.com`,
+                    search_depth: 'advanced',
+                    max_results: 5,
+                    include_domains: [
+                        `${stock.toLowerCase()}.com`,
+                        `investors.${stock.toLowerCase()}.com`,
+                        'sec.gov',
+                        'edgar-online.com'
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            return data.results;
+        }
+
+        function generateCategoryHTML(category, results) {
+            if (!results || results.length === 0) {
+                return '';
+            }
+
+            let html = `
+                <div class="category-section">
+                    <div class="category-title">${category}</div>`;
+
+            results.forEach(result => {
+                const dateMatch = result.content.match(/\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/) || 
+                                result.title.match(/\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/);
+                const dateStr = dateMatch ? `(${dateMatch[0]})` : '';
+
+                html += `
+                    <div class="document-item">
+                        <div class="document-title">
+                            <a href="${result.url}" target="_blank">${result.title}</a>
+                            <span class="document-date">${dateStr}</span>
+                        </div>
+                        <div class="document-content">${result.content.substring(0, 200)}...</div>
+                    </div>`;
+            });
+
+            html += '</div>';
+            return html;
+        }
+
+        // Auto-search if stock symbol is in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const stockParam = urlParams.get('stock');
+        if (stockParam) {
+            document.getElementById('stockInput').value = stockParam;
+            searchStock();
         }
     </script>
 </body>
