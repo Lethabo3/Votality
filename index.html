@@ -1102,126 +1102,153 @@ try {
 });
 
 // Update the sendMessage function in your JavaScript
-    async function sendMessage(message, file = null) {
-        try {
-            // Do the UI transitions first
-            initialContent.classList.add('fade-out');
-            suggestedQueries.classList.add('fade-out');
-            footerLinks.classList.add('fade-out');
-            textareaContainer.classList.add('repositioned');
-            document.body.classList.add('white-background');
-            
-            setTimeout(async () => {
-                // Hide initial elements
-                initialContent.style.display = 'none';
-                suggestedQueries.style.display = 'none';
-                footerLinks.style.display = 'none';
-                chatContainer.style.display = 'block';
-                chatContainer.classList.add('fade-in');
+async function sendMessage(message, file = null) {
+    try {
+        // Do the UI transitions first
+        initialContent.classList.add('fade-out');
+        suggestedQueries.classList.add('fade-out');
+        footerLinks.classList.add('fade-out');
+        textareaContainer.classList.add('repositioned');
+        document.body.classList.add('white-background');
+        
+        setTimeout(async () => {
+            // Hide initial elements
+            initialContent.style.display = 'none';
+            suggestedQueries.style.display = 'none';
+            footerLinks.style.display = 'none';
+            chatContainer.style.display = 'block';
+            chatContainer.classList.add('fade-in');
 
-                // Handle desktop/mobile specific UI
-                if (window.innerWidth > 640) {
-                    disclaimer.style.display = 'block';
-                    setTimeout(() => {
-                        disclaimer.classList.add('fade-in');
-                    }, 50);
-                    
-                    desktopTopNav.style.display = 'flex';
-                    setTimeout(() => {
-                        desktopTopNav.classList.add('fade-in');
-                    }, 50);
-                } else {
-                    const topNav = document.querySelector('.top-nav');
-                    if (topNav) {
-                        topNav.style.display = 'none';
-                    }
-                    document.body.classList.add('chat-active');
-                }
-
-                // Add user message and show thinking indicator
-                const userMessageElement = await addMessage(message, 'user');
-                textarea.value = '';
-                showAIThinking();
+            // Handle desktop/mobile specific UI
+            if (window.innerWidth > 640) {
+                disclaimer.style.display = 'block';
+                setTimeout(() => {
+                    disclaimer.classList.add('fade-in');
+                }, 50);
                 
-                if (userMessageElement) {
-                    userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                desktopTopNav.style.display = 'flex';
+                setTimeout(() => {
+                    desktopTopNav.classList.add('fade-in');
+                }, 50);
+            } else {
+                const topNav = document.querySelector('.top-nav');
+                if (topNav) {
+                    topNav.style.display = 'none';
                 }
+                document.body.classList.add('chat-active');
+            }
 
-                try {
-                    const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
-                    const response = await fetch('VotalityChat2.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'sendMessage',
-                            message: message,
-                            chatId: currentChatId,
-                            stayLoggedOut: stayLoggedOut,
-                            file: file ? { data: await readFileAsDataURL(file), type: file.type } : null
-                        }),
-                        credentials: 'same-origin'
-                    });
+            // Add user message and show thinking indicator
+            const userMessageElement = await addMessage(message, 'user');
+            textarea.value = '';
+            showAIThinking();
+            
+            if (userMessageElement) {
+                userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
 
-                    const data = await response.json();
-
-                    // Handle authentication errors
-                    if (data.error) {
-                        if (data.error === 'auth_required' && !stayLoggedOut) {
-                            hideAIThinking();
-                            sessionStorage.setItem('returnUrl', window.location.href);
-                            window.location.href = '/signin.html';
-                            return;
-                        }
-                        if (data.error === 'auth_required' && stayLoggedOut) {
-                            // Ignore auth error if user chose to stay logged out
-                        } else {
-                            throw new Error(data.error);
-                        }
-                    }
-
-                    // Update chat topic if provided
-                    if (data.chatTopic) {
-                        updateChatTopicDisplay(data.chatTopic);
-                    }
-
-                    hideAIThinking();
+            try {
+                // Extract potential stock symbols (looking for $SYMBOL or standalone uppercase letters)
+                const stockSymbolMatch = message.match(/\$([A-Z]{1,5})|(?:^|\s)([A-Z]{1,5})(?:\s|$)/);
+                let marketData = null;
+                let tavilyData = null;
+                
+                // If we found a stock symbol, fetch market data
+                if (stockSymbolMatch) {
+                    const symbol = stockSymbolMatch[1] || stockSymbolMatch[2];
                     
-                    // Add AI response
-                    await addMessage(data.response, 'ai', data.relatedTopics);
-
-                    // Handle market data if present
-                    if (data.marketData) {
-                        const marketSection = createMarketDataSection(data.marketData);
-                        const aiMessage = document.querySelector('.message.ai:last-child');
-                        if (aiMessage) {
-                            aiMessage.insertBefore(marketSection, aiMessage.firstChild);
-                        }
-                    }
-
-                    // Set chat ID if not already set
-                    if (!currentChatId) {
-                        currentChatId = data.chatId;
-                    }
-
-                    // Load recent chats after successful message
-                    await loadRecentChats();
-
-                } catch (error) {
-                    console.error('Error:', error);
-                    hideAIThinking();
-                    await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
+                    // Fetch market data and Tavily search results in parallel
+                    [marketData, tavilyData] = await Promise.all([
+                        fetchMarketData(symbol),
+                        performTavilySearch(symbol)
+                    ]);
                 }
-            }, 500);
 
-        } catch (error) {
-            console.error('Error in sendMessage:', error);
-            hideAIThinking();
-            await addMessage("Error: " + error.message, 'ai');
-        }
+                const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
+                const response = await fetch('VotalityChat2.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'sendMessage',
+                        message: message,
+                        chatId: currentChatId,
+                        stayLoggedOut: stayLoggedOut,
+                        file: file ? { data: await readFileAsDataURL(file), type: file.type } : null,
+                        marketData: marketData ? {
+                            currentPrice: marketData.c,
+                            highPrice: marketData.h,
+                            lowPrice: marketData.l,
+                            openPrice: marketData.o,
+                            previousClose: marketData.pc,
+                            timestamp: new Date().toISOString()
+                        } : null,
+                        additionalInfo: tavilyData ? {
+                            summary: tavilyData.answer,
+                            sources: tavilyData.results
+                        } : null
+                    }),
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                // Handle authentication errors
+                if (data.error) {
+                    if (data.error === 'auth_required' && !stayLoggedOut) {
+                        hideAIThinking();
+                        sessionStorage.setItem('returnUrl', window.location.href);
+                        window.location.href = '/signin.html';
+                        return;
+                    }
+                    if (data.error === 'auth_required' && stayLoggedOut) {
+                        // Ignore auth error if user chose to stay logged out
+                    } else {
+                        throw new Error(data.error);
+                    }
+                }
+
+                // Update chat topic if provided
+                if (data.chatTopic) {
+                    updateChatTopicDisplay(data.chatTopic);
+                }
+
+                hideAIThinking();
+                
+                // Add AI response
+                await addMessage(data.response, 'ai', data.relatedTopics);
+
+                // Handle market data if present
+                if (data.marketData) {
+                    const marketSection = createMarketDataSection(data.marketData);
+                    const aiMessage = document.querySelector('.message.ai:last-child');
+                    if (aiMessage) {
+                        aiMessage.insertBefore(marketSection, aiMessage.firstChild);
+                    }
+                }
+
+                // Set chat ID if not already set
+                if (!currentChatId) {
+                    currentChatId = data.chatId;
+                }
+
+                // Load recent chats after successful message
+                await loadRecentChats();
+
+            } catch (error) {
+                console.error('Error:', error);
+                hideAIThinking();
+                await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
+            }
+        }, 500);
+
+    } catch (error) {
+        console.error('Error in sendMessage:', error);
+        hideAIThinking();
+        await addMessage("Error: " + error.message, 'ai');
     }
-
+}
 // Update DOM content loaded handler
 document.addEventListener('DOMContentLoaded', async () => {
 const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
@@ -3554,7 +3581,123 @@ dropdownItems.forEach(item => {
         selectedType.textContent = this.textContent;
         dropdownContent.classList.remove('show');
     });
-});</script>
+});
+
+// API configuration
+const apiKeys = {
+    finnhub: 'crnm7tpr01qt44di3q5gcrnm7tpr01qt44di3q60',
+    marketaux: 'o4VnvcRmaBZeK4eBHPJr8KP3xN8gMBTedxHGkCNz',
+    benzinga: '685f0ad2fe3f4facb3da0aeacb27b76b',
+    nasdaq: 'VGV68j1nV9w9Zn3vwbsG',
+    tavily: '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'
+};
+
+// Helper function for API fallback
+async function fetchWithFallback(url, params, fallbackApis, apiName) {
+    try {
+        console.log(`Fetching data from ${apiName}...`);
+        const response = await fetch(`${url}?${new URLSearchParams(params)}`);
+        if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+        const data = await response.json();
+        console.log(`Data successfully fetched from ${apiName}.`);
+        return data;
+    } catch (error) {
+        console.error(`Error with ${apiName}:`, error.message);
+        if (fallbackApis.length > 0) {
+            const nextApi = fallbackApis.shift();
+            console.log(`Falling back to ${nextApi.name}...`);
+            return fetchWithFallback(nextApi.url, nextApi.params, fallbackApis, nextApi.name);
+        } else {
+            throw new Error('All APIs failed');
+        }
+    }
+}
+
+// Helper function for Tavily search
+async function performTavilySearch(query, domains) {
+    try {
+        console.log('Performing Tavily search...');
+        const response = await fetch('https://api.tavily.com/search', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                api_key: apiKeys.tavily,
+                query: query,
+                search_depth: 'advanced',
+                include_answer: true,
+                max_results: 5,
+                include_domains: domains
+            })
+        });
+        const data = await response.json();
+        console.log('Tavily search successful.');
+        return data;
+    } catch (error) {
+        throw new Error('Tavily search failed: ' + error.message);
+    }
+}
+
+
+// Helper function to extract stock symbols from message
+function extractStockSymbols(message) {
+    // Match potential stock symbols (1-5 uppercase letters, optionally preceded by $ or surrounded by spaces)
+    const matches = message.match(/(?:\$|^|\s)([A-Z]{1,5})(?:\s|$)/g);
+    if (matches) {
+        return matches.map(match => match.trim().replace('$', ''));
+    }
+    return [];
+}
+
+// Helper function to fetch market data
+async function fetchMarketData(symbol) {
+    const apiUrl = 'https://finnhub.io/api/v1/quote';
+    const params = { symbol: symbol, token: apiKeys.finnhub };
+    const fallbackApis = [
+        { 
+            url: 'https://api.marketaux.com/v1/entity/quote', 
+            params: { symbols: symbol, api_token: apiKeys.marketaux },
+            name: 'Marketaux'
+        },
+        { 
+            url: 'https://data.nasdaq.com/api/v3/datasets/WIKI/' + symbol + '/data.json', 
+            params: { api_key: apiKeys.nasdaq },
+            name: 'Nasdaq Data Link'
+        }
+    ];
+
+    return await fetchWithFallback(apiUrl, params, fallbackApis, 'Finnhub');
+}
+
+// Helper function to fetch company documents
+async function fetchCompanyDocs(symbol) {
+    const categories = [
+        'annual report financial statements',
+        'SEC filings 10-K 10-Q 8-K',
+        'press releases news announcements',
+        'corporate governance leadership board directors'
+    ];
+
+    const results = await Promise.all(categories.map(category => 
+        performTavilySearch(`${symbol} ${category}`, [
+            `${symbol.toLowerCase()}.com`,
+            `investors.${symbol.toLowerCase()}.com`,
+            'sec.gov',
+            'edgar-online.com'
+        ])
+    ));
+
+    return {
+        annualReports: results[0],
+        secFilings: results[1],
+        pressReleases: results[2],
+        governance: results[3]
+    };
+}
+
+</script>
 
 </body>
 </html>
