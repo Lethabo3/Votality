@@ -37,20 +37,80 @@
 
             public function generateResponse($message, $chatId) {
                 try {
+                    // First, extract any financial instruments mentioned in the message
+                    $instrument = $this->extractFinancialInstrument($message);
+                    
+                    // Initialize data containers
+                    $marketData = null;
+                    $economicData = null;
+                    $searchData = null;
+                    
+                    // If we found a financial instrument, fetch its market data
+                    if ($instrument) {
+                        $marketData = $this->fetchMarketData($instrument);
+                        error_log("Market data fetched for " . $instrument['symbol'] . ": " . json_encode($marketData));
+                    }
+                    
+                    // Fetch economic indicators
+                    $economicData = $this->fetchEconomicData();
+                    error_log("Economic data fetched: " . json_encode($economicData));
+                    
+                    // Get relevant search data from Tavily
+                    $searchData = $this->getRelevantTavilyData();
+                    if ($searchData) {
+                        $searchData = $this->processTavilyResults($searchData);
+                        error_log("Tavily data processed: " . json_encode($searchData));
+                    }
+                    
+                    // Fetch top financial news stories
+                    $newsData = $this->fetchTopStories(5);
+                    error_log("News data fetched: " . json_encode($newsData));
+                    
+                    // Prepare enhanced context with all gathered data
+                    $enhancedContext = $this->prepareEnhancedContext($message, $marketData, $economicData, $searchData);
+                    
+                    // Add news data to context
+                    $enhancedContext['news_data'] = $newsData;
+                    
+                    // Add message to conversation history
                     $this->addToHistory('user', $message);
                     
-                    // Log configuration for debugging
-                    error_log("API URL: " . $this->apiUrl);
-                    error_log("Using model: gemini-1.5-flash-latest");
+                    // Prepare instructions with the enhanced context
+                    $instructions = $this->prepareInstructions($marketData, $economicData);
                     
-                    // Prepare the request - Note the structure for Gemini 1.5
+                    // Prepare the complete context for the AI model
+                    $aiContext = "User Query: {$message}\n\n";
+                    
+                    if ($marketData) {
+                        $aiContext .= "Market Data:\n" . json_encode($marketData, JSON_PRETTY_PRINT) . "\n\n";
+                    }
+                    
+                    if ($economicData) {
+                        $aiContext .= "Economic Indicators:\n" . json_encode($economicData, JSON_PRETTY_PRINT) . "\n\n";
+                    }
+                    
+                    if ($searchData && isset($searchData['results'])) {
+                        $aiContext .= "Recent Market Developments:\n";
+                        foreach ($searchData['results'] as $result) {
+                            $aiContext .= "- {$result['title']}\n  {$result['content']}\n\n";
+                        }
+                    }
+                    
+                    if ($newsData) {
+                        $aiContext .= "Latest Market News:\n";
+                        foreach ($newsData as $news) {
+                            $aiContext .= "- {$news['title']} ({$news['source']})\n  {$news['summary']}\n\n";
+                        }
+                    }
+                    
+                    // Prepare the AI request with the enhanced context
                     $aiRequest = [
                         'contents' => [
                             [
                                 'role' => 'user',
                                 'parts' => [
                                     [
-                                        'text' => $this->prepareInstructions(null, null) . "\n\nUser message: " . $message
+                                        'text' => $instructions . "\n\nContext:\n" . $aiContext . "\n\nUser message: " . $message
                                     ]
                                 ]
                             ]
@@ -69,10 +129,11 @@
                             'stopSequences' => []
                         ]
                     ];
-            
-                    // Log the request payload for debugging
-                    error_log("Request payload: " . json_encode($aiRequest, JSON_PRETTY_PRINT));
-            
+                    
+                    // Log the complete context being sent to the AI
+                    error_log("Sending context to AI: " . substr($aiContext, 0, 1000) . "...");
+                    
+                    // Make the API request to the AI model
                     $ch = curl_init($this->apiUrl . '?key=' . $this->apiKey);
                     curl_setopt_array($ch, [
                         CURLOPT_RETURNTRANSFER => true,
@@ -82,68 +143,34 @@
                             'Content-Type: application/json',
                             'Accept: application/json'
                         ],
-                        CURLOPT_TIMEOUT => 30,
-                        CURLOPT_VERBOSE => true
+                        CURLOPT_TIMEOUT => 30
                     ]);
-            
-                    // Create a temporary file handle for CURL debugging
-                    $verbose = fopen('php://temp', 'w+');
-                    curl_setopt($ch, CURLOPT_STDERR, $verbose);
-            
-                    // Execute the request and capture response details
+                    
                     $response = curl_exec($ch);
-                    $curlError = curl_error($ch);
                     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                     
-                    // Get verbose debug information
-                    rewind($verbose);
-                    $verboseLog = stream_get_contents($verbose);
-                    fclose($verbose);
-            
-                    // Log detailed debug information
-                    error_log("HTTP Code: " . $httpCode);
-                    error_log("Curl Error: " . $curlError);
-                    error_log("Verbose log: " . $verboseLog);
-                    error_log("Raw response: " . $response);
-            
+                    if (curl_errno($ch)) {
+                        throw new Exception("Curl error: " . curl_error($ch));
+                    }
+                    
                     curl_close($ch);
-            
-                    if ($curlError) {
-                        throw new Exception("Curl error: " . $curlError);
-                    }
-            
+                    
                     if ($httpCode !== 200) {
-                        throw new Exception("API returned non-200 status code: " . $httpCode . ". Response: " . $response);
+                        throw new Exception("API returned non-200 status code: " . $httpCode);
                     }
-            
-                    if (empty($response)) {
-                        throw new Exception("Empty response received from API");
-                    }
-            
+                    
                     $result = json_decode($response, true);
-                    if (json_last_error() !== JSON_ERROR_NONE) {
-                        error_log("JSON decode error. Response received: " . substr($response, 0, 1000));
-                        throw new Exception("JSON decode error: " . json_last_error_msg());
-                    }
-            
-                    // Log the decoded response structure
-                    error_log("Decoded response structure: " . json_encode($result, JSON_PRETTY_PRINT));
-            
-                    // Updated path for response content in Gemini 1.5
                     if (!isset($result['candidates'][0]['content']['parts'][0]['text'])) {
-                        throw new Exception("Unexpected response structure: " . json_encode($result));
+                        throw new Exception("Unexpected response structure");
                     }
-            
+                    
                     $aiResponse = $result['candidates'][0]['content']['parts'][0]['text'];
                     $cleanedResponse = $this->removeAsterisks($aiResponse);
                     
                     $this->addToHistory('ai', $cleanedResponse);
                     
-                    // Log successful response
-                    error_log("Successfully generated response: " . substr($cleanedResponse, 0, 100) . "...");
-                    
                     return $cleanedResponse;
-            
+                    
                 } catch (Exception $e) {
                     error_log("Error in generateResponse: " . $e->getMessage());
                     error_log("Stack trace: " . $e->getTraceAsString());
