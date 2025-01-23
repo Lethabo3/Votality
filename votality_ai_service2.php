@@ -705,7 +705,7 @@
                     error_log("Tavily Results Content: " . json_encode($searchResults['results']));
                 }
             
-                $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Focus on providing comprehensive corporate documentation analysis and insights from SEC filings, news releases, and financial reports.";
+                $instructions = "You are Votality, a knowledgeable and detailed AI assistant for the Votality app. Provide comprehensive and insightful financial information with a focus on specific statistics and numerical data.";
             
                 // Make search results mandatory to reference
                 if ($searchResults && !empty($searchResults['results'])) {
@@ -720,71 +720,47 @@
                 }
             
                 $instructions .= "\n\nGUIDELINES:
-                1. Prioritize analysis of official corporate documents and filings.
-                2. No basic greetings - start with your most significant filing or disclosure insight.
-                3. Focus on SEC filings, particularly Form 10-K, 10-Q, 8-K, and proxy statements.
-                4. Analyze corporate governance structures and changes.
-                5. Provide detailed information about corporate documents, organized into the following sections:
+                1. Prioritize analysis of SEC filings and corporate disclosures.
+                2. No basic greetings - start with your most significant filing insight.
+                3. Reveal key findings from latest 10-K, 10-Q, and 8-K filings.
+                4. Focus on material changes and important disclosures.
+                5. Provide detailed information about financial instruments and filings:
                 
-                - **SEC Filings Analysis**:
-                  - Latest 10-K and 10-Q highlights
-                  - Recent 8-K disclosures
-                  - Material changes in business operations
-                  - Risk factor updates
-                  - Management discussion analysis (MD&A)
+                - **SEC Filing Information**: Latest 10-K, 10-Q, 8-K contents and material changes.
+                - **Corporate Governance**: Board changes, insider trading, shareholder rights.
+                - **Financial Reports**: Annual and interim report highlights, key metrics.
+                - **Regulatory Filings**: Recent form submissions and disclosures.
+                - **Risk Disclosures**: Updated risk factors and management discussion.
+                - **Shareholder Data**: Dividend info, buybacks, institutional holdings.
+                - **Financial Metrics**: Revenue, earnings, and key ratios from reports.
+                - **News Releases**: Official corporate communications and releases.
+                - **Filing Calendar**: Recent and upcoming filing deadlines.
+                - **Material Events**: Significant corporate actions and changes.
                 
-                - **Corporate Governance**:
-                  - Board composition and changes
-                  - Executive compensation
-                  - Insider trading activity
-                  - Shareholder rights
-                  - Committee structures
-                
-                - **Financial Reports**:
-                  - Annual report highlights
-                  - Interim report analysis
-                  - Segment performance
-                  - Cash flow analysis
-                  - Capital allocation strategy
-                
-                - **News Releases and Communications**:
-                  - Press releases
-                  - Investor presentations
-                  - Earnings call transcripts
-                  - Corporate communications
-                  - Regulatory announcements
-                
-                - **Shareholder Information**:
-                  - Dividend policies
-                  - Share buyback programs
-                  - Ownership structure
-                  - Institutional holdings
-                  - Voting rights
-                
-                6. Highlight significant changes in corporate documentation and filings.
-                7. No emojis or basic analysis. Reply in 1301 or fewer characters in all responses.
-                8. Identify patterns in corporate disclosures and reporting.
-                9. Focus on material information from official filings.
-                10. Every response must include at least one significant filing or disclosure insight.
-                11. Match technical detail to the user's knowledge level.
-                12. Emphasize recent and upcoming filing deadlines and requirements.
-                13. Use clear, precise language when discussing filings and reports.
-                14. Do not mention data sources or providers.
-                15. Never use {}, [], or respond with [something not found].
-                16. Maintain formal language appropriate for financial documentation.
-                17. Keep responses focused and concise within 300 tokens.
+                6. Highlight important changes in corporate documentation.
+                7. No emojis or basic analysis. Reply in 1301 or fewer characters.
+                8. Track patterns in corporate filings and disclosures.
+                9. Focus on official company documents and filings.
+                10. Include one significant filing insight in each response.
+                11. Match technical detail to user knowledge level.
+                12. Emphasize forward-looking statements and guidance.
+                13. Use simple language to explain complex filings.
+                14. Do not mention data sources.
+                15. Never use {}, [], or [something not found].
+                16. Maintain formal language.
+                17. Keep responses within 300 tokens.
             
                 Format your response as follows:
-                [Your detailed analysis of filings and corporate documents, with specific citations and data points]
+                [Your detailed main response here, structured in multiple paragraphs, rich with specific statistics and numerical data]
+            
+                Market Info:
+                CompanyName|Symbol|CurrentPriceAsNumber|PriceChangeAsNumber
+                (Example: Apple Inc.|AAPL|190.50|-2.30)
                 
-                Document Info:
-                CompanyName|FilingType|FilingDate|KeyDisclosure
-                (Example: Apple Inc.|10-K|2023-10-27|Revenue growth 8% YoY)
-                
-                Related Documents:
-                1. [First related filing or document]
-                2. [Second related filing or document]
-                3. [Third related filing or document]";
+                Related Topics:
+                1. [First related topic or question]
+                2. [Second related topic or question]
+                3. [Third related topic or question]";
             
                 // Add market data if available
                 if ($marketData) {
@@ -798,9 +774,9 @@
             
                 // Final reminder about using recent developments
                 $instructions .= "\n\nRESPONSE STRUCTURE REQUIREMENTS:
-                1. BEGIN with a specific recent filing or disclosure from the Critical Recent Developments
-                2. CONNECT this filing to current corporate governance and financial reporting trends
-                3. EXPLAIN the implications for corporate strategy and stakeholders
+                1. BEGIN with a specific recent development from the Critical Recent Developments section above
+                2. CONNECT this development to current market data and trends
+                3. EXPLAIN the implications and potential future impact
                 4. MAINTAIN response format and character limit (1301 max)";
             
                 return $instructions;
