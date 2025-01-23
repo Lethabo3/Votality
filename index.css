@@ -2979,6 +2979,7 @@
     right: 50px;
     bottom: 12px;
     transform: none;
+    display: none;
     border: none;
     cursor: pointer;
     z-index: 10;
