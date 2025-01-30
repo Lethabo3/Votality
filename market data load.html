@@ -13,6 +13,7 @@
             --border-color: #e5e7eb;
             --hover-color: #f3f4f6;
             --secondary-background: #f9f9f9;
+            --completed-circle: #6B7280;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -24,7 +25,14 @@
                 --border-color: #2e3138;
                 --hover-color: #2a2d33;
                 --secondary-background: #232323;
+                --completed-circle: #4B5563;
             }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -37,12 +45,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            line-height: 1.5;
         }
 
         .loading-container {
             max-width: 600px;
             width: 100%;
             margin-top: 50px;
+            padding: 0 20px;
         }
 
         .header {
@@ -63,6 +73,7 @@
         .loading-dots {
             display: inline-flex;
             gap: 2px;
+            margin-left: 4px;
         }
 
         .dot {
@@ -70,17 +81,18 @@
             height: 3px;
             background-color: var(--text-color);
             border-radius: 50%;
-            animation: pulse 1.5s infinite;
+            animation: pulse 5s infinite;
         }
 
         .dot:nth-child(2) { animation-delay: 0.2s; }
         .dot:nth-child(3) { animation-delay: 0.4s; }
 
         .checkpoint-container {
-            margin-top: 20px;
             opacity: 0;
             transform: translateY(10px);
             transition: all 0.5s ease;
+            position: relative;
+            margin-bottom: 4px;
         }
 
         .checkpoint-container.visible {
@@ -92,48 +104,103 @@
             display: flex;
             align-items: flex-start;
             gap: 16px;
-            margin-bottom: 16px;
             padding: 12px;
             border-radius: 8px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
         .checkpoint.active {
             background-color: var(--hover-color);
         }
 
+        .checkpoint::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            width: 2px;
+            height: calc(100% + 8px);
+            background-color: var(--border-color);
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .checkpoint:last-child::after {
+            display: none;
+        }
+
         .checkpoint-circle {
             width: 24px;
             height: 24px;
-            border: 2px solid var(--border-color);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            transition: all 0.3s ease;
+            position: relative;
+            background-color: var(--text-color);
+            z-index: 1;
+            padding: 2px;
         }
 
         .checkpoint.active .checkpoint-circle {
-            border-color: var(--text-color);
-            animation: pulse 2s infinite;
+            --_m: 
+                conic-gradient(transparent 10%, var(--text-color)),
+                linear-gradient(var(--text-color) 0 0) content-box;
+            -webkit-mask: var(--_m);
+                    mask: var(--_m);
+            -webkit-mask-composite: source-out;
+                    mask-composite: subtract;
+            animation: loaderRotate 1s infinite linear;
+            border: none;
         }
 
         .checkpoint.completed .checkpoint-circle {
-            border-color: var(--text-color);
-            background-color: var(--text-color);
+            animation: none;
+            background-color: var(--completed-circle);
+            border: none;
+            -webkit-mask: none;
+                    mask: none;
+            transition: background-color 0.3s ease;
         }
 
-        .checkpoint.completed .checkpoint-circle::after {
-            content: "";
-            width: 8px;
-            height: 8px;
-            background-color: var(--background-color);
-            border-radius: 50%;
+        @keyframes loaderRotate {
+            to {
+                transform: rotate(1turn)
+            }
+        }
+
+        /* Remove previous pulse animations */
+        .checkpoint.active .checkpoint-circle::before,
+        .checkpoint.active .checkpoint-circle::after,
+        .checkpoint.active .checkpoint-circle .ripple {
+            display: none;
+        }
+
+        .checkpoint.active .checkpoint-circle::after {
+            animation-delay: 0.5s;
+        }
+
+        .checkpoint.active .checkpoint-circle .ripple {
+            animation-delay: 1s;
+        }
+
+        .checkpoint.completed .checkpoint-circle {
+            border-color: var(--completed-circle);
+            background-color: var(--completed-circle);
+        }
+
+        .checkpoint.completed .checkpoint-circle::before,
+        .checkpoint.completed .checkpoint-circle::after,
+        .checkpoint.completed .checkpoint-circle .ripple {
+            animation: none;
+            display: none;
         }
 
         .checkpoint-content {
             flex: 1;
+            padding-top: 2px;
         }
 
         .checkpoint-title {
@@ -147,6 +214,7 @@
             font-size: 14px;
             color: var(--description-text);
             display: none;
+            line-height: 1.4;
         }
 
         .checkpoint.active .checkpoint-detail {
@@ -154,15 +222,36 @@
             animation: fadeIn 0.3s ease;
         }
 
+        @keyframes rippleWave {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.3);
+                opacity: 0.2;
+            }
+            100% {
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+        }
+
         @keyframes pulse {
             0% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.3; }
             100% { opacity: 1; }
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { 
+                opacity: 0; 
+                transform: translateY(-5px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -180,6 +269,7 @@
         </div>
         <div id="checkpoints-list"></div>
     </div>
+
     <script>
         const steps = [
             {

@@ -1687,103 +1687,251 @@ function showAIThinking() {
     const lastChatGroup = chatContainer.lastElementChild;
     const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // Create sources container with same styling as addMessage
-    const sourcesContainer = document.createElement('div');
-    sourcesContainer.className = 'sources-container skeleton-sources-container';
-    sourcesContainer.style.display = 'flex';
-    sourcesContainer.style.flexDirection = 'row';
-    sourcesContainer.style.gap = '8px';
-    sourcesContainer.style.padding = '1px 16px';
-    sourcesContainer.style.marginBottom = '12px';
-    sourcesContainer.style.flexWrap = 'nowrap';
-    sourcesContainer.style.alignItems = 'stretch';
+    // Create main container for checkpoints
+    const checkpointSequence = document.createElement('div');
+    checkpointSequence.className = 'checkpoint-sequence';
+    checkpointSequence.style.width = '100%';
+    checkpointSequence.style.padding = '20px';
 
-    // Create four source items with the same structure as addMessage
-    const sourceData = [
-        { name: 'Annual & Interim Reports', metric: '16 quarters' },
-        { name: 'News Releases', metric: '342 releases' },
-        { name: 'SEC Filings', metric: '53K words' },
-        { name: 'Corporate Governance', metric: '18 documents' }
+    // Add loading header
+    const header = document.createElement('div');
+    header.className = 'header';
+    header.innerHTML = `
+        <div class="header-title" style="
+            font-size: 18px;
+            font-weight: 500;
+            color: ${isDarkMode ? '#ffffff' : '#000000'};
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        ">
+            Processing Market Data
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    `;
+    checkpointSequence.appendChild(header);
+
+    // Add styles for the sequence
+    const style = document.createElement('style');
+    style.textContent = `
+        .checkpoint-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            background-color: var(--background-color);
+            z-index: 1;
+            padding: 2px;
+        }
+
+        .checkpoint.active .checkpoint-circle {
+            --_m: 
+                conic-gradient(transparent 10%, currentColor),
+                linear-gradient(currentColor 0 0) content-box;
+            -webkit-mask: var(--_m);
+                    mask: var(--_m);
+            -webkit-mask-composite: source-out;
+                    mask-composite: subtract;
+            animation: loaderRotate 1s infinite linear;
+            border: none;
+        }
+
+        .checkpoint.completed .checkpoint-circle {
+            animation: none;
+            background-color: ${isDarkMode ? '#4B5563' : '#6B7280'};
+            border: none;
+            -webkit-mask: none;
+                    mask: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .checkpoint-container {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+            margin-bottom: 4px;
+        }
+
+        .checkpoint-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .checkpoint {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .checkpoint::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            width: 2px;
+            height: calc(100% + 8px);
+            background-color: ${isDarkMode ? '#2e3138' : '#e5e7eb'};
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .checkpoint:last-child::after {
+            display: none;
+        }
+
+        .checkpoint-content {
+            flex: 1;
+            padding-top: 2px;
+        }
+
+        .checkpoint-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: ${isDarkMode ? '#ffffff' : '#000000'};
+            margin-bottom: 4px;
+        }
+
+        .checkpoint-detail {
+            font-size: 14px;
+            color: ${isDarkMode ? '#666f7c' : '#9ca3af'};
+            display: none;
+            line-height: 1.4;
+        }
+
+        .checkpoint.active .checkpoint-detail {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes loaderRotate {
+            to { transform: rotate(1turn) }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .loading-dots {
+            display: inline-flex;
+            gap: 2px;
+            margin-left: 4px;
+        }
+
+        .dot {
+            width: 3px;
+            height: 3px;
+            background-color: currentColor;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Create checkpoints list container
+    const checkpointsList = document.createElement('div');
+    checkpointsList.id = 'checkpoints-list';
+    checkpointSequence.appendChild(checkpointsList);
+
+    // Add the sequence container to the chat
+    lastChatGroup.appendChild(checkpointSequence);
+
+    // Initialize the checkpoint sequence
+    const steps = [
+        {
+            title: "Searching financial databases...",
+            detail: "Initiating market data retrieval from global sources"
+        },
+        {
+            title: "Analyzing Annual & Interim Reports",
+            detail: "Processing 16 quarters of financial statements"
+        },
+        {
+            title: "Reviewing News Releases",
+            detail: "Analyzing 342 recent company announcements"
+        },
+        {
+            title: "Processing SEC Filings",
+            detail: "Examining 53K words of regulatory documents"
+        },
+        {
+            title: "Scanning Corporate Governance",
+            detail: "Reviewing 18 organizational documents"
+        },
+        {
+            title: "Preparing comprehensive analysis",
+            detail: "Synthesizing market data insights"
+        }
     ];
 
-    sourceData.forEach(() => {
-        const sourceItem = document.createElement('div');
-        sourceItem.style.display = 'flex';
-        sourceItem.style.flexDirection = 'column';
-        sourceItem.style.backgroundColor = isDarkMode ? '#232323' : '#f3f4f6';
-        sourceItem.style.borderRadius = '6px';
-        sourceItem.style.padding = '8px 12px';
-        sourceItem.style.width = '170px';
-        sourceItem.style.flexShrink = '0';
-        sourceItem.style.cursor = 'pointer';
-        sourceItem.style.transition = 'background-color 0.2s ease';
-        sourceItem.style.justifyContent = 'flex-start';
-        sourceItem.className = 'animate-pulse';
+    let currentStep = 0;
 
-        // Create title container
-        const titleContainer = document.createElement('div');
-        titleContainer.style.display = 'flex';
-        titleContainer.style.flexDirection = 'column';
-        titleContainer.style.width = '100%';
-        titleContainer.style.alignItems = 'flex-start';
-
-        // Create title skeleton
-        const titleText = document.createElement('div');
-        titleText.style.height = '14px';
-        titleText.style.width = '80%';
-        titleText.style.backgroundColor = isDarkMode ? '#2a2d33' : '#e5e7eb';
-        titleText.style.borderRadius = '4px';
-        titleText.style.marginBottom = '2px';
-
-        // Create metric container skeleton
-        const metricContainer = document.createElement('div');
-        metricContainer.style.display = 'flex';
-        metricContainer.style.alignItems = 'center';
-        metricContainer.style.gap = '4px';
-        metricContainer.style.width = '100%';
-        metricContainer.style.justifyContent = 'flex-start';
-
-        // Create metric text skeleton
-        const metricText = document.createElement('div');
-        metricText.style.height = '12px';
-        metricText.style.width = '60%';
-        metricText.style.backgroundColor = isDarkMode ? '#2a2d33' : '#e5e7eb';
-        metricText.style.borderRadius = '4px';
-
-        // Create link icon skeleton
-        const linkIcon = document.createElement('div');
-        linkIcon.style.width = '12px';
-        linkIcon.style.height = '12px';
-        linkIcon.style.backgroundColor = isDarkMode ? '#2a2d33' : '#e5e7eb';
-        linkIcon.style.borderRadius = '2px';
-
-        metricContainer.appendChild(metricText);
-        metricContainer.appendChild(linkIcon);
-        titleContainer.appendChild(titleText);
-        titleContainer.appendChild(metricContainer);
-        sourceItem.appendChild(titleContainer);
-        sourcesContainer.appendChild(sourceItem);
-    });
-
-    lastChatGroup.appendChild(sourcesContainer);
-
-    // AI message skeleton
-    const skeletonLoader = document.createElement('div');
-    skeletonLoader.className = 'skeleton-loader';
-    
-    for (let i = 0; i < 4; i++) {
-        const skeletonLine = document.createElement('div');
-        skeletonLine.className = 'skeleton-line';
-        skeletonLine.style.width = `${100 - i * 5}%`;
-        skeletonLine.style.height = '16px';
-        skeletonLine.style.marginBottom = '8px';
-        skeletonLine.style.background = isDarkMode ?
-            'linear-gradient(90deg, #232323 25%, #2a2d33 50%, #232323 75%)' :
-            'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)';
-        skeletonLoader.appendChild(skeletonLine);
+    function createCheckpoint(step) {
+        const container = document.createElement('div');
+        container.className = 'checkpoint-container';
+        
+        const checkpoint = document.createElement('div');
+        checkpoint.className = 'checkpoint';
+        
+        checkpoint.innerHTML = `
+            <div class="checkpoint-circle"></div>
+            <div class="checkpoint-content">
+                <div class="checkpoint-title">${step.title}</div>
+                <div class="checkpoint-detail">${step.detail}</div>
+            </div>
+        `;
+        
+        container.appendChild(checkpoint);
+        return container;
     }
 
-    lastChatGroup.appendChild(skeletonLoader);
+    function updateCheckpoints() {
+        if (currentStep >= steps.length) return;
+
+        const newCheckpoint = createCheckpoint(steps[currentStep]);
+        checkpointsList.appendChild(newCheckpoint);
+
+        setTimeout(() => {
+            newCheckpoint.classList.add('visible');
+            const checkpoint = newCheckpoint.querySelector('.checkpoint');
+            checkpoint.classList.add('active');
+
+            if (currentStep > 0) {
+                const previousCheckpoint = checkpointsList.children[currentStep - 1].querySelector('.checkpoint');
+                previousCheckpoint.classList.remove('active');
+                previousCheckpoint.classList.add('completed');
+            }
+
+            currentStep++;
+            if (currentStep < steps.length) {
+                setTimeout(updateCheckpoints, 2000);
+            }
+        }, 100);
+    }
+
+    // Start the sequence
+    updateCheckpoints();
+
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1791,19 +1939,12 @@ function hideAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
     const lastChatGroup = chatContainer.lastElementChild;
     
-    // Remove sources container skeleton
-    const sourcesContainerSkeleton = lastChatGroup.querySelector('.skeleton-sources-container');
-    if (sourcesContainerSkeleton) {
-        sourcesContainerSkeleton.remove();
-    }
-    
-    // Remove skeleton loader
-    const skeletonLoader = lastChatGroup.querySelector('.skeleton-loader');
-    if (skeletonLoader) {
-        skeletonLoader.remove();
+    // Remove checkpoint sequence
+    const checkpointSequence = lastChatGroup.querySelector('.checkpoint-sequence');
+    if (checkpointSequence) {
+        checkpointSequence.remove();
     }
 }
-
 function toggleMobileNav() {
 const bottomNav = document.querySelector('.bottom-nav');
 const sidebar = document.querySelector('.sidebar');
