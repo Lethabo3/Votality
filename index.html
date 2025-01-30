@@ -1754,71 +1754,47 @@ function showAIThinking() {
     function updateCheckpoints() {
     if (currentStep >= steps.length) return;
 
-    const existingCheckpoints = checkpointsList.querySelectorAll('.checkpoint-container');
-    
-    if (existingCheckpoints.length > 0) {
-        // First, stop the loading animation and fill the circle
-        const completedCheckpoint = existingCheckpoints[0].querySelector('.checkpoint');
-        completedCheckpoint.classList.remove('active');
-        completedCheckpoint.classList.add('completed');
+    // If it's the first step, create all checkpoints at once
+    if (currentStep === 0) {
+        steps.forEach((step, index) => {
+            const checkpoint = createCheckpoint(step, index !== 0); // First one not pending
+            checkpoint.style.opacity = '0';
+            checkpoint.style.transform = 'translateY(20px)';
+            checkpointsList.appendChild(checkpoint);
 
-        // Increased delay to ensure fill is visible
-        setTimeout(() => {
-            // Only after it's filled, start the fade out
-            existingCheckpoints[0].style.transition = 'all 0.3s ease'; // Slightly slower transition
-            existingCheckpoints[0].style.opacity = '0';
-            existingCheckpoints[0].style.transform = 'translateY(-20px)';
+            // Show each checkpoint with a slight delay
+            setTimeout(() => {
+                checkpoint.style.transition = 'all 0.3s ease';
+                checkpoint.style.opacity = '1';
+                checkpoint.style.transform = 'translateY(0)';
+                checkpoint.classList.add('visible');
 
-            if (existingCheckpoints[1]) {
-                setTimeout(() => {
-                    existingCheckpoints[0].remove();
-                    existingCheckpoints[1].style.transition = 'all 0.3s ease';
-                    existingCheckpoints[1].style.transform = 'translateY(0)';
-                    
-                    if (currentStep + 1 < steps.length) {
-                        const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
-                        nextCheckpoint.style.transform = 'translateY(20px)';
-                        nextCheckpoint.style.opacity = '0';
-                        checkpointsList.appendChild(nextCheckpoint);
-                        
-                        setTimeout(() => {
-                            nextCheckpoint.style.transition = 'all 0.3s ease';
-                            nextCheckpoint.style.transform = 'translateY(0)';
-                            nextCheckpoint.style.opacity = '1';
-                            const currentCheck = existingCheckpoints[1].querySelector('.checkpoint');
-                            currentCheck.classList.add('active');
-                            currentCheck.classList.remove('pending');
-                        }, 50); // Increased from 30
-                    }
-                }, 300); // Increased from 200
-            }
-        }, 600); // Increased from 400 to ensure fill is visible
+                // Make first checkpoint active
+                if (index === 0) {
+                    const firstCheck = checkpoint.querySelector('.checkpoint');
+                    firstCheck.classList.add('active');
+                }
+            }, index * 100); // Stagger the appearance
+        });
     } else {
-        // Initial setup of first two checkpoints
-        const currentCheckpoint = createCheckpoint(steps[currentStep]);
-        checkpointsList.appendChild(currentCheckpoint);
-        
-        if (currentStep + 1 < steps.length) {
-            const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
-            checkpointsList.appendChild(nextCheckpoint);
-        }
+        // Get current and next checkpoints
+        const currentCheckpoint = checkpointsList.children[currentStep - 1].querySelector('.checkpoint');
+        const nextCheckpoint = checkpointsList.children[currentStep].querySelector('.checkpoint');
 
+        // Complete current checkpoint
+        currentCheckpoint.classList.remove('active');
+        currentCheckpoint.classList.add('completed');
+
+        // After completion animation, activate next checkpoint
         setTimeout(() => {
-            currentCheckpoint.classList.add('visible');
-            const currentCheck = currentCheckpoint.querySelector('.checkpoint');
-            currentCheck.classList.add('active');
-            
-            if (currentStep + 1 < steps.length) {
-                setTimeout(() => {
-                    checkpointsList.children[1].classList.add('visible');
-                }, 300); // Increased from 200
-            }
-        }, 100); // Increased from 50
+            nextCheckpoint.classList.remove('pending');
+            nextCheckpoint.classList.add('active');
+        }, 600);
     }
 
     currentStep++;
     if (currentStep < steps.length) {
-        setTimeout(updateCheckpoints, 1500); // Increased from 1200
+        setTimeout(updateCheckpoints, 1500);
     }
 }
 
