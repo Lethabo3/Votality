@@ -3131,7 +3131,7 @@
     background-color: var(--border-color);
     transform: translateX(-50%);
     z-index: 0;
-}
+}   
 
 .checkpoint:last-child::after {
     display: none;
