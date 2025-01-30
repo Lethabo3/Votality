@@ -1690,10 +1690,15 @@ function showAIThinking() {
     const loadingContainer = document.createElement('div');
     loadingContainer.className = 'loading-container';
 
-    // Create checkpoints list container
+    // Create a single checkpoint container for all checkpoints
+    const checkpointContainer = document.createElement('div');
+    checkpointContainer.className = 'checkpoint-container';
+    loadingContainer.appendChild(checkpointContainer);
+
+    // Create checkpoints list container inside the single container
     const checkpointsList = document.createElement('div');
     checkpointsList.id = 'checkpoints-list';
-    loadingContainer.appendChild(checkpointsList);
+    checkpointContainer.appendChild(checkpointsList);
 
     // Add to chat container
     lastChatGroup.appendChild(loadingContainer);
@@ -1729,9 +1734,6 @@ function showAIThinking() {
     let currentStep = 0;
 
     function createCheckpoint(step, isPending = false) {
-        const container = document.createElement('div');
-        container.className = 'checkpoint-container';
-        
         const checkpoint = document.createElement('div');
         checkpoint.className = 'checkpoint';
         
@@ -1747,61 +1749,60 @@ function showAIThinking() {
             </div>
         `;
         
-        container.appendChild(checkpoint);
-        return container;
+        return checkpoint;
     }
 
     function updateCheckpoints() {
-    if (currentStep >= steps.length) return;
+        if (currentStep >= steps.length) return;
 
-    // If it's the first step, create all checkpoints at once
-    if (currentStep === 0) {
-        steps.forEach((step, index) => {
-            const checkpoint = createCheckpoint(step, index !== 0); // First one not pending
-            checkpoint.style.opacity = '0';
-            checkpoint.style.transform = 'translateY(20px)';
-            checkpointsList.appendChild(checkpoint);
+        // If it's the first step, create all checkpoints at once
+        if (currentStep === 0) {
+            steps.forEach((step, index) => {
+                const checkpoint = createCheckpoint(step, index !== 0);
+                checkpoint.style.opacity = '0';
+                checkpoint.style.transform = 'translateY(20px)';
+                checkpointsList.appendChild(checkpoint);
 
-            // Show each checkpoint with a slight delay
+                setTimeout(() => {
+                    checkpoint.style.transition = 'all 0.3s ease';
+                    checkpoint.style.opacity = '1';
+                    checkpoint.style.transform = 'translateY(0)';
+
+                    // Make first checkpoint active
+                    if (index === 0) {
+                        checkpoint.classList.add('active');
+                    }
+                }, index * 100);
+            });
+
+            // Make the container visible
+            checkpointContainer.classList.add('visible');
+        } else {
+            // Get current and next checkpoints
+            const currentCheckpoint = checkpointsList.children[currentStep - 1];
+            const nextCheckpoint = checkpointsList.children[currentStep];
+
+            // Complete current checkpoint
+            currentCheckpoint.classList.remove('active');
+            currentCheckpoint.classList.add('completed');
+
+            // After completion animation, activate next checkpoint
             setTimeout(() => {
-                checkpoint.style.transition = 'all 0.3s ease';
-                checkpoint.style.opacity = '1';
-                checkpoint.style.transform = 'translateY(0)';
-                checkpoint.classList.add('visible');
+                nextCheckpoint.classList.remove('pending');
+                nextCheckpoint.classList.add('active');
+            }, 600);
+        }
 
-                // Make first checkpoint active
-                if (index === 0) {
-                    const firstCheck = checkpoint.querySelector('.checkpoint');
-                    firstCheck.classList.add('active');
-                }
-            }, index * 100); // Stagger the appearance
-        });
-    } else {
-        // Get current and next checkpoints
-        const currentCheckpoint = checkpointsList.children[currentStep - 1].querySelector('.checkpoint');
-        const nextCheckpoint = checkpointsList.children[currentStep].querySelector('.checkpoint');
-
-        // Complete current checkpoint
-        currentCheckpoint.classList.remove('active');
-        currentCheckpoint.classList.add('completed');
-
-        // After completion animation, activate next checkpoint
-        setTimeout(() => {
-            nextCheckpoint.classList.remove('pending');
-            nextCheckpoint.classList.add('active');
-        }, 600);
+        currentStep++;
+        if (currentStep < steps.length) {
+            setTimeout(updateCheckpoints, 1500);
+        }
     }
-
-    currentStep++;
-    if (currentStep < steps.length) {
-        setTimeout(updateCheckpoints, 1500);
-    }
-}
 
     // Start the sequence
     updateCheckpoints();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
-} // Added closing brace for showAIThinking
+}
 
 function hideAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
@@ -1812,7 +1813,6 @@ function hideAIThinking() {
         loadingContainer.remove();
     }
 }
-
 function toggleMobileNav() {
 const bottomNav = document.querySelector('.bottom-nav');
 const sidebar = document.querySelector('.sidebar');
