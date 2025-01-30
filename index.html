@@ -1683,77 +1683,125 @@ return 'Market Analysis';
 }
 
 function showAIThinking() {
-const chatContainer = document.querySelector('.chat-container');
-const lastChatGroup = chatContainer.lastElementChild;
-const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const chatContainer = document.querySelector('.chat-container');
+    const lastChatGroup = chatContainer.lastElementChild;
+    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-// Single sources container skeleton
-const sourcesContainerSkeleton = document.createElement('div');
-sourcesContainerSkeleton.className = 'sources-container skeleton-sources-container';
-sourcesContainerSkeleton.style.cssText = `
-    display: flex;
-    margin-bottom: 16px;
-    padding: 0 16px;
-    margin-right: 0px;
-`;
+    // Create sources container with same styling as addMessage
+    const sourcesContainer = document.createElement('div');
+    sourcesContainer.className = 'sources-container skeleton-sources-container';
+    sourcesContainer.style.display = 'flex';
+    sourcesContainer.style.flexDirection = 'row';
+    sourcesContainer.style.gap = '8px';
+    sourcesContainer.style.padding = '1px 16px';
+    sourcesContainer.style.marginBottom = '12px';
+    sourcesContainer.style.flexWrap = 'nowrap';
+    sourcesContainer.style.alignItems = 'stretch';
 
-// Create single source chip skeleton with overlapping circles
-const sourceChipSkeleton = document.createElement('div');
-sourceChipSkeleton.className = 'flex items-center rounded-xl p-2 animate-pulse';
-sourceChipSkeleton.style.width = '192px';
-sourceChipSkeleton.style.backgroundColor = isDarkMode ? '#232323' : '#f3f4f6';
+    // Create four source items with the same structure as addMessage
+    const sourceData = [
+        { name: 'Annual & Interim Reports', metric: '16 quarters' },
+        { name: 'News Releases', metric: '342 releases' },
+        { name: 'SEC Filings', metric: '53K words' },
+        { name: 'Corporate Governance', metric: '18 documents' }
+    ];
 
-const circlesContainer = document.createElement('div');
-circlesContainer.className = 'flex space-x-1';
+    sourceData.forEach(() => {
+        const sourceItem = document.createElement('div');
+        sourceItem.style.display = 'flex';
+        sourceItem.style.flexDirection = 'column';
+        sourceItem.style.backgroundColor = isDarkMode ? '#232323' : '#f3f4f6';
+        sourceItem.style.borderRadius = '6px';
+        sourceItem.style.padding = '8px 12px';
+        sourceItem.style.width = '170px';
+        sourceItem.style.flexShrink = '0';
+        sourceItem.style.cursor = 'pointer';
+        sourceItem.style.transition = 'background-color 0.2s ease';
+        sourceItem.style.justifyContent = 'flex-start';
+        sourceItem.className = 'animate-pulse';
 
-// Create five overlapping circles
-for (let i = 0; i < 5; i++) {
-    const circle = document.createElement('div');
-    circle.className = 'w-8 h-8 rounded-full';
-    circle.style.backgroundColor = isDarkMode ? '#2a2d33' : '#e5e7eb';
-    circle.style.marginRight = i < 4 ? '-16px' : '0';
-    circlesContainer.appendChild(circle);
-}
+        // Create title container
+        const titleContainer = document.createElement('div');
+        titleContainer.style.display = 'flex';
+        titleContainer.style.flexDirection = 'column';
+        titleContainer.style.width = '100%';
+        titleContainer.style.alignItems = 'flex-start';
 
-sourceChipSkeleton.appendChild(circlesContainer);
-sourcesContainerSkeleton.appendChild(sourceChipSkeleton);
-lastChatGroup.appendChild(sourcesContainerSkeleton);
+        // Create title skeleton
+        const titleText = document.createElement('div');
+        titleText.style.height = '14px';
+        titleText.style.width = '80%';
+        titleText.style.backgroundColor = isDarkMode ? '#2a2d33' : '#e5e7eb';
+        titleText.style.borderRadius = '4px';
+        titleText.style.marginBottom = '2px';
 
-// AI message skeleton
-const skeletonLoader = document.createElement('div');
-skeletonLoader.className = 'skeleton-loader';
+        // Create metric container skeleton
+        const metricContainer = document.createElement('div');
+        metricContainer.style.display = 'flex';
+        metricContainer.style.alignItems = 'center';
+        metricContainer.style.gap = '4px';
+        metricContainer.style.width = '100%';
+        metricContainer.style.justifyContent = 'flex-start';
 
-for (let i = 0; i < 4; i++) {
-    const skeletonLine = document.createElement('div');
-    skeletonLine.className = 'skeleton-line';
-    skeletonLine.style.width = `${100 - i * 5}%`;
-    skeletonLine.style.height = '16px';
-    skeletonLine.style.marginBottom = '8px';
-    skeletonLine.style.background = isDarkMode ? 
-        'linear-gradient(90deg, #232323 25%, #2a2d33 50%, #232323 75%)' : 
-        'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)';
-    skeletonLoader.appendChild(skeletonLine);
-}
+        // Create metric text skeleton
+        const metricText = document.createElement('div');
+        metricText.style.height = '12px';
+        metricText.style.width = '60%';
+        metricText.style.backgroundColor = isDarkMode ? '#2a2d33' : '#e5e7eb';
+        metricText.style.borderRadius = '4px';
 
-lastChatGroup.appendChild(skeletonLoader);
-lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Create link icon skeleton
+        const linkIcon = document.createElement('div');
+        linkIcon.style.width = '12px';
+        linkIcon.style.height = '12px';
+        linkIcon.style.backgroundColor = isDarkMode ? '#2a2d33' : '#e5e7eb';
+        linkIcon.style.borderRadius = '2px';
+
+        metricContainer.appendChild(metricText);
+        metricContainer.appendChild(linkIcon);
+        titleContainer.appendChild(titleText);
+        titleContainer.appendChild(metricContainer);
+        sourceItem.appendChild(titleContainer);
+        sourcesContainer.appendChild(sourceItem);
+    });
+
+    lastChatGroup.appendChild(sourcesContainer);
+
+    // AI message skeleton
+    const skeletonLoader = document.createElement('div');
+    skeletonLoader.className = 'skeleton-loader';
+    
+    for (let i = 0; i < 4; i++) {
+        const skeletonLine = document.createElement('div');
+        skeletonLine.className = 'skeleton-line';
+        skeletonLine.style.width = `${100 - i * 5}%`;
+        skeletonLine.style.height = '16px';
+        skeletonLine.style.marginBottom = '8px';
+        skeletonLine.style.background = isDarkMode ?
+            'linear-gradient(90deg, #232323 25%, #2a2d33 50%, #232323 75%)' :
+            'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)';
+        skeletonLoader.appendChild(skeletonLine);
+    }
+
+    lastChatGroup.appendChild(skeletonLoader);
+    lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function hideAIThinking() {
-const chatContainer = document.querySelector('.chat-container');
-const lastChatGroup = chatContainer.lastElementChild;
-
-// Remove sources container skeleton
-const sourcesContainerSkeleton = lastChatGroup.querySelector('.skeleton-sources-container');
-if (sourcesContainerSkeleton) {
-    sourcesContainerSkeleton.remove();
-}
-
-// Remove skeleton loader
-const skeletonLoader = lastChatGroup.querySelector('.skeleton-loader');
-if (skeletonLoader) {
-    skeletonLoader.remove();
-}
+    const chatContainer = document.querySelector('.chat-container');
+    const lastChatGroup = chatContainer.lastElementChild;
+    
+    // Remove sources container skeleton
+    const sourcesContainerSkeleton = lastChatGroup.querySelector('.skeleton-sources-container');
+    if (sourcesContainerSkeleton) {
+        sourcesContainerSkeleton.remove();
+    }
+    
+    // Remove skeleton loader
+    const skeletonLoader = lastChatGroup.querySelector('.skeleton-loader');
+    if (skeletonLoader) {
+        skeletonLoader.remove();
+    }
 }
 
 function toggleMobileNav() {
