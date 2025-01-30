@@ -3150,9 +3150,9 @@
 }
 
 .checkpoint.active .checkpoint-circle {
-    --_m: 
-        conic-gradient(transparent 10%, var(--text-color)),
-        linear-gradient(var(--text-color) 0 0) content-box;
+    --_m:
+        conic-gradient(transparent 10%, var(--border-color)),
+        linear-gradient(var(--border-color) 0 0) content-box;
     -webkit-mask: var(--_m);
             mask: var(--_m);
     -webkit-mask-composite: source-out;
@@ -3163,7 +3163,7 @@
 
 .checkpoint.completed .checkpoint-circle {
     animation: none;
-    background-color: var(--completed-circle);
+    background-color: var(--border-color); /* Use border color for fill */
     border: none;
     -webkit-mask: none;
             mask: none;
