@@ -3072,3 +3072,172 @@
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
+
+.loading-container {
+    max-width: 600px;
+    width: 100%;
+    margin-top: 50px;
+    padding: 0 20px;
+}
+
+.header {
+    margin-bottom: 30px;
+    text-align: left;
+    width: 100%;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loading-dots {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 4px;
+}
+
+.dot {
+    width: 3px;
+    height: 3px;
+    background-color: var(--text-color);
+    border-radius: 50%;
+    animation: pulse 5s infinite;
+}
+
+.dot:nth-child(2) { 
+    animation-delay: 0.2s; 
+}
+
+.dot:nth-child(3) { 
+    animation-delay: 0.4s; 
+}
+
+.checkpoint-container {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.5s ease;
+    position: relative;
+    margin-bottom: 4px;
+}
+
+.checkpoint-container.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.checkpoint {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.checkpoint.active {
+    background-color: var(--hover-color);
+}
+
+.checkpoint::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    width: 2px;
+    height: calc(100% + 8px);
+    background-color: var(--border-color);
+    transform: translateX(-50%);
+    z-index: 0;
+}
+
+.checkpoint:last-child::after {
+    display: none;
+}
+
+.checkpoint-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    background-color: var(--text-color);
+    z-index: 1;
+    padding: 2px;
+}
+
+.checkpoint.active .checkpoint-circle {
+    --_m: 
+        conic-gradient(transparent 10%, var(--text-color)),
+        linear-gradient(var(--text-color) 0 0) content-box;
+    -webkit-mask: var(--_m);
+            mask: var(--_m);
+    -webkit-mask-composite: source-out;
+            mask-composite: subtract;
+    animation: loaderRotate 1s infinite linear;
+    border: none;
+}
+
+.checkpoint.completed .checkpoint-circle {
+    animation: none;
+    background-color: var(--completed-circle);
+    border: none;
+    -webkit-mask: none;
+            mask: none;
+    transition: background-color 0.3s ease;
+}
+
+.checkpoint-content {
+    flex: 1;
+    padding-top: 2px;
+}
+
+.checkpoint-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 4px;
+}
+
+.checkpoint-detail {
+    font-size: 14px;
+    color: var(--description-text);
+    display: none;
+    line-height: 1.4;
+}
+
+.checkpoint.active .checkpoint-detail {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes loaderRotate {
+    to {
+        transform: rotate(1turn)
+    }
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-5px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}

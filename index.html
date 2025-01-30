@@ -1685,178 +1685,41 @@ return 'Market Analysis';
 function showAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
     const lastChatGroup = chatContainer.lastElementChild;
-    const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    // Create main container for checkpoints
-    const checkpointSequence = document.createElement('div');
-    checkpointSequence.className = 'checkpoint-sequence';
-    checkpointSequence.style.width = '100%';
-    checkpointSequence.style.padding = '20px';
+    // Create the loading sequence container
+    const loadingContainer = document.createElement('div');
+    loadingContainer.className = 'loading-container';
 
-    // Add loading header
+    // Add the header
     const header = document.createElement('div');
     header.className = 'header';
-    header.innerHTML = `
-        <div class="header-title" style="
-            font-size: 18px;
-            font-weight: 500;
-            color: ${isDarkMode ? '#ffffff' : '#000000'};
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        ">
-            Processing Market Data
-            <div class="loading-dots">
-                <div class="dot"></div>
-                <div class="dot"></div>
-                <div class="dot"></div>
-            </div>
-        </div>
-    `;
-    checkpointSequence.appendChild(header);
 
-    // Add styles for the sequence
-    const style = document.createElement('style');
-    style.textContent = `
-        .checkpoint-circle {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            position: relative;
-            background-color: var(--background-color);
-            z-index: 1;
-            padding: 2px;
-        }
+    const headerTitle = document.createElement('div');
+    headerTitle.className = 'header-title';
+    headerTitle.textContent = 'Processing Market Data';
 
-        .checkpoint.active .checkpoint-circle {
-            --_m: 
-                conic-gradient(transparent 10%, currentColor),
-                linear-gradient(currentColor 0 0) content-box;
-            -webkit-mask: var(--_m);
-                    mask: var(--_m);
-            -webkit-mask-composite: source-out;
-                    mask-composite: subtract;
-            animation: loaderRotate 1s infinite linear;
-            border: none;
-        }
+    const loadingDots = document.createElement('div');
+    loadingDots.className = 'loading-dots';
 
-        .checkpoint.completed .checkpoint-circle {
-            animation: none;
-            background-color: ${isDarkMode ? '#4B5563' : '#6B7280'};
-            border: none;
-            -webkit-mask: none;
-                    mask: none;
-            transition: background-color 0.3s ease;
-        }
+    for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        loadingDots.appendChild(dot);
+    }
 
-        .checkpoint-container {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.5s ease;
-            margin-bottom: 4px;
-        }
-
-        .checkpoint-container.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .checkpoint {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            padding: 12px;
-            border-radius: 8px;
-            position: relative;
-        }
-
-        .checkpoint::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 13px;
-            width: 2px;
-            height: calc(100% + 8px);
-            background-color: ${isDarkMode ? '#2e3138' : '#e5e7eb'};
-            transform: translateX(-50%);
-            z-index: 0;
-        }
-
-        .checkpoint:last-child::after {
-            display: none;
-        }
-
-        .checkpoint-content {
-            flex: 1;
-            padding-top: 2px;
-        }
-
-        .checkpoint-title {
-            font-size: 16px;
-            font-weight: 500;
-            color: ${isDarkMode ? '#ffffff' : '#000000'};
-            margin-bottom: 4px;
-        }
-
-        .checkpoint-detail {
-            font-size: 14px;
-            color: ${isDarkMode ? '#666f7c' : '#9ca3af'};
-            display: none;
-            line-height: 1.4;
-        }
-
-        .checkpoint.active .checkpoint-detail {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes loaderRotate {
-            to { transform: rotate(1turn) }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .loading-dots {
-            display: inline-flex;
-            gap: 2px;
-            margin-left: 4px;
-        }
-
-        .dot {
-            width: 3px;
-            height: 3px;
-            background-color: currentColor;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-    `;
-    document.head.appendChild(style);
+    headerTitle.appendChild(loadingDots);
+    header.appendChild(headerTitle);
+    loadingContainer.appendChild(header);
 
     // Create checkpoints list container
     const checkpointsList = document.createElement('div');
     checkpointsList.id = 'checkpoints-list';
-    checkpointSequence.appendChild(checkpointsList);
+    loadingContainer.appendChild(checkpointsList);
 
-    // Add the sequence container to the chat
-    lastChatGroup.appendChild(checkpointSequence);
+    // Add to chat container
+    lastChatGroup.appendChild(loadingContainer);
 
-    // Initialize the checkpoint sequence
+    // Steps data
     const steps = [
         {
             title: "Searching financial databases...",
@@ -1931,7 +1794,6 @@ function showAIThinking() {
 
     // Start the sequence
     updateCheckpoints();
-
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1939,12 +1801,12 @@ function hideAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
     const lastChatGroup = chatContainer.lastElementChild;
     
-    // Remove checkpoint sequence
-    const checkpointSequence = lastChatGroup.querySelector('.checkpoint-sequence');
-    if (checkpointSequence) {
-        checkpointSequence.remove();
+    const loadingContainer = lastChatGroup.querySelector('.loading-container');
+    if (loadingContainer) {
+        loadingContainer.remove();
     }
 }
+
 function toggleMobileNav() {
 const bottomNav = document.querySelector('.bottom-nav');
 const sidebar = document.querySelector('.sidebar');
