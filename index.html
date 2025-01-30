@@ -1141,7 +1141,9 @@ async function sendMessage(message, file = null) {
             // Add user message and show thinking indicator
             const userMessageElement = await addMessage(message, 'user');
             textarea.value = '';
-            showAIThinking();
+            
+            // Get the function to signal AI response readiness
+            const signalAIResponse = showAIThinking();
             
             if (userMessageElement) {
                 userMessageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1197,6 +1199,7 @@ async function sendMessage(message, file = null) {
                 // Handle authentication errors
                 if (data.error) {
                     if (data.error === 'auth_required' && !stayLoggedOut) {
+                        signalAIResponse(); // Signal before redirect
                         hideAIThinking();
                         sessionStorage.setItem('returnUrl', window.location.href);
                         window.location.href = '/signin.html';
@@ -1214,30 +1217,37 @@ async function sendMessage(message, file = null) {
                     updateChatTopicDisplay(data.chatTopic);
                 }
 
-                hideAIThinking();
+                // Signal that AI response is ready
+                signalAIResponse();
                 
-                // Add AI response
-                await addMessage(data.response, 'ai', data.relatedTopics);
+                // Wait briefly for checkpoints to complete
+                setTimeout(async () => {
+                    hideAIThinking();
+                    
+                    // Add AI response
+                    await addMessage(data.response, 'ai', data.relatedTopics);
 
-                // Handle market data if present
-                if (data.marketData) {
-                    const marketSection = createMarketDataSection(data.marketData);
-                    const aiMessage = document.querySelector('.message.ai:last-child');
-                    if (aiMessage) {
-                        aiMessage.insertBefore(marketSection, aiMessage.firstChild);
+                    // Handle market data if present
+                    if (data.marketData) {
+                        const marketSection = createMarketDataSection(data.marketData);
+                        const aiMessage = document.querySelector('.message.ai:last-child');
+                        if (aiMessage) {
+                            aiMessage.insertBefore(marketSection, aiMessage.firstChild);
+                        }
                     }
-                }
 
-                // Set chat ID if not already set
-                if (!currentChatId) {
-                    currentChatId = data.chatId;
-                }
+                    // Set chat ID if not already set
+                    if (!currentChatId) {
+                        currentChatId = data.chatId;
+                    }
 
-                // Load recent chats after successful message
-                await loadRecentChats();
+                    // Load recent chats after successful message
+                    await loadRecentChats();
+                }, 800); // Small delay for checkpoint completion
 
             } catch (error) {
                 console.error('Error:', error);
+                signalAIResponse(); // Signal even on error
                 hideAIThinking();
                 await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
             }
@@ -1249,6 +1259,7 @@ async function sendMessage(message, file = null) {
         await addMessage("Error: " + error.message, 'ai');
     }
 }
+
 // Update DOM content loaded handler
 document.addEventListener('DOMContentLoaded', async () => {
 const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
@@ -1698,7 +1709,6 @@ function showAIThinking() {
     // Add to chat container
     lastChatGroup.appendChild(loadingContainer);
 
-    // Steps data remains the same...
     const steps = [
         {
             title: "Searching financial databases...",
@@ -1727,6 +1737,7 @@ function showAIThinking() {
     ];
 
     let currentStep = 0;
+    let aiResponseReceived = false;
 
     function createCheckpoint(step, isPending = false) {
         const container = document.createElement('div');
@@ -1752,7 +1763,13 @@ function showAIThinking() {
     }
 
     function updateCheckpoints() {
-        if (currentStep >= steps.length) return;
+        if (currentStep >= steps.length) {
+            // If we've completed all steps and AI response is ready
+            if (aiResponseReceived) {
+                fadeOutLoadingSequence();
+            }
+            return;
+        }
 
         const existingCheckpoints = checkpointsList.querySelectorAll('.checkpoint-container');
         
@@ -1810,11 +1827,13 @@ function showAIThinking() {
         }
 
         currentStep++;
+        // Adjust timing based on whether AI response is received
+        const nextStepDelay = aiResponseReceived ? 400 : 1500;
         if (currentStep < steps.length) {
-            setTimeout(updateCheckpoints, 1500);
+            setTimeout(updateCheckpoints, nextStepDelay);
         }
     }
-
+    
     // Start the sequence
     updateCheckpoints();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1829,6 +1848,52 @@ function hideAIThinking() {
         loadingContainer.remove();
     }
 }
+
+// Function to handle AI response ready
+function onAIResponseReady() {
+        isAIResponseReady = true;
+        // If checkpoints aren't done, speed them up
+        if (!checkpointsCompleted) {
+            accelerateCheckpoints();
+        }
+    }
+
+    // Function to speed up remaining checkpoints
+    function accelerateCheckpoints() {
+        const remainingSteps = steps.length - currentStep;
+        if (remainingSteps > 0) {
+            // Speed up the interval for remaining steps
+            const acceleratedInterval = 200; // Much faster interval
+            setTimeout(() => {
+                // Complete all remaining steps rapidly
+                const completeRemaining = () => {
+                    if (currentStep < steps.length) {
+                        const currentCheckpoint = checkpointsList.children[currentStep - 1].querySelector('.checkpoint');
+                        currentCheckpoint.classList.remove('active');
+                        currentCheckpoint.classList.add('completed');
+                        currentStep++;
+                        setTimeout(completeRemaining, acceleratedInterval);
+                    } else {
+                        checkpointsCompleted = true;
+                        fadeOutLoadingSequence();
+                    }
+                };
+                completeRemaining();
+            }, 0);
+        }
+    }
+
+    // Function to fade out the loading sequence
+    function fadeOutLoadingSequence() {
+        loadingContainer.style.transition = 'opacity 0.5s ease';
+        loadingContainer.style.opacity = '0';
+        setTimeout(() => {
+            loadingContainer.remove();
+            if (isAIResponseReady) {
+                showAIResponse(); // Function to show the AI response
+            }
+        }, 500);
+    }
 
 function toggleMobileNav() {
 const bottomNav = document.querySelector('.bottom-nav');
