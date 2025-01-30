@@ -1728,12 +1728,16 @@ function showAIThinking() {
 
     let currentStep = 0;
 
-    function createCheckpoint(step) {
+    function createCheckpoint(step, isPending = false) {
         const container = document.createElement('div');
         container.className = 'checkpoint-container';
         
         const checkpoint = document.createElement('div');
         checkpoint.className = 'checkpoint';
+        
+        if (isPending) {
+            checkpoint.className = 'checkpoint pending';
+        }
         
         checkpoint.innerHTML = `
             <div class="checkpoint-circle"></div>
@@ -1750,18 +1754,31 @@ function showAIThinking() {
     function updateCheckpoints() {
         if (currentStep >= steps.length) return;
 
-        const newCheckpoint = createCheckpoint(steps[currentStep]);
-        checkpointsList.appendChild(newCheckpoint);
+        // Clear existing checkpoints
+        checkpointsList.innerHTML = '';
 
+        // Add current step
+        const currentCheckpoint = createCheckpoint(steps[currentStep]);
+        checkpointsList.appendChild(currentCheckpoint);
+        
+        // Add next step if available
+        if (currentStep + 1 < steps.length) {
+            const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
+            checkpointsList.appendChild(nextCheckpoint);
+        }
+
+        // Make them visible with proper states
         setTimeout(() => {
-            newCheckpoint.classList.add('visible');
-            const checkpoint = newCheckpoint.querySelector('.checkpoint');
-            checkpoint.classList.add('active');
+            const checkpoints = checkpointsList.children;
+            
+            // Make current checkpoint active
+            checkpoints[0].classList.add('visible');
+            const currentCheck = checkpoints[0].querySelector('.checkpoint');
+            currentCheck.classList.add('active');
 
-            if (currentStep > 0) {
-                const previousCheckpoint = checkpointsList.children[currentStep - 1].querySelector('.checkpoint');
-                previousCheckpoint.classList.remove('active');
-                previousCheckpoint.classList.add('completed');
+            // Make next checkpoint visible but pending
+            if (checkpoints[1]) {
+                checkpoints[1].classList.add('visible');
             }
 
             currentStep++;

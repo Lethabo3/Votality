@@ -3092,6 +3092,18 @@
     transform: translateY(0);
 }
 
+.checkpoint.pending .checkpoint-circle {
+    background-color: transparent;
+    border: 2px solid var(--border-color);
+    animation: none;
+    -webkit-mask: none;
+    mask: none;
+}
+
+.checkpoint.pending .checkpoint-detail {
+    display: none;
+}
+
 .checkpoint {
     display: flex;
     align-items: flex-start;
@@ -3120,6 +3132,7 @@
 
 .checkpoint:last-child::after {
     display: none;
+    height: 0;
 }
 
 .checkpoint-circle {
