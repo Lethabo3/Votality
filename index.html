@@ -1759,7 +1759,7 @@ function showAIThinking() {
         if (existingCheckpoints.length > 0) {
             setTimeout(() => {
                 // Fade out completed checkpoint
-                existingCheckpoints[0].style.transition = 'all 0.3s ease';
+                existingCheckpoints[0].style.transition = 'all 0.2s ease'; // Faster transition
                 existingCheckpoints[0].style.opacity = '0';
                 existingCheckpoints[0].style.transform = 'translateY(-20px)';
 
@@ -1767,7 +1767,7 @@ function showAIThinking() {
                 if (existingCheckpoints[1]) {
                     setTimeout(() => {
                         existingCheckpoints[0].remove();
-                        existingCheckpoints[1].style.transition = 'all 0.3s ease';
+                        existingCheckpoints[1].style.transition = 'all 0.2s ease'; // Faster transition
                         existingCheckpoints[1].style.transform = 'translateY(0)';
                         
                         // Add new pending checkpoint
@@ -1779,17 +1779,17 @@ function showAIThinking() {
                             
                             // Fade in new pending checkpoint
                             setTimeout(() => {
-                                nextCheckpoint.style.transition = 'all 0.3s ease';
+                                nextCheckpoint.style.transition = 'all 0.2s ease'; // Faster transition
                                 nextCheckpoint.style.transform = 'translateY(0)';
                                 nextCheckpoint.style.opacity = '1';
                                 const currentCheck = existingCheckpoints[1].querySelector('.checkpoint');
                                 currentCheck.classList.add('active');
                                 currentCheck.classList.remove('pending');
-                            }, 50);
+                            }, 30); // Faster delay
                         }
-                    }, 300);
+                    }, 200); // Faster transition delay
                 }
-            }, 2000); // Delayed by 2 seconds before starting transition
+            }, 800); // Shorter completion time
         } else {
             // Initial setup of first two checkpoints
             const currentCheckpoint = createCheckpoint(steps[currentStep]);
@@ -1808,21 +1808,21 @@ function showAIThinking() {
                 if (currentStep + 1 < steps.length) {
                     setTimeout(() => {
                         checkpointsList.children[1].classList.add('visible');
-                    }, 300);
+                    }, 200); // Faster initial delay
                 }
-            }, 100);
+            }, 50); // Faster initial delay
         }
 
         currentStep++;
         if (currentStep < steps.length) {
-            setTimeout(updateCheckpoints, 3000); // Total time for each step (2s delay + 1s for transitions)
+            setTimeout(updateCheckpoints, 1200); // Faster step cycle
         }
     }
 
     // Start the sequence
     updateCheckpoints();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+} // Added closing brace for showAIThinking
 
 function hideAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
@@ -1833,6 +1833,7 @@ function hideAIThinking() {
         loadingContainer.remove();
     }
 }
+
 function toggleMobileNav() {
 const bottomNav = document.querySelector('.bottom-nav');
 const sidebar = document.querySelector('.sidebar');
