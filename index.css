@@ -3118,7 +3118,7 @@
 
 .checkpoint.active {
     background-color: transparent;
-    border: 1px solid var(--border-color);
+    border: 0px solid var(--border-color);
 }
 
 .checkpoint::after {
