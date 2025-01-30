@@ -3084,7 +3084,7 @@
     transform: translateY(10px);
     transition: all 0.5s ease;
     position: relative;
-    margin-bottom: 94px;
+    margin-bottom: 4px;
 }
 
 .checkpoint-container.visible {
