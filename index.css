@@ -3076,45 +3076,8 @@
 .loading-container {
     max-width: 600px;
     width: 100%;
-    margin-top: 50px;
+    margin-top: 10px;
     padding: 0 20px;
-}
-
-.header {
-    margin-bottom: 30px;
-    text-align: left;
-    width: 100%;
-}
-
-.header-title {
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--text-color);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.loading-dots {
-    display: inline-flex;
-    gap: 2px;
-    margin-left: 4px;
-}
-
-.dot {
-    width: 3px;
-    height: 3px;
-    background-color: var(--text-color);
-    border-radius: 50%;
-    animation: pulse 5s infinite;
-}
-
-.dot:nth-child(2) { 
-    animation-delay: 0.2s; 
-}
-
-.dot:nth-child(3) { 
-    animation-delay: 0.4s; 
 }
 
 .checkpoint-container {

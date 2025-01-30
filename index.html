@@ -1690,27 +1690,6 @@ function showAIThinking() {
     const loadingContainer = document.createElement('div');
     loadingContainer.className = 'loading-container';
 
-    // Add the header
-    const header = document.createElement('div');
-    header.className = 'header';
-
-    const headerTitle = document.createElement('div');
-    headerTitle.className = 'header-title';
-    headerTitle.textContent = 'Processing Market Data';
-
-    const loadingDots = document.createElement('div');
-    loadingDots.className = 'loading-dots';
-
-    for (let i = 0; i < 3; i++) {
-        const dot = document.createElement('div');
-        dot.className = 'dot';
-        loadingDots.appendChild(dot);
-    }
-
-    headerTitle.appendChild(loadingDots);
-    header.appendChild(headerTitle);
-    loadingContainer.appendChild(header);
-
     // Create checkpoints list container
     const checkpointsList = document.createElement('div');
     checkpointsList.id = 'checkpoints-list';
