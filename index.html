@@ -1754,38 +1754,63 @@ function showAIThinking() {
     function updateCheckpoints() {
         if (currentStep >= steps.length) return;
 
-        // Clear existing checkpoints
-        checkpointsList.innerHTML = '';
-
-        // Add current step
-        const currentCheckpoint = createCheckpoint(steps[currentStep]);
-        checkpointsList.appendChild(currentCheckpoint);
+        const existingCheckpoints = checkpointsList.querySelectorAll('.checkpoint-container');
         
-        // Add next step if available
-        if (currentStep + 1 < steps.length) {
-            const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
-            checkpointsList.appendChild(nextCheckpoint);
+        if (existingCheckpoints.length > 0) {
+            // Fade out completed checkpoint
+            existingCheckpoints[0].style.transition = 'all 0.3s ease';
+            existingCheckpoints[0].style.opacity = '0';
+            existingCheckpoints[0].style.transform = 'translateY(-10px)';
+
+            // Move active checkpoint up
+            if (existingCheckpoints[1]) {
+                setTimeout(() => {
+                    existingCheckpoints[0].remove();
+                    existingCheckpoints[1].style.transition = 'all 0.3s ease';
+                    existingCheckpoints[1].style.transform = 'translateY(-40px)';
+                    
+                    // Add new pending checkpoint
+                    if (currentStep + 1 < steps.length) {
+                        const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
+                        checkpointsList.appendChild(nextCheckpoint);
+                        
+                        // Fade in new pending checkpoint
+                        setTimeout(() => {
+                            nextCheckpoint.classList.add('visible');
+                            const currentCheck = existingCheckpoints[1].querySelector('.checkpoint');
+                            currentCheck.classList.add('active');
+                            currentCheck.classList.remove('pending');
+                        }, 300);
+                    }
+                }, 300);
+            }
+        } else {
+            // Initial setup of first two checkpoints
+            const currentCheckpoint = createCheckpoint(steps[currentStep]);
+            checkpointsList.appendChild(currentCheckpoint);
+            
+            if (currentStep + 1 < steps.length) {
+                const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
+                checkpointsList.appendChild(nextCheckpoint);
+            }
+
+            setTimeout(() => {
+                currentCheckpoint.classList.add('visible');
+                const currentCheck = currentCheckpoint.querySelector('.checkpoint');
+                currentCheck.classList.add('active');
+                
+                if (currentStep + 1 < steps.length) {
+                    setTimeout(() => {
+                        checkpointsList.children[1].classList.add('visible');
+                    }, 300);
+                }
+            }, 100);
         }
 
-        // Make them visible with proper states
-        setTimeout(() => {
-            const checkpoints = checkpointsList.children;
-            
-            // Make current checkpoint active
-            checkpoints[0].classList.add('visible');
-            const currentCheck = checkpoints[0].querySelector('.checkpoint');
-            currentCheck.classList.add('active');
-
-            // Make next checkpoint visible but pending
-            if (checkpoints[1]) {
-                checkpoints[1].classList.add('visible');
-            }
-
-            currentStep++;
-            if (currentStep < steps.length) {
-                setTimeout(updateCheckpoints, 2000);
-            }
-        }, 100);
+        currentStep++;
+        if (currentStep < steps.length) {
+            setTimeout(updateCheckpoints, 2000);
+        }
     }
 
     // Start the sequence

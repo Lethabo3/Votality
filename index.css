@@ -3081,8 +3081,7 @@
 
 .checkpoint-container {
     opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.5s ease;
+    transform: translateY(20px); /* Increased from 10px for more visible movement */    transition: all 0.5s ease;
     position: relative;
     margin-bottom: 4px;
 }
@@ -3218,4 +3217,21 @@
         opacity: 1; 
         transform: translateY(0);
     }
+}
+
+.checkpoint-container.fade-out {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.checkpoint-container.slide-up {
+    transform: translateY(-40px);
+    transition: all 0.3s ease;
+}
+
+.checkpoint-container.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease;
 }
