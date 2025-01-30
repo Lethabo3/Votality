@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Data Loading</title>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --secondary-text: #4b5563;
+            --description-text: #9ca3af;
+            --border-color: #e5e7eb;
+            --hover-color: #f3f4f6;
+            --secondary-background: #f9f9f9;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #1a1a1a;
+                --text-color: #ffffff;
+                --secondary-text: #9ba3af;
+                --description-text: #666f7c;
+                --border-color: #2e3138;
+                --hover-color: #2a2d33;
+                --secondary-background: #232323;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .loading-container {
+            max-width: 600px;
+            width: 100%;
+            margin-top: 50px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            text-align: left;
+            width: 100%;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 2px;
+        }
+
+        .dot {
+            width: 3px;
+            height: 3px;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        .checkpoint-container {
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+        }
+
+        .checkpoint-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .checkpoint {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .checkpoint.active {
+            background-color: var(--hover-color);
+        }
+
+        .checkpoint-circle {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .checkpoint.active .checkpoint-circle {
+            border-color: var(--text-color);
+            animation: pulse 2s infinite;
+        }
+
+        .checkpoint.completed .checkpoint-circle {
+            border-color: var(--text-color);
+            background-color: var(--text-color);
+        }
+
+        .checkpoint.completed .checkpoint-circle::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background-color: var(--background-color);
+            border-radius: 50%;
+        }
+
+        .checkpoint-content {
+            flex: 1;
+        }
+
+        .checkpoint-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 4px;
+        }
+
+        .checkpoint-detail {
+            font-size: 14px;
+            color: var(--description-text);
+            display: none;
+        }
+
+        .checkpoint.active .checkpoint-detail {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-container">
+        <div class="header">
+            <div class="header-title">
+                Processing Market Data
+                <div class="loading-dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+        <div id="checkpoints-list"></div>
+    </div>
+    <script>
+        const steps = [
+            {
+                title: "Searching financial databases...",
+                detail: "Initiating market data retrieval from global sources"
+            },
+            {
+                title: "Analyzing Annual & Interim Reports",
+                detail: "Processing 16 quarters of financial statements"
+            },
+            {
+                title: "Reviewing News Releases",
+                detail: "Analyzing 342 recent company announcements"
+            },
+            {
+                title: "Processing SEC Filings",
+                detail: "Examining 53K words of regulatory documents"
+            },
+            {
+                title: "Scanning Corporate Governance",
+                detail: "Reviewing 18 organizational documents"
+            },
+            {
+                title: "Preparing comprehensive analysis",
+                detail: "Synthesizing market data insights"
+            }
+        ];
+
+        const checkpointsList = document.getElementById('checkpoints-list');
+        let currentStep = 0;
+
+        function createCheckpoint(step, index) {
+            const container = document.createElement('div');
+            container.className = 'checkpoint-container';
+            
+            const checkpoint = document.createElement('div');
+            checkpoint.className = 'checkpoint';
+            
+            checkpoint.innerHTML = `
+                <div class="checkpoint-circle"></div>
+                <div class="checkpoint-content">
+                    <div class="checkpoint-title">${step.title}</div>
+                    <div class="checkpoint-detail">${step.detail}</div>
+                </div>
+            `;
+            
+            container.appendChild(checkpoint);
+            return container;
+        }
+
+        function updateCheckpoints() {
+            if (currentStep >= steps.length) return;
+
+            const newCheckpoint = createCheckpoint(steps[currentStep], currentStep);
+            checkpointsList.appendChild(newCheckpoint);
+
+            setTimeout(() => {
+                newCheckpoint.classList.add('visible');
+                const checkpoint = newCheckpoint.querySelector('.checkpoint');
+                checkpoint.classList.add('active');
+
+                if (currentStep > 0) {
+                    const previousCheckpoint = checkpointsList.children[currentStep - 1].querySelector('.checkpoint');
+                    previousCheckpoint.classList.remove('active');
+                    previousCheckpoint.classList.add('completed');
+                }
+
+                currentStep++;
+                if (currentStep < steps.length) {
+                    setTimeout(updateCheckpoints, 2000);
+                }
+            }, 100);
+        }
+
+        // Start the sequence
+        updateCheckpoints();
+    </script>
+</body>
+</html>
