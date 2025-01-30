@@ -3094,7 +3094,7 @@
 
 .checkpoint.pending .checkpoint-circle {
     background-color: transparent;
-    border: 2px solid var(--border-color);
+    border: 1px solid var(--border-color);
     animation: none;
     -webkit-mask: none;
     mask: none;
@@ -3115,7 +3115,8 @@
 }
 
 .checkpoint.active {
-    background-color: var(--hover-color);
+    background-color: transparent;
+    border: 1px solid var(--border-color);
 }
 
 .checkpoint::after {
