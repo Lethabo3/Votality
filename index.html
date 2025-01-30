@@ -1698,7 +1698,7 @@ function showAIThinking() {
     // Add to chat container
     lastChatGroup.appendChild(loadingContainer);
 
-    // Steps data
+    // Steps data remains the same...
     const steps = [
         {
             title: "Searching financial databases...",
@@ -1757,42 +1757,35 @@ function showAIThinking() {
         const existingCheckpoints = checkpointsList.querySelectorAll('.checkpoint-container');
         
         if (existingCheckpoints.length > 0) {
-            // First, stop the loading animation and fill the circle
-            const completedCheckpoint = existingCheckpoints[0].querySelector('.checkpoint');
-            completedCheckpoint.classList.remove('active');
-            completedCheckpoint.classList.add('completed');
+            // Complete current checkpoint but don't remove it
+            const currentCheckpoint = existingCheckpoints[existingCheckpoints.length - 2]?.querySelector('.checkpoint');
+            if (currentCheckpoint) {
+                currentCheckpoint.classList.remove('active');
+                currentCheckpoint.classList.add('completed');
+            }
 
-            // Wait for the circle to fill
-            setTimeout(() => {
-                // Only after it's filled, start the fade out
-                existingCheckpoints[0].style.transition = 'all 0.3s ease';
-                existingCheckpoints[0].style.opacity = '0';
-                existingCheckpoints[0].style.transform = 'translateY(-20px)';
+            // Activate the next checkpoint
+            const nextCheckpoint = existingCheckpoints[existingCheckpoints.length - 1]?.querySelector('.checkpoint');
+            if (nextCheckpoint) {
+                setTimeout(() => {
+                    nextCheckpoint.classList.remove('pending');
+                    nextCheckpoint.classList.add('active');
 
-                if (existingCheckpoints[1]) {
-                    setTimeout(() => {
-                        existingCheckpoints[0].remove();
-                        existingCheckpoints[1].style.transition = 'all 0.3s ease';
-                        existingCheckpoints[1].style.transform = 'translateY(0)';
-                        
-                        if (currentStep + 1 < steps.length) {
-                            const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
-                            nextCheckpoint.style.transform = 'translateY(20px)';
-                            nextCheckpoint.style.opacity = '0';
-                            checkpointsList.appendChild(nextCheckpoint);
-                            
-                            setTimeout(() => {
-                                nextCheckpoint.style.transition = 'all 0.3s ease';
-                                nextCheckpoint.style.transform = 'translateY(0)';
-                                nextCheckpoint.style.opacity = '1';
-                                const currentCheck = existingCheckpoints[1].querySelector('.checkpoint');
-                                currentCheck.classList.add('active');
-                                currentCheck.classList.remove('pending');
-                            }, 50);
-                        }
-                    }, 300);
-                }
-            }, 600);
+                    // Add new pending checkpoint if there are more steps
+                    if (currentStep + 1 < steps.length) {
+                        const newCheckpoint = createCheckpoint(steps[currentStep + 1], true);
+                        newCheckpoint.style.opacity = '0';
+                        newCheckpoint.style.transform = 'translateY(20px)';
+                        checkpointsList.appendChild(newCheckpoint);
+
+                        setTimeout(() => {
+                            newCheckpoint.style.transition = 'all 0.3s ease';
+                            newCheckpoint.style.opacity = '1';
+                            newCheckpoint.style.transform = 'translateY(0)';
+                        }, 50);
+                    }
+                }, 600);
+            }
         } else {
             // Initial setup of first two checkpoints
             const currentCheckpoint = createCheckpoint(steps[currentStep]);
@@ -1836,6 +1829,7 @@ function hideAIThinking() {
         loadingContainer.remove();
     }
 }
+
 function toggleMobileNav() {
 const bottomNav = document.querySelector('.bottom-nav');
 const sidebar = document.querySelector('.sidebar');
