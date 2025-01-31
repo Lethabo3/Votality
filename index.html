@@ -1908,6 +1908,17 @@ function showAIThinking() {
     updateCheckpoints();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+function hideAIThinking() {
+    const chatContainer = document.querySelector('.chat-container');
+    const lastChatGroup = chatContainer.lastElementChild;
+    
+    const loadingContainer = lastChatGroup.querySelector('.loading-container');
+    if (loadingContainer) {
+        loadingContainer.remove();
+    }
+}
+
 // Function to handle AI response ready
 function onAIResponseReady() {
         isAIResponseReady = true;
