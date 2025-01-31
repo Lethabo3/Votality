@@ -1701,17 +1701,41 @@ function showAIThinking() {
     const loadingContainer = document.createElement('div');
     loadingContainer.className = 'loading-container';
 
+    // Create and add the container header
+    const containerHeader = document.createElement('div');
+    containerHeader.className = 'loading-container-header';
+    containerHeader.innerHTML = `
+        <div class="loading-container-title">Search</div>
+        <div class="header-right">
+            <span class="source-count">9 sources</span>
+            <button class="loading-dropdown-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </button>
+        </div>
+    `;
+    loadingContainer.appendChild(containerHeader);
+
     // Create checkpoints list container
     const checkpointsList = document.createElement('div');
     checkpointsList.id = 'checkpoints-list';
     loadingContainer.appendChild(checkpointsList);
+
+    // Add dropdown functionality for the main container
+    const dropdownBtn = containerHeader.querySelector('.loading-dropdown-btn');
+    dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownBtn.classList.toggle('rotated');
+        loadingContainer.classList.toggle('collapsed');
+    });
 
     // Add to chat container
     lastChatGroup.appendChild(loadingContainer);
 
     const steps = [
         {
-            title: "Searching financial databases...",
+            title: "Searching financial databases",
             detail: "Initiating market data retrieval from global sources"
         },
         {
@@ -1750,24 +1774,44 @@ function showAIThinking() {
             checkpoint.className = 'checkpoint pending';
         }
         
+        // Only add dropdown button for completed checkpoints (not pending or active)
+        const dropdownButton = isPending || !checkpoint.classList.contains('completed') ? '' : `
+            <button class="checkpoint-dropdown-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m6 9 6 6 6-6"/>
+                </svg>
+            </button>
+        `;
+
         checkpoint.innerHTML = `
             <div class="checkpoint-circle"></div>
             <div class="checkpoint-content">
-                <div class="checkpoint-title">${step.title}</div>
+                <div class="checkpoint-header">
+                    <div class="checkpoint-title">${step.title}</div>
+                    ${dropdownButton}
+                </div>
                 <div class="checkpoint-detail">${step.detail}</div>
             </div>
         `;
         
+        // Add dropdown functionality only if the button exists (completed checkpoints)
+        const dropdownBtn = checkpoint.querySelector('.checkpoint-dropdown-btn');
+        const detailSection = checkpoint.querySelector('.checkpoint-detail');
+        
+        if (dropdownBtn) {
+            dropdownBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownBtn.classList.toggle('rotated');
+                if (detailSection.classList.contains('show')) {
+                    detailSection.classList.remove('show');
+                } else {
+                    detailSection.classList.add('show');
+                }
+            });
+        }
+        
         container.appendChild(checkpoint);
         return container;
-    }
-
-    function fadeOutLoadingSequence() {
-        loadingContainer.style.transition = 'opacity 0.5s ease';
-        loadingContainer.style.opacity = '0';
-        setTimeout(() => {
-            loadingContainer.remove();
-        }, 500);
     }
 
     function updateCheckpoints() {
@@ -1785,6 +1829,9 @@ function showAIThinking() {
             if (currentCheckpoint) {
                 currentCheckpoint.classList.remove('active');
                 currentCheckpoint.classList.add('completed');
+
+                currentCheckpoint.parentElement.style.transform = 'translateY(0)';
+                currentCheckpoint.parentElement.style.marginBottom = '-0.75rem';
             }
 
             const nextCheckpoint = existingCheckpoints[existingCheckpoints.length - 1]?.querySelector('.checkpoint');
@@ -1796,7 +1843,8 @@ function showAIThinking() {
                     if (currentStep + 1 < steps.length) {
                         const newCheckpoint = createCheckpoint(steps[currentStep + 1], true);
                         newCheckpoint.style.opacity = '0';
-                        newCheckpoint.style.transform = 'translateY(20px)';
+                        newCheckpoint.style.transform = 'translateY(10px)';
+                        newCheckpoint.style.marginBottom = '-0.75rem';
                         checkpointsList.appendChild(newCheckpoint);
 
                         setTimeout(() => {
@@ -1809,10 +1857,12 @@ function showAIThinking() {
             }
         } else {
             const currentCheckpoint = createCheckpoint(steps[currentStep]);
+            currentCheckpoint.style.marginBottom = '-0.75rem';
             checkpointsList.appendChild(currentCheckpoint);
             
             if (currentStep + 1 < steps.length) {
                 const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
+                nextCheckpoint.style.marginBottom = '-0.75rem';
                 checkpointsList.appendChild(nextCheckpoint);
             }
 
@@ -1839,11 +1889,6 @@ function showAIThinking() {
     // Start the sequence
     updateCheckpoints();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    // Return function to signal AI response
-    return () => {
-        aiResponseReceived = true;
-    };
 }
 
 function hideAIThinking() {
@@ -1855,7 +1900,6 @@ function hideAIThinking() {
         loadingContainer.remove();
     }
 }
-
 // Function to handle AI response ready
 function onAIResponseReady() {
         isAIResponseReady = true;
