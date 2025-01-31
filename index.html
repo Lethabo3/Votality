@@ -1706,7 +1706,7 @@ function showAIThinking() {
     containerHeader.className = 'loading-container-header';
     containerHeader.innerHTML = `
         <div class="loading-container-title">Search</div>
-        <div class="header-right">
+        <div class="header-right hidden">
             <span class="source-count">9 sources</span>
             <button class="loading-dropdown-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1723,11 +1723,21 @@ function showAIThinking() {
     loadingContainer.appendChild(checkpointsList);
 
     // Add dropdown functionality for the main container
-    const dropdownBtn = containerHeader.querySelector('.loading-dropdown-btn');
+    const headerRight = containerHeader.querySelector('.header-right');
+    const dropdownBtn = headerRight.querySelector('.loading-dropdown-btn');
+    
     dropdownBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        dropdownBtn.classList.toggle('rotated');
-        loadingContainer.classList.toggle('collapsed');
+        if (!loadingContainer.classList.contains('transitioning')) {
+            loadingContainer.classList.add('transitioning');
+            dropdownBtn.classList.toggle('rotated');
+            loadingContainer.classList.toggle('collapsed');
+            
+            // Remove transitioning class after animation completes
+            setTimeout(() => {
+                loadingContainer.classList.remove('transitioning');
+            }, 300);
+        }
     });
 
     // Add to chat container
@@ -1768,55 +1778,59 @@ function showAIThinking() {
         container.className = 'checkpoint-container';
         
         const checkpoint = document.createElement('div');
-        checkpoint.className = 'checkpoint';
-        
-        if (isPending) {
-            checkpoint.className = 'checkpoint pending';
-        }
-        
-        // Only add dropdown button for completed checkpoints (not pending or active)
-        const dropdownButton = isPending || !checkpoint.classList.contains('completed') ? '' : `
-            <button class="checkpoint-dropdown-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m6 9 6 6 6-6"/>
-                </svg>
-            </button>
-        `;
+        checkpoint.className = isPending ? 'checkpoint pending' : 'checkpoint';
 
+        // Basic checkpoint structure
+        const checkpointContent = document.createElement('div');
+        checkpointContent.className = 'checkpoint-content';
+        
         checkpoint.innerHTML = `
             <div class="checkpoint-circle"></div>
-            <div class="checkpoint-content">
-                <div class="checkpoint-header">
-                    <div class="checkpoint-title">${step.title}</div>
-                    ${dropdownButton}
-                </div>
-                <div class="checkpoint-detail">${step.detail}</div>
-            </div>
         `;
         
-        // Add dropdown functionality only if the button exists (completed checkpoints)
-        const dropdownBtn = checkpoint.querySelector('.checkpoint-dropdown-btn');
-        const detailSection = checkpoint.querySelector('.checkpoint-detail');
+        checkpointContent.innerHTML = `
+            <div class="checkpoint-header">
+                <div class="checkpoint-title">${step.title}</div>
+            </div>
+            <div class="checkpoint-detail">${step.detail}</div>
+        `;
         
-        if (dropdownBtn) {
-            dropdownBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdownBtn.classList.toggle('rotated');
-                if (detailSection.classList.contains('show')) {
-                    detailSection.classList.remove('show');
-                } else {
-                    detailSection.classList.add('show');
-                }
-            });
-        }
-        
+        checkpoint.appendChild(checkpointContent);
         container.appendChild(checkpoint);
         return container;
+    }
+
+    function addDropdownToCheckpoint(checkpoint) {
+        const header = checkpoint.querySelector('.checkpoint-header');
+        const dropdownBtn = document.createElement('button');
+        dropdownBtn.className = 'checkpoint-dropdown-btn';
+        dropdownBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        `;
+
+        const detailSection = checkpoint.querySelector('.checkpoint-detail');
+        
+        dropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownBtn.classList.toggle('rotated');
+            if (detailSection.classList.contains('show')) {
+                detailSection.classList.remove('show');
+            } else {
+                detailSection.classList.add('show');
+            }
+        });
+
+        header.appendChild(dropdownBtn);
     }
 
     function updateCheckpoints() {
         if (currentStep >= steps.length) {
             if (aiResponseReceived) {
+                // Show the header elements when process is complete
+                headerRight.classList.remove('hidden');
+                headerRight.classList.add('fade-in');
                 fadeOutLoadingSequence();
             }
             return;
@@ -1827,8 +1841,12 @@ function showAIThinking() {
         if (existingCheckpoints.length > 0) {
             const currentCheckpoint = existingCheckpoints[existingCheckpoints.length - 2]?.querySelector('.checkpoint');
             if (currentCheckpoint) {
-                currentCheckpoint.classList.remove('active');
-                currentCheckpoint.classList.add('completed');
+                // Only add dropdown if it hasn't been added yet
+                if (!currentCheckpoint.querySelector('.checkpoint-dropdown-btn')) {
+                    currentCheckpoint.classList.remove('active');
+                    currentCheckpoint.classList.add('completed');
+                    addDropdownToCheckpoint(currentCheckpoint);
+                }
 
                 currentCheckpoint.parentElement.style.transform = 'translateY(0)';
                 currentCheckpoint.parentElement.style.marginBottom = '-0.75rem';
@@ -1889,16 +1907,6 @@ function showAIThinking() {
     // Start the sequence
     updateCheckpoints();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function hideAIThinking() {
-    const chatContainer = document.querySelector('.chat-container');
-    const lastChatGroup = chatContainer.lastElementChild;
-    
-    const loadingContainer = lastChatGroup.querySelector('.loading-container');
-    if (loadingContainer) {
-        loadingContainer.remove();
-    }
 }
 // Function to handle AI response ready
 function onAIResponseReady() {
