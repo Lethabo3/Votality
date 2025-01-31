@@ -1762,9 +1762,16 @@ function showAIThinking() {
         return container;
     }
 
+    function fadeOutLoadingSequence() {
+        loadingContainer.style.transition = 'opacity 0.5s ease';
+        loadingContainer.style.opacity = '0';
+        setTimeout(() => {
+            loadingContainer.remove();
+        }, 500);
+    }
+
     function updateCheckpoints() {
         if (currentStep >= steps.length) {
-            // If we've completed all steps and AI response is ready
             if (aiResponseReceived) {
                 fadeOutLoadingSequence();
             }
@@ -1774,21 +1781,18 @@ function showAIThinking() {
         const existingCheckpoints = checkpointsList.querySelectorAll('.checkpoint-container');
         
         if (existingCheckpoints.length > 0) {
-            // Complete current checkpoint but don't remove it
             const currentCheckpoint = existingCheckpoints[existingCheckpoints.length - 2]?.querySelector('.checkpoint');
             if (currentCheckpoint) {
                 currentCheckpoint.classList.remove('active');
                 currentCheckpoint.classList.add('completed');
             }
 
-            // Activate the next checkpoint
             const nextCheckpoint = existingCheckpoints[existingCheckpoints.length - 1]?.querySelector('.checkpoint');
             if (nextCheckpoint) {
                 setTimeout(() => {
                     nextCheckpoint.classList.remove('pending');
                     nextCheckpoint.classList.add('active');
 
-                    // Add new pending checkpoint if there are more steps
                     if (currentStep + 1 < steps.length) {
                         const newCheckpoint = createCheckpoint(steps[currentStep + 1], true);
                         newCheckpoint.style.opacity = '0';
@@ -1804,7 +1808,6 @@ function showAIThinking() {
                 }, 600);
             }
         } else {
-            // Initial setup of first two checkpoints
             const currentCheckpoint = createCheckpoint(steps[currentStep]);
             checkpointsList.appendChild(currentCheckpoint);
             
@@ -1827,16 +1830,20 @@ function showAIThinking() {
         }
 
         currentStep++;
-        // Adjust timing based on whether AI response is received
         const nextStepDelay = aiResponseReceived ? 400 : 1500;
         if (currentStep < steps.length) {
             setTimeout(updateCheckpoints, nextStepDelay);
         }
     }
-    
+
     // Start the sequence
     updateCheckpoints();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Return function to signal AI response
+    return () => {
+        aiResponseReceived = true;
+    };
 }
 
 function hideAIThinking() {

@@ -3075,7 +3075,7 @@
 
 .loading-container {
     max-width: 800px;
-    width: 90%;
+    width: 95%;
     margin-top: 10px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -3087,6 +3087,7 @@
     transform: translateY(20px);
     transition: all 0.5s ease;
     position: relative;
+    margin-bottom: -0.75rem; /* Reduced from 4px */
 }
 
 .checkpoint-container.visible {
@@ -3139,8 +3140,8 @@
 }
 
 .checkpoint-circle {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -3150,6 +3151,8 @@
     background-color: var(--text-color);
     z-index: 1;
     padding: 2px;
+    margin-top:0.35rem; /* Add this line to lower the circle */
+
 }
 
 .checkpoint.active .checkpoint-circle {
