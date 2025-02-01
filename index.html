@@ -1773,6 +1773,82 @@ function fadeOutLoadingSequence() {
     let currentStep = 0;
     let aiResponseReceived = false;
 
+    function createCheckpoint(stepData) {
+    // Create the main container for the checkpoint
+    const checkpointContainer = document.createElement('div');
+    checkpointContainer.className = 'checkpoint-container';
+
+    // Create the checkpoint div
+    const checkpoint = document.createElement('div');
+    checkpoint.className = 'checkpoint';
+
+    // Create and style the circle indicator
+    const circle = document.createElement('div');
+    circle.className = 'checkpoint-circle';
+    circle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    // Create the content container
+    const content = document.createElement('div');
+    content.className = 'checkpoint-content';
+
+    // Create header container
+    const header = document.createElement('div');
+    header.className = 'checkpoint-header';
+
+    // Create and set the title
+    const title = document.createElement('div');
+    title.className = 'checkpoint-title';
+    title.textContent = stepData.title;
+
+    // Add title to header
+    header.appendChild(title);
+
+    // Create and set the detail text
+    const detail = document.createElement('div');
+    detail.className = 'checkpoint-detail';
+    detail.textContent = stepData.detail;
+
+    // Assemble the content
+    content.appendChild(header);
+    content.appendChild(detail);
+
+    // Assemble the checkpoint
+    checkpoint.appendChild(circle);
+    checkpoint.appendChild(content);
+
+    // Add checkpoint to container
+    checkpointContainer.appendChild(checkpoint);
+
+    return checkpointContainer;
+}
+
+function addDropdownToCheckpoint(checkpoint) {
+    // Get the checkpoint header
+    const header = checkpoint.querySelector('.checkpoint-header');
+    
+    // Create dropdown button
+    const dropdownBtn = document.createElement('button');
+    dropdownBtn.className = 'checkpoint-dropdown-btn';
+    dropdownBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+        </svg>
+    `;
+
+    // Get the detail section
+    const detailSection = checkpoint.querySelector('.checkpoint-detail');
+    
+    // Add click handler for the dropdown
+    dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownBtn.classList.toggle('rotated');
+        detailSection.classList.toggle('show');
+    });
+
+    // Add the dropdown button to the header
+    header.appendChild(dropdownBtn);
+}
+
     function updateCheckpoints() {
     if (currentStep >= steps.length) {
         // Complete the last checkpoint if it exists
