@@ -3075,17 +3075,21 @@
 
 .loading-container {
     max-width: 800px;
-    width: 95%;
-    margin-top: 10px;
+    width: 96%;
+    margin-top: -0.5rem;
+    margin-bottom: 0.5rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 16px;
     position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .loading-container.collapsed {
-padding: 8px 16px;
+    padding: 8px 16px;
+    margin-bottom: 0.5rem;
 }
+
 
 .loading-container #checkpoints-list {
     max-height: 1000px;
@@ -3101,7 +3105,6 @@ padding: 8px 16px;
     opacity: 0;
     pointer-events: none;
 }
-
 
 .loading-container-header {
     display: flex;
