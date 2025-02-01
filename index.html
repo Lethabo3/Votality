@@ -1199,8 +1199,7 @@ async function sendMessage(message, file = null) {
                 // Handle authentication errors
                 if (data.error) {
                     if (data.error === 'auth_required' && !stayLoggedOut) {
-                        signalAIResponse(); // Signal before redirect
-                        hideAIThinking();
+                        signalAIResponse();
                         sessionStorage.setItem('returnUrl', window.location.href);
                         window.location.href = '/signin.html';
                         return;
@@ -1222,8 +1221,6 @@ async function sendMessage(message, file = null) {
                 
                 // Wait briefly for checkpoints to complete
                 setTimeout(async () => {
-                    hideAIThinking();
-                    
                     // Add AI response
                     await addMessage(data.response, 'ai', data.relatedTopics);
 
@@ -1243,19 +1240,17 @@ async function sendMessage(message, file = null) {
 
                     // Load recent chats after successful message
                     await loadRecentChats();
-                }, 800); // Small delay for checkpoint completion
+                }, 800);
 
             } catch (error) {
                 console.error('Error:', error);
-                signalAIResponse(); // Signal even on error
-                hideAIThinking();
+                signalAIResponse();
                 await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
             }
         }, 500);
 
     } catch (error) {
         console.error('Error in sendMessage:', error);
-        hideAIThinking();
         await addMessage("Error: " + error.message, 'ai');
     }
 }
@@ -1704,7 +1699,9 @@ function fadeOutLoadingSequence() {
                 dropdownBtn.classList.add('rotated');
             }
         }
-    }function showAIThinking() {
+    }
+    
+    function showAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
     const lastChatGroup = chatContainer.lastElementChild;
     let checkpointsCompleted = false;
@@ -2859,6 +2856,9 @@ function addMessage(text, sender, relatedTopics = []) {
         } else {
             const lastChatGroup = chatContainer.lastElementChild;
 
+            // Get existing loading container
+            const loadingContainer = lastChatGroup.querySelector('.loading-container');
+
             // Create source container with horizontal layout
             const sourcesContainer = document.createElement('div');
             sourcesContainer.className = 'sources-container';
@@ -2939,39 +2939,43 @@ function addMessage(text, sender, relatedTopics = []) {
                 sourcesContainer.appendChild(sourceItem);
             });
 
-            lastChatGroup.appendChild(sourcesContainer);
-// Parse market info if present in the text
-if (text.includes('Market Info:')) {
-    const marketInfoMatch = text.match(/Market Info:\s*(.*?)\|(.*?)\|(\d+\.?\d*)\|([-+]?\d+\.?\d*)(?=\n|$)/);
-    if (marketInfoMatch) {
-        const [, companyName, symbol, currentPrice, priceChange] = marketInfoMatch;
-        const stockData = {
-            companyName: companyName.trim(),
-            symbol: symbol.trim(),
-            currentPrice: currentPrice,
-            priceChange: priceChange,
-            priceChangePercent: ((parseFloat(priceChange) / parseFloat(currentPrice)) * 100).toFixed(2),
-            tradingStatus: 'Regular Hours',
-            lastUpdated: getNYSETime()
-        };
-
-        // Create market section
-        const marketDataSection = createMarketDataSection(stockData);
-
-        // Update time every 5 minutes
-        const timeUpdateInterval = setInterval(() => {
-            const timeElement = marketDataSection.querySelector('.trading-status span:last-child');
-            if (timeElement) {
-                timeElement.textContent = getNYSETime();
+            // Insert sources container after loading container if it exists
+            if (loadingContainer) {
+                loadingContainer.after(sourcesContainer);
+            } else {
+                lastChatGroup.appendChild(sourcesContainer);
             }
-        }, 5 * 60 * 1000); // 5 minutes in milliseconds
 
-        // Store interval for cleanup
-        marketDataSection.dataset.timeInterval = timeUpdateInterval;
-        
-        lastChatGroup.appendChild(marketDataSection);
-    }
-}
+            // Parse market info if present in the text
+            if (text.includes('Market Info:')) {
+                const marketInfoMatch = text.match(/Market Info:\s*(.*?)\|(.*?)\|(\d+\.?\d*)\|([-+]?\d+\.?\d*)(?=\n|$)/);
+                if (marketInfoMatch) {
+                    const [, companyName, symbol, currentPrice, priceChange] = marketInfoMatch;
+                    const stockData = {
+                        companyName: companyName.trim(),
+                        symbol: symbol.trim(),
+                        currentPrice: currentPrice,
+                        priceChange: priceChange,
+                        priceChangePercent: ((parseFloat(priceChange) / parseFloat(currentPrice)) * 100).toFixed(2),
+                        tradingStatus: 'Regular Hours',
+                        lastUpdated: getNYSETime()
+                    };
+
+                    const marketDataSection = createMarketDataSection(stockData);
+                    
+                    const timeUpdateInterval = setInterval(() => {
+                        const timeElement = marketDataSection.querySelector('.trading-status span:last-child');
+                        if (timeElement) {
+                            timeElement.textContent = getNYSETime();
+                        }
+                    }, 5 * 60 * 1000);
+
+                    marketDataSection.dataset.timeInterval = timeUpdateInterval;
+                    
+                    lastChatGroup.appendChild(marketDataSection);
+                }
+            }
+
             // Create an outer wrapper for proper positioning context
             const outerWrapper = document.createElement('div');
             outerWrapper.style.position = 'relative';
@@ -2985,28 +2989,6 @@ if (text.includes('Market Info:')) {
             messageContainer.style.boxSizing = 'border-box';
             messageContainer.style.position = 'relative';
             messageContainer.style.marginTop = '0px';
-
-            // Add logo container with absolute positioning
-            const logoContainer = document.createElement('div');
-            logoContainer.style.position = 'absolute';
-            logoContainer.style.left = '-36px';
-            logoContainer.style.width = '40px';
-            logoContainer.style.height = '40px';
-            logoContainer.style.borderRadius = '50%';
-            logoContainer.style.display = 'none';
-            logoContainer.style.alignItems = 'center';
-            logoContainer.style.justifyContent = 'center';
-            logoContainer.style.backgroundColor = '#f9f9f9';
-            logoContainer.style.border = '1px solid #E5E7EB';
-
-            const initials = document.createElement('span');
-            initials.textContent = 'LS';
-            initials.style.fontSize = '16px';
-            initials.style.color = '#374151';
-            initials.style.fontWeight = 'bold';
-
-            logoContainer.appendChild(initials);
-            messageContainer.appendChild(logoContainer);
 
             // Remove the Market Info section from displayed text
             let displayText = text;
@@ -3176,7 +3158,6 @@ if (text.includes('Market Info:')) {
         }
     });
 }
-
 
 function addMessageInteractions(messageElement, sender) {
 if (sender === 'ai') {
