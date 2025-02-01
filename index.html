@@ -1696,6 +1696,8 @@ return 'Market Analysis';
 function showAIThinking() {
     const chatContainer = document.querySelector('.chat-container');
     const lastChatGroup = chatContainer.lastElementChild;
+    let checkpointsCompleted = false;
+    let isAIResponseReady = false;
 
     // Create the loading sequence container
     const loadingContainer = document.createElement('div');
@@ -1771,7 +1773,6 @@ function showAIThinking() {
     ];
 
     let currentStep = 0;
-    let aiResponseReceived = false;
 
     function createCheckpoint(step, isPending = false) {
         const container = document.createElement('div');
@@ -1827,11 +1828,14 @@ function showAIThinking() {
 
     function updateCheckpoints() {
         if (currentStep >= steps.length) {
-            if (aiResponseReceived) {
-                // Show the header elements when process is complete
+            checkpointsCompleted = true;
+            if (isAIResponseReady) {
+                // Show sources count and fade out
                 headerRight.classList.remove('hidden');
                 headerRight.classList.add('fade-in');
-                fadeOutLoadingSequence();
+                setTimeout(() => {
+                    fadeOutLoadingSequence();
+                }, 300);
             }
             return;
         }
@@ -1841,12 +1845,9 @@ function showAIThinking() {
         if (existingCheckpoints.length > 0) {
             const currentCheckpoint = existingCheckpoints[existingCheckpoints.length - 2]?.querySelector('.checkpoint');
             if (currentCheckpoint) {
-                // Only add dropdown if it hasn't been added yet
-                if (!currentCheckpoint.querySelector('.checkpoint-dropdown-btn')) {
-                    currentCheckpoint.classList.remove('active');
-                    currentCheckpoint.classList.add('completed');
-                    addDropdownToCheckpoint(currentCheckpoint);
-                }
+                currentCheckpoint.classList.remove('active');
+                currentCheckpoint.classList.add('completed');
+                addDropdownToCheckpoint(currentCheckpoint);
 
                 currentCheckpoint.parentElement.style.transform = 'translateY(0)';
                 currentCheckpoint.parentElement.style.marginBottom = '-0.75rem';
@@ -1898,15 +1899,52 @@ function showAIThinking() {
         }
 
         currentStep++;
-        const nextStepDelay = aiResponseReceived ? 400 : 1500;
+        const nextStepDelay = isAIResponseReady ? 200 : 1500;
         if (currentStep < steps.length) {
             setTimeout(updateCheckpoints, nextStepDelay);
+        }
+    }
+
+    function fadeOutLoadingSequence() {
+        const loadingContainer = lastChatGroup.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            loadingContainer.style.opacity = '0';
+            loadingContainer.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                loadingContainer.remove();
+            }, 500);
+        }
+    }
+
+    // Callback to handle AI response ready state
+    function signalAIResponse() {
+        isAIResponseReady = true;
+        // If checkpoints aren't done, speed them up
+        if (!checkpointsCompleted && currentStep < steps.length) {
+            const remainingSteps = steps.length - currentStep;
+            const acceleratedInterval = 200; // Much faster interval
+            
+            // Complete remaining steps rapidly
+            function completeRemaining() {
+                if (currentStep < steps.length) {
+                    updateCheckpoints();
+                    setTimeout(completeRemaining, acceleratedInterval);
+                }
+            }
+            completeRemaining();
+        } else if (checkpointsCompleted) {
+            // If checkpoints are already done, proceed with cleanup
+            fadeOutLoadingSequence();
         }
     }
 
     // Start the sequence
     updateCheckpoints();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Return the signal function to be called when AI response is ready
+    return signalAIResponse;
 }
 
 function hideAIThinking() {
@@ -1918,52 +1956,6 @@ function hideAIThinking() {
         loadingContainer.remove();
     }
 }
-
-// Function to handle AI response ready
-function onAIResponseReady() {
-        isAIResponseReady = true;
-        // If checkpoints aren't done, speed them up
-        if (!checkpointsCompleted) {
-            accelerateCheckpoints();
-        }
-    }
-
-    // Function to speed up remaining checkpoints
-    function accelerateCheckpoints() {
-        const remainingSteps = steps.length - currentStep;
-        if (remainingSteps > 0) {
-            // Speed up the interval for remaining steps
-            const acceleratedInterval = 200; // Much faster interval
-            setTimeout(() => {
-                // Complete all remaining steps rapidly
-                const completeRemaining = () => {
-                    if (currentStep < steps.length) {
-                        const currentCheckpoint = checkpointsList.children[currentStep - 1].querySelector('.checkpoint');
-                        currentCheckpoint.classList.remove('active');
-                        currentCheckpoint.classList.add('completed');
-                        currentStep++;
-                        setTimeout(completeRemaining, acceleratedInterval);
-                    } else {
-                        checkpointsCompleted = true;
-                        fadeOutLoadingSequence();
-                    }
-                };
-                completeRemaining();
-            }, 0);
-        }
-    }
-
-    // Function to fade out the loading sequence
-    function fadeOutLoadingSequence() {
-        loadingContainer.style.transition = 'opacity 0.5s ease';
-        loadingContainer.style.opacity = '0';
-        setTimeout(() => {
-            loadingContainer.remove();
-            if (isAIResponseReady) {
-                showAIResponse(); // Function to show the AI response
-            }
-        }, 500);
-    }
 
 function toggleMobileNav() {
 const bottomNav = document.querySelector('.bottom-nav');
