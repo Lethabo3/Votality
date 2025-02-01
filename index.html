@@ -1216,13 +1216,13 @@ async function sendMessage(message, file = null) {
                     updateChatTopicDisplay(data.chatTopic);
                 }
 
-                // Signal that AI response is ready
-                signalAIResponse();
-                
-                // Wait briefly for checkpoints to complete
-                setTimeout(async () => {
-                    // Add AI response
-                    await addMessage(data.response, 'ai', data.relatedTopics);
+// Wait briefly for checkpoints to complete
+setTimeout(async () => {
+    // Signal AI response right before adding the message
+    signalAIResponse();
+    
+    // Add AI response
+    await addMessage(data.response, 'ai', data.relatedTopics);
 
                     // Handle market data if present
                     if (data.marketData) {
