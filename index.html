@@ -1827,15 +1827,16 @@ function fadeOutLoadingSequence() {
     }
 
     function progressSequence() {
-        if (isAIResponseReady || currentStep >= steps.length) return;
+    if (isAIResponseReady || currentStep >= steps.length) return;
 
-        // Complete current active checkpoint
-        if (activeCheckpoint) {
-            activeCheckpoint.classList.remove('active');
-            activeCheckpoint.classList.add('completed');
-            addDropdownToCheckpoint(activeCheckpoint);
-            activeCheckpoint = null;
-        }
+    // Complete current active checkpoint
+    if (activeCheckpoint) {
+        activeCheckpoint.classList.remove('active');
+        activeCheckpoint.classList.add('completed');
+        addTickToCheckpoint(activeCheckpoint);
+        addDropdownToCheckpoint(activeCheckpoint);
+        activeCheckpoint = null;
+    }
 
         // Make pending checkpoint active
         if (nextPendingCheckpoint) {
@@ -1855,45 +1856,48 @@ function fadeOutLoadingSequence() {
     }
 
     function completeRemainingCheckpoints() {
-        clearTimeout(sequenceTimeout);
-        let delay = 0;
+    clearTimeout(sequenceTimeout);
+    let delay = 0;
 
-        // Complete active checkpoint if exists
-        if (activeCheckpoint) {
+    // Complete active checkpoint if exists
+    if (activeCheckpoint) {
+        setTimeout(() => {
+            activeCheckpoint.classList.remove('active');
+            activeCheckpoint.classList.add('completed');
+            addTickToCheckpoint(activeCheckpoint);
+            addDropdownToCheckpoint(activeCheckpoint);
+            activeCheckpoint = null;
+        }, delay);
+        delay += 200;
+    }
+
+    // Complete pending checkpoint if exists
+    if (nextPendingCheckpoint) {
+        setTimeout(() => {
+            nextPendingCheckpoint.classList.remove('pending');
+            nextPendingCheckpoint.classList.add('completed');
+            addTickToCheckpoint(nextPendingCheckpoint);
+            addDropdownToCheckpoint(nextPendingCheckpoint);
+            nextPendingCheckpoint = null;
+        }, delay);
+        delay += 200;
+    }
+
+    // Add and complete remaining checkpoints
+    for (let i = currentStep; i < steps.length; i++) {
+        ((index) => {
             setTimeout(() => {
-                activeCheckpoint.classList.remove('active');
-                activeCheckpoint.classList.add('completed');
-                addDropdownToCheckpoint(activeCheckpoint);
-                activeCheckpoint = null;
-            }, delay);
-            delay += 200;
-        }
-
-        // Complete pending checkpoint if exists
-        if (nextPendingCheckpoint) {
-            setTimeout(() => {
-                nextPendingCheckpoint.classList.remove('pending');
-                nextPendingCheckpoint.classList.add('completed');
-                addDropdownToCheckpoint(nextPendingCheckpoint);
-                nextPendingCheckpoint = null;
-            }, delay);
-            delay += 200;
-        }
-
-        // Add and complete remaining checkpoints
-        for (let i = currentStep; i < steps.length; i++) {
-            ((index) => {
+                const checkpoint = addCheckpoint(index, 'pending');
                 setTimeout(() => {
-                    const checkpoint = addCheckpoint(index, 'pending');
-                    setTimeout(() => {
-                        checkpoint.classList.remove('pending');
-                        checkpoint.classList.add('completed');
-                        addDropdownToCheckpoint(checkpoint);
-                    }, 100);
-                }, delay);
-            })(i);
-            delay += 200;
-        }
+                    checkpoint.classList.remove('pending');
+                    checkpoint.classList.add('completed');
+                    addTickToCheckpoint(checkpoint);
+                    addDropdownToCheckpoint(checkpoint);
+                }, 100);
+            }, delay);
+        })(i);
+        delay += 200;
+    }
 
         // Show header elements and collapse
         setTimeout(() => {
@@ -1995,52 +1999,48 @@ function fadeOutLoadingSequence(loadingContainer) {
 }
 
 function createCheckpoint(stepData) {
-    // Create the main container for the checkpoint
     const checkpointContainer = document.createElement('div');
     checkpointContainer.className = 'checkpoint-container';
 
-    // Create the checkpoint div
     const checkpoint = document.createElement('div');
     checkpoint.className = 'checkpoint';
 
-    // Create and style the circle indicator
+    // Create circle without the tick initially
     const circle = document.createElement('div');
     circle.className = 'checkpoint-circle';
-    circle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><polyline points="20 6 9 17 4 12"/></svg>`;
+    // We'll add the SVG later when completed
 
-    // Create the content container
     const content = document.createElement('div');
     content.className = 'checkpoint-content';
 
-    // Create header container
     const header = document.createElement('div');
     header.className = 'checkpoint-header';
 
-    // Create and set the title
     const title = document.createElement('div');
     title.className = 'checkpoint-title';
     title.textContent = stepData.title;
 
-    // Add title to header
     header.appendChild(title);
 
-    // Create and set the detail text
     const detail = document.createElement('div');
     detail.className = 'checkpoint-detail';
     detail.textContent = stepData.detail;
 
-    // Assemble the content
     content.appendChild(header);
     content.appendChild(detail);
 
-    // Assemble the checkpoint
     checkpoint.appendChild(circle);
     checkpoint.appendChild(content);
 
-    // Add checkpoint to container
     checkpointContainer.appendChild(checkpoint);
 
     return checkpointContainer;
+}
+
+// Add this new function to handle adding the tick
+function addTickToCheckpoint(checkpoint) {
+    const circle = checkpoint.querySelector('.checkpoint-circle');
+    circle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><polyline points="20 6 9 17 4 12"/></svg>`;
 }
 
 function addDropdownToCheckpoint(checkpoint) {
