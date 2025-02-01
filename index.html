@@ -1830,19 +1830,22 @@ function fadeOutLoadingSequence() {
 
     function updateCheckpoints() {
     if (currentStep >= steps.length) {
-        // Complete the last checkpoint before handling completion
+        // Complete the last checkpoint if it exists
         const lastCheckpoint = checkpointsList.querySelector('.checkpoint-container:last-child .checkpoint');
         if (lastCheckpoint && lastCheckpoint.classList.contains('active')) {
             lastCheckpoint.classList.remove('active');
             lastCheckpoint.classList.add('completed');
             addDropdownToCheckpoint(lastCheckpoint);
         }
+        checkpointsCompleted = true;
 
         if (isAIResponseReady) {
             // Show the header elements when process is complete
             headerRight.classList.remove('hidden');
             headerRight.classList.add('fade-in');
-            fadeOutLoadingSequence();
+            setTimeout(() => {
+                fadeOutLoadingSequence();
+            }, 300);
         }
         return;
     }
@@ -1922,25 +1925,28 @@ function fadeOutLoadingSequence() {
 }
     // Callback to handle AI response ready state
     function signalAIResponse() {
-        isAIResponseReady = true;
-        // If checkpoints aren't done, speed them up
-        if (!checkpointsCompleted && currentStep < steps.length) {
-            const remainingSteps = steps.length - currentStep;
-            const acceleratedInterval = 200; // Much faster interval
-            
-            // Complete remaining steps rapidly
-            function completeRemaining() {
-                if (currentStep < steps.length) {
-                    updateCheckpoints();
-                    setTimeout(completeRemaining, acceleratedInterval);
-                }
+    isAIResponseReady = true;
+    // If checkpoints aren't done, speed them up
+    if (!checkpointsCompleted && currentStep < steps.length) {
+        // Complete remaining steps rapidly
+        function completeRemaining() {
+            if (currentStep < steps.length) {
+                updateCheckpoints();
+                setTimeout(completeRemaining, 200);
             }
-            completeRemaining();
-        } else if (checkpointsCompleted) {
-            // If checkpoints are already done, proceed with cleanup
-            fadeOutLoadingSequence();
         }
+        completeRemaining();
+    } else if (checkpointsCompleted) {
+        // If checkpoints are already done, proceed with cleanup
+        const lastCheckpoint = checkpointsList.querySelector('.checkpoint-container:last-child .checkpoint');
+        if (lastCheckpoint && !lastCheckpoint.classList.contains('completed')) {
+            lastCheckpoint.classList.remove('active');
+            lastCheckpoint.classList.add('completed');
+            addDropdownToCheckpoint(lastCheckpoint);
+        }
+        fadeOutLoadingSequence();
     }
+}
 
     // Start the sequence
     updateCheckpoints();
