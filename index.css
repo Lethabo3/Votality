@@ -3073,357 +3073,357 @@
     padding-top: 0 !important;
 }
 
-.loading-container {
-    max-width: 800px;
-    width: 96%;
-    margin-top: 0.75rem;
-    margin-bottom: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 16px;
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+        .loading-container {
+            max-width: 800px;
+            width: 96%;
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-.loading-container.collapsed {
-    padding: 8px 16px;
-    margin-bottom: 0.75rem;
-}
+        .loading-container.collapsed {
+            padding: 8px 16px;
+            margin-bottom: 0.75rem;
+        }
 
 
-.user-message + .loading-container {
-    margin-top: 0.75rem;
-}
+        .user-message + .loading-container {
+            margin-top: 0.75rem;
+        }
 
-.loading-container + .sources-container {
-    margin-top: 0.75rem;
-}
+        .loading-container + .sources-container {
+            margin-top: 0.75rem;
+        }
 
-.loading-container #checkpoints-list {
-    max-height: 1000px;
-    opacity: 1;
-    margin-top: 16px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-}
+        .loading-container #checkpoints-list {
+            max-height: 1000px;
+            opacity: 1;
+            margin-top: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
 
-.loading-container.collapsed #checkpoints-list {
-    max-height: 0;
-    margin-top: 0;
-    opacity: 0;
-    pointer-events: none;
-}
+        .loading-container.collapsed #checkpoints-list {
+            max-height: 0;
+            margin-top: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
 
-.loading-container-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-}
+        .loading-container-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+        }
 
-.loading-container-title {
-font-size: 18px;
-font-weight: 500;
-color: var(--text-color);
-}
+        .loading-container-title {
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--text-color);
+        }
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
 
-.header-right.hidden {
-    opacity: 0;
-    transform: translateY(-5px);
-    pointer-events: none;
-}
+        .header-right.hidden {
+            opacity: 0;
+            transform: translateY(-5px);
+            pointer-events: none;
+        }
 
-.header-right.fade-in {
-    animation: fadeIn 0.3s ease forwards;
-}
+        .header-right.fade-in {
+            animation: fadeIn 0.3s ease forwards;
+        }
 
-.source-count {
-font-size: 14px;
-opacity: 0.7;
-color: var(--text-color);
-}
+        .source-count {
+        font-size: 14px;
+        opacity: 0.7;
+        color: var(--text-color);
+        }
 
-.loading-dropdown-btn {
-    background: none;
-    border: none;
-    padding: 4px;
-    cursor: pointer;
-    color: var(--text-color);
-    opacity: 0.6;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .loading-dropdown-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: var(--text-color);
+            opacity: 0.6;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.loading-dropdown-btn:hover {
-    opacity: 1;
-    background-color: var(--hover-color);
-    border-radius: 4px;
-}
+        .loading-dropdown-btn:hover {
+            opacity: 1;
+            background-color: var(--hover-color);
+            border-radius: 4px;
+        }
 
-.loading-dropdown-btn svg {
-    transform: rotate(180deg);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+        .loading-dropdown-btn svg {
+            transform: rotate(180deg);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-.loading-dropdown-btn.rotated svg {
-    transform: rotate(0deg);
-}
+        .loading-dropdown-btn.rotated svg {
+            transform: rotate(0deg);
+        }
 
-.checkpoint-container {
-opacity: 0;
-transform: translateY(20px);
-transition: all 0.5s ease;
-position: relative;
-margin-bottom: -0.75rem;
-}
+        .checkpoint-container {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+        position: relative;
+        margin-bottom: -0.75rem;
+        }
 
-.checkpoint-container.visible {
-opacity: 1;
-transform: translateY(0);
-}
+        .checkpoint-container.visible {
+        opacity: 1;
+        transform: translateY(0);
+        }
 
-.checkpoint {
-display: flex;
-align-items: flex-start;
-gap: 16px;
-padding: 12px;
-border-radius: 8px;
-transition: all 0.3s ease;
-position: relative;
-}
+        .checkpoint {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+        }
 
-.checkpoint.active {
-background-color: transparent;
-border: 0px solid var(--border-color);
-}
+        .checkpoint.active {
+        background-color: transparent;
+        border: 0px solid var(--border-color);
+        }
 
-.checkpoint::after {
-content: '';
-position: absolute;
-top: 50%;
-left: 13px;
-width: 2px;
-height: calc(100% + 8px);
-background-color: var(--border-color);
-transform: translateX(-50%);
-z-index: 0;
-}
+        .checkpoint::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 13px;
+        width: 2px;
+        height: calc(100% + 8px);
+        background-color: var(--border-color);
+        transform: translateX(-50%);
+        z-index: 0;
+        }
 
-.checkpoint:last-child::after {
-display: none;
-height: 0;
-}
+        .checkpoint:last-child::after {
+        display: none;
+        height: 0;
+        }
 
-.checkpoint-circle {
-width: 18px;
-height: 18px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-flex-shrink: 0;
-position: relative;
-background-color: var(--text-color);
-z-index: 1;
-padding: 2px;
-margin-top: 0.35rem;
-}
+        .checkpoint-circle {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: relative;
+        background-color: var(--text-color);
+        z-index: 1;
+        padding: 2px;
+        margin-top: 0.35rem;
+        }
 
-.checkpoint.pending .checkpoint-circle {
-background-color: transparent;
-border: 1px solid var(--border-color);
-animation: none;
--webkit-mask: none;
-mask: none;
-}
-
-.checkpoint.active .checkpoint-circle {
---_m:
-    conic-gradient(transparent 10%, var(--border-color)),
-    linear-gradient(var(--border-color) 0 0) content-box;
--webkit-mask: var(--_m);
-        mask: var(--_m);
--webkit-mask-composite: source-out;
-        mask-composite: subtract;
-animation: loaderRotate 1s infinite linear;
-border: none;
-}
-
-.checkpoint.completed .checkpoint-circle {
-animation: none;
-background-color: var(--border-color);
-border: none;
--webkit-mask: none;
+        .checkpoint.pending .checkpoint-circle {
+        background-color: transparent;
+        border: 1px solid var(--border-color);
+        animation: none;
+        -webkit-mask: none;
         mask: none;
-transition: background-color 0.3s ease;
-}
+        }
 
-.checkpoint-content {
-flex: 1;
-padding-top: 2px;
-text-align: left;
-}
+        .checkpoint.active .checkpoint-circle {
+        --_m:
+            conic-gradient(transparent 10%, var(--border-color)),
+            linear-gradient(var(--border-color) 0 0) content-box;
+        -webkit-mask: var(--_m);
+                mask: var(--_m);
+        -webkit-mask-composite: source-out;
+                mask-composite: subtract;
+        animation: loaderRotate 1s infinite linear;
+        border: none;
+        }
 
-.checkpoint-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-width: 100%;
-}
+        .checkpoint.completed .checkpoint-circle {
+        animation: none;
+        background-color: var(--border-color);
+        border: none;
+        -webkit-mask: none;
+                mask: none;
+        transition: background-color 0.3s ease;
+        }
 
-.checkpoint-title {
-font-size: 14px;
-font-weight: 500;
-color: var(--text-color);
-margin-bottom: 4px;
-text-align: left;
-}
+        .checkpoint-content {
+        flex: 1;
+        padding-top: 2px;
+        text-align: left;
+        }
 
-.checkpoint.pending .checkpoint-title {
-color: var(--description-text);
-transition: color 0.3s ease;
-}
+        .checkpoint-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        }
 
-.checkpoint.active .checkpoint-title {
-color: var(--text-color);
-}
+        .checkpoint-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-color);
+        margin-bottom: 4px;
+        text-align: left;
+        }
 
-.checkpoint-dropdown-btn {
-background: none;
-border: none;
-padding: 4px;
-cursor: pointer;
-color: var(--text-color);
-opacity: 0.6;
-transition: all 0.2s ease;
-display: flex;
-align-items: center;
-justify-content: center;
-}
+        .checkpoint.pending .checkpoint-title {
+        color: var(--description-text);
+        transition: color 0.3s ease;
+        }
 
-.checkpoint-dropdown-btn:hover {
-opacity: 1;
-background-color: var(--hover-color);
-border-radius: 4px;
-}
+        .checkpoint.active .checkpoint-title {
+        color: var(--text-color);
+        }
 
-.checkpoint-dropdown-btn.rotated svg {
-transform: rotate(180deg);
-}
+        .checkpoint-dropdown-btn {
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        color: var(--text-color);
+        opacity: 0.6;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
 
-.checkpoint-detail {
-font-size: 12px;
-color: var(--description-text);
-line-height: 1.4;
-max-height: 0;
-opacity: 0;
-overflow: hidden;
-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+        .checkpoint-dropdown-btn:hover {
+        opacity: 1;
+        background-color: var(--hover-color);
+        border-radius: 4px;
+        }
 
-.checkpoint.pending .checkpoint-detail {
-display: none;
-}
+        .checkpoint-dropdown-btn.rotated svg {
+        transform: rotate(180deg);
+        }
 
-.checkpoint-detail.show {
-max-height: 50px;
-opacity: 1;
-margin-top: 4px;
-}
+        .checkpoint-detail {
+        font-size: 12px;
+        color: var(--description-text);
+        line-height: 1.4;
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-.checkpoint.active .checkpoint-detail {
-max-height: 50px;
-opacity: 1;
-margin-top: 4px;
-}
+        .checkpoint.pending .checkpoint-detail {
+        display: none;
+        }
 
-#checkpoints-list {
-display: flex;
-flex-direction: column;
-gap: 4px;
-}
+        .checkpoint-detail.show {
+        max-height: 50px;
+        opacity: 1;
+        margin-top: 4px;
+        }
 
-.loading-container.collapsed .loading-container-header {
-margin-bottom: 0;
-}
+        .checkpoint.active .checkpoint-detail {
+        max-height: 50px;
+        opacity: 1;
+        margin-top: 4px;
+        }
 
-@keyframes loaderRotate {
-to {
-    transform: rotate(1turn)
-}
-}
+        #checkpoints-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        }
 
-@keyframes pulse {
-0% { opacity: 1; }
-50% { opacity: 0.3; }
-100% { opacity: 1; }
-}
+        .loading-container.collapsed .loading-container-header {
+        margin-bottom: 0;
+        }
 
-@keyframes fadeIn {
-from { 
-    opacity: 0; 
-    transform: translateY(-5px);
-}
-to { 
-    opacity: 1; 
-    transform: translateY(0);
-}
-}
+        @keyframes loaderRotate {
+        to {
+            transform: rotate(1turn)
+        }
+        }
 
-@keyframes slideDown {
-from {
-    max-height: 0;
-    opacity: 0;
-    transform: translateY(-10px);
-}
-to {
-    max-height: 50px;
-    opacity: 1;
-    transform: translateY(0);
-}
-}
+        @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.3; }
+        100% { opacity: 1; }
+        }
 
-@keyframes slideUp {
-from {
-    max-height: 50px;
-    opacity: 1;
-    transform: translateY(0);
-}
-to {
-    max-height: 0;
-    opacity: 0;
-    transform: translateY(-10px);
-}
-}
+        @keyframes fadeIn {
+        from { 
+            opacity: 0; 
+            transform: translateY(-5px);
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0);
+        }
+        }
 
-.checkpoint-container.fade-out {
-opacity: 0;
-transform: translateY(-20px);
-transition: all 0.3s ease;
-}
+        @keyframes slideDown {
+        from {
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            max-height: 50px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        }
 
-.checkpoint-container.slide-up {
-transform: translateY(-40px);
-transition: all 0.3s ease;
-}
+        @keyframes slideUp {
+        from {
+            max-height: 50px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        }
 
-.checkpoint-container.fade-in {
-opacity: 1;
-transform: translateY(0);
-transition: all 0.3s ease;
-}
+        .checkpoint-container.fade-out {
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+        }
 
-.loading-container.transitioning {
-    pointer-events: none;
-}
+        .checkpoint-container.slide-up {
+        transform: translateY(-40px);
+        transition: all 0.3s ease;
+        }
+
+        .checkpoint-container.fade-in {
+        opacity: 1;
+        transform: translateY(0);
+        transition: all 0.3s ease;
+        }
+
+        .loading-container.transitioning {
+            pointer-events: none;
+        }

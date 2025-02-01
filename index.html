@@ -1150,16 +1150,13 @@ async function sendMessage(message, file = null) {
             }
 
             try {
-                // Extract potential stock symbols (looking for $SYMBOL or standalone uppercase letters)
+                // Extract potential stock symbols
                 const stockSymbolMatch = message.match(/\$([A-Z]{1,5})|(?:^|\s)([A-Z]{1,5})(?:\s|$)/);
                 let marketData = null;
                 let tavilyData = null;
                 
-                // If we found a stock symbol, fetch market data
                 if (stockSymbolMatch) {
                     const symbol = stockSymbolMatch[1] || stockSymbolMatch[2];
-                    
-                    // Fetch market data and Tavily search results in parallel
                     [marketData, tavilyData] = await Promise.all([
                         fetchMarketData(symbol),
                         performTavilySearch(symbol)
@@ -1216,34 +1213,65 @@ async function sendMessage(message, file = null) {
                     updateChatTopicDisplay(data.chatTopic);
                 }
 
-// Wait briefly for checkpoints to complete
-setTimeout(async () => {
-    // Signal AI response right before adding the message
-    signalAIResponse();
-    
-    // Add AI response
-    await addMessage(data.response, 'ai', data.relatedTopics);
+                // Handle loading container collapse with proper transitions
+                const loadingContainer = document.querySelector('.loading-container');
+                if (loadingContainer) {
+                    // Add transitioning class to prevent interactions during animation
+                    loadingContainer.classList.add('transitioning');
+                    
+                    // Fade out checkpoints
+                    const checkpoints = loadingContainer.querySelectorAll('.checkpoint-container');
+                    checkpoints.forEach((checkpoint, index) => {
+                        setTimeout(() => {
+                            checkpoint.classList.add('fade-out');
+                        }, index * 50);
+                    });
 
-                    // Handle market data if present
-                    if (data.marketData) {
-                        const marketSection = createMarketDataSection(data.marketData);
-                        const aiMessage = document.querySelector('.message.ai:last-child');
-                        if (aiMessage) {
-                            aiMessage.insertBefore(marketSection, aiMessage.firstChild);
-                        }
+                    // After checkpoints fade out, collapse the container
+                    setTimeout(() => {
+                        loadingContainer.classList.add('collapsed');
+                        
+                        // After collapse animation completes, remove transitioning class
+                        setTimeout(() => {
+                            loadingContainer.classList.remove('transitioning');
+                        }, 300); // Match the CSS transition duration
+                    }, checkpoints.length * 50 + 100);
+                }
+
+                // Signal AI response and add the message
+                signalAIResponse();
+                
+                // Add AI response
+                await addMessage(data.response, 'ai', data.relatedTopics);
+
+                // Handle market data if present
+                if (data.marketData) {
+                    const marketSection = createMarketDataSection(data.marketData);
+                    const aiMessage = document.querySelector('.message.ai:last-child');
+                    if (aiMessage) {
+                        aiMessage.insertBefore(marketSection, aiMessage.firstChild);
                     }
+                }
 
-                    // Set chat ID if not already set
-                    if (!currentChatId) {
-                        currentChatId = data.chatId;
-                    }
+                // Set chat ID if not already set
+                if (!currentChatId) {
+                    currentChatId = data.chatId;
+                }
 
-                    // Load recent chats after successful message
-                    await loadRecentChats();
-                }, 800);
+                // Load recent chats after successful message
+                await loadRecentChats();
 
             } catch (error) {
                 console.error('Error:', error);
+                // Handle loading container collapse even on error
+                const loadingContainer = document.querySelector('.loading-container');
+                if (loadingContainer) {
+                    loadingContainer.classList.add('transitioning');
+                    loadingContainer.classList.add('collapsed');
+                    setTimeout(() => {
+                        loadingContainer.classList.remove('transitioning');
+                    }, 300);
+                }
                 signalAIResponse();
                 await addMessage("I'm sorry, there was an error processing your request: " + error.message, 'ai');
             }
@@ -1251,6 +1279,15 @@ setTimeout(async () => {
 
     } catch (error) {
         console.error('Error in sendMessage:', error);
+        // Handle loading container collapse on outer error
+        const loadingContainer = document.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.classList.add('transitioning');
+            loadingContainer.classList.add('collapsed');
+            setTimeout(() => {
+                loadingContainer.classList.remove('transitioning');
+            }, 300);
+        }
         await addMessage("Error: " + error.message, 'ai');
     }
 }
