@@ -803,13 +803,82 @@ function getTopStories() {
 }
 
 function getMarketData() {
+    $symbol = $_POST['symbol'] ?? null;
+    $period = $_POST['period'] ?? '1D';
+
+    if (!$symbol) {
+        return ['error' => 'Symbol is required'];
+    }
+
     try {
-        $marketDataService = new MarketDataService();
-        $marketData = $marketDataService->fetchMarketDataForWatchlist();
-        return ['marketData' => $marketData];
+        // Fetch data based on period
+        switch ($period) {
+            case '1D':
+                $interval = '5';  // 5 minute intervals
+                $limit = 78;     // 6.5 hours trading day
+                break;
+            case '5D':
+                $interval = '30'; // 30 minute intervals
+                $limit = 65;     // 5 trading days
+                break;
+            case '1M':
+                $interval = 'D';  // Daily intervals
+                $limit = 22;     // ~22 trading days
+                break;
+            case '3M':
+                $interval = 'D';
+                $limit = 66;     // ~66 trading days
+                break;
+            case '6M':
+                $interval = 'D';
+                $limit = 128;    // ~128 trading days
+                break;
+            case '1Y':
+                $interval = 'W';  // Weekly intervals
+                $limit = 52;     // 52 weeks
+                break;
+            case '5Y':
+                $interval = 'M';  // Monthly intervals
+                $limit = 60;     // 60 months
+                break;
+            default:
+                $interval = 'D';
+                $limit = 22;
+        }
+
+        // Fetch data from Finnhub
+        $finnhubUrl = "https://finnhub.io/api/v1/stock/candle?" . http_build_query([
+            'symbol' => $symbol,
+            'resolution' => $interval,
+            'from' => strtotime("-" . ($period === '1D' ? '1' : $period) . " " . ($period === '1D' ? 'day' : '')),
+            'to' => time(),
+            'token' => FINNHUB_API_KEY
+        ]);
+
+        $response = file_get_contents($finnhubUrl);
+        $data = json_decode($response, true);
+
+        if (!$data || $data['s'] !== 'ok') {
+            throw new Exception('Failed to fetch market data');
+        }
+
+        // Format data for chart
+        $timePoints = array_map(function($timestamp) {
+            return date('c', $timestamp);
+        }, $data['t']);
+
+        return [
+            'marketData' => [
+                'timePoints' => $timePoints,
+                'prices' => $data['c'],
+                'symbol' => $symbol,
+                'interval' => $interval
+            ]
+        ];
+
     } catch (Exception $e) {
-        logMessage("Error fetching market data: " . $e->getMessage());
-        return ['error' => 'An error occurred while fetching market data: ' . $e->getMessage()];
+        error_log("Error fetching market data: " . $e->getMessage());
+        return ['error' => 'Failed to fetch market data'];
     }
 }
 

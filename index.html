@@ -3560,43 +3560,32 @@ async function updateChart(period) {
         console.error('Error updating chart:', error);
     }
 }
-function initializeChart(canvas) {
+function initializeChart(canvas, stockData) {
     const ctx = canvas.getContext('2d');
     
-    // Generate realistic market data
-    const hours = ['9:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00'];
-    const basePrice = 189.37;
-    const prices = [];
-    let currentPrice = basePrice;
-    
-    // Generate semi-random prices with realistic market movement
-    hours.forEach((hour, index) => {
-        const trend = Math.sin(index / 5) * 0.3;
-        const noise = (Math.random() - 0.5) * 0.4;
-        const change = trend + noise;
-        currentPrice = currentPrice + change;
-        prices.push(currentPrice);
-    });
-
+    // Create gradient for the chart area
     const gradient = ctx.createLinearGradient(0, 0, 0, 250);
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
     gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
+    // Initialize with current price point
+    const initialData = {
+        labels: [getNYSETime()],
+        datasets: [{
+            label: 'Price',
+            data: [stockData.currentPrice],
+            borderColor: '#10B981',
+            backgroundColor: gradient,
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.4,
+            fill: true
+        }]
+    };
+
     return new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: hours,
-            datasets: [{
-                label: 'Price',
-                data: prices,
-                borderColor: '#10B981',
-                backgroundColor: gradient,
-                borderWidth: 2,
-                pointRadius: 0,
-                tension: 0.4,
-                fill: true
-            }]
-        },
+        data: initialData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -3668,12 +3657,74 @@ function initializeChart(canvas) {
     });
 }
 
-function updateChart(period) {
-    // Implement period-specific data updates here
-    console.log(`Updating chart for period: ${period}`);
+async function updateChart(period, symbol) {
+    try {
+        const response = await fetch('VotalityChat2.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'getMarketData',
+                period: period,
+                symbol: symbol
+            }),
+            credentials: 'same-origin'
+        });
+        
+        const data = await response.json();
+        if (data.error) {
+            console.error('Error fetching market data:', data.error);
+            return;
+        }
+
+        const chart = Chart.getChart('priceChart');
+        if (chart && data.marketData) {
+            // Format time labels based on period
+            const formattedLabels = data.marketData.timePoints.map(time => {
+                const date = new Date(time);
+                switch (period) {
+                    case '1D':
+                        return date.toLocaleTimeString('en-US', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        });
+                    case '5D':
+                    case '1M':
+                        return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
+                    default:
+                        return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            year: '2-digit' 
+                        });
+                }
+            });
+
+            // Calculate appropriate y-axis scale
+            const prices = data.marketData.prices;
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const padding = (maxPrice - minPrice) * 0.1;
+
+            // Update chart data
+            chart.data.labels = formattedLabels;
+            chart.data.datasets[0].data = prices;
+            chart.options.scales.y.min = minPrice - padding;
+            chart.options.scales.y.max = maxPrice + padding;
+            chart.update('none');
+        }
+    } catch (error) {
+        console.error('Error updating chart:', error);
+    }
 }
 
 function startMarketDataUpdates(symbol) {
+    // Initial chart update
+    updateChart('1D', symbol);
+
     // Update every 5 seconds for real-time data
     const updateInterval = setInterval(async () => {
         try {
@@ -3696,75 +3747,66 @@ function startMarketDataUpdates(symbol) {
             }
 
             // Update price display
-            const priceElement = document.querySelector('.current-price');
-            const changeElement = document.querySelector('.price-change');
-            if (priceElement && changeElement) {
-                priceElement.textContent = `$${data.currentPrice.toFixed(2)}`;
-                
-                const change = data.priceChange;
-                const changePercent = data.priceChangePercent;
-                changeElement.className = `price-change ${change >= 0 ? 'positive' : 'negative'}`;
-                changeElement.innerHTML = `
-                    <span>$${Math.abs(change).toFixed(2)}</span>
-                    <span>(${changePercent}%)</span>
-                `;
-            }
+            updatePriceDisplay(data);
 
             // Update chart with new price point
             const chart = Chart.getChart('priceChart');
             if (chart) {
                 chart.data.datasets[0].data.push(data.currentPrice);
-                chart.data.labels.push(data.timestamp);
-                // Remove oldest point to keep chart looking clean
+                chart.data.labels.push(getNYSETime());
+                
+                // Keep last 100 data points for smooth visualization
                 if (chart.data.datasets[0].data.length > 100) {
                     chart.data.datasets[0].data.shift();
                     chart.data.labels.shift();
                 }
-                chart.update('none'); // Use 'none' for smoother updates
+                
+                chart.update('none');
             }
         } catch (error) {
             console.error('Error updating market data:', error);
         }
     }, 5000);
 
-    // Store interval ID for cleanup
-    window.marketDataInterval = updateInterval;
+    return updateInterval;
 }
 
-function cleanupMarketData() {
-    if (window.marketDataInterval) {
-        clearInterval(window.marketDataInterval);
-        window.marketDataInterval = null;
+function updatePriceDisplay(data) {
+    const priceElement = document.querySelector('.current-price');
+    const changeElement = document.querySelector('.price-change');
+    
+    if (priceElement && changeElement) {
+        priceElement.textContent = `$${data.currentPrice.toFixed(2)}`;
+        
+        const change = data.priceChange;
+        const changePercent = data.priceChangePercent;
+        changeElement.className = `price-change ${change >= 0 ? 'positive' : 'negative'}`;
+        changeElement.innerHTML = `
+            <span>$${Math.abs(change).toFixed(2)}</span>
+            <span>(${changePercent}%)</span>
+        `;
     }
-
-    // Clear time update interval if it exists
-    const marketSection = document.querySelector('.market-data-section');
-    if (marketSection && marketSection.dataset.timeInterval) {
-        clearInterval(parseInt(marketSection.dataset.timeInterval));
-        delete marketSection.dataset.timeInterval;
-    }
-}
-
-function getNYSETime() {
-    const nyTime = new Date().toLocaleString("en-US", {
-        timeZone: "America/New_York",
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-    });
-    return nyTime + " EST";
 }
 
 function createMarketDataSection(stockData) {
-    // Load Chart.js if it's not already loaded
+    // Load Chart.js if needed
     if (!window.Chart) {
         const script = document.createElement('script');
         script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-        script.onload = () => initializeChart(document.getElementById('priceChart'));
+        script.onload = () => {
+            const chart = initializeChart(
+                document.getElementById('priceChart'), 
+                stockData
+            );
+            // Start real-time updates after chart is initialized
+            const updateInterval = startMarketDataUpdates(stockData.symbol);
+            // Store interval ID for cleanup
+            document.getElementById('priceChart').dataset.updateInterval = updateInterval;
+        };
         document.head.appendChild(script);
     }
 
-    // Cleanup any existing interval
+    // Cleanup existing intervals
     cleanupMarketData();
 
     const marketDataSection = document.createElement('div');
@@ -3788,7 +3830,7 @@ function createMarketDataSection(stockData) {
                 <div class="trading-status">
                     <span>${stockData.tradingStatus}</span>
                     <span class="separator">•</span>
-                    <span>${stockData.lastUpdated}</span>
+                    <span>${getNYSETime()}</span>
                 </div>
 
                 <div class="time-periods">
@@ -3808,31 +3850,28 @@ function createMarketDataSection(stockData) {
         </div>
     `;
 
-    // Add event listeners to period buttons
-    const periodButtons = marketDataSection.querySelectorAll('.period-button');
-    periodButtons.forEach(button => {
+    // Add period button event listeners
+    marketDataSection.querySelectorAll('.period-button').forEach(button => {
         button.addEventListener('click', () => {
-            periodButtons.forEach(btn => btn.classList.remove('active'));
+            marketDataSection.querySelectorAll('.period-button')
+                .forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            if (window.Chart) {
-                updateChart(button.dataset.period, stockData.symbol);
-            }
+            updateChart(button.dataset.period, stockData.symbol);
         });
     });
 
-    // Initialize chart after a small delay to ensure the canvas is ready
-    setTimeout(() => {
-        if (window.Chart) {
-            initializeChart(marketDataSection.querySelector('#priceChart'), stockData);
+    // Update time every minute
+    const timeInterval = setInterval(() => {
+        const timeElement = marketDataSection.querySelector('.trading-status span:last-child');
+        if (timeElement) {
+            timeElement.textContent = getNYSETime();
         }
-    }, 100);
+    }, 60000);
 
-    // Start real-time updates
-    startMarketDataUpdates(stockData.symbol);
+    marketDataSection.dataset.timeInterval = timeInterval;
 
     return marketDataSection;
 }
-
 const typeButton = document.querySelector('.type-button'); // Changed from getElementById
 const selectedType = document.querySelector('#selected-type');
 const dropdownContent = document.querySelector('.dropdown-content');
@@ -3905,7 +3944,32 @@ async function performTavilySearch(symbol) {
         console.error('Error with Tavily search:', error);
         return null;
     }
-}</script>
+}
 
+// Function to handle period changes
+function handlePeriodChange(chart, symbol, period) {
+    fetchMarketData(symbol, period).then(marketData => {
+        if (marketData) {
+            updateChart(chart, marketData, period);
+        }
+    });
+}
+
+// Event listeners for period buttons
+document.querySelectorAll('.period-button').forEach(button => {
+    button.addEventListener('click', function() {
+        const period = this.dataset.period;
+        document.querySelectorAll('.period-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        this.classList.add('active');
+        
+        const chart = Chart.getChart('priceChart');
+        if (chart) {
+            handlePeriodChange(chart, currentSymbol, period);
+        }
+    });
+});
+</script>
 </body>
 </html>
