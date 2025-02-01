@@ -1778,8 +1778,9 @@ function fadeOutLoadingSequence() {
     let currentStep = 0;
     let activeCheckpoint = null;
     let nextPendingCheckpoint = null;
+    let sequenceTimeout = null;
 
-    function addCheckpoint(step, isActive = false) {
+    function addCheckpoint(step, type = 'pending') {
         const checkpoint = createCheckpoint(steps[step]);
         checkpoint.style.opacity = '0';
         checkpoint.style.transform = 'translateY(20px)';
@@ -1794,40 +1795,49 @@ function fadeOutLoadingSequence() {
             checkpoint.style.transform = 'translateY(0)';
             checkpoint.classList.add('visible');
             const checkpointElement = checkpoint.querySelector('.checkpoint');
+            checkpointElement.classList.add(type);
             
-            if (isActive) {
-                checkpointElement.classList.add('active');
+            if (type === 'active') {
                 activeCheckpoint = checkpointElement;
-            } else {
-                checkpointElement.classList.add('pending');
+            } else if (type === 'pending') {
                 nextPendingCheckpoint = checkpointElement;
             }
         });
 
-        return checkpoint;
+        return checkpoint.querySelector('.checkpoint');
+    }
+
+    function startSequence() {
+        // Add first active checkpoint
+        addCheckpoint(currentStep++, 'active');
+        
+        // Add first pending checkpoint
+        if (currentStep < steps.length) {
+            addCheckpoint(currentStep, 'pending');
+        }
+
+        // Start the progression sequence
+        scheduleNextProgression();
+    }
+
+    function scheduleNextProgression() {
+        if (!isAIResponseReady && currentStep < steps.length) {
+            sequenceTimeout = setTimeout(progressSequence, 1500);
+        }
     }
 
     function progressSequence() {
-        if (currentStep >= steps.length || isAIResponseReady) return;
+        if (isAIResponseReady || currentStep >= steps.length) return;
 
-        // Add the active checkpoint if we're just starting
-        if (currentStep === 0) {
-            addCheckpoint(currentStep++, true);
-            // Add the next pending checkpoint
-            if (currentStep < steps.length) {
-                addCheckpoint(currentStep);
-            }
-            return;
-        }
-
-        // Complete the current active checkpoint
+        // Complete current active checkpoint
         if (activeCheckpoint) {
             activeCheckpoint.classList.remove('active');
             activeCheckpoint.classList.add('completed');
             addDropdownToCheckpoint(activeCheckpoint);
+            activeCheckpoint = null;
         }
 
-        // Make the pending checkpoint active
+        // Make pending checkpoint active
         if (nextPendingCheckpoint) {
             nextPendingCheckpoint.classList.remove('pending');
             nextPendingCheckpoint.classList.add('active');
@@ -1835,54 +1845,62 @@ function fadeOutLoadingSequence() {
             nextPendingCheckpoint = null;
         }
 
-        // Add the next pending checkpoint if available
+        // Add new pending checkpoint if available
         if (currentStep < steps.length - 1) {
-            addCheckpoint(currentStep + 1);
+            addCheckpoint(currentStep + 1, 'pending');
         }
 
         currentStep++;
-
-        // Schedule next progression if not at the end
-        if (currentStep < steps.length && !isAIResponseReady) {
-            setTimeout(progressSequence, 1500);
-        }
+        scheduleNextProgression();
     }
 
     function completeRemainingCheckpoints() {
-        // Complete current active checkpoint
+        clearTimeout(sequenceTimeout);
+        let delay = 0;
+
+        // Complete active checkpoint if exists
         if (activeCheckpoint) {
-            activeCheckpoint.classList.remove('active');
-            activeCheckpoint.classList.add('completed');
-            addDropdownToCheckpoint(activeCheckpoint);
-        }
-
-        // Complete current pending checkpoint
-        if (nextPendingCheckpoint) {
-            nextPendingCheckpoint.classList.remove('pending');
-            nextPendingCheckpoint.classList.add('completed');
-            addDropdownToCheckpoint(nextPendingCheckpoint);
-        }
-
-        // Add and complete any remaining checkpoints
-        let delay = 200;
-        for (let i = currentStep; i < steps.length; i++) {
             setTimeout(() => {
-                const checkpoint = addCheckpoint(i);
-                const checkpointElement = checkpoint.querySelector('.checkpoint');
-                setTimeout(() => {
-                    checkpointElement.classList.add('completed');
-                    addDropdownToCheckpoint(checkpointElement);
-                }, 100);
+                activeCheckpoint.classList.remove('active');
+                activeCheckpoint.classList.add('completed');
+                addDropdownToCheckpoint(activeCheckpoint);
+                activeCheckpoint = null;
             }, delay);
             delay += 200;
         }
 
-        // Show header elements and collapse after all checkpoints are complete
+        // Complete pending checkpoint if exists
+        if (nextPendingCheckpoint) {
+            setTimeout(() => {
+                nextPendingCheckpoint.classList.remove('pending');
+                nextPendingCheckpoint.classList.add('completed');
+                addDropdownToCheckpoint(nextPendingCheckpoint);
+                nextPendingCheckpoint = null;
+            }, delay);
+            delay += 200;
+        }
+
+        // Add and complete remaining checkpoints
+        for (let i = currentStep; i < steps.length; i++) {
+            ((index) => {
+                setTimeout(() => {
+                    const checkpoint = addCheckpoint(index, 'pending');
+                    setTimeout(() => {
+                        checkpoint.classList.remove('pending');
+                        checkpoint.classList.add('completed');
+                        addDropdownToCheckpoint(checkpoint);
+                    }, 100);
+                }, delay);
+            })(i);
+            delay += 200;
+        }
+
+        // Show header elements and collapse
         setTimeout(() => {
             headerRight.classList.remove('hidden');
             headerRight.classList.add('fade-in');
             setTimeout(() => {
-                fadeOutLoadingSequence();
+                fadeOutLoadingSequence(loadingContainer);
             }, 300);
         }, delay + 200);
     }
@@ -1893,15 +1911,74 @@ function fadeOutLoadingSequence() {
     }
 
     // Start the sequence
-    progressSequence();
+    startSequence();
     lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // Return the signal function to be called when AI response is ready
+    // Return the signal function
     return signalAIResponse;
 }
 
-function fadeOutLoadingSequence() {
-    const loadingContainer = document.querySelector('.loading-container');
+function createCheckpoint(stepData) {
+    const checkpointContainer = document.createElement('div');
+    checkpointContainer.className = 'checkpoint-container';
+
+    const checkpoint = document.createElement('div');
+    checkpoint.className = 'checkpoint';
+
+    const circle = document.createElement('div');
+    circle.className = 'checkpoint-circle';
+    circle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    const content = document.createElement('div');
+    content.className = 'checkpoint-content';
+
+    const header = document.createElement('div');
+    header.className = 'checkpoint-header';
+
+    const title = document.createElement('div');
+    title.className = 'checkpoint-title';
+    title.textContent = stepData.title;
+
+    header.appendChild(title);
+
+    const detail = document.createElement('div');
+    detail.className = 'checkpoint-detail';
+    detail.textContent = stepData.detail;
+
+    content.appendChild(header);
+    content.appendChild(detail);
+
+    checkpoint.appendChild(circle);
+    checkpoint.appendChild(content);
+
+    checkpointContainer.appendChild(checkpoint);
+
+    return checkpointContainer;
+}
+
+function addDropdownToCheckpoint(checkpoint) {
+    const header = checkpoint.querySelector('.checkpoint-header');
+    
+    const dropdownBtn = document.createElement('button');
+    dropdownBtn.className = 'checkpoint-dropdown-btn';
+    dropdownBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+        </svg>
+    `;
+
+    const detailSection = checkpoint.querySelector('.checkpoint-detail');
+    
+    dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownBtn.classList.toggle('rotated');
+        detailSection.classList.toggle('show');
+    });
+
+    header.appendChild(dropdownBtn);
+}
+
+function fadeOutLoadingSequence(loadingContainer) {
     if (loadingContainer) {
         loadingContainer.classList.add('transitioning');
         loadingContainer.classList.add('collapsed');
@@ -1911,7 +1988,6 @@ function fadeOutLoadingSequence() {
             dropdownBtn.classList.add('rotated');
         }
 
-        // Remove transitioning class after animation completes
         setTimeout(() => {
             loadingContainer.classList.remove('transitioning');
         }, 300);
