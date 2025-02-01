@@ -1829,88 +1829,97 @@ function fadeOutLoadingSequence() {
     }
 
     function updateCheckpoints() {
-        if (currentStep >= steps.length) {
-            if (aiResponseReceived) {
-                fadeOutLoadingSequence();
-            }
-            return;
+    if (currentStep >= steps.length) {
+        // Complete the last checkpoint before handling completion
+        const lastCheckpoint = checkpointsList.querySelector('.checkpoint-container:last-child .checkpoint');
+        if (lastCheckpoint && lastCheckpoint.classList.contains('active')) {
+            lastCheckpoint.classList.remove('active');
+            lastCheckpoint.classList.add('completed');
+            addDropdownToCheckpoint(lastCheckpoint);
         }
 
-        const existingCheckpoints = checkpointsList.querySelectorAll('.checkpoint-container');
-        
-        // Remove any existing dropdown from the last checkpoint
-        const lastCheckpoint = existingCheckpoints[existingCheckpoints.length - 1]?.querySelector('.checkpoint');
-        if (lastCheckpoint) {
-            const existingDropdown = lastCheckpoint.querySelector('.checkpoint-dropdown-btn');
-            if (existingDropdown) {
-                existingDropdown.remove();
-            }
+        if (isAIResponseReady) {
+            // Show the header elements when process is complete
+            headerRight.classList.remove('hidden');
+            headerRight.classList.add('fade-in');
+            fadeOutLoadingSequence();
         }
+        return;
+    }
 
-        if (existingCheckpoints.length > 0) {
-            const currentCheckpoint = existingCheckpoints[existingCheckpoints.length - 2]?.querySelector('.checkpoint');
-            if (currentCheckpoint) {
-                currentCheckpoint.classList.remove('active');
-                currentCheckpoint.classList.add('completed');
-                // Add dropdown when checkpoint becomes completed
-                addDropdownToCheckpoint(currentCheckpoint);
-
-                currentCheckpoint.parentElement.style.transform = 'translateY(0)';
-                currentCheckpoint.parentElement.style.marginBottom = '-0.75rem';
-            }
-
-            const nextCheckpoint = existingCheckpoints[existingCheckpoints.length - 1]?.querySelector('.checkpoint');
-            if (nextCheckpoint) {
-                setTimeout(() => {
-                    nextCheckpoint.classList.remove('pending');
-                    nextCheckpoint.classList.add('active');
-
-                    if (currentStep + 1 < steps.length) {
-                        const newCheckpoint = createCheckpoint(steps[currentStep + 1], true);
-                        newCheckpoint.style.opacity = '0';
-                        newCheckpoint.style.transform = 'translateY(10px)';
-                        newCheckpoint.style.marginBottom = '-0.75rem';
-                        checkpointsList.appendChild(newCheckpoint);
-
-                        setTimeout(() => {
-                            newCheckpoint.style.transition = 'all 0.3s ease';
-                            newCheckpoint.style.opacity = '1';
-                            newCheckpoint.style.transform = 'translateY(0)';
-                        }, 50);
-                    }
-                }, 600);
-            }
-        } else {
-            const currentCheckpoint = createCheckpoint(steps[currentStep]);
-            currentCheckpoint.style.marginBottom = '-0.75rem';
-            checkpointsList.appendChild(currentCheckpoint);
-            
-            if (currentStep + 1 < steps.length) {
-                const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
-                nextCheckpoint.style.marginBottom = '-0.75rem';
-                checkpointsList.appendChild(nextCheckpoint);
-            }
-
-            setTimeout(() => {
-                currentCheckpoint.classList.add('visible');
-                const currentCheck = currentCheckpoint.querySelector('.checkpoint');
-                currentCheck.classList.add('active');
-                
-                if (currentStep + 1 < steps.length) {
-                    setTimeout(() => {
-                        checkpointsList.children[1].classList.add('visible');
-                    }, 300);
-                }
-            }, 100);
-        }
-
-        currentStep++;
-        const nextStepDelay = aiResponseReceived ? 400 : 1500;
-        if (currentStep < steps.length) {
-            setTimeout(updateCheckpoints, nextStepDelay);
+    const existingCheckpoints = checkpointsList.querySelectorAll('.checkpoint-container');
+    
+    // Remove any existing dropdown from the last checkpoint
+    const lastCheckpoint = existingCheckpoints[existingCheckpoints.length - 1]?.querySelector('.checkpoint');
+    if (lastCheckpoint) {
+        const existingDropdown = lastCheckpoint.querySelector('.checkpoint-dropdown-btn');
+        if (existingDropdown) {
+            existingDropdown.remove();
         }
     }
 
+    if (existingCheckpoints.length > 0) {
+        const currentCheckpoint = existingCheckpoints[existingCheckpoints.length - 2]?.querySelector('.checkpoint');
+        if (currentCheckpoint) {
+            currentCheckpoint.classList.remove('active');
+            currentCheckpoint.classList.add('completed');
+            // Add dropdown when checkpoint becomes completed
+            addDropdownToCheckpoint(currentCheckpoint);
+            currentCheckpoint.parentElement.style.transform = 'translateY(0)';
+            currentCheckpoint.parentElement.style.marginBottom = '-0.75rem';
+        }
+
+        const nextCheckpoint = existingCheckpoints[existingCheckpoints.length - 1]?.querySelector('.checkpoint');
+        if (nextCheckpoint) {
+            setTimeout(() => {
+                nextCheckpoint.classList.remove('pending');
+                nextCheckpoint.classList.add('active');
+
+                if (currentStep + 1 < steps.length) {
+                    const newCheckpoint = createCheckpoint(steps[currentStep + 1], true);
+                    newCheckpoint.style.opacity = '0';
+                    newCheckpoint.style.transform = 'translateY(10px)';
+                    newCheckpoint.style.marginBottom = '-0.75rem';
+                    checkpointsList.appendChild(newCheckpoint);
+
+                    setTimeout(() => {
+                        newCheckpoint.style.transition = 'all 0.3s ease';
+                        newCheckpoint.style.opacity = '1';
+                        newCheckpoint.style.transform = 'translateY(0)';
+                    }, 50);
+                }
+            }, 600);
+        }
+    } else {
+        const currentCheckpoint = createCheckpoint(steps[currentStep]);
+        currentCheckpoint.style.marginBottom = '-0.75rem';
+        checkpointsList.appendChild(currentCheckpoint);
+        
+        if (currentStep + 1 < steps.length) {
+            const nextCheckpoint = createCheckpoint(steps[currentStep + 1], true);
+            nextCheckpoint.style.marginBottom = '-0.75rem';
+            checkpointsList.appendChild(nextCheckpoint);
+        }
+
+        setTimeout(() => {
+            currentCheckpoint.classList.add('visible');
+            const currentCheck = currentCheckpoint.querySelector('.checkpoint');
+            currentCheck.classList.add('active');
+            
+            if (currentStep + 1 < steps.length) {
+                setTimeout(() => {
+                    checkpointsList.children[1].classList.add('visible');
+                }, 300);
+            }
+        }, 100);
+    }
+
+    currentStep++;
+    const nextStepDelay = isAIResponseReady ? 200 : 1500;
+    if (currentStep < steps.length) {
+        setTimeout(updateCheckpoints, nextStepDelay);
+    }
+}
     // Callback to handle AI response ready state
     function signalAIResponse() {
         isAIResponseReady = true;
