@@ -1926,25 +1926,23 @@ function fadeOutLoadingSequence() {
     // Callback to handle AI response ready state
     function signalAIResponse() {
     isAIResponseReady = true;
-    // If checkpoints aren't done, speed them up
-    if (!checkpointsCompleted && currentStep < steps.length) {
-        // Complete remaining steps rapidly
-        function completeRemaining() {
-            if (currentStep < steps.length) {
-                updateCheckpoints();
-                setTimeout(completeRemaining, 200);
-            }
-        }
-        completeRemaining();
-    } else if (checkpointsCompleted) {
-        // If checkpoints are already done, proceed with cleanup
-        const lastCheckpoint = checkpointsList.querySelector('.checkpoint-container:last-child .checkpoint');
-        if (lastCheckpoint && !lastCheckpoint.classList.contains('completed')) {
-            lastCheckpoint.classList.remove('active');
-            lastCheckpoint.classList.add('completed');
-            addDropdownToCheckpoint(lastCheckpoint);
-        }
-        fadeOutLoadingSequence();
+
+    // Immediately mark current checkpoint as completed and collapse
+    const currentCheckpoint = checkpointsList.querySelector('.checkpoint.active');
+    if (currentCheckpoint) {
+        currentCheckpoint.classList.remove('active');
+        currentCheckpoint.classList.add('completed');
+        addDropdownToCheckpoint(currentCheckpoint);
+    }
+
+    // Show header elements and collapse
+    headerRight.classList.remove('hidden');
+    headerRight.classList.add('fade-in');
+    fadeOutLoadingSequence();
+
+    // Clear any pending timeouts to stop further updates
+    if (currentStep < steps.length) {
+        currentStep = steps.length;  // Force step completion
     }
 }
 
