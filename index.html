@@ -4024,6 +4024,20 @@ document.querySelectorAll('.period-button').forEach(button => {
         }
     });
 });
+
+function cleanupMarketData() {
+    if (window.marketDataInterval) {
+        clearInterval(window.marketDataInterval);
+        window.marketDataInterval = null;
+    }
+
+    // Clear time update interval if it exists
+    const marketSection = document.querySelector('.market-data-section');
+    if (marketSection && marketSection.dataset.timeInterval) {
+        clearInterval(parseInt(marketSection.dataset.timeInterval));
+        delete marketSection.dataset.timeInterval;
+    }
+}
 </script>
 </body>
 </html>
