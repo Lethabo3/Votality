@@ -2934,6 +2934,10 @@ function createSourceItem(source) {
     return sourceItem;
 }
 
+function isDarkMode() {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
 function addMessage(text, sender, relatedTopics = []) {
     return new Promise((resolve) => {
         const chatContainer = document.querySelector('.chat-container');
@@ -3257,6 +3261,7 @@ function addMessage(text, sender, relatedTopics = []) {
         }
     });
 }
+
 
 function addMessageInteractions(messageElement, sender) {
 if (sender === 'ai') {
@@ -3872,6 +3877,55 @@ function createMarketDataSection(stockData) {
 
     return marketDataSection;
 }
+
+// Function to get NYSE time
+function getNYSETime() {
+    const nyTime = new Date().toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+    return nyTime + " EST";
+}
+
+// Function to add market data section to message
+function addMarketDataSection(response) {
+    const marketInfoMatch = response.match(/Market Info:\s*(.*?)\|(.*?)\|(\d+\.?\d*)\|([-+]?\d+\.?\d*)(?=\n|$)/);
+    if (marketInfoMatch) {
+        const [, companyName, symbol, currentPrice, priceChange] = marketInfoMatch;
+        const priceChangePercent = ((parseFloat(priceChange) / parseFloat(currentPrice)) * 100).toFixed(2);
+        
+        const stockData = {
+            companyName: companyName.trim(),
+            symbol: symbol.trim(),
+            currentPrice: parseFloat(currentPrice),
+            priceChange: parseFloat(priceChange),
+            priceChangePercent: priceChangePercent,
+            tradingStatus: 'Regular Hours',
+            lastUpdated: getNYSETime()
+        };
+
+        return createMarketDataSection(stockData);
+    }
+    return null;
+}
+
+// Function to parse market data from AI response
+function parseMarketData(response) {
+    const marketInfoMatch = response.match(/Market Info:\s*(.*?)\|(.*?)\|(\d+\.?\d*)\|([-+]?\d+\.?\d*)(?=\n|$)/);
+    if (!marketInfoMatch) return null;
+
+    const [, companyName, symbol, currentPrice, priceChange] = marketInfoMatch;
+    return {
+        companyName: companyName.trim(),
+        symbol: symbol.trim(),
+        currentPrice: parseFloat(currentPrice),
+        priceChange: parseFloat(priceChange),
+        priceChangePercent: ((parseFloat(priceChange) / parseFloat(currentPrice)) * 100).toFixed(2)
+    };
+}
+
 const typeButton = document.querySelector('.type-button'); // Changed from getElementById
 const selectedType = document.querySelector('#selected-type');
 const dropdownContent = document.querySelector('.dropdown-content');
