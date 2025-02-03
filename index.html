@@ -3534,37 +3534,6 @@ document.querySelector('[data-feedback]').addEventListener('click', () => {
 window.location.href = 'feedback.html';
 });
 
-async function updateChart(period) {
-    try {
-        const response = await fetch('VotalityChat2.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'getMarketData',
-                period: period,
-                chatId: currentChatId
-            }),
-            credentials: 'same-origin'
-        });
-        
-        const data = await response.json();
-        if (data.error) {
-            console.error('Error fetching market data:', data.error);
-            return;
-        }
-
-        const chart = Chart.getChart('priceChart');
-        if (chart) {
-            chart.data.labels = data.marketData.timePoints;
-            chart.data.datasets[0].data = data.marketData.prices;
-            chart.update();
-        }
-    } catch (error) {
-        console.error('Error updating chart:', error);
-    }
-}
 function initializeChart(canvas, stockData) {
     const ctx = canvas.getContext('2d');
     
@@ -3573,7 +3542,7 @@ function initializeChart(canvas, stockData) {
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
     gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
-    // Initialize with current price point
+    // Initialize with single data point
     const initialData = {
         labels: [getNYSETime()],
         datasets: [{
@@ -3588,7 +3557,7 @@ function initializeChart(canvas, stockData) {
         }]
     };
 
-    return new Chart(ctx, {
+    const chart = new Chart(ctx, {
         type: 'line',
         data: initialData,
         options: {
@@ -3660,33 +3629,24 @@ function initializeChart(canvas, stockData) {
             }
         }
     });
-}
 
+    // Load initial data
+    updateChart('1D', stockData.symbol);
+
+    return chart;
+}
 async function updateChart(period, symbol) {
     try {
-        const response = await fetch('VotalityChat2.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'getMarketData',
-                period: period,
-                symbol: symbol
-            }),
-            credentials: 'same-origin'
-        });
-        
-        const data = await response.json();
-        if (data.error) {
-            console.error('Error fetching market data:', data.error);
+        const marketData = await fetchMarketData(symbol, period);
+        if (!marketData) {
+            console.error('Failed to fetch market data');
             return;
         }
 
         const chart = Chart.getChart('priceChart');
-        if (chart && data.marketData) {
+        if (chart && marketData) {
             // Format time labels based on period
-            const formattedLabels = data.marketData.timePoints.map(time => {
+            const formattedLabels = marketData.timePoints.map(time => {
                 const date = new Date(time);
                 switch (period) {
                     case '1D':
@@ -3709,7 +3669,7 @@ async function updateChart(period, symbol) {
             });
 
             // Calculate appropriate y-axis scale
-            const prices = data.marketData.prices;
+            const prices = marketData.prices;
             const minPrice = Math.min(...prices);
             const maxPrice = Math.max(...prices);
             const padding = (maxPrice - minPrice) * 0.1;
@@ -3717,14 +3677,22 @@ async function updateChart(period, symbol) {
             // Update chart data
             chart.data.labels = formattedLabels;
             chart.data.datasets[0].data = prices;
+            
+            // Update scales
             chart.options.scales.y.min = minPrice - padding;
             chart.options.scales.y.max = maxPrice + padding;
-            chart.update('none');
+            
+            // Update with animation for smooth transition
+            chart.update({
+                duration: 750,
+                easing: 'easeInOutCubic'
+            });
         }
     } catch (error) {
         console.error('Error updating chart:', error);
     }
 }
+
 
 function startMarketDataUpdates(symbol) {
     // Initial chart update
@@ -3964,13 +3932,86 @@ const API_KEYS = {
     tavily: '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'
 };
 
-async function fetchMarketData(symbol) {
+// Function to fetch data from Alpha Vantage
+async function fetchMarketData(symbol, period = '1D') {
     try {
-        const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEYS.finnhub}`);
-        if (!response.ok) {
-            throw new Error('Finnhub API error');
+        let interval, apiFunction;
+        
+        // Determine API parameters based on period
+        switch(period) {
+            case '1D':
+                apiFunction = 'TIME_SERIES_INTRADAY';
+                interval = '5min';
+                break;
+            case '5D':
+                apiFunction = 'TIME_SERIES_INTRADAY';
+                interval = '15min';
+                break;
+            case '1M':
+            case '3M':
+            case '6M':
+                apiFunction = 'TIME_SERIES_DAILY';
+                interval = 'Daily';
+                break;
+            case '1Y':
+            case '5Y':
+                apiFunction = 'TIME_SERIES_WEEKLY';
+                interval = 'Weekly';
+                break;
+            default:
+                apiFunction = 'TIME_SERIES_DAILY';
+                interval = 'Daily';
         }
-        return await response.json();
+
+        const url = `https://www.alphavantage.co/query?function=${apiFunction}&symbol=${symbol}&interval=${interval}&apikey=YW0AODUZUQC95HIF`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Process the data based on the API function used
+        let timeSeriesKey;
+        switch(apiFunction) {
+            case 'TIME_SERIES_INTRADAY':
+                timeSeriesKey = `Time Series (${interval})`;
+                break;
+            case 'TIME_SERIES_DAILY':
+                timeSeriesKey = 'Time Series (Daily)';
+                break;
+            case 'TIME_SERIES_WEEKLY':
+                timeSeriesKey = 'Weekly Time Series';
+                break;
+        }
+
+        const timeSeries = data[timeSeriesKey];
+        if (!timeSeries) {
+            throw new Error('No data received from Alpha Vantage');
+        }
+
+        // Convert Alpha Vantage data to chart format
+        const chartData = Object.entries(timeSeries)
+            .map(([timestamp, values]) => ({
+                time: timestamp,
+                price: parseFloat(values['4. close'])
+            }))
+            .reverse(); // Reverse to get chronological order
+
+        // Limit data points based on period
+        const limitMap = {
+            '1D': 78,   // 6.5 hours in 5-min intervals
+            '5D': 130,  // 5 days in 15-min intervals
+            '1M': 22,   // ~22 trading days
+            '3M': 66,   // ~66 trading days
+            '6M': 128,  // ~128 trading days
+            '1Y': 52,   // 52 weeks
+            '5Y': 260   // ~260 weeks
+        };
+
+        const limit = limitMap[period] || 100;
+        const limitedData = chartData.slice(-limit);
+
+        return {
+            timePoints: limitedData.map(d => d.time),
+            prices: limitedData.map(d => d.price)
+        };
     } catch (error) {
         console.error('Error fetching market data:', error);
         return null;
