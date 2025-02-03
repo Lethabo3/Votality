@@ -3752,49 +3752,6 @@ dropdownItems.forEach(item => {
     });
 });
 
-// API Keys and Constants
-const API_KEYS = {
-    alphavantage: 'U1JW9YY2S4VTQMOD',
-    finnhub: 'crnm7tpr01qt44di3q5gcrnm7tpr01qt44di3q60',
-    marketaux: 'o4VnvcRmaBZeK4eBHPJr8KP3xN8gMBTedxHGkCNz',
-    benzinga: '685f0ad2fe3f4facb3da0aeacb27b76b',
-    nasdaq: 'VGV68j1nV9w9Zn3vwbsG',
-    tavily: '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'
-};
-
-// Helper Functions
-function getNYSETime() {
-    const nyTime = new Date().toLocaleString("en-US", {
-        timeZone: "America/New_York",
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-    });
-    return nyTime + " EST";
-}
-
-function formatDateLabel(date, period) {
-    switch (period) {
-        case '1D':
-            return date.toLocaleTimeString('en-US', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-        case '5D':
-        case '1M':
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric' 
-            });
-        default:
-            return date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                year: '2-digit' 
-            });
-    }
-}
-
-// Chart Initialization
 function initializeChart(canvas, stockData) {
     const ctx = canvas.getContext('2d');
     
@@ -3897,56 +3854,6 @@ function initializeChart(canvas, stockData) {
     return chart;
 }
 
-// Data Fetching
-async function fetchMarketData(symbol, period = '1D') {
-    try {
-        const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${API_KEYS.alphavantage}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data['Error Message'] || !data['Time Series (Daily)']) {
-            throw new Error('Invalid data received from Alpha Vantage');
-        }
-
-        const timeSeriesData = data['Time Series (Daily)'];
-        let dates = Object.keys(timeSeriesData).sort();
-
-        // Limit data points based on period
-        const limitMap = {
-            '1D': 1,
-            '5D': 5,
-            '1M': 30,
-            '3M': 90,
-            '6M': 180,
-            '1Y': 365,
-            '5Y': 1825
-        };
-
-        const daysToInclude = limitMap[period] || 30;
-        dates = dates.slice(-daysToInclude);
-
-        const processedData = dates.map(date => ({
-            time: date,
-            price: parseFloat(timeSeriesData[date]['4. close'])
-        }));
-
-        return {
-            timePoints: processedData.map(d => d.time),
-            prices: processedData.map(d => d.price),
-            symbol: symbol
-        };
-
-    } catch (error) {
-        console.error('Error fetching market data:', error);
-        return null;
-    }
-}
-
-// Chart Update Function
 async function updateChart(period, symbol) {
     try {
         const marketData = await fetchMarketData(symbol, period);
@@ -3957,9 +3864,28 @@ async function updateChart(period, symbol) {
 
         const chart = Chart.getChart('priceChart');
         if (chart) {
-            const formattedLabels = marketData.timePoints.map(time => 
-                formatDateLabel(new Date(time), period)
-            );
+            // Format time labels based on period
+            const formattedLabels = marketData.timePoints.map(time => {
+                const date = new Date(time);
+                switch (period) {
+                    case '1D':
+                        return date.toLocaleTimeString('en-US', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        });
+                    case '5D':
+                    case '1M':
+                        return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
+                    default:
+                        return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            year: '2-digit' 
+                        });
+                }
+            });
 
             // Calculate appropriate y-axis scale with padding
             const prices = marketData.prices;
@@ -3986,7 +3912,68 @@ async function updateChart(period, symbol) {
     }
 }
 
-// Additional Features
+function getNYSETime() {
+    return new Date().toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    }) + " EST";
+}
+
+async function fetchMarketData(symbol, period = '1D') {
+    try {
+        const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=U1JW9YY2S4VTQMOD`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data['Error Message'] || !data['Time Series (Daily)']) {
+            throw new Error('No data available for this symbol');
+        }
+
+        const timeSeriesData = data['Time Series (Daily)'];
+        const dates = Object.keys(timeSeriesData).sort();
+        
+        // Limit data points based on period
+        const limitMap = {
+            '1D': 1,
+            '5D': 5,
+            '1M': 30,
+            '3M': 90,
+            '6M': 180,
+            '1Y': 365,
+            '5Y': 1825
+        };
+
+        const daysToInclude = limitMap[period] || 30;
+        const limitedDates = dates.slice(-daysToInclude);
+
+        const processedData = {
+            timePoints: limitedDates,
+            prices: limitedDates.map(date => parseFloat(timeSeriesData[date]['4. close'])),
+            symbol: symbol
+        };
+
+        return processedData;
+
+    } catch (error) {
+        console.error('Error fetching market data:', error);
+        return null;
+    }
+}
+
+function handlePeriodChange(chart, symbol, period) {
+    fetchMarketData(symbol, period).then(marketData => {
+        if (marketData) {
+            updateChart(period, symbol);
+        }
+    });
+}
+
 async function performTavilySearch(symbol) {
     try {
         const response = await fetch('https://api.tavily.com/search', {
@@ -3996,7 +3983,7 @@ async function performTavilySearch(symbol) {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                api_key: API_KEYS.tavily,
+                api_key: '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',
                 query: `${symbol} stock financial information latest news`,
                 search_depth: 'advanced',
                 include_answer: true,
@@ -4010,16 +3997,6 @@ async function performTavilySearch(symbol) {
     }
 }
 
-// Event Handlers
-function handlePeriodChange(chart, symbol, period) {
-    fetchMarketData(symbol, period).then(marketData => {
-        if (marketData) {
-            updateChart(period, symbol);
-        }
-    });
-}
-
-// Cleanup Function
 function cleanupMarketData() {
     if (window.marketDataInterval) {
         clearInterval(window.marketDataInterval);
@@ -4032,24 +4009,6 @@ function cleanupMarketData() {
         delete marketSection.dataset.timeInterval;
     }
 }
-
-// Initialize Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.period-button').forEach(button => {
-        button.addEventListener('click', function() {
-            const period = this.dataset.period;
-            document.querySelectorAll('.period-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            this.classList.add('active');
-            
-            const chart = Chart.getChart('priceChart');
-            if (chart) {
-                handlePeriodChange(chart, currentSymbol, period);
-            }
-        });
-    });
-});
 </script>
 </body>
 </html>
