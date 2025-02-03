@@ -1153,17 +1153,11 @@ async function sendMessage(message, file = null) {
                 // Extract potential stock symbols (looking for $SYMBOL or standalone uppercase letters)
                 const stockSymbolMatch = message.match(/\$([A-Z]{1,5})|(?:^|\s)([A-Z]{1,5})(?:\s|$)/);
                 let marketData = null;
-                let tavilyData = null;
                 
                 // If we found a stock symbol, fetch market data
                 if (stockSymbolMatch) {
                     const symbol = stockSymbolMatch[1] || stockSymbolMatch[2];
-                    
-                    // Fetch market data and Tavily search results in parallel
-                    [marketData, tavilyData] = await Promise.all([
-                        fetchMarketData(symbol),
-                        performTavilySearch(symbol)
-                    ]);
+                    marketData = await fetchMarketData(symbol);
                 }
 
                 const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
@@ -1185,10 +1179,7 @@ async function sendMessage(message, file = null) {
                             priceChangePercent: marketData.priceChangePercent,
                             timestamp: new Date().toISOString()
                         } : null,
-                        additionalInfo: tavilyData ? {
-                            summary: tavilyData.answer,
-                            sources: tavilyData.results
-                        } : null
+                        additionalInfo: null
                     }),
                     credentials: 'same-origin'
                 });
