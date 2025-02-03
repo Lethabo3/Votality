@@ -3537,12 +3537,12 @@ window.location.href = 'feedback.html';
 function initializeChart(canvas, stockData) {
     const ctx = canvas.getContext('2d');
     
-    // Create gradient for the chart area
+    // Create gradient for chart area
     const gradient = ctx.createLinearGradient(0, 0, 0, 250);
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
     gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
-    // Initialize with single data point
+    // Initialize with current price point
     const initialData = {
         labels: [getNYSETime()],
         datasets: [{
@@ -3635,6 +3635,7 @@ function initializeChart(canvas, stockData) {
 
     return chart;
 }
+
 async function updateChart(period, symbol) {
     try {
         const marketData = await fetchMarketData(symbol, period);
@@ -3644,7 +3645,7 @@ async function updateChart(period, symbol) {
         }
 
         const chart = Chart.getChart('priceChart');
-        if (chart && marketData) {
+        if (chart) {
             // Format time labels based on period
             const formattedLabels = marketData.timePoints.map(time => {
                 const date = new Date(time);
@@ -3668,7 +3669,7 @@ async function updateChart(period, symbol) {
                 }
             });
 
-            // Calculate appropriate y-axis scale
+            // Calculate appropriate y-axis scale with padding
             const prices = marketData.prices;
             const minPrice = Math.min(...prices);
             const maxPrice = Math.max(...prices);
@@ -3677,12 +3678,12 @@ async function updateChart(period, symbol) {
             // Update chart data
             chart.data.labels = formattedLabels;
             chart.data.datasets[0].data = prices;
-            
+
             // Update scales
             chart.options.scales.y.min = minPrice - padding;
             chart.options.scales.y.max = maxPrice + padding;
-            
-            // Update with animation for smooth transition
+
+            // Animate update
             chart.update({
                 duration: 750,
                 easing: 'easeInOutCubic'
@@ -3934,84 +3935,93 @@ const API_KEYS = {
 
 // Function to fetch data from Alpha Vantage
 async function fetchMarketData(symbol, period = '1D') {
+    const API_KEY = '0f9910759084e84dddbd825b4cc84074';
+    const BASE_URL = 'http://api.marketstack.com/v1';
+
     try {
-        let interval, apiFunction;
-        
-        // Determine API parameters based on period
+        let endpoint, params;
+        const currentDate = new Date();
+        let fromDate = new Date();
+
+        // Calculate date range based on period
         switch(period) {
             case '1D':
-                apiFunction = 'TIME_SERIES_INTRADAY';
-                interval = '5min';
+                fromDate.setDate(currentDate.getDate() - 1);
+                endpoint = '/intraday';
+                params = `interval=1hour`;
                 break;
             case '5D':
-                apiFunction = 'TIME_SERIES_INTRADAY';
-                interval = '15min';
+                fromDate.setDate(currentDate.getDate() - 5);
+                endpoint = '/intraday';
+                params = `interval=3hour`;
                 break;
             case '1M':
+                fromDate.setMonth(currentDate.getMonth() - 1);
+                endpoint = '/eod';
+                break;
             case '3M':
+                fromDate.setMonth(currentDate.getMonth() - 3);
+                endpoint = '/eod';
+                break;
             case '6M':
-                apiFunction = 'TIME_SERIES_DAILY';
-                interval = 'Daily';
+                fromDate.setMonth(currentDate.getMonth() - 6);
+                endpoint = '/eod';
                 break;
             case '1Y':
+                fromDate.setFullYear(currentDate.getFullYear() - 1);
+                endpoint = '/eod';
+                break;
             case '5Y':
-                apiFunction = 'TIME_SERIES_WEEKLY';
-                interval = 'Weekly';
+                fromDate.setFullYear(currentDate.getFullYear() - 5);
+                endpoint = '/eod';
                 break;
             default:
-                apiFunction = 'TIME_SERIES_DAILY';
-                interval = 'Daily';
+                fromDate.setMonth(currentDate.getMonth() - 1);
+                endpoint = '/eod';
         }
 
-        const url = `https://www.alphavantage.co/query?function=${apiFunction}&symbol=${symbol}&interval=${interval}&apikey=YW0AODUZUQC95HIF`;
+        // Format dates for API
+        const dateFrom = fromDate.toISOString().split('T')[0];
+        const dateTo = currentDate.toISOString().split('T')[0];
+
+        // Construct URL with parameters
+        const url = `${BASE_URL}${endpoint}?access_key=${API_KEY}&symbols=${symbol}&date_from=${dateFrom}&date_to=${dateTo}&limit=1000${params ? '&' + params : ''}`;
+
         const response = await fetch(url);
         const data = await response.json();
 
-        // Process the data based on the API function used
-        let timeSeriesKey;
-        switch(apiFunction) {
-            case 'TIME_SERIES_INTRADAY':
-                timeSeriesKey = `Time Series (${interval})`;
-                break;
-            case 'TIME_SERIES_DAILY':
-                timeSeriesKey = 'Time Series (Daily)';
-                break;
-            case 'TIME_SERIES_WEEKLY':
-                timeSeriesKey = 'Weekly Time Series';
-                break;
+        if (!data.data || data.data.length === 0) {
+            throw new Error('No data received from MarketStack');
         }
 
-        const timeSeries = data[timeSeriesKey];
-        if (!timeSeries) {
-            throw new Error('No data received from Alpha Vantage');
-        }
+        // Process and format the data
+        const processedData = data.data
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+            .map(item => ({
+                time: item.date,
+                price: item.close
+            }));
 
-        // Convert Alpha Vantage data to chart format
-        const chartData = Object.entries(timeSeries)
-            .map(([timestamp, values]) => ({
-                time: timestamp,
-                price: parseFloat(values['4. close'])
-            }))
-            .reverse(); // Reverse to get chronological order
-
-        // Limit data points based on period
+        // Limit number of data points for better visualization
         const limitMap = {
-            '1D': 78,   // 6.5 hours in 5-min intervals
-            '5D': 130,  // 5 days in 15-min intervals
-            '1M': 22,   // ~22 trading days
-            '3M': 66,   // ~66 trading days
-            '6M': 128,  // ~128 trading days
-            '1Y': 52,   // 52 weeks
-            '5Y': 260   // ~260 weeks
+            '1D': 24,    // Hourly for one day
+            '5D': 40,    // 3-hour intervals for 5 days
+            '1M': 31,    // Daily for a month
+            '3M': 90,    // Daily for 3 months
+            '6M': 180,   // Daily for 6 months
+            '1Y': 252,   // Trading days in a year
+            '5Y': 260    // Weekly for 5 years
         };
 
         const limit = limitMap[period] || 100;
-        const limitedData = chartData.slice(-limit);
+        const limitedData = processedData.slice(-limit);
 
         return {
             timePoints: limitedData.map(d => d.time),
-            prices: limitedData.map(d => d.price)
+            prices: limitedData.map(d => d.price),
+            symbol: symbol
         };
+
     } catch (error) {
         console.error('Error fetching market data:', error);
         return null;
