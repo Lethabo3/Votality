@@ -836,9 +836,13 @@
     }
 
     .main-content {
-        padding-top: 60px; /* Make room for top nav */
-        padding-bottom: 60px; /* Make room for bottom nav */
-        margin-top: 0; /* Ensure no top margin */
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Center children horizontally */
+        transition: margin-left 0.3s ease;
+        margin-left: 4rem; /* Original sidebar width */
+        padding: 0 1rem; /* Add padding for smaller screens */
     }
 
     .top-nav {
@@ -995,9 +999,55 @@
         max-width: 800px;
         height: 90px;
         z-index: 10;
-        left: 20%; /* Adjusted from 50% to 35% to move it more to the left */
+        left: 50%;
+        transform: translateX(-50%);
         border-radius: 12px;
     }
+
+/* Remove sidebar expansion adjustment */
+.sidebar.expanded ~ .main-content .textarea-container.repositioned {
+    transform: translateX(-50%);
+}
+
+@media (max-width: 768px) {
+    .textarea-container.repositioned {
+        width: 90%;
+    }
+}
+
+.sidebar.expanded ~ .main-content .chat-container.fade-in {
+    transform: translateX(-90%);
+    left: 50%;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .textarea-container.repositioned {
+        width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .sidebar.expanded ~ .main-content .textarea-container.repositioned {
+        transform: translateX(-50%);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chat-container.fade-in {
+        width: 95%; /* Slightly wider on smaller screens */
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 0 0.5rem;
+    }
+    
+    .sidebar.expanded ~ .main-content {
+        margin-left: 0;
+    }
+}
 
     /* Adjusting the textarea within the container */
     .textarea-container.repositioned .textarea-input {
@@ -1051,11 +1101,27 @@
         pointer-events: all;
     }
 
-    /* When sidebar is collapsed */
-    .sidebar.collapsed ~ .main-content .chat-container.fade-in {
-        left: 30%; /* Move it to match the chat container position */
-        transform: translateX(-50%);
-    }
+/* Updated chat container styles */
+.chat-container.fade-in {
+    display: block;
+    position: relative;
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto; /* Center using margin auto */
+    left: 0; /* Remove left positioning */
+    transform: none; /* Remove transform */
+    transition: all 0.3s ease;
+}
+
+.sidebar.expanded ~ .main-content {
+    margin-left: 15rem;
+}
+
+.sidebar.collapsed ~ .main-content .chat-container.fade-in {
+    left: 0; /* Remove left positioning */
+    transform: none; /* Remove transform */
+    margin: 0 auto; /* Keep centering with margin auto */
+}
 
     .sidebar.collapsed ~ .scroll-to-bottom-button {
         position: relative;
@@ -1097,16 +1163,10 @@
     }
 
     .chat-container {
-    display: none;
-    height: calc(100vh - 200px);
-    overflow-y: auto;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1rem;
     }
 
     .chat-container::-webkit-scrollbar { 
@@ -1267,34 +1327,32 @@
     }
 
     .sources-container {
-    display: flex;
-    flex-wrap: nowrap; /* Prevent wrapping */
-    gap: 0.5rem;
-    margin: 0.5rem 0;
-    margin-left: -1rem;
-    width: 100%;
-    overflow-x: auto; /* Enable horizontal scrolling */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    scrollbar-width: none; /* Hide scrollbar for Firefox */
-    -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+        margin: 0.5rem 0;
+        margin-left: -0.7rem;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        padding: 0.5rem;
     }
 
     .message {
-    padding: 12px 0; /* Remove horizontal padding */
-    border-radius: 20px;
-    transition: all 0.3s ease;
-    background-color: transparent;
-    width: 100%;
+        width: 100%;
+        max-width: 100%;
+        word-wrap: break-word;
     }
 
     .user-message {
-        font-size: 2em;
+        font-size: clamp(1.25rem, 2vw, 2em);
         font-weight: bold;
-        color: #333;
-        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        margin: 0 0 0.5rem;
         text-align: left;
-        margin-left: -1rem;
-        max-width: 100%;
+        width: 100%;
         align-self: flex-start;
         word-wrap: break-word;
         overflow-wrap: break-word;
@@ -1304,7 +1362,7 @@
         border-radius: 8px;
         transition: all 0.3s ease;
         border: 1px solid transparent;
-        position: relative; /* Added for edit controls positioning */
+        position: relative;
     }
 
     .user-message:hover {
@@ -1383,20 +1441,22 @@
     }
 
     .ai-message {
-    align-self: flex-start;
-    margin-right: auto;
-    text-align: left;
-    max-width: 96%;
-    position: relative;
-    overflow-wrap: break-word;
-    hyphens: none;
-    line-height: 1.5;
-    -webkit-hyphens: none;
-    -ms-hyphens: none;
-    word-wrap: break-word;
-    word-break: normal;
-    white-space: pre-wrap;
-    margin-top: 0.5rem;
+        align-self: flex-start;
+        margin-right: auto;
+        text-align: left;
+        width: 100%;
+        max-width: clamp(90%, 96%, 98%);
+        position: relative;
+        overflow-wrap: break-word;
+        hyphens: none;
+        -webkit-hyphens: none;
+        -ms-hyphens: none;
+        line-height: 1.5;
+        word-wrap: break-word;
+        word-break: normal;
+        white-space: pre-wrap;
+        margin-top: 0.5rem;
+        padding: 0 0.5rem;
     }
 
     .ai-message-heading {
@@ -1475,7 +1535,20 @@
     }
 
     .desktop-top-nav__center {
-    justify-content: center;
+        position: fixed;
+        left: 48%;
+        transform: translateX(-50%);
+        text-align: center;
+        width: auto;
+        z-index: 2;
+    }
+    
+    @media (max-width: 768px) {
+        .desktop-top-nav__center {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+        }
     }
 
     .desktop-top-nav__right {
@@ -3247,6 +3320,13 @@
         -webkit-mask: none;
         mask: none;
         }
+
+        /* Ensure content stays centered when sidebar is expanded */
+@media (min-width: 1200px) {
+    .sidebar.expanded ~ .main-content .chat-container {
+        margin-left: calc(15rem + auto);
+    }
+}
 
         .checkpoint.active .checkpoint-circle {
         --_m:
