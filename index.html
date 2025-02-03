@@ -3608,66 +3608,50 @@ function updatePriceDisplay(data) {
 }
 
 function createMarketDataSection(stockData) {
-    // Load Chart.js if needed
-    if (!window.Chart) {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-        script.onload = () => {
-            const chart = initializeChart(
-                document.getElementById('priceChart'), 
-                stockData
-            );
-            // Start real-time updates after chart is initialized
-            const updateInterval = startMarketDataUpdates(stockData.symbol);
-            // Store interval ID for cleanup
-            document.getElementById('priceChart').dataset.updateInterval = updateInterval;
-        };
-        document.head.appendChild(script);
-    }
-
     // Cleanup existing intervals
     cleanupMarketData();
 
     const marketDataSection = document.createElement('div');
     marketDataSection.className = 'market-data-section';
     
-    marketDataSection.innerHTML = `
-        <div class="market-header">
-            <div class="market-title">
-                <span class="company-name">${stockData.companyName}</span>
-                <span class="company-symbol">${stockData.symbol}</span>
-            </div>
-            <div class="price-container">
-                <span class="current-price">$${parseFloat(stockData.currentPrice).toFixed(2)}</span>
-                <div class="price-change ${stockData.priceChange >= 0 ? 'positive' : 'negative'}">
-                    <span>$${Math.abs(stockData.priceChange).toFixed(2)}</span>
-                    <span>(${stockData.priceChangePercent}%)</span>
-                </div>
-            </div>
-            
-            <div class="controls-row">
-                <div class="trading-status">
-                    <span>${stockData.tradingStatus}</span>
-                    <span class="separator">•</span>
-                    <span>${getNYSETime()}</span>
-                </div>
-
-                <div class="time-periods">
-                    <button class="period-button active" data-period="1D">1D</button>
-                    <button class="period-button" data-period="5D">5D</button>
-                    <button class="period-button" data-period="1M">1M</button>
-                    <button class="period-button" data-period="3M">3M</button>
-                    <button class="period-button" data-period="6M">6M</button>
-                    <button class="period-button" data-period="1Y">1Y</button>
-                    <button class="period-button" data-period="5Y">5Y</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="chart-container">
-            <canvas id="priceChart" style="width: 100%; height: 100%;"></canvas>
-        </div>
-    `;
+    const priceChangeValue = parseFloat(stockData.priceChange);
+    const priceChangeClass = priceChangeValue >= 0 ? 'positive' : 'negative';
+    
+    marketDataSection.innerHTML = 
+        '<div class="market-header">' +
+            '<div class="market-title">' +
+                `<span class="company-name">${stockData.symbol}</span>` +
+                `<span class="company-symbol">${stockData.symbol}</span>` +
+            '</div>' +
+            '<div class="price-container">' +
+                `<span class="current-price">$${parseFloat(stockData.currentPrice).toFixed(2)}</span>` +
+                `<div class="price-change ${priceChangeClass}">` +
+                    `<span>$${Math.abs(priceChangeValue).toFixed(2)}</span>` +
+                    `<span>(${stockData.priceChangePercent}%)</span>` +
+                '</div>' +
+            '</div>' +
+            '<div class="controls-row">' +
+                '<div class="trading-status">' +
+                    '<span>Regular Hours</span>' +
+                    '<span class="separator">•</span>' +
+                    `<span>${getNYSETime()}</span>` +
+                '</div>' +
+                '<div class="time-periods">' +
+                    '<button class="period-button active" data-period="1D">1D</button>' +
+                    '<button class="period-button" data-period="5D">5D</button>' +
+                    '<button class="period-button" data-period="1M">1M</button>' +
+                    '<button class="period-button" data-period="3M">3M</button>' +
+                    '<button class="period-button" data-period="6M">6M</button>' +
+                    '<button class="period-button" data-period="1Y">1Y</button>' +
+                    '<button class="period-button" data-period="5Y">5Y</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="chart-container">' +
+            '<div class="chart">' +
+                '<canvas id="priceChart"></canvas>' +
+            '</div>' +
+        '</div>';
 
     // Add period button event listeners
     marketDataSection.querySelectorAll('.period-button').forEach(button => {
@@ -3677,6 +3661,28 @@ function createMarketDataSection(stockData) {
             button.classList.add('active');
             updateChart(button.dataset.period, stockData.symbol);
         });
+    });
+
+    // Initialize chart with a delay to ensure the DOM is ready
+    requestAnimationFrame(() => {
+        const chartCanvas = marketDataSection.querySelector('#priceChart');
+        if (chartCanvas) {
+            // Set canvas dimensions to match container
+            const container = chartCanvas.parentElement;
+            chartCanvas.style.width = '100%';
+            chartCanvas.style.height = '100%';
+            chartCanvas.width = container.clientWidth;
+            chartCanvas.height = container.clientHeight;
+
+            console.log('Initializing chart with data:', stockData);
+            initializeChart(chartCanvas, {
+                prices: [stockData.currentPrice],
+                timePoints: [getNYSETime()]
+            });
+            
+            // Load initial data
+            updateChart('1D', stockData.symbol);
+        }
     });
 
     // Update time every minute
@@ -3947,15 +3953,26 @@ function createMarketDataSection(stockData) {
 }
 
 function initializeChart(canvas, data) {
+    console.log('Initializing chart with canvas:', canvas);
+    
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Failed to get canvas context');
+        return;
+    }
     
     // Create gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
     gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
     const prices = data.prices;
     const timeLabels = data.timePoints;
+
+    // Calculate appropriate y-axis scale with padding
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+    const padding = (maxPrice - minPrice) * 0.1;
 
     const chartData = {
         labels: timeLabels,
@@ -4042,12 +4059,15 @@ function initializeChart(canvas, data) {
                     },
                     border: {
                         display: false
-                    }
+                    },
+                    min: minPrice - padding,
+                    max: maxPrice + padding
                 }
             }
         }
     });
 
+    console.log('Chart initialized successfully');
     return window.priceChart;
 }
 
