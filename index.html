@@ -1179,11 +1179,10 @@ async function sendMessage(message, file = null) {
                         stayLoggedOut: stayLoggedOut,
                         file: file ? { data: await readFileAsDataURL(file), type: file.type } : null,
                         marketData: marketData ? {
-                            currentPrice: marketData.c,
-                            highPrice: marketData.h,
-                            lowPrice: marketData.l,
-                            openPrice: marketData.o,
-                            previousClose: marketData.pc,
+                            symbol: stockSymbolMatch[1] || stockSymbolMatch[2],
+                            currentPrice: marketData.prices[marketData.prices.length - 1],
+                            priceChange: marketData.priceChange,
+                            priceChangePercent: marketData.priceChangePercent,
                             timestamp: new Date().toISOString()
                         } : null,
                         additionalInfo: tavilyData ? {
@@ -1216,20 +1215,36 @@ async function sendMessage(message, file = null) {
                     updateChatTopicDisplay(data.chatTopic);
                 }
 
-// Wait briefly for checkpoints to complete
-setTimeout(async () => {
-    // Signal AI response right before adding the message
-    signalAIResponse();
-    
-    // Add AI response
-    await addMessage(data.response, 'ai', data.relatedTopics);
+                // Wait briefly for checkpoints to complete
+                setTimeout(async () => {
+                    // Signal AI response right before adding the message
+                    signalAIResponse();
+                    
+                    // Add AI response
+                    const messageElement = await addMessage(data.response, 'ai', data.relatedTopics);
 
-                    // Handle market data if present
-                    if (data.marketData) {
-                        const marketSection = createMarketDataSection(data.marketData);
-                        const aiMessage = document.querySelector('.message.ai:last-child');
-                        if (aiMessage) {
-                            aiMessage.insertBefore(marketSection, aiMessage.firstChild);
+                    // Handle market data if present and we have market data
+                    if (data.marketData && marketData) {
+                        const marketSection = createMarketDataSection({
+                            symbol: stockSymbolMatch[1] || stockSymbolMatch[2],
+                            currentPrice: marketData.prices[marketData.prices.length - 1],
+                            priceChange: marketData.priceChange,
+                            priceChangePercent: marketData.priceChangePercent
+                        });
+
+                        if (messageElement && messageElement.parentNode) {
+                            messageElement.parentNode.insertBefore(marketSection, messageElement);
+                            
+                            // Initialize chart after DOM insertion
+                            setTimeout(() => {
+                                const chartCanvas = document.getElementById('priceChart');
+                                if (chartCanvas) {
+                                    initializeChart(chartCanvas, {
+                                        prices: marketData.prices,
+                                        timePoints: marketData.timePoints
+                                    });
+                                }
+                            }, 0);
                         }
                     }
 
@@ -3864,10 +3879,19 @@ async function fetchMarketData(symbol, period = '1D') {
         const daysToInclude = limitMap[period] || 30;
         const limitedDates = dates.slice(-daysToInclude);
 
+        // Calculate price change
+        const latestPrice = parseFloat(timeSeriesData[dates[0]]['4. close']);
+        const previousPrice = parseFloat(timeSeriesData[dates[1]]['4. close']);
+        const priceChange = latestPrice - previousPrice;
+        const priceChangePercent = (priceChange / previousPrice) * 100;
+
         const processedData = {
             timePoints: limitedDates,
             prices: limitedDates.map(date => parseFloat(timeSeriesData[date]['4. close'])),
-            symbol: symbol
+            symbol: symbol,
+            currentPrice: latestPrice,
+            priceChange: priceChange,
+            priceChangePercent: priceChangePercent.toFixed(2)
         };
 
         return processedData;
@@ -3875,6 +3899,60 @@ async function fetchMarketData(symbol, period = '1D') {
         console.error('Error fetching market data:', error);
         return null;
     }
+}
+
+function createMarketDataSection(stockData) {
+    // Cleanup existing intervals
+    cleanupMarketData();
+
+    const marketDataSection = document.createElement('div');
+    marketDataSection.className = 'market-data-section';
+    
+    marketDataSection.innerHTML = 
+        '<div class="market-header">' +
+            '<div class="market-title">' +
+                `<span class="company-name">${stockData.symbol}</span>` +
+                `<span class="company-symbol">${stockData.symbol}</span>` +
+            '</div>' +
+            '<div class="price-container">' +
+                `<span class="current-price">$${parseFloat(stockData.currentPrice).toFixed(2)}</span>` +
+                `<div class="price-change ${parseFloat(stockData.priceChange) >= 0 ? 'positive' : 'negative'}">` +
+                    `<span>$${Math.abs(parseFloat(stockData.priceChange)).toFixed(2)}</span>` +
+                    `<span>(${stockData.priceChangePercent}%)</span>` +
+                '</div>' +
+            '</div>' +
+            '<div class="controls-row">' +
+                '<div class="trading-status">' +
+                    '<span>Regular Hours</span>' +
+                    '<span class="separator">•</span>' +
+                    `<span>${getNYSETime()}</span>` +
+                '</div>' +
+                '<div class="time-periods">' +
+                    '<button class="period-button active" data-period="1D">1D</button>' +
+                    '<button class="period-button" data-period="5D">5D</button>' +
+                    '<button class="period-button" data-period="1M">1M</button>' +
+                    '<button class="period-button" data-period="3M">3M</button>' +
+                    '<button class="period-button" data-period="6M">6M</button>' +
+                    '<button class="period-button" data-period="1Y">1Y</button>' +
+                    '<button class="period-button" data-period="5Y">5Y</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="chart-container" style="height: 300px;">' +
+            '<canvas id="priceChart"></canvas>' +
+        '</div>';
+
+    // Add period button event listeners
+    marketDataSection.querySelectorAll('.period-button').forEach(button => {
+        button.addEventListener('click', () => {
+            marketDataSection.querySelectorAll('.period-button')
+                .forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            updateChart(button.dataset.period, stockData.symbol);
+        });
+    });
+
+    return marketDataSection;
 }
 
 function initializeChart(canvas, data) {
@@ -3887,11 +3965,6 @@ function initializeChart(canvas, data) {
 
     const prices = data.prices;
     const timeLabels = data.timePoints;
-
-    // Calculate appropriate y-axis scale with padding
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    const padding = (maxPrice - minPrice) * 0.1;
 
     const chartData = {
         labels: timeLabels,
@@ -3978,9 +4051,7 @@ function initializeChart(canvas, data) {
                     },
                     border: {
                         display: false
-                    },
-                    min: minPrice - padding,
-                    max: maxPrice + padding
+                    }
                 }
             }
         }
@@ -4019,7 +4090,6 @@ async function updateChart(period, symbol) {
             }
         });
 
-        // Initialize or update chart with new data
         const chartCanvas = document.getElementById('priceChart');
         if (chartCanvas) {
             initializeChart(chartCanvas, {
@@ -4058,6 +4128,9 @@ function getNYSETime() {
         minute: '2-digit',
         hour12: true
     }) + " EST";
-}</script>
+}
+
+
+</script>
 </body>
 </html>
