@@ -3534,6 +3534,168 @@ document.querySelector('[data-feedback]').addEventListener('click', () => {
 window.location.href = 'feedback.html';
 });
 
+function initializeChart(canvas, stockData) {
+    const ctx = canvas.getContext('2d');
+    
+    // Create gradient for the chart area
+    const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
+    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+    // Initialize with single data point
+    const initialData = {
+        labels: [getNYSETime()],
+        datasets: [{
+            label: 'Price',
+            data: [stockData.currentPrice],
+            borderColor: '#10B981',
+            backgroundColor: gradient,
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.4,
+            fill: true
+        }]
+    };
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: initialData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                    titleColor: '#9CA3AF',
+                    bodyColor: '#ffffff',
+                    borderColor: '#4B5563',
+                    borderWidth: 1,
+                    padding: 8,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `$${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#9CA3AF',
+                        font: {
+                            size: 11
+                        },
+                        maxRotation: 0,
+                        autoSkip: true,
+                        maxTicksLimit: 6
+                    },
+                    border: {
+                        display: false
+                    }
+                },
+                y: {
+                    position: 'left',
+                    grid: {
+                        color: 'rgba(75, 85, 99, 0.1)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#9CA3AF',
+                        font: {
+                            size: 11
+                        },
+                        padding: 8,
+                        callback: function(value) {
+                            return `$${value.toFixed(2)}`;
+                        }
+                    },
+                    border: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Load initial data
+    updateChart('1D', stockData.symbol);
+
+    return chart;
+}
+
+
+async function updateChart(period, symbol) {
+    try {
+        const marketData = await fetchMarketData(symbol, period);
+        if (!marketData) {
+            console.error('Failed to fetch market data');
+            return;
+        }
+
+        const chart = Chart.getChart('priceChart');
+        if (chart) {
+            // Format time labels based on period
+            const formattedLabels = marketData.timePoints.map(time => {
+                const date = new Date(time);
+                switch (period) {
+                    case '1D':
+                        return date.toLocaleTimeString('en-US', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        });
+                    case '5D':
+                    case '1M':
+                        return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        });
+                    default:
+                        return date.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            year: '2-digit' 
+                        });
+                }
+            });
+
+            // Calculate appropriate y-axis scale with padding
+            const prices = marketData.prices;
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const padding = (maxPrice - minPrice) * 0.1;
+
+            // Update chart data
+            chart.data.labels = formattedLabels;
+            chart.data.datasets[0].data = prices;
+
+            // Update scales
+            chart.options.scales.y.min = minPrice - padding;
+            chart.options.scales.y.max = maxPrice + padding;
+
+            // Animate update
+            chart.update({
+                duration: 750,
+                easing: 'easeInOutCubic'
+            });
+        }
+    } catch (error) {
+        console.error('Error updating chart:', error);
+    }
+}
+
+
 function startMarketDataUpdates(symbol) {
     // Initial chart update
     updateChart('1D', symbol);
@@ -3686,6 +3848,16 @@ function createMarketDataSection(stockData) {
     return marketDataSection;
 }
 
+// Function to get NYSE time
+function getNYSETime() {
+    const nyTime = new Date().toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+    return nyTime + " EST";
+}
 
 // Function to add market data section to message
 function addMarketDataSection(response) {
@@ -3751,177 +3923,6 @@ dropdownItems.forEach(item => {
         dropdownContent.classList.remove('show');
     });
 });
-
-function initializeChart(canvas, stockData) {
-    const ctx = canvas.getContext('2d');
-    
-    // Create gradient for the chart area
-    const gradient = ctx.createLinearGradient(0, 0, 0, 250);
-    gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
-    gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-
-    // Initialize with single data point
-    const initialData = {
-        labels: [getNYSETime()],
-        datasets: [{
-            label: 'Price',
-            data: [stockData.currentPrice],
-            borderColor: '#10B981',
-            backgroundColor: gradient,
-            borderWidth: 2,
-            pointRadius: 0,
-            tension: 0.4,
-            fill: true
-        }]
-    };
-
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: initialData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                    titleColor: '#9CA3AF',
-                    bodyColor: '#ffffff',
-                    borderColor: '#4B5563',
-                    borderWidth: 1,
-                    padding: 8,
-                    displayColors: false,
-                    callbacks: {
-                        label: function(context) {
-                            return `$${context.parsed.y.toFixed(2)}`;
-                        }
-                    }
-                }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        color: '#9CA3AF',
-                        font: {
-                            size: 11
-                        },
-                        maxRotation: 0,
-                        autoSkip: true,
-                        maxTicksLimit: 6
-                    },
-                    border: {
-                        display: false
-                    }
-                },
-                y: {
-                    position: 'left',
-                    grid: {
-                        color: 'rgba(75, 85, 99, 0.1)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#9CA3AF',
-                        font: {
-                            size: 11
-                        },
-                        padding: 8,
-                        callback: function(value) {
-                            return `$${value.toFixed(2)}`;
-                        }
-                    },
-                    border: {
-                        display: false
-                    }
-                }
-            }
-        }
-    });
-
-    // Load initial data
-    updateChart('1D', stockData.symbol);
-
-    return chart;
-}
-
-async function updateChart(period, symbol) {
-    try {
-        const marketData = await fetchMarketData(symbol, period);
-        if (!marketData) {
-            console.error('Failed to fetch market data');
-            return;
-        }
-
-        const chart = Chart.getChart('priceChart');
-        if (chart) {
-            // Format time labels based on period
-            const formattedLabels = marketData.timePoints.map(time => {
-                const date = new Date(time);
-                switch (period) {
-                    case '1D':
-                        return date.toLocaleTimeString('en-US', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                        });
-                    case '5D':
-                    case '1M':
-                        return date.toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric' 
-                        });
-                    default:
-                        return date.toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            year: '2-digit' 
-                        });
-                }
-            });
-
-            // Calculate appropriate y-axis scale with padding
-            const prices = marketData.prices;
-            const minPrice = Math.min(...prices);
-            const maxPrice = Math.max(...prices);
-            const padding = (maxPrice - minPrice) * 0.1;
-
-            // Update chart data
-            chart.data.labels = formattedLabels;
-            chart.data.datasets[0].data = prices;
-
-            // Update scales
-            chart.options.scales.y.min = minPrice - padding;
-            chart.options.scales.y.max = maxPrice + padding;
-
-            // Animate update
-            chart.update({
-                duration: 750,
-                easing: 'easeInOutCubic'
-            });
-        }
-    } catch (error) {
-        console.error('Error updating chart:', error);
-    }
-}
-
-// Function to get NYSE time
-function getNYSETime() {
-    const nyTime = new Date().toLocaleString("en-US", {
-        timeZone: "America/New_York",
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-    });
-    return nyTime + " EST";
-}
 
 // API configuration
 // Define helper functions first
@@ -4089,7 +4090,6 @@ function cleanupMarketData() {
         delete marketSection.dataset.timeInterval;
     }
 }
-
 </script>
 </body>
 </html>
