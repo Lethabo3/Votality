@@ -3,8 +3,6 @@
 <head>
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-G7WREYHFF7"></script>
-<canvas id="priceChartCanvas" width="600" height="400"></canvas>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
@@ -3539,12 +3537,12 @@ window.location.href = 'feedback.html';
 function initializeChart(canvas, stockData) {
     const ctx = canvas.getContext('2d');
     
-    // Create gradient for chart area
+    // Create gradient for the chart area
     const gradient = ctx.createLinearGradient(0, 0, 0, 250);
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
     gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
-    // Initialize with current price point
+    // Initialize with single data point
     const initialData = {
         labels: [getNYSETime()],
         datasets: [{
@@ -3637,6 +3635,7 @@ function initializeChart(canvas, stockData) {
 
     return chart;
 }
+
 
 async function updateChart(period, symbol) {
     try {
