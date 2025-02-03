@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+        .stock-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+        .price {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .change {
+            font-size: 18px;
+        }
+        .positive { color: #28a745; }
+        .negative { color: #dc3545; }
+        #loading {
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-box">
+            <input type="text" id="symbolInput" placeholder="Enter stock symbol (e.g., AAPL)">
+            <button onclick="fetchStockData()">Search</button>
+        </div>
+        <div id="loading">Loading...</div>
+        <div id="stockInfo" class="stock-info"></div>
+        <div class="chart-container">
+            <canvas id="stockChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'U1JW9YY2S4VTQMOD';
+        let currentChart = null;
+
+        async function fetchStockData() {
+            const symbol = document.getElementById('symbolInput').value.toUpperCase();
+            const loading = document.getElementById('loading');
+            const stockInfo = document.getElementById('stockInfo');
+            
+            if (!symbol) return;
+
+            loading.style.display = 'block';
+            stockInfo.style.display = 'none';
+
+            // Destroy existing chart if it exists
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+            
+            try {
+                const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${API_KEY}`);
+                const data = await response.json();
+
+                if (data['Error Message']) {
+                    throw new Error(data['Error Message']);
+                }
+
+                const timeSeriesData = data['Time Series (Daily)'];
+                if (!timeSeriesData) {
+                    throw new Error('No data available for this symbol');
+                }
+
+                const dates = Object.keys(timeSeriesData).sort();
+                const prices = dates.map(date => ({
+                    x: new Date(date).getTime(),
+                    y: parseFloat(timeSeriesData[date]['4. close'])
+                }));
+
+                // Calculate price change
+                const currentPrice = prices[prices.length - 1].y;
+                const previousPrice = prices[prices.length - 2].y;
+                const priceChange = currentPrice - previousPrice;
+                const priceChangePercent = (priceChange / previousPrice) * 100;
+
+                // Update stock info display
+                stockInfo.innerHTML = `
+                    <div class="price">$${currentPrice.toFixed(2)}</div>
+                    <div class="change ${priceChange >= 0 ? 'positive' : 'negative'}">
+                        ${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)} 
+                        (${priceChange >= 0 ? '+' : ''}${priceChangePercent.toFixed(2)}%)
+                    </div>
+                `;
+                stockInfo.style.display = 'block';
+
+                // Create new chart
+                createChart(prices, symbol);
+
+            } catch (error) {
+                console.error('Error:', error);
+                stockInfo.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                stockInfo.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function createChart(prices, symbol) {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(0, 123, 255, 0.2)');
+            gradient.addColorStop(1, 'rgba(0, 123, 255, 0)');
+
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: `${symbol} Stock Price`,
+                        data: prices,
+                        borderColor: '#007bff',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `$${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return new Date(value).toLocaleDateString();
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add Enter key support
+        document.getElementById('symbolInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                fetchStockData();
+            }
+        });
+
+        // Initialize with AAPL
+        document.getElementById('symbolInput').value = 'AAPL';
+        fetchStockData();
+    </script>
+</body>
+</html>
