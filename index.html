@@ -1104,7 +1104,7 @@ try {
 // Update the sendMessage function in your JavaScript
 async function sendMessage(message, file = null) {
     try {
-        // Initial UI transitions
+        // Do the UI transitions first
         initialContent.classList.add('fade-out');
         suggestedQueries.classList.add('fade-out');
         footerLinks.classList.add('fade-out');
@@ -1112,31 +1112,37 @@ async function sendMessage(message, file = null) {
         document.body.classList.add('white-background');
         
         setTimeout(async () => {
-            // Hide initial elements and show chat container
+            // Hide initial elements
             initialContent.style.display = 'none';
             suggestedQueries.style.display = 'none';
             footerLinks.style.display = 'none';
             chatContainer.style.display = 'block';
             chatContainer.classList.add('fade-in');
 
-            // Handle responsive UI elements
+            // Handle desktop/mobile specific UI
             if (window.innerWidth > 640) {
-                // Desktop view setup
                 disclaimer.style.display = 'block';
-                setTimeout(() => disclaimer.classList.add('fade-in'), 50);
+                setTimeout(() => {
+                    disclaimer.classList.add('fade-in');
+                }, 50);
                 
                 desktopTopNav.style.display = 'flex';
-                setTimeout(() => desktopTopNav.classList.add('fade-in'), 50);
+                setTimeout(() => {
+                    desktopTopNav.classList.add('fade-in');
+                }, 50);
             } else {
-                // Mobile view setup
                 const topNav = document.querySelector('.top-nav');
-                if (topNav) topNav.style.display = 'none';
+                if (topNav) {
+                    topNav.style.display = 'none';
+                }
                 document.body.classList.add('chat-active');
             }
 
-            // Add user's message and prepare for AI response
+            // Add user message and show thinking indicator
             const userMessageElement = await addMessage(message, 'user');
             textarea.value = '';
+            
+            // Get the function to signal AI response readiness
             const signalAIResponse = showAIThinking();
             
             if (userMessageElement) {
@@ -1144,30 +1150,28 @@ async function sendMessage(message, file = null) {
             }
 
             try {
-                // Look for stock symbols in the message
+                // Extract potential stock symbols (looking for $SYMBOL or standalone uppercase letters)
                 const stockSymbolMatch = message.match(/\$([A-Z]{1,5})|(?:^|\s)([A-Z]{1,5})(?:\s|$)/);
                 let marketData = null;
                 
-                // Fetch market data if a stock symbol is found
+                // If we found a stock symbol, fetch market data
                 if (stockSymbolMatch) {
                     const symbol = stockSymbolMatch[1] || stockSymbolMatch[2];
                     marketData = await fetchMarketData(symbol);
                 }
 
-                // Prepare and send the message to the server
                 const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
                 const response = await fetch('VotalityChat2.php', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify({
                         action: 'sendMessage',
                         message: message,
                         chatId: currentChatId,
                         stayLoggedOut: stayLoggedOut,
-                        file: file ? { 
-                            data: await readFileAsDataURL(file), 
-                            type: file.type 
-                        } : null,
+                        file: file ? { data: await readFileAsDataURL(file), type: file.type } : null,
                         marketData: marketData ? {
                             symbol: stockSymbolMatch[1] || stockSymbolMatch[2],
                             currentPrice: marketData.prices[marketData.prices.length - 1],
@@ -1182,7 +1186,7 @@ async function sendMessage(message, file = null) {
 
                 const data = await response.json();
 
-                // Handle authentication
+                // Handle authentication errors
                 if (data.error) {
                     if (data.error === 'auth_required' && !stayLoggedOut) {
                         signalAIResponse();
@@ -1190,7 +1194,9 @@ async function sendMessage(message, file = null) {
                         window.location.href = '/signin.html';
                         return;
                     }
-                    if (data.error === 'auth_required' && !stayLoggedOut) {
+                    if (data.error === 'auth_required' && stayLoggedOut) {
+                        // Ignore auth error if user chose to stay logged out
+                    } else {
                         throw new Error(data.error);
                     }
                 }
@@ -1200,43 +1206,46 @@ async function sendMessage(message, file = null) {
                     updateChatTopicDisplay(data.chatTopic);
                 }
 
-                // Process the response after a brief delay
+                // Wait briefly for checkpoints to complete
                 setTimeout(async () => {
+                    // Signal AI response right before adding the message
                     signalAIResponse();
                     
-                    // Create message group for the response
-                    const chatGroup = document.createElement('div');
-                    chatGroup.className = 'chat-group';
-                    chatContainer.appendChild(chatGroup);
+                    // Add AI response
+                    const messageElement = await addMessage(data.response, 'ai', data.relatedTopics);
 
-                    // Add market data section if available
+                    // Handle market data if present and we have market data
                     if (data.marketData && marketData) {
                         const marketSection = createMarketDataSection({
                             symbol: stockSymbolMatch[1] || stockSymbolMatch[2],
                             currentPrice: marketData.prices[marketData.prices.length - 1],
                             priceChange: marketData.priceChange,
-                            priceChangePercent: marketData.priceChangePercent,
-                            // Add sample data for testing
-                            prices: [100, 102, 101, 103, 102.5],
-                            timePoints: ['9:30 AM', '10:30 AM', '11:30 AM', '12:30 PM', '1:30 PM']
+                            priceChangePercent: marketData.priceChangePercent
                         });
-                        chatGroup.appendChild(marketSection);
+
+                        if (messageElement && messageElement.parentNode) {
+                            messageElement.parentNode.insertBefore(marketSection, messageElement);
+                            
+                            // Initialize chart after DOM insertion
+                            setTimeout(() => {
+                                const chartCanvas = document.getElementById('priceChart');
+                                if (chartCanvas) {
+                                    initializeChart(chartCanvas, {
+                                        prices: marketData.prices,
+                                        timePoints: marketData.timePoints
+                                    });
+                                }
+                            }, 0);
+                        }
                     }
 
-                    // Add AI response message
-                    const messageElement = await addMessage(data.response, 'ai', data.relatedTopics);
-                    if (messageElement) {
-                        chatGroup.appendChild(messageElement);
-                    }
-
-                    // Update chat ID and recent chats
+                    // Set chat ID if not already set
                     if (!currentChatId) {
                         currentChatId = data.chatId;
                     }
-                    await loadRecentChats();
 
-                    // Scroll to the new content
-                    chatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Load recent chats after successful message
+                    await loadRecentChats();
                 }, 800);
 
             } catch (error) {
@@ -3599,108 +3608,96 @@ function updatePriceDisplay(data) {
 }
 
 function createMarketDataSection(stockData) {
-    // Use placeholder data if real data isn't available
-    const testData = {
-        symbol: stockData?.symbol || 'AAPL',
-        currentPrice: stockData?.currentPrice || 150.25,
-        priceChange: stockData?.priceChange || 2.50,
-        priceChangePercent: stockData?.priceChangePercent || '1.67',
-        prices: stockData?.prices || [148, 149, 150, 151, 150.25],
-        timePoints: stockData?.timePoints || ['9:30 AM', '10:30 AM', '11:30 AM', '12:30 PM', '1:30 PM']
-    };
+    // Cleanup existing intervals
+    cleanupMarketData();
 
     const marketDataSection = document.createElement('div');
     marketDataSection.className = 'market-data-section';
     
-    marketDataSection.innerHTML = `
-        <div class="market-header" style="background: #ffffff; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-            <div class="market-title" style="margin-bottom: 12px;">
-                <span class="company-name" style="font-size: 24px; font-weight: 600;">${testData.symbol}</span>
-            </div>
-            <div class="price-container" style="margin-bottom: 16px;">
-                <span class="current-price" style="font-size: 32px; font-weight: 700;">$${testData.currentPrice.toFixed(2)}</span>
-                <div class="price-change ${parseFloat(testData.priceChange) >= 0 ? 'positive' : 'negative'}" 
-                     style="display: inline-block; margin-left: 12px; font-size: 16px; color: ${parseFloat(testData.priceChange) >= 0 ? '#10B981' : '#EF4444'}">
-                    <span>$${Math.abs(parseFloat(testData.priceChange)).toFixed(2)}</span>
-                    <span>(${testData.priceChangePercent}%)</span>
-                </div>
-            </div>
-            <div class="controls-row" style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="trading-status" style="color: #6B7280; font-size: 14px;">
-                    <span>Regular Hours</span>
-                    <span class="separator" style="margin: 0 8px;">•</span>
-                    <span>${getNYSETime()}</span>
-                </div>
-                <div class="time-periods" style="display: flex; gap: 8px;">
-                    <button class="period-button active" data-period="1D" 
-                            style="padding: 6px 12px; border-radius: 6px; font-size: 14px; background: #10B981; color: white;">1D</button>
-                    <button class="period-button" data-period="5D"
-                            style="padding: 6px 12px; border-radius: 6px; font-size: 14px; background: #F3F4F6; color: #374151;">5D</button>
-                    <button class="period-button" data-period="1M"
-                            style="padding: 6px 12px; border-radius: 6px; font-size: 14px; background: #F3F4F6; color: #374151;">1M</button>
-                </div>
-            </div>
-        </div>
-        <div class="chart-container" style="height: 300px; background: #ffffff; padding: 16px; border-radius: 8px;">
-            <canvas id="priceChart"></canvas>
-        </div>
-    `;
+    const priceChangeValue = parseFloat(stockData.priceChange);
+    const priceChangeClass = priceChangeValue >= 0 ? 'positive' : 'negative';
+    
+    marketDataSection.innerHTML = 
+        '<div class="market-header">' +
+            '<div class="market-title">' +
+                `<span class="company-name">${stockData.symbol}</span>` +
+                `<span class="company-symbol">${stockData.symbol}</span>` +
+            '</div>' +
+            '<div class="price-container">' +
+                `<span class="current-price">$${parseFloat(stockData.currentPrice).toFixed(2)}</span>` +
+                `<div class="price-change ${priceChangeClass}">` +
+                    `<span>$${Math.abs(priceChangeValue).toFixed(2)}</span>` +
+                    `<span>(${stockData.priceChangePercent}%)</span>` +
+                '</div>' +
+            '</div>' +
+            '<div class="controls-row">' +
+                '<div class="trading-status">' +
+                    '<span>Regular Hours</span>' +
+                    '<span class="separator">•</span>' +
+                    `<span>${getNYSETime()}</span>` +
+                '</div>' +
+                '<div class="time-periods">' +
+                    '<button class="period-button active" data-period="1D">1D</button>' +
+                    '<button class="period-button" data-period="5D">5D</button>' +
+                    '<button class="period-button" data-period="1M">1M</button>' +
+                    '<button class="period-button" data-period="3M">3M</button>' +
+                    '<button class="period-button" data-period="6M">6M</button>' +
+                    '<button class="period-button" data-period="1Y">1Y</button>' +
+                    '<button class="period-button" data-period="5Y">5Y</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="chart-container">' +
+            '<div class="chart">' +
+                '<canvas id="priceChart"></canvas>' +
+            '</div>' +
+        '</div>';
 
-    // Initialize chart after adding to DOM
-    setTimeout(() => {
-        const ctx = marketDataSection.querySelector('#priceChart').getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
-        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-
-        if (window.priceChart) {
-            window.priceChart.destroy();
-        }
-
-        window.priceChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: testData.timePoints,
-                datasets: [{
-                    label: 'Price',
-                    data: testData.prices,
-                    borderColor: '#10B981',
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: 'rgba(17, 24, 39, 0.9)',
-                        titleColor: '#9CA3AF',
-                        bodyColor: '#ffffff',
-                        padding: 8,
-                        displayColors: false
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false }
-                    },
-                    y: {
-                        ticks: {
-                            callback: value => `$${value.toFixed(2)}`
-                        }
-                    }
-                }
-            }
+    // Add period button event listeners
+    marketDataSection.querySelectorAll('.period-button').forEach(button => {
+        button.addEventListener('click', () => {
+            marketDataSection.querySelectorAll('.period-button')
+                .forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            updateChart(button.dataset.period, stockData.symbol);
         });
-    }, 100);
+    });
+
+    // Initialize chart with a delay to ensure the DOM is ready
+    requestAnimationFrame(() => {
+        const chartCanvas = marketDataSection.querySelector('#priceChart');
+        if (chartCanvas) {
+            // Set canvas dimensions to match container
+            const container = chartCanvas.parentElement;
+            chartCanvas.style.width = '100%';
+            chartCanvas.style.height = '100%';
+            chartCanvas.width = container.clientWidth;
+            chartCanvas.height = container.clientHeight;
+
+            console.log('Initializing chart with data:', stockData);
+            initializeChart(chartCanvas, {
+                prices: [stockData.currentPrice],
+                timePoints: [getNYSETime()]
+            });
+            
+            // Load initial data
+            updateChart('1D', stockData.symbol);
+        }
+    });
+
+    // Update time every minute
+    const timeInterval = setInterval(() => {
+        const timeElement = marketDataSection.querySelector('.trading-status span:last-child');
+        if (timeElement) {
+            timeElement.textContent = getNYSETime();
+        }
+    }, 60000);
+
+    marketDataSection.dataset.timeInterval = timeInterval;
 
     return marketDataSection;
 }
+
 
 // Function to add market data section to message
 function addMarketDataSection(response) {
@@ -3768,41 +3765,31 @@ dropdownItems.forEach(item => {
 });
 
 function createMarketDataSection(stockData) {
-    // Use placeholder data if real data isn't available
-    const placeholderData = {
-        symbol: stockData.symbol || 'NVDA',
-        companyName: stockData.companyName || 'NVIDIA Corporation',
-        currentPrice: stockData.currentPrice || 789.50,
-        priceChange: stockData.priceChange || 23.45,
-        priceChangePercent: stockData.priceChangePercent || '3.06',
-        prices: stockData.prices || [760.25, 765.50, 770.75, 780.25, 785.50, 789.50],
-        timePoints: stockData.timePoints || ['9:30 AM', '10:30 AM', '11:30 AM', '12:30 PM', '1:30 PM', '2:30 PM'],
-        tradingStatus: stockData.tradingStatus || 'Regular Hours'
-    };
-
+    // Cleanup existing intervals
     cleanupMarketData();
 
     const marketDataSection = document.createElement('div');
     marketDataSection.className = 'market-data-section';
     
-    const priceChangeClass = parseFloat(placeholderData.priceChange) >= 0 ? 'positive' : 'negative';
+    const priceChangeValue = parseFloat(stockData.priceChange);
+    const priceChangeClass = priceChangeValue >= 0 ? 'positive' : 'negative';
     
     marketDataSection.innerHTML = 
         '<div class="market-header">' +
             '<div class="market-title">' +
-                `<span class="company-name">${placeholderData.companyName}</span>` +
-                `<span class="company-symbol">${placeholderData.symbol}</span>` +
+                `<span class="company-name">${stockData.companyName}</span>` +
+                `<span class="company-symbol">${stockData.symbol}</span>` +
             '</div>' +
             '<div class="price-container">' +
-                `<span class="current-price">$${parseFloat(placeholderData.currentPrice).toFixed(2)}</span>` +
+                `<span class="current-price">$${parseFloat(stockData.currentPrice).toFixed(2)}</span>` +
                 `<div class="price-change ${priceChangeClass}">` +
-                    `<span>$${Math.abs(parseFloat(placeholderData.priceChange)).toFixed(2)}</span>` +
-                    `<span>(${placeholderData.priceChangePercent}%)</span>` +
+                    `<span>$${Math.abs(priceChangeValue).toFixed(2)}</span>` +
+                    `<span>(${stockData.priceChangePercent}%)</span>` +
                 '</div>' +
             '</div>' +
             '<div class="controls-row">' +
                 '<div class="trading-status">' +
-                    `<span>${placeholderData.tradingStatus}</span>` +
+                    `<span>${stockData.tradingStatus || 'Regular Hours'}</span>` +
                     '<span class="separator">•</span>' +
                     `<span>${getNYSETime()}</span>` +
                 '</div>' +
@@ -3821,25 +3808,31 @@ function createMarketDataSection(stockData) {
             '<canvas id="priceChart" style="width: 100%; height: 300px;"></canvas>' +
         '</div>';
 
+    // Add period button event listeners
     marketDataSection.querySelectorAll('.period-button').forEach(button => {
         button.addEventListener('click', () => {
             marketDataSection.querySelectorAll('.period-button')
                 .forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            updateChart(button.dataset.period, placeholderData.symbol);
+            updateChart(button.dataset.period, stockData.symbol);
         });
     });
 
+    // Initialize chart with a delay to ensure the canvas is in the DOM
     setTimeout(() => {
         const chartCanvas = marketDataSection.querySelector('#priceChart');
         if (chartCanvas) {
             initializeChart(chartCanvas, {
-                prices: placeholderData.prices,
-                timePoints: placeholderData.timePoints
+                prices: [stockData.currentPrice],
+                timePoints: [getNYSETime()]
             });
+            
+            // Load initial data
+            updateChart('1D', stockData.symbol);
         }
     }, 0);
 
+    // Update time every minute
     const timeInterval = setInterval(() => {
         const timeElement = marketDataSection.querySelector('.trading-status span:last-child');
         if (timeElement) {
@@ -3848,6 +3841,7 @@ function createMarketDataSection(stockData) {
     }, 60000);
 
     marketDataSection.dataset.timeInterval = timeInterval;
+
     return marketDataSection;
 }
 
@@ -3868,6 +3862,7 @@ async function fetchMarketData(symbol, period = '1D') {
         const timeSeriesData = data['Time Series (Daily)'];
         const dates = Object.keys(timeSeriesData).sort();
         
+        // Limit data points based on period
         const limitMap = {
             '1D': 1,
             '5D': 5,
@@ -3881,12 +3876,13 @@ async function fetchMarketData(symbol, period = '1D') {
         const daysToInclude = limitMap[period] || 30;
         const limitedDates = dates.slice(-daysToInclude);
 
+        // Calculate price change
         const latestPrice = parseFloat(timeSeriesData[dates[0]]['4. close']);
         const previousPrice = parseFloat(timeSeriesData[dates[1]]['4. close']);
         const priceChange = latestPrice - previousPrice;
         const priceChangePercent = (priceChange / previousPrice) * 100;
 
-        return {
+        const processedData = {
             timePoints: limitedDates,
             prices: limitedDates.map(date => parseFloat(timeSeriesData[date]['4. close'])),
             symbol: symbol,
@@ -3894,16 +3890,78 @@ async function fetchMarketData(symbol, period = '1D') {
             priceChange: priceChange,
             priceChangePercent: priceChangePercent.toFixed(2)
         };
+
+        return processedData;
     } catch (error) {
         console.error('Error fetching market data:', error);
         return null;
     }
 }
 
-function initializeChart(canvas, data) {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+function createMarketDataSection(stockData) {
+    // Cleanup existing intervals
+    cleanupMarketData();
+
+    const marketDataSection = document.createElement('div');
+    marketDataSection.className = 'market-data-section';
     
+    marketDataSection.innerHTML = 
+        '<div class="market-header">' +
+            '<div class="market-title">' +
+                `<span class="company-name">${stockData.symbol}</span>` +
+                `<span class="company-symbol">${stockData.symbol}</span>` +
+            '</div>' +
+            '<div class="price-container">' +
+                `<span class="current-price">$${parseFloat(stockData.currentPrice).toFixed(2)}</span>` +
+                `<div class="price-change ${parseFloat(stockData.priceChange) >= 0 ? 'positive' : 'negative'}">` +
+                    `<span>$${Math.abs(parseFloat(stockData.priceChange)).toFixed(2)}</span>` +
+                    `<span>(${stockData.priceChangePercent}%)</span>` +
+                '</div>' +
+            '</div>' +
+            '<div class="controls-row">' +
+                '<div class="trading-status">' +
+                    '<span>Regular Hours</span>' +
+                    '<span class="separator">•</span>' +
+                    `<span>${getNYSETime()}</span>` +
+                '</div>' +
+                '<div class="time-periods">' +
+                    '<button class="period-button active" data-period="1D">1D</button>' +
+                    '<button class="period-button" data-period="5D">5D</button>' +
+                    '<button class="period-button" data-period="1M">1M</button>' +
+                    '<button class="period-button" data-period="3M">3M</button>' +
+                    '<button class="period-button" data-period="6M">6M</button>' +
+                    '<button class="period-button" data-period="1Y">1Y</button>' +
+                    '<button class="period-button" data-period="5Y">5Y</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="chart-container" style="height: 300px;">' +
+            '<canvas id="priceChart"></canvas>' +
+        '</div>';
+
+    // Add period button event listeners
+    marketDataSection.querySelectorAll('.period-button').forEach(button => {
+        button.addEventListener('click', () => {
+            marketDataSection.querySelectorAll('.period-button')
+                .forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            updateChart(button.dataset.period, stockData.symbol);
+        });
+    });
+
+    return marketDataSection;
+}
+
+function initializeChart(canvas, data) {
+    console.log('Initializing chart with canvas:', canvas);
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Failed to get canvas context');
+        return;
+    }
+    
+    // Create gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
     gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
@@ -3911,9 +3969,24 @@ function initializeChart(canvas, data) {
     const prices = data.prices;
     const timeLabels = data.timePoints;
 
+    // Calculate appropriate y-axis scale with padding
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
     const padding = (maxPrice - minPrice) * 0.1;
+
+    const chartData = {
+        labels: timeLabels,
+        datasets: [{
+            label: 'Price',
+            data: prices,
+            borderColor: '#10B981',
+            backgroundColor: gradient,
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.4,
+            fill: true
+        }]
+    };
 
     if (window.priceChart) {
         window.priceChart.destroy();
@@ -3921,24 +3994,14 @@ function initializeChart(canvas, data) {
 
     window.priceChart = new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: timeLabels,
-            datasets: [{
-                label: 'Price',
-                data: prices,
-                borderColor: '#10B981',
-                backgroundColor: gradient,
-                borderWidth: 2,
-                pointRadius: 0,
-                tension: 0.4,
-                fill: true
-            }]
-        },
+        data: chartData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: false
+                },
                 tooltip: {
                     mode: 'index',
                     intersect: false,
@@ -3962,15 +4025,21 @@ function initializeChart(canvas, data) {
             },
             scales: {
                 x: {
-                    grid: { display: false },
+                    grid: {
+                        display: false
+                    },
                     ticks: {
                         color: '#9CA3AF',
-                        font: { size: 11 },
+                        font: {
+                            size: 11
+                        },
                         maxRotation: 0,
                         autoSkip: true,
                         maxTicksLimit: 6
                     },
-                    border: { display: false }
+                    border: {
+                        display: false
+                    }
                 },
                 y: {
                     position: 'left',
@@ -3980,13 +4049,17 @@ function initializeChart(canvas, data) {
                     },
                     ticks: {
                         color: '#9CA3AF',
-                        font: { size: 11 },
+                        font: {
+                            size: 11
+                        },
                         padding: 8,
                         callback: function(value) {
                             return `$${value.toFixed(2)}`;
                         }
                     },
-                    border: { display: false },
+                    border: {
+                        display: false
+                    },
                     min: minPrice - padding,
                     max: maxPrice + padding
                 }
@@ -3994,6 +4067,7 @@ function initializeChart(canvas, data) {
         }
     });
 
+    console.log('Chart initialized successfully');
     return window.priceChart;
 }
 
@@ -4034,6 +4108,7 @@ async function updateChart(period, symbol) {
                 timePoints: formattedLabels
             });
         }
+
     } catch (error) {
         console.error('Error updating chart:', error);
     }
@@ -4065,6 +4140,7 @@ function getNYSETime() {
         hour12: true
     }) + " EST";
 }
+
 
 </script>
 </body>
