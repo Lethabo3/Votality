@@ -1144,9 +1144,15 @@ async function sendMessage(message, file = null) {
             }
 
             try {
-                // Check for stock symbol in message
+                // Look for stock symbols in the message
                 const stockSymbolMatch = message.match(/\$([A-Z]{1,5})|(?:^|\s)([A-Z]{1,5})(?:\s|$)/);
                 let marketData = null;
+                
+                // Fetch market data if a stock symbol is found
+                if (stockSymbolMatch) {
+                    const symbol = stockSymbolMatch[1] || stockSymbolMatch[2];
+                    marketData = await fetchMarketData(symbol);
+                }
 
                 // Prepare and send the message to the server
                 const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
@@ -1162,8 +1168,11 @@ async function sendMessage(message, file = null) {
                             data: await readFileAsDataURL(file), 
                             type: file.type 
                         } : null,
-                        marketData: stockSymbolMatch ? {
+                        marketData: marketData ? {
                             symbol: stockSymbolMatch[1] || stockSymbolMatch[2],
+                            currentPrice: marketData.prices[marketData.prices.length - 1],
+                            priceChange: marketData.priceChange,
+                            priceChangePercent: marketData.priceChangePercent,
                             timestamp: new Date().toISOString()
                         } : null,
                         additionalInfo: null
@@ -1200,31 +1209,18 @@ async function sendMessage(message, file = null) {
                     chatGroup.className = 'chat-group';
                     chatContainer.appendChild(chatGroup);
 
-                    // If we found a stock symbol, create market section immediately
-                    if (stockSymbolMatch) {
-                        const symbol = stockSymbolMatch[1] || stockSymbolMatch[2];
+                    // Add market data section if available
+                    if (data.marketData && marketData) {
                         const marketSection = createMarketDataSection({
-                            symbol: symbol
+                            symbol: stockSymbolMatch[1] || stockSymbolMatch[2],
+                            currentPrice: marketData.prices[marketData.prices.length - 1],
+                            priceChange: marketData.priceChange,
+                            priceChangePercent: marketData.priceChangePercent,
+                            // Add sample data for testing
+                            prices: [100, 102, 101, 103, 102.5],
+                            timePoints: ['9:30 AM', '10:30 AM', '11:30 AM', '12:30 PM', '1:30 PM']
                         });
                         chatGroup.appendChild(marketSection);
-
-                        // Try to fetch real data in the background
-                        try {
-                            marketData = await fetchMarketData(symbol);
-                            if (marketData) {
-                                // Update market section with real data if available
-                                const priceElement = marketSection.querySelector('.current-price');
-                                const changeElement = marketSection.querySelector('.price-change');
-                                if (priceElement && changeElement) {
-                                    priceElement.textContent = `$${marketData.currentPrice.toFixed(2)}`;
-                                    changeElement.textContent = `$${Math.abs(marketData.priceChange).toFixed(2)} (${marketData.priceChangePercent}%)`;
-                                    changeElement.className = `price-change ${marketData.priceChange >= 0 ? 'positive' : 'negative'}`;
-                                }
-                            }
-                        } catch (error) {
-                            console.error('Error fetching market data:', error);
-                            // Placeholder data remains visible if fetch fails
-                        }
                     }
 
                     // Add AI response message
@@ -1255,6 +1251,7 @@ async function sendMessage(message, file = null) {
         await addMessage("Error: " + error.message, 'ai');
     }
 }
+
 // Update DOM content loaded handler
 document.addEventListener('DOMContentLoaded', async () => {
 const stayLoggedOut = sessionStorage.getItem('stayLoggedOut') === 'true';
