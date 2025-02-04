@@ -1933,43 +1933,43 @@ return 'Market Analysis';
     }
 
     function createCheckpoint(stepData) {
-    const checkpointContainer = document.createElement('div');
-    checkpointContainer.className = 'checkpoint-container';
+        const checkpointContainer = document.createElement('div');
+        checkpointContainer.className = 'checkpoint-container';
 
-    const checkpoint = document.createElement('div');
-    checkpoint.className = 'checkpoint';
+        const checkpoint = document.createElement('div');
+        checkpoint.className = 'checkpoint';
 
-    // Create empty circle without tick
-    const circle = document.createElement('div');
-    circle.className = 'checkpoint-circle';
-    // No SVG here anymore - it will be added only when completed
+        const circle = document.createElement('div');
+        circle.className = 'checkpoint-circle';
+        circle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><polyline points="20 6 9 17 4 12"/></svg>`;
 
-    const content = document.createElement('div');
-    content.className = 'checkpoint-content';
+        const content = document.createElement('div');
+        content.className = 'checkpoint-content';
 
-    const header = document.createElement('div');
-    header.className = 'checkpoint-header';
+        const header = document.createElement('div');
+        header.className = 'checkpoint-header';
 
-    const title = document.createElement('div');
-    title.className = 'checkpoint-title';
-    title.textContent = stepData.title;
+        const title = document.createElement('div');
+        title.className = 'checkpoint-title';
+        title.textContent = stepData.title;
 
-    header.appendChild(title);
+        header.appendChild(title);
 
-    const detail = document.createElement('div');
-    detail.className = 'checkpoint-detail';
-    detail.textContent = stepData.detail;
+        const detail = document.createElement('div');
+        detail.className = 'checkpoint-detail';
+        detail.textContent = stepData.detail;
 
-    content.appendChild(header);
-    content.appendChild(detail);
+        content.appendChild(header);
+        content.appendChild(detail);
 
-    checkpoint.appendChild(circle);
-    checkpoint.appendChild(content);
+        checkpoint.appendChild(circle);
+        checkpoint.appendChild(content);
 
-    checkpointContainer.appendChild(checkpoint);
+        checkpointContainer.appendChild(checkpoint);
 
-    return checkpointContainer;
-}
+        return checkpointContainer;
+    }
+
     function addDropdownToCheckpoint(checkpoint) {
         const header = checkpoint.querySelector('.checkpoint-header');
         
