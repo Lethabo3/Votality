@@ -1688,6 +1688,7 @@ if (paragraph === lastParagraphInMessage) {
 return 'Market Analysis';
 }
 
+<<<<<<< HEAD
     function fadeOutLoadingSequence() {
             const loadingContainer = lastChatGroup.querySelector('.loading-container');
             if (loadingContainer) {
@@ -1993,62 +1994,263 @@ return 'Market Analysis';
     }
 
     function fadeOutLoadingSequence(loadingContainer) {
+=======
+function fadeOutLoadingSequence() {
+        const loadingContainer = lastChatGroup.querySelector('.loading-container');
+>>>>>>> f02fd929133390a02db3e3acd9f9363ff216f1cc
         if (loadingContainer) {
-            loadingContainer.classList.add('transitioning');
+            // Instead of fading out and removing, we just collapse it
             loadingContainer.classList.add('collapsed');
-            
+            // Ensure the dropdown button is in the correct state
             const dropdownBtn = loadingContainer.querySelector('.loading-dropdown-btn');
             if (dropdownBtn) {
                 dropdownBtn.classList.add('rotated');
             }
-
-            setTimeout(() => {
-                loadingContainer.classList.remove('transitioning');
-            }, 300);
         }
     }
-    // Add this new function to handle adding the tick
-    function addTickToCheckpoint(checkpoint) {
-        const circle = checkpoint.querySelector('.checkpoint-circle');
-        circle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><polyline points="20 6 9 17 4 12"/></svg>`;
-    }
+    
+    function showAIThinking() {
+    const chatContainer = document.querySelector('.chat-container');
+    const lastChatGroup = chatContainer.lastElementChild;
+    let checkpointsCompleted = false;
+    let isAIResponseReady = false;
 
-    function addDropdownToCheckpoint(checkpoint) {
-        // Get the checkpoint header
-        const header = checkpoint.querySelector('.checkpoint-header');
-        
-        // Create dropdown button
-        const dropdownBtn = document.createElement('button');
-        dropdownBtn.className = 'checkpoint-dropdown-btn';
-        dropdownBtn.innerHTML = `
+    // Create the loading sequence container
+    const loadingContainer = document.createElement('div');
+    loadingContainer.className = 'loading-container';
+
+    // Create and add the container header
+    const containerHeader = document.createElement('div');
+    containerHeader.className = 'loading-container-header';
+
+    // Create the header right section
+    const headerRight = document.createElement('div');
+    headerRight.className = 'header-right hidden';  // Start as hidden
+    headerRight.innerHTML = `
+        <span class="source-count">9 sources</span>
+        <button class="loading-dropdown-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="m6 9 6 6 6-6"/>
             </svg>
-        `;
+        </button>
+    `;
 
-        // Get the detail section
-        const detailSection = checkpoint.querySelector('.checkpoint-detail');
-        
-        // Add click handler for the dropdown
-        dropdownBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdownBtn.classList.toggle('rotated');
-            detailSection.classList.toggle('show');
-        });
+    containerHeader.innerHTML = `
+        <div class="loading-container-title">Search</div>
+    `;
+    containerHeader.appendChild(headerRight);  // Add headerRight to the container header
+    loadingContainer.appendChild(containerHeader);
 
-        // Add the dropdown button to the header
-        header.appendChild(dropdownBtn);
-    }
+    // Create checkpoints list container
+    const checkpointsList = document.createElement('div');
+    checkpointsList.id = 'checkpoints-list';
+    loadingContainer.appendChild(checkpointsList);
 
-    function hideAIThinking() {
-        const chatContainer = document.querySelector('.chat-container');
-        const lastChatGroup = chatContainer.lastElementChild;
-        
-        const loadingContainer = lastChatGroup.querySelector('.loading-container');
-        if (loadingContainer) {
-            loadingContainer.remove();
+    // Add dropdown functionality for the main container
+    const dropdownBtn = containerHeader.querySelector('.loading-dropdown-btn');
+    dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownBtn.classList.toggle('rotated');
+        loadingContainer.classList.toggle('collapsed');
+    });
+
+    // Add to chat container
+    lastChatGroup.insertBefore(loadingContainer, lastChatGroup.firstChild.nextSibling);
+
+    const steps = [
+        {
+            title: "Searching financial databases",
+            detail: "Initiating market data retrieval from global sources"
+        },
+        {
+            title: "Analyzing Annual & Interim Reports",
+            detail: "Processing 16 quarters of financial statements"
+        },
+        {
+            title: "Reviewing News Releases",
+            detail: "Analyzing 342 recent company announcements"
+        },
+        {
+            title: "Processing SEC Filings",
+            detail: "Examining 53K words of regulatory documents"
+        },
+        {
+            title: "Scanning Corporate Governance",
+            detail: "Reviewing 18 organizational documents"
+        },
+        {
+            title: "Preparing comprehensive analysis",
+            detail: "Synthesizing market data insights"
+        }
+    ];
+
+    let currentStep = 0;
+    let aiResponseReceived = false;
+
+    function updateCheckpoints() {
+        if (currentStep >= steps.length) {
+            // Complete the last checkpoint if it exists
+            const lastCheckpoint = checkpointsList.querySelector('.checkpoint-container:last-child .checkpoint');
+            if (lastCheckpoint && lastCheckpoint.classList.contains('active')) {
+                lastCheckpoint.classList.remove('active');
+                lastCheckpoint.classList.add('completed');
+                addDropdownToCheckpoint(lastCheckpoint);
+            }
+            checkpointsCompleted = true;
+
+            if (isAIResponseReady) {
+                // Show the header elements when process is complete
+                headerRight.classList.remove('hidden');
+                headerRight.classList.add('fade-in');
+                setTimeout(() => {
+                    fadeOutLoadingSequence();
+                }, 300);
+            }
+            return;
+        }
+
+        // Proceed with adding new checkpoints
+        const currentCheckpoint = createCheckpoint(steps[currentStep]);
+        checkpointsList.appendChild(currentCheckpoint);
+        currentCheckpoint.classList.add('visible');
+        const currentCheck = currentCheckpoint.querySelector('.checkpoint');
+        currentCheck.classList.add('active');
+
+        // Move to the next step
+        currentStep++;
+        const nextStepDelay = isAIResponseReady ? 200 : 1500;
+        if (currentStep < steps.length) {
+            setTimeout(updateCheckpoints, nextStepDelay);
         }
     }
+
+    // Callback to handle AI response ready state
+    function signalAIResponse() {
+        isAIResponseReady = true;
+
+        // Immediately mark current checkpoint as completed and collapse
+        const currentCheckpoint = checkpointsList.querySelector('.checkpoint.active');
+        if (currentCheckpoint) {
+            currentCheckpoint.classList.remove('active');
+            currentCheckpoint.classList.add('completed');
+            addDropdownToCheckpoint(currentCheckpoint);
+        }
+
+        // Show header elements and collapse
+        headerRight.classList.remove('hidden');
+        headerRight.classList.add('fade-in');
+        fadeOutLoadingSequence();
+
+        // Clear any pending timeouts to stop further updates
+        if (currentStep < steps.length) {
+            currentStep = steps.length;  // Force step completion
+        }
+    }
+
+    // Start the sequence
+    updateCheckpoints();
+    lastChatGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Return the signal function to be called when AI response is ready
+    return signalAIResponse;
+}
+
+function fadeOutLoadingSequence() {
+    const loadingContainer = document.querySelector('.loading-container');
+    if (loadingContainer) {
+        loadingContainer.classList.add('collapsed');
+        const dropdownBtn = loadingContainer.querySelector('.loading-dropdown-btn');
+        if (dropdownBtn) {
+            dropdownBtn.classList.add('rotated');
+        }
+    }
+}
+
+function createCheckpoint(stepData) {
+    // Create the main container for the checkpoint
+    const checkpointContainer = document.createElement('div');
+    checkpointContainer.className = 'checkpoint-container';
+
+    // Create the checkpoint div
+    const checkpoint = document.createElement('div');
+    checkpoint.className = 'checkpoint';
+
+    // Create and style the circle indicator
+    const circle = document.createElement('div');
+    circle.className = 'checkpoint-circle';
+    circle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    // Create the content container
+    const content = document.createElement('div');
+    content.className = 'checkpoint-content';
+
+    // Create header container
+    const header = document.createElement('div');
+    header.className = 'checkpoint-header';
+
+    // Create and set the title
+    const title = document.createElement('div');
+    title.className = 'checkpoint-title';
+    title.textContent = stepData.title;
+
+    // Add title to header
+    header.appendChild(title);
+
+    // Create and set the detail text
+    const detail = document.createElement('div');
+    detail.className = 'checkpoint-detail';
+    detail.textContent = stepData.detail;
+
+    // Assemble the content
+    content.appendChild(header);
+    content.appendChild(detail);
+
+    // Assemble the checkpoint
+    checkpoint.appendChild(circle);
+    checkpoint.appendChild(content);
+
+    // Add checkpoint to container
+    checkpointContainer.appendChild(checkpoint);
+
+    return checkpointContainer;
+}
+
+function addDropdownToCheckpoint(checkpoint) {
+    // Get the checkpoint header
+    const header = checkpoint.querySelector('.checkpoint-header');
+    
+    // Create dropdown button
+    const dropdownBtn = document.createElement('button');
+    dropdownBtn.className = 'checkpoint-dropdown-btn';
+    dropdownBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m6 9 6 6 6-6"/>
+        </svg>
+    `;
+
+    // Get the detail section
+    const detailSection = checkpoint.querySelector('.checkpoint-detail');
+    
+    // Add click handler for the dropdown
+    dropdownBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownBtn.classList.toggle('rotated');
+        detailSection.classList.toggle('show');
+    });
+
+    // Add the dropdown button to the header
+    header.appendChild(dropdownBtn);
+}
+
+function hideAIThinking() {
+    const chatContainer = document.querySelector('.chat-container');
+    const lastChatGroup = chatContainer.lastElementChild;
+    
+    const loadingContainer = lastChatGroup.querySelector('.loading-container');
+    if (loadingContainer) {
+        loadingContainer.remove();
+    }
+}
 
 function toggleMobileNav() {
 const bottomNav = document.querySelector('.bottom-nav');

@@ -1,6 +1,12 @@
 {
     "name": "sekot/votality-ai",
     "require": {
+<<<<<<< HEAD
         "firebase/php-jwt": "^6.11"
+=======
+        "php": ">=7.4",
+        "google/apiclient": "2.0",
+        "firebase/php-jwt": "^6.0"
+>>>>>>> f02fd929133390a02db3e3acd9f9363ff216f1cc
     }
 }
